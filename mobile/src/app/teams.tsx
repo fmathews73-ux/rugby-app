@@ -1,6 +1,5 @@
-import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Team } from '@rugby-app/shared';
@@ -14,10 +13,12 @@ const TIER_1_IDS = new Set(['eng', 'fra', 'ire', 'ita', 'sco', 'wal', 'arg', 'au
 
 /**
  * Teams — all 28 international sides, split by tier and sorted alphabetically
- * within tier. Tap a row → team detail with the 3D flag ball.
+ * within tier. Rows are non-interactive at this stage. Tap-to-detail is
+ * queued for the next phase (Detail Pages), which will properly configure a
+ * Stack over the NativeTabs — `teams/[id].tsx` and the 3D flag ball
+ * component are staged for that phase and stay in-tree meanwhile.
  */
 export default function TeamsScreen() {
-  const router = useRouter();
   const query = useTeams();
 
   const grouped = useMemo(() => {
@@ -55,15 +56,13 @@ export default function TeamsScreen() {
                 <Text style={styles.groupHeaderCount}>{item.count}</Text>
               </View>
             ) : (
-              <Pressable
-                style={({ pressed }) => [styles.teamRow, pressed && styles.teamRowPressed]}
-                onPress={() => router.push(`/teams/${item.team.id}`)}>
+              <View style={styles.teamRow}>
                 <TeamFlagBall2D flagCode={item.team.flag_code} size={44} />
                 <View style={styles.teamText}>
                   <Text style={styles.teamName}>{item.team.name}</Text>
                   <Text style={styles.teamShort}>{item.team.short_name}</Text>
                 </View>
-              </Pressable>
+              </View>
             )
           }
         />
@@ -93,7 +92,6 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
   teamText: { flex: 1, gap: 2 },
   teamName: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
   teamShort: { fontSize: 11, letterSpacing: 1, color: Colors.light.textSecondary },
