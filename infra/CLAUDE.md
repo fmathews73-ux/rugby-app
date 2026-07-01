@@ -13,7 +13,21 @@ Personal GCP project + Firebase: **`rugby-mobile-app`** (project number `4100111
 
 **Before any `gcloud` operation on this project**, verify the active identity is personal: `gcloud config get-value account` must return `fmathews73@gmail.com`, not the work `@cg-tech.co` account. Switch with `gcloud config set account fmathews73@gmail.com` if wrong. Both accounts are credentialed on this machine; `gcloud` picks whichever is "active".
 
-**ADC follow-up (Phase 3):** `gcloud auth application-default login` (as `fmathews73@gmail.com`) and `gcloud auth application-default set-quota-project rugby-mobile-app` — needed before Terraform / SDK code can run under this project. Not yet done; current ADC still points at a work-project quota.
+**ADC follow-up (Phase 3+):** `gcloud auth application-default login` (as `fmathews73@gmail.com`) and `gcloud auth application-default set-quota-project rugby-mobile-app` — needed before Terraform / SDK code can run under this project. Not yet done; current ADC still points at a work-project quota. Stage 4 Cloud Run deploy did NOT require ADC (gcloud CLI credentials sufficed).
+
+---
+
+## Deployed services
+
+- **`rugby-api`** (Cloud Run, region `europe-west1`) — deployed via `gcloud run deploy --source . --allow-unauthenticated` from repo root using `/Dockerfile`.
+  - **Public URL:** `https://rugby-api-410011126463.europe-west1.run.app`
+  - Sizing: 512 MiB / 1 vCPU, 0-3 instances, concurrency 80.
+  - Env: `NODE_ENV=production`, `ALLOW_SYNTHETIC_DATA=1` (required by `services/api/src/config.ts` guardrail — must be removed before real-data cutover).
+  - Data source: reads baked-in `services/pipeline/data/*.json` — synthetic (PRD §5.5). Every response carries `X-Data-Source: synthetic`.
+  - Labels: `app=rugby-mobile-app,stage=dev,data-source=synthetic`.
+  - Public access is intentional and low-risk — no auth, no personal data, no secrets in the payload. Add auth only when the client needs a session (Phase 4 Firebase Auth).
+
+Enabled APIs on `rugby-mobile-app` as of 2026-07-01: `run.googleapis.com`, `cloudbuild.googleapis.com`, `artifactregistry.googleapis.com` (plus the auto-enabled GCP defaults).
 
 ---
 

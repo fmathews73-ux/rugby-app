@@ -1,0 +1,40 @@
+# Files excluded from `gcloud run deploy --source .` uploads to Cloud Build.
+# Similar in spirit to .gitignore but scoped to the deploy tarball.
+
+# VCS
+.git/
+.gitignore
+
+# Node
+node_modules/
+**/node_modules/
+npm-debug.log*
+*.tsbuildinfo
+
+# The mobile client is not deployed as part of the API image.
+mobile/
+
+# Pipeline SOURCE is not needed in the API image — only the generated data
+# under services/pipeline/data/ ships. The Dockerfile handles that COPY.
+services/pipeline/src/
+services/pipeline/tsconfig.json
+services/pipeline/README.md
+services/pipeline/dist/
+
+# Shared package builds (source is what ships, not compiled output)
+packages/*/dist/
+
+# Docs / repo-level noise
+docs/
+_merge-after-expo/
+*.md
+
+# IDE / OS
+.DS_Store
+.vscode/
+.idea/
+tmp/
+.expo/
+
+# The Dockerfile itself IS needed by Cloud Build.
+!Dockerfile

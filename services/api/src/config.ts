@@ -24,14 +24,19 @@ export function loadConfig(): Config {
   const port = Number(process.env['PORT'] ?? 3000);
   const data_dir = process.env['DATA_DIR'] ?? DEFAULT_DATA_DIR;
 
-  // Guardrail: refuse to run against the synthetic dataset while claiming
-  // to be production. Any store-bound build must not import this dataset.
+  // Guardrail: refuse to run against the synthetic dataset while claiming to
+  // be production, UNLESS the operator has explicitly opted in via
+  // ALLOW_SYNTHETIC_DATA=1. The opt-in must be present at every stage-4-style
+  // dev deploy and MUST be removed before the real-data cutover — root
+  // CLAUDE.md §9, PRD §5.5.
   const node_env = process.env['NODE_ENV'] ?? 'development';
   const looksLikeSynthetic = data_dir.includes('pipeline/data');
-  if (node_env === 'production' && looksLikeSynthetic) {
+  const allowSynthetic = process.env['ALLOW_SYNTHETIC_DATA'] === '1';
+  if (node_env === 'production' && looksLikeSynthetic && !allowSynthetic) {
     throw new Error(
       'Refusing to start: NODE_ENV=production with DATA_DIR pointing at synthetic ' +
-        'dataset. This dataset is dev-only (PRD §5.5). See root CLAUDE.md §9.',
+        'dataset and ALLOW_SYNTHETIC_DATA not set. This dataset is dev-only ' +
+        '(PRD §5.5). See root CLAUDE.md §9.',
     );
   }
 
