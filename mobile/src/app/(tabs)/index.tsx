@@ -142,14 +142,14 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   cardLeft: {
-    flex: 1,
+    flex: 2,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',
     minHeight: 180,
   },
   cardRight: {
-    flex: 2,
+    flex: 3,
     padding: Spacing.four,
     gap: 8,
     justifyContent: 'center',
