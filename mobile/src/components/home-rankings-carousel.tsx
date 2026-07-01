@@ -1,7 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  useWindowDimensions,
+  View,
+} from 'react-native';
 
 import { useLatestRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
@@ -12,12 +21,53 @@ const ACCENT = '#4F46E5';
 const UP = '#059669';
 const DOWN = '#DC2626';
 
+/** Matches Home's `HORIZONTAL_MARGIN` — used per-page inside the carousel so
+ * both pages align to the centre carousel card above. */
+const PAGE_HORIZONTAL_MARGIN = 40;
+
 /**
- * Compact preview of the World Rugby men's rankings for the Home page.
- * Shows the top 5 teams from the latest snapshot; tapping the "See all"
- * footer pushes to the full Rankings tab.
+ * Two-page paged carousel: Men's rankings + Women's placeholder.
+ *
+ * PRD register #3 (v0.4) resolved v1 scope to Men's only, so the women's
+ * page is a "coming soon" placeholder — the shape is ready, real data
+ * plugs in when scope expands.
  */
-export function HomeRankingsCard() {
+export function HomeRankingsCarousel() {
+  const { width: screenWidth } = useWindowDimensions();
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    if (idx !== activeIdx && (idx === 0 || idx === 1)) setActiveIdx(idx);
+  };
+
+  return (
+    <View>
+      <ScrollView
+        horizontal
+        pagingEnabled
+        showsHorizontalScrollIndicator={false}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}>
+        <View style={[styles.page, { width: screenWidth }]}>
+          <MensRankingsCard />
+        </View>
+        <View style={[styles.page, { width: screenWidth }]}>
+          <WomensPlaceholderCard />
+        </View>
+      </ScrollView>
+
+      <View style={styles.dotsRow}>
+        <View style={[styles.dot, activeIdx === 0 ? styles.dotActive : styles.dotInactive]} />
+        <View style={[styles.dot, activeIdx === 1 ? styles.dotActive : styles.dotInactive]} />
+      </View>
+    </View>
+  );
+}
+
+// ─── Men's card ──────────────────────────────────────────────────────────────
+
+function MensRankingsCard() {
   const router = useRouter();
   const ranking = useLatestRanking();
   const teams = useTeams();
@@ -39,7 +89,9 @@ export function HomeRankingsCard() {
         <Text style={styles.title}>World Rugby Rankings</Text>
         {ranking.data ? (
           <Text style={styles.subtitle}>Men’s · Snapshot {ranking.data.snapshot_date}</Text>
-        ) : null}
+        ) : (
+          <Text style={styles.subtitle}>Men’s</Text>
+        )}
       </View>
 
       {ranking.isLoading ? (
@@ -94,7 +146,34 @@ function MovementBadge({ movement }: { movement: number | null }) {
   );
 }
 
+// ─── Women's placeholder ─────────────────────────────────────────────────────
+
+function WomensPlaceholderCard() {
+  return (
+    <View style={styles.card}>
+      <View style={styles.header}>
+        <Text style={styles.title}>World Rugby Rankings</Text>
+        <Text style={styles.subtitle}>Women’s</Text>
+      </View>
+
+      <View style={styles.placeholderBody}>
+        <View style={styles.comingSoonBadge}>
+          <Text style={styles.comingSoonText}>COMING SOON</Text>
+        </View>
+        <Text style={styles.placeholderText}>
+          Women’s internationals are a future scope expansion (PRD register #3).
+          The pipeline’s adapter model already supports a second ranking source
+          — plug in the women’s data whenever it’s in scope.
+        </Text>
+      </View>
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  page: {
+    paddingHorizontal: PAGE_HORIZONTAL_MARGIN,
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -127,21 +206,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
-  rank: {
-    width: 18,
-    fontSize: 14,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
+  rank: { width: 18, fontSize: 14, fontWeight: '700', color: Colors.light.text },
   flagFallback: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#E5E7EB' },
   teamName: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  points: {
-    width: 40,
-    textAlign: 'right',
-    fontSize: 13,
-    fontWeight: '700',
-    color: Colors.light.text,
-  },
+  points: { width: 40, textAlign: 'right', fontSize: 13, fontWeight: '700', color: Colors.light.text },
   movement: { width: 52, textAlign: 'right', fontSize: 12, fontWeight: '700' },
   movementUp: { color: UP },
   movementDown: { color: DOWN },
@@ -163,4 +231,39 @@ const styles = StyleSheet.create({
   },
   footerPressed: { opacity: 0.5 },
   footerText: { fontSize: 13, fontWeight: '700', color: ACCENT, letterSpacing: 0.2 },
+
+  placeholderBody: {
+    alignItems: 'center',
+    gap: Spacing.three,
+    paddingVertical: Spacing.four,
+  },
+  comingSoonBadge: {
+    borderWidth: 1,
+    borderColor: ACCENT,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+  },
+  comingSoonText: { color: ACCENT, fontSize: 10, fontWeight: '800', letterSpacing: 1.4 },
+  placeholderText: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+    lineHeight: 20,
+    maxWidth: 260,
+  },
+
+  dotsRow: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    gap: 8,
+    paddingTop: Spacing.three,
+  },
+  dot: { width: 8, height: 8, borderRadius: 999 },
+  dotActive: { backgroundColor: ACCENT },
+  dotInactive: {
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: ACCENT,
+  },
 });
