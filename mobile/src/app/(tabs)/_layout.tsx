@@ -1,18 +1,23 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs } from 'expo-router';
 
+import { AppHeader } from '@/components/app-header';
 import { Colors } from '@/constants/theme';
 
 /**
  * Standard expo-router `<Tabs>` — battle-tested with a parent Stack, unlike
  * `expo-router/unstable-native-tabs`. Uses Ionicons for cross-platform
  * consistency; on iOS the tab bar renders close to the previous native look.
+ *
+ * `header: AppHeader` renders the persistent header (PRD §4.1) at the top of
+ * every tab screen. `headerShown: true` is required for it to appear.
  */
 export default function TabsLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: false,
+        headerShown: true,
+        header: () => <AppHeader />,
         tabBarActiveTintColor: Colors.light.text,
         tabBarInactiveTintColor: Colors.light.textSecondary,
         tabBarStyle: {
