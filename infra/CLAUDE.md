@@ -9,7 +9,11 @@
 
 ## Separation is the top rule here
 
-Personal GCP project + Firebase only `[CONFIRM project id]`. Resource names, project IDs, service accounts, and labels must be **neutral and personal** — no employer, group, or company reference anywhere (root §1). Infra config is where org names leak most easily; check every name.
+Personal GCP project + Firebase: **`rugby-mobile-app`** (project number `410011126463`, orphan — no Workspace org parent, personal billing linked). Resource names, project IDs, service accounts, and labels must be **neutral and personal** — no employer, group, or company reference anywhere (root §1). Infra config is where org names leak most easily; check every name.
+
+**Before any `gcloud` operation on this project**, verify the active identity is personal: `gcloud config get-value account` must return `fmathews73@gmail.com`, not the work `@cg-tech.co` account. Switch with `gcloud config set account fmathews73@gmail.com` if wrong. Both accounts are credentialed on this machine; `gcloud` picks whichever is "active".
+
+**ADC follow-up (Phase 3):** `gcloud auth application-default login` (as `fmathews73@gmail.com`) and `gcloud auth application-default set-quota-project rugby-mobile-app` — needed before Terraform / SDK code can run under this project. Not yet done; current ADC still points at a work-project quota.
 
 ---
 

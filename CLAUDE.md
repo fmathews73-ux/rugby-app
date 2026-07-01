@@ -22,7 +22,7 @@ Operating contract for the build agent. **Read fully before taking any action.**
 
 This is a **standalone, private project under the owner's personal identity only.** Breaking this is the worst failure you can commit, above any bug.
 
-- **Personal accounts only:** personal GitHub `[CONFIRM handle]`, personal Google Cloud + Firebase project `[CONFIRM project id]`, personal Apple/Google store developer accounts. No organisational, shared, or third-party accounts.
+- **Personal accounts only:** personal GitHub `fmathews73-ux`, personal Google Cloud + Firebase project `rugby-mobile-app` (orphan — no Workspace org parent, personal billing linked), personal Apple/Google store developer accounts `[CONFIRM at Phase 6]`. No organisational, shared, or third-party accounts.
 - **Zero employer footprint.** No reference to any employer, group, company, brand, or colleague — anywhere. That explicitly includes: source code, config, comments, commit messages, git author/committer metadata, package names, bundle/app IDs, cloud resource names, labels, README, and store listings.
 - **Neutral identifiers.** Bundle IDs / package names use the reverse-DNS of a *personal* domain, never an org domain.
 - **Pre-commit identity check.** Before any commit, verify `git config user.name` / `user.email` resolve to the personal identity, not a work account.
