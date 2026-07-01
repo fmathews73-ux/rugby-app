@@ -28,6 +28,12 @@ const FILTER_OPTIONS = [
  * Fixtures — every fixture across the five current-season competitions,
  * grouped by date, chronologically. Picker at the top filters by competition.
  * Tap a row → fixture detail.
+ *
+ * Default view (competitionFilter = "all"): the most recent completed
+ * fixture at the top + every upcoming fixture below. Users switching to a
+ * specific competition see ALL fixtures for that competition (including
+ * older completed ones) — the filter is treated as an explicit "browse this
+ * competition" action rather than a narrowing of the default feed.
  */
 export default function FixturesScreen() {
   const router = useRouter();
@@ -54,9 +60,26 @@ export default function FixturesScreen() {
     const compById = new Map(competitions.data?.map((c) => [c.id, c]) ?? []);
     const teamById = new Map(teams.data?.map((t) => [t.id, t]) ?? []);
     const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
-    const filtered = competitionFilter === ALL_COMPETITIONS
-      ? all
-      : all.filter((f) => f.competition_id === competitionFilter);
+
+    let filtered: Fixture[];
+    if (competitionFilter === ALL_COMPETITIONS) {
+      // Default view: most recent completed + everything upcoming.
+      const sortedAsc = all.slice().sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc));
+      // The most recent completed fixture is the last one whose status is
+      // "completed" — sortedAsc places completed fixtures before upcoming.
+      let mostRecentCompleted: Fixture | undefined;
+      for (const f of sortedAsc) {
+        if (f.status === 'completed') mostRecentCompleted = f;
+      }
+      const upcoming = sortedAsc.filter(
+        (f) =>
+          f.status === 'scheduled' || f.status === 'live' || f.status === 'half-time',
+      );
+      filtered = mostRecentCompleted ? [mostRecentCompleted, ...upcoming] : upcoming;
+    } else {
+      filtered = all.filter((f) => f.competition_id === competitionFilter);
+    }
+
     const byDate = new Map<string, Fixture[]>();
     for (const fx of filtered) {
       const day = fx.kickoff_utc.slice(0, 10);
