@@ -207,8 +207,10 @@ export default function FixturesScreen() {
               <Text style={styles.timeCol}>{item.kickoff_utc.slice(11, 16)}</Text>
               <View style={styles.mainCol}>
                 <View style={styles.matchupRow}>
-                  {home ? <TeamFlagBall2D flagCode={home.flag_code} size={22} /> : null}
-                  <Text style={styles.matchupText}>
+                  <View style={styles.flagWrap}>
+                    {home ? <TeamFlagBall2D flagCode={home.flag_code} size={22} /> : null}
+                  </View>
+                  <Text style={styles.teamCode}>
                     {home?.short_name ?? item.home_team_id.toUpperCase()}
                   </Text>
                   {result ? (
@@ -218,10 +220,12 @@ export default function FixturesScreen() {
                   ) : (
                     <Text style={styles.matchupSep}>·</Text>
                   )}
-                  <Text style={styles.matchupText}>
+                  <Text style={styles.teamCode}>
                     {away?.short_name ?? item.away_team_id.toUpperCase()}
                   </Text>
-                  {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
+                  <View style={styles.flagWrap}>
+                    {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
+                  </View>
                 </View>
                 <Text style={styles.metaText}>
                   {comp?.short_name ?? item.competition_id} · {item.venue}
@@ -282,14 +286,28 @@ const styles = StyleSheet.create({
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   timeCol: { width: 52, fontSize: 13, fontWeight: '600', color: Colors.light.text },
   mainCol: { flex: 1, gap: 4 },
-  matchupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  matchupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  flagWrap: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
+  teamCode: {
+    width: 40,
+    textAlign: 'center',
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.light.text,
+  },
   matchupText: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  matchupSep: { fontSize: 14, color: Colors.light.textSecondary, marginHorizontal: 2 },
+  matchupSep: {
+    width: 70,
+    textAlign: 'center',
+    fontSize: 14,
+    color: Colors.light.textSecondary,
+  },
   scoreText: {
+    width: 70,
+    textAlign: 'center',
     fontSize: 15,
     fontWeight: '700',
     color: Colors.light.text,
-    marginHorizontal: 4,
   },
   metaText: { fontSize: 11, color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
