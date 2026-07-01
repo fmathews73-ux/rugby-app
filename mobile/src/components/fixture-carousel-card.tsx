@@ -224,9 +224,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   scoreBox: {
-    minWidth: 40,
+    width: 52,
     height: 44,
-    paddingHorizontal: 10,
     borderRadius: 8,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
