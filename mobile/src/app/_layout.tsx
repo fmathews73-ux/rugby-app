@@ -1,18 +1,51 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { useMemo } from 'react';
+import { StyleSheet, useColorScheme, View } from 'react-native';
+import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
 import AppTabs from '@/components/app-tabs';
+import { DevModeBanner } from '@/components/dev-mode-banner';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function TabLayout() {
+export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const queryClient = useMemo(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000, // 30s — freshens on refocus but avoids storming the stub
+            retry: 1,
+          },
+        },
+      }),
+    [],
+  );
+
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+        <SafeAreaProvider>
+          <SafeAreaView edges={['top']} style={styles.safeArea}>
+            <DevModeBanner />
+          </SafeAreaView>
+          <View style={styles.appBody}>
+            <AppTabs />
+          </View>
+        </SafeAreaProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
+
+const styles = StyleSheet.create({
+  safeArea: {
+    backgroundColor: '#B45309', // matches dev banner so status bar area doesn't gap
+  },
+  appBody: {
+    flex: 1,
+  },
+});

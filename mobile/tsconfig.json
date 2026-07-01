@@ -8,6 +8,9 @@
       ],
       "@/assets/*": [
         "./assets/*"
+      ],
+      "@rugby-app/shared": [
+        "../packages/shared/src/types"
       ]
     }
   },
