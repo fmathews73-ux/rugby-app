@@ -218,7 +218,11 @@ export default function FixturesScreen() {
                       {result.home_score} - {result.away_score}
                     </Text>
                   ) : (
-                    <Text style={styles.matchupSep}>·</Text>
+                    <Text
+                      style={[styles.statusMid, statusMidExtraStyle(item.status)]}
+                      numberOfLines={1}>
+                      {statusMidLabel(item.status)}
+                    </Text>
                   )}
                   <Text style={styles.teamCode}>
                     {away?.short_name ?? item.away_team_id.toUpperCase()}
@@ -231,7 +235,6 @@ export default function FixturesScreen() {
                   {comp?.short_name ?? item.competition_id} · {item.venue}
                 </Text>
               </View>
-              {isCompleted ? null : <StatusPill status={item.status} />}
             </Pressable>
           );
         }}
@@ -248,21 +251,24 @@ function formatDay(iso: string): string {
   return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-function StatusPill({ status }: { status: Fixture['status'] }) {
-  const colors: Record<Fixture['status'], { bg: string; fg: string; label: string }> = {
-    scheduled: { bg: '#E5E7EB', fg: '#374151', label: 'Upcoming' },
-    live: { bg: '#DC2626', fg: '#FFFFFF', label: 'LIVE' },
-    'half-time': { bg: '#F59E0B', fg: '#FFFFFF', label: 'HT' },
-    completed: { bg: '#111827', fg: '#F9FAFB', label: 'Final' },
-    postponed: { bg: '#F59E0B', fg: '#FFFFFF', label: 'Postp.' },
-    cancelled: { bg: '#9CA3AF', fg: '#FFFFFF', label: 'Cancel.' },
+/** Text shown in the middle slot of the matchup row for non-completed
+ * fixtures. Completed fixtures show the score itself instead. */
+function statusMidLabel(status: Fixture['status']): string {
+  const labels: Record<Fixture['status'], string> = {
+    scheduled: 'Upcoming',
+    live: 'LIVE',
+    'half-time': 'HT',
+    completed: '', // not reached — score renders instead
+    postponed: 'Postp.',
+    cancelled: 'Cancel.',
   };
-  const c = colors[status];
-  return (
-    <View style={[styles.pill, { backgroundColor: c.bg }]}>
-      <Text style={[styles.pillText, { color: c.fg }]}>{c.label}</Text>
-    </View>
-  );
+  return labels[status];
+}
+
+function statusMidExtraStyle(status: Fixture['status']) {
+  if (status === 'live') return styles.statusMidLive;
+  if (status === 'half-time') return styles.statusMidHalfTime;
+  return undefined;
 }
 
 const styles = StyleSheet.create({
@@ -295,21 +301,22 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.text,
   },
-  matchupText: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  matchupSep: {
-    width: 70,
-    textAlign: 'center',
-    fontSize: 14,
-    color: Colors.light.textSecondary,
-  },
   scoreText: {
-    width: 70,
+    width: 76,
     textAlign: 'center',
     fontSize: 15,
     fontWeight: '700',
     color: Colors.light.text,
   },
+  statusMid: {
+    width: 76,
+    textAlign: 'center',
+    fontSize: 12,
+    fontWeight: '600',
+    color: Colors.light.textSecondary,
+    letterSpacing: 0.3,
+  },
+  statusMidLive: { color: '#DC2626', fontWeight: '700', letterSpacing: 1 },
+  statusMidHalfTime: { color: '#F59E0B', fontWeight: '700', letterSpacing: 1 },
   metaText: { fontSize: 11, color: Colors.light.textSecondary, textAlign: 'center' },
-  pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
 });
