@@ -4,10 +4,16 @@ import { useColorScheme } from 'react-native';
 import { Colors } from '@/constants/theme';
 
 /**
- * Six-tab IA per PRD §4: Home · Fixtures · Standings · Teams · Stats ·
- * Power Rankings. Icons are SF Symbols on iOS (`sf` prop); Android drawables
- * are the same identifier — Android styling comes in a later stage when we
- * verify on that platform.
+ * Five-tab IA (PRD §4). Reduced from six after the UITabBar overflow-into-"More"
+ * problem — iOS collapses the 5th tab onwards into a system "More" menu, which
+ * buried Rankings (a PRD-called-out differentiator) behind an ellipsis.
+ *
+ * Stats is deferred out of the tab bar and will resurface as a Team-detail
+ * sub-route once register #12 (KPI field list) lands. That leaves 5 primary
+ * tabs that fit iOS's constraint.
+ *
+ * Icons are SF Symbols on iOS; Android drawable identifiers are stubbed and
+ * will be verified once we run on that platform.
  */
 export default function AppTabs() {
   const scheme = useColorScheme();
@@ -36,11 +42,6 @@ export default function AppTabs() {
       <NativeTabs.Trigger name="teams">
         <NativeTabs.Trigger.Label>Teams</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf="person.3" drawable="ic_people" />
-      </NativeTabs.Trigger>
-
-      <NativeTabs.Trigger name="stats">
-        <NativeTabs.Trigger.Label>Stats</NativeTabs.Trigger.Label>
-        <NativeTabs.Trigger.Icon sf="chart.bar" drawable="ic_chart" />
       </NativeTabs.Trigger>
 
       <NativeTabs.Trigger name="rankings">

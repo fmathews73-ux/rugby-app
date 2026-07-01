@@ -80,7 +80,7 @@ export default function FixturesScreen() {
             </View>
           );
         }}
-        stickySectionHeadersEnabled
+        stickySectionHeadersEnabled={false}
         contentContainerStyle={{ paddingBottom: 40 }}
       />
     </SafeAreaView>
