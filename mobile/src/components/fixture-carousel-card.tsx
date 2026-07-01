@@ -80,7 +80,7 @@ export function FixtureCarouselCard({
       <View style={styles.divider} />
 
       <View style={styles.venueRow}>
-        <Ionicons name="location" size={14} color={ACCENT} />
+        <Ionicons name="location" size={14} color={Colors.light.text} />
         <Text style={styles.venueText} numberOfLines={1}>
           {fixture.venue}
         </Text>
