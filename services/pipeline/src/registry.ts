@@ -18,16 +18,16 @@ export const RUGBY_APP_SEED = 20260701;
 /** Ten Tier-1 Men's national teams (PRD §3.4). Colours are NEUTRAL grays —
  * NOT the real kit palettes (register #23 resolved: neutral placeholders). */
 export const TIER_1_TEAMS: readonly Team[] = [
-  { id: 'eng', name: 'England', short_name: 'ENG', primary_color: '#4A4A4A' },
-  { id: 'fra', name: 'France', short_name: 'FRA', primary_color: '#4A4A4A' },
-  { id: 'ire', name: 'Ireland', short_name: 'IRE', primary_color: '#4A4A4A' },
-  { id: 'ita', name: 'Italy', short_name: 'ITA', primary_color: '#4A4A4A' },
-  { id: 'sco', name: 'Scotland', short_name: 'SCO', primary_color: '#4A4A4A' },
-  { id: 'wal', name: 'Wales', short_name: 'WAL', primary_color: '#4A4A4A' },
-  { id: 'arg', name: 'Argentina', short_name: 'ARG', primary_color: '#4A4A4A' },
-  { id: 'aus', name: 'Australia', short_name: 'AUS', primary_color: '#4A4A4A' },
-  { id: 'nzl', name: 'New Zealand', short_name: 'NZL', primary_color: '#4A4A4A' },
-  { id: 'rsa', name: 'South Africa', short_name: 'RSA', primary_color: '#4A4A4A' },
+  { id: 'eng', name: 'England', short_name: 'ENG', primary_color: '#4A4A4A', flag_code: 'gb-eng' },
+  { id: 'fra', name: 'France', short_name: 'FRA', primary_color: '#4A4A4A', flag_code: 'fr' },
+  { id: 'ire', name: 'Ireland', short_name: 'IRE', primary_color: '#4A4A4A', flag_code: 'ie' },
+  { id: 'ita', name: 'Italy', short_name: 'ITA', primary_color: '#4A4A4A', flag_code: 'it' },
+  { id: 'sco', name: 'Scotland', short_name: 'SCO', primary_color: '#4A4A4A', flag_code: 'gb-sct' },
+  { id: 'wal', name: 'Wales', short_name: 'WAL', primary_color: '#4A4A4A', flag_code: 'gb-wls' },
+  { id: 'arg', name: 'Argentina', short_name: 'ARG', primary_color: '#4A4A4A', flag_code: 'ar' },
+  { id: 'aus', name: 'Australia', short_name: 'AUS', primary_color: '#4A4A4A', flag_code: 'au' },
+  { id: 'nzl', name: 'New Zealand', short_name: 'NZL', primary_color: '#4A4A4A', flag_code: 'nz' },
+  { id: 'rsa', name: 'South Africa', short_name: 'RSA', primary_color: '#4A4A4A', flag_code: 'za' },
 ];
 
 /** Eighteen Tier-2 Men's national teams (PRD §3.4 broadened v0.5). 14 of
@@ -35,24 +35,24 @@ export const TIER_1_TEAMS: readonly Team[] = [
  * surface. Colours are the SAME neutral grey placeholder — a design-system
  * decision (register #23) will later distinguish teams properly. */
 export const TIER_2_TEAMS: readonly Team[] = [
-  { id: 'fij', name: 'Fiji', short_name: 'FIJ', primary_color: '#4A4A4A' },
-  { id: 'geo', name: 'Georgia', short_name: 'GEO', primary_color: '#4A4A4A' },
-  { id: 'jpn', name: 'Japan', short_name: 'JPN', primary_color: '#4A4A4A' },
-  { id: 'sam', name: 'Samoa', short_name: 'SAM', primary_color: '#4A4A4A' },
-  { id: 'tga', name: 'Tonga', short_name: 'TGA', primary_color: '#4A4A4A' },
-  { id: 'usa', name: 'United States', short_name: 'USA', primary_color: '#4A4A4A' },
-  { id: 'uru', name: 'Uruguay', short_name: 'URU', primary_color: '#4A4A4A' },
-  { id: 'chi', name: 'Chile', short_name: 'CHI', primary_color: '#4A4A4A' },
-  { id: 'nam', name: 'Namibia', short_name: 'NAM', primary_color: '#4A4A4A' },
-  { id: 'por', name: 'Portugal', short_name: 'POR', primary_color: '#4A4A4A' },
-  { id: 'rou', name: 'Romania', short_name: 'ROU', primary_color: '#4A4A4A' },
-  { id: 'esp', name: 'Spain', short_name: 'ESP', primary_color: '#4A4A4A' },
-  { id: 'zim', name: 'Zimbabwe', short_name: 'ZIM', primary_color: '#4A4A4A' },
-  { id: 'hkg', name: 'Hong Kong China', short_name: 'HKG', primary_color: '#4A4A4A' },
-  { id: 'can', name: 'Canada', short_name: 'CAN', primary_color: '#4A4A4A' },
-  { id: 'bra', name: 'Brazil', short_name: 'BRA', primary_color: '#4A4A4A' },
-  { id: 'ned', name: 'Netherlands', short_name: 'NED', primary_color: '#4A4A4A' },
-  { id: 'ken', name: 'Kenya', short_name: 'KEN', primary_color: '#4A4A4A' },
+  { id: 'fij', name: 'Fiji', short_name: 'FIJ', primary_color: '#4A4A4A', flag_code: 'fj' },
+  { id: 'geo', name: 'Georgia', short_name: 'GEO', primary_color: '#4A4A4A', flag_code: 'ge' },
+  { id: 'jpn', name: 'Japan', short_name: 'JPN', primary_color: '#4A4A4A', flag_code: 'jp' },
+  { id: 'sam', name: 'Samoa', short_name: 'SAM', primary_color: '#4A4A4A', flag_code: 'ws' },
+  { id: 'tga', name: 'Tonga', short_name: 'TGA', primary_color: '#4A4A4A', flag_code: 'to' },
+  { id: 'usa', name: 'United States', short_name: 'USA', primary_color: '#4A4A4A', flag_code: 'us' },
+  { id: 'uru', name: 'Uruguay', short_name: 'URU', primary_color: '#4A4A4A', flag_code: 'uy' },
+  { id: 'chi', name: 'Chile', short_name: 'CHI', primary_color: '#4A4A4A', flag_code: 'cl' },
+  { id: 'nam', name: 'Namibia', short_name: 'NAM', primary_color: '#4A4A4A', flag_code: 'na' },
+  { id: 'por', name: 'Portugal', short_name: 'POR', primary_color: '#4A4A4A', flag_code: 'pt' },
+  { id: 'rou', name: 'Romania', short_name: 'ROU', primary_color: '#4A4A4A', flag_code: 'ro' },
+  { id: 'esp', name: 'Spain', short_name: 'ESP', primary_color: '#4A4A4A', flag_code: 'es' },
+  { id: 'zim', name: 'Zimbabwe', short_name: 'ZIM', primary_color: '#4A4A4A', flag_code: 'zw' },
+  { id: 'hkg', name: 'Hong Kong China', short_name: 'HKG', primary_color: '#4A4A4A', flag_code: 'hk' },
+  { id: 'can', name: 'Canada', short_name: 'CAN', primary_color: '#4A4A4A', flag_code: 'ca' },
+  { id: 'bra', name: 'Brazil', short_name: 'BRA', primary_color: '#4A4A4A', flag_code: 'br' },
+  { id: 'ned', name: 'Netherlands', short_name: 'NED', primary_color: '#4A4A4A', flag_code: 'nl' },
+  { id: 'ken', name: 'Kenya', short_name: 'KEN', primary_color: '#4A4A4A', flag_code: 'ke' },
 ];
 
 /** All Men's international teams — Tier 1 + Tier 2. Used by Power Rankings. */

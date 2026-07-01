@@ -1,21 +1,23 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { FlatList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Team } from '@rugby-app/shared';
 
 import { useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 const TIER_1_IDS = new Set(['eng', 'fra', 'ire', 'ita', 'sco', 'wal', 'arg', 'aus', 'nzl', 'rsa']);
 
 /**
  * Teams — all 28 international sides, split by tier and sorted alphabetically
- * within tier. Row taps a stubbed detail navigation (not wired to a screen
- * yet — that's next stage).
+ * within tier. Tap a row → team detail with the 3D flag ball.
  */
 export default function TeamsScreen() {
+  const router = useRouter();
   const query = useTeams();
 
   const grouped = useMemo(() => {
@@ -53,12 +55,15 @@ export default function TeamsScreen() {
                 <Text style={styles.groupHeaderCount}>{item.count}</Text>
               </View>
             ) : (
-              <View style={styles.teamRow}>
-                <View style={[styles.crest, { backgroundColor: item.team.primary_color }]}>
-                  <Text style={styles.crestLabel}>{item.team.short_name}</Text>
+              <Pressable
+                style={({ pressed }) => [styles.teamRow, pressed && styles.teamRowPressed]}
+                onPress={() => router.push(`/teams/${item.team.id}`)}>
+                <TeamFlagBall2D flagCode={item.team.flag_code} size={44} />
+                <View style={styles.teamText}>
+                  <Text style={styles.teamName}>{item.team.name}</Text>
+                  <Text style={styles.teamShort}>{item.team.short_name}</Text>
                 </View>
-                <Text style={styles.teamName}>{item.team.name}</Text>
-              </View>
+              </Pressable>
             )
           }
         />
@@ -83,15 +88,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two + 2,
+    paddingVertical: Spacing.two + 4,
     gap: Spacing.three,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  crest: {
-    width: 40, height: 40, borderRadius: 8,
-    alignItems: 'center', justifyContent: 'center',
-  },
-  crestLabel: { color: '#FFFFFF', fontSize: 11, fontWeight: '700', letterSpacing: 0.6 },
+  teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
+  teamText: { flex: 1, gap: 2 },
   teamName: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
+  teamShort: { fontSize: 11, letterSpacing: 1, color: Colors.light.textSecondary },
 });

@@ -1,19 +1,28 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useHealth, useLatestRanking } from '@/api/hooks';
+import { useHealth, useLatestRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
  * Home. Deliberately dashboard-like at this stage — real IA per PRD §4.3 is
  * "General description/landing" with content blocks still `[INPUT NEEDED #19]`.
  * Until that's specified, this shows a rugby-agnostic pipeline health card
- * + a rankings tease.
+ * + a rankings tease with 2D flag balls.
  */
 export default function HomeScreen() {
   const health = useHealth();
   const ranking = useLatestRanking();
+  const teams = useTeams();
+
+  const teamById = useMemo(() => {
+    const m = new Map<string, { name: string; flag_code: string; short_name: string }>();
+    for (const t of teams.data ?? []) m.set(t.id, t);
+    return m;
+  }, [teams.data]);
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
@@ -46,13 +55,23 @@ export default function HomeScreen() {
           ) : ranking.data ? (
             <View style={styles.rankList}>
               <Text style={styles.rankMeta}>{ranking.data.snapshot_date}</Text>
-              {ranking.data.rows.slice(0, 5).map((row) => (
-                <View key={row.team_id} style={styles.rankRow}>
-                  <Text style={styles.rankIndex}>{row.rank}.</Text>
-                  <Text style={styles.rankTeam}>{row.team_id.toUpperCase()}</Text>
-                  <Text style={styles.rankPoints}>{row.points} pts</Text>
-                </View>
-              ))}
+              {ranking.data.rows.slice(0, 5).map((row) => {
+                const team = teamById.get(row.team_id);
+                return (
+                  <View key={row.team_id} style={styles.rankRow}>
+                    <Text style={styles.rankIndex}>{row.rank}.</Text>
+                    {team ? (
+                      <TeamFlagBall2D flagCode={team.flag_code} size={26} />
+                    ) : (
+                      <View style={styles.flagFallback} />
+                    )}
+                    <Text style={styles.rankTeam}>
+                      {team?.name ?? row.team_id.toUpperCase()}
+                    </Text>
+                    <Text style={styles.rankPoints}>{row.points} pts</Text>
+                  </View>
+                );
+              })}
             </View>
           ) : null}
         </View>
@@ -88,8 +107,9 @@ const styles = StyleSheet.create({
   metricLabel: { fontSize: 12, color: Colors.light.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
   rankList: { gap: 8 },
   rankMeta: { fontSize: 12, color: Colors.light.textSecondary },
-  rankRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.two },
-  rankIndex: { fontSize: 14, fontWeight: '600', color: Colors.light.textSecondary, minWidth: 24 },
-  rankTeam: { fontSize: 16, fontWeight: '600', color: Colors.light.text, flex: 1 },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
+  rankIndex: { fontSize: 14, fontWeight: '600', color: Colors.light.textSecondary, minWidth: 22 },
+  flagFallback: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#E5E7EB' },
+  rankTeam: { fontSize: 15, fontWeight: '600', color: Colors.light.text, flex: 1 },
   rankPoints: { fontSize: 12, color: Colors.light.textSecondary },
 });

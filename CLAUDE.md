@@ -132,7 +132,8 @@ Repo structure (monorepo vs. split) is not yet decided. Confirm before scaffoldi
 - **Never ship the synthetic dev dataset to a production build** (v0.4, register #27). Gate synthetic data to `__DEV__` / dev-client / EAS internal preview only. Any code path that could leak synthetic data into a store build is a release blocker. Store builds must fail hard if a synthetic adapter is present.
 - **Never render synthetic data without a persistent dev-mode indicator** on the screen (v0.4).
 - **Never fabricate stats against real player names** — use plausibly-fake names in synthetic data (v0.4). Real team names are fine.
-- **Never include real team crests / logos** — trademarked; neutral placeholders only until a licensed image path is established.
+- **Never include real team crests / logos** — Springbok, silver fern, Welsh dragon, shamrock, thistle, three feathers, etc. are trademarked. Neutral placeholders only until a licensed image path is established.
+- **National / sub-national flags are OK** (v0.5). Sovereign national flags and constituent-country flags (England / Scotland / Wales / Hong Kong) are public identifiers, not trademarked, and are the standard visual for teams in international rugby. Flags may appear anywhere in the client (badges, hero balls, ranking rows). Crests remain out.
 - Never pre-emptively build the real-time (Redis / WebSocket) tier — deferred behind a latency decision (#17) and real demand. Poll-refresh is fine for MVP.
 - Never add betting/odds, ads, live video, AR, or Fantasy in v1.
 - Never build any **club-level rankings compute path** in v1 (v0.4, register #13 deferred). Internationals use World Rugby's stored public rankings only.

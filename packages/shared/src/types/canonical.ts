@@ -114,6 +114,15 @@ export interface Team {
   name: string; // 'New Zealand'
   short_name: string; // 'NZL' — World Rugby 3-letter code
   primary_color: string; // '#XXXXXX' neutral placeholder — do NOT use official kit colours
+  /**
+   * flagcdn.com identifier used to fetch the national flag PNG:
+   * https://flagcdn.com/w{size}/{flag_code}.png
+   * ISO 3166-1 alpha-2 for sovereign nations ('nz', 'fr'), or the
+   * hyphenated subdivision code for constituent countries ('gb-eng',
+   * 'gb-sct', 'gb-wls'). Flags — unlike crests — are public identifiers
+   * and are allowed by root CLAUDE.md §9 (v0.5).
+   */
+  flag_code: string;
 }
 
 /**

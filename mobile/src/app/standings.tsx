@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useSeasonStandings } from '@/api/hooks';
+import { useSeasonStandings, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
@@ -16,6 +18,13 @@ import { Colors, Spacing } from '@/constants/theme';
  */
 export default function StandingsScreen() {
   const query = useSeasonStandings('six-nations-2026');
+  const teams = useTeams();
+
+  const teamById = useMemo(() => {
+    const m = new Map<string, { name: string; short_name: string; flag_code: string }>();
+    for (const t of teams.data ?? []) m.set(t.id, t);
+    return m;
+  }, [teams.data]);
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
@@ -28,7 +37,7 @@ export default function StandingsScreen() {
         ) : query.isError ? (
           <ErrorState error={query.error} />
         ) : query.data && query.data[0] ? (
-          <StandingsTable rows={query.data[0].rows} />
+          <StandingsTable rows={query.data[0].rows} teamById={teamById} />
         ) : null}
       </ScrollView>
     </SafeAreaView>
@@ -37,16 +46,19 @@ export default function StandingsScreen() {
 
 function StandingsTable({
   rows,
+  teamById,
 }: {
   rows: readonly {
     team_id: string; played: number; won: number; drawn: number; lost: number;
     points_difference: number; table_points: number; rank: number;
   }[];
+  teamById: Map<string, { name: string; short_name: string; flag_code: string }>;
 }) {
   return (
     <View style={styles.table}>
       <View style={[styles.row, styles.headerRow]}>
         <Text style={[styles.cellRank, styles.headerText]}>#</Text>
+        <View style={styles.cellFlag} />
         <Text style={[styles.cellTeam, styles.headerText]}>Team</Text>
         <Text style={[styles.cellStat, styles.headerText]}>P</Text>
         <Text style={[styles.cellStat, styles.headerText]}>W</Text>
@@ -55,18 +67,24 @@ function StandingsTable({
         <Text style={[styles.cellStat, styles.headerText]}>PD</Text>
         <Text style={[styles.cellPts, styles.headerText]}>Pts</Text>
       </View>
-      {rows.map((r) => (
-        <View key={r.team_id} style={styles.row}>
-          <Text style={styles.cellRank}>{r.rank}</Text>
-          <Text style={styles.cellTeam}>{r.team_id.toUpperCase()}</Text>
-          <Text style={styles.cellStat}>{r.played}</Text>
-          <Text style={styles.cellStat}>{r.won}</Text>
-          <Text style={styles.cellStat}>{r.drawn}</Text>
-          <Text style={styles.cellStat}>{r.lost}</Text>
-          <Text style={styles.cellStat}>{r.points_difference > 0 ? `+${r.points_difference}` : r.points_difference}</Text>
-          <Text style={[styles.cellPts, styles.cellPtsValue]}>{r.table_points}</Text>
-        </View>
-      ))}
+      {rows.map((r) => {
+        const team = teamById.get(r.team_id);
+        return (
+          <View key={r.team_id} style={styles.row}>
+            <Text style={styles.cellRank}>{r.rank}</Text>
+            <View style={styles.cellFlag}>
+              {team ? <TeamFlagBall2D flagCode={team.flag_code} size={22} /> : null}
+            </View>
+            <Text style={styles.cellTeam}>{team?.short_name ?? r.team_id.toUpperCase()}</Text>
+            <Text style={styles.cellStat}>{r.played}</Text>
+            <Text style={styles.cellStat}>{r.won}</Text>
+            <Text style={styles.cellStat}>{r.drawn}</Text>
+            <Text style={styles.cellStat}>{r.lost}</Text>
+            <Text style={styles.cellStat}>{r.points_difference > 0 ? `+${r.points_difference}` : r.points_difference}</Text>
+            <Text style={[styles.cellPts, styles.cellPtsValue]}>{r.table_points}</Text>
+          </View>
+        );
+      })}
     </View>
   );
 }
@@ -88,12 +106,14 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two + 2,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    gap: 4,
   },
   headerRow: { backgroundColor: Colors.light.backgroundSelected },
   headerText: { fontSize: 11, fontWeight: '600', color: Colors.light.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
-  cellRank: { width: 26, fontSize: 13, fontWeight: '600', color: Colors.light.text },
+  cellRank: { width: 22, fontSize: 13, fontWeight: '600', color: Colors.light.text },
+  cellFlag: { width: 26, alignItems: 'center' },
   cellTeam: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  cellStat: { width: 28, textAlign: 'center', fontSize: 13, color: Colors.light.text },
-  cellPts: { width: 36, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  cellStat: { width: 24, textAlign: 'center', fontSize: 12, color: Colors.light.text },
+  cellPts: { width: 32, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
   cellPtsValue: { color: Colors.light.text },
 });

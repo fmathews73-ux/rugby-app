@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { useLatestRanking } from '@/api/hooks';
+import { useLatestRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
@@ -12,6 +14,13 @@ import { Colors, Spacing } from '@/constants/theme';
  */
 export default function RankingsScreen() {
   const query = useLatestRanking();
+  const teams = useTeams();
+
+  const teamById = useMemo(() => {
+    const m = new Map<string, { name: string; short_name: string; flag_code: string }>();
+    for (const t of teams.data ?? []) m.set(t.id, t);
+    return m;
+  }, [teams.data]);
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
@@ -28,16 +37,26 @@ export default function RankingsScreen() {
           <ErrorState error={query.error} />
         ) : query.data ? (
           <View style={styles.table}>
-            {query.data.rows.map((row) => (
-              <View key={row.team_id} style={styles.row}>
-                <Text style={styles.rank}>{row.rank}</Text>
-                <View style={styles.teamCol}>
-                  <Text style={styles.teamName}>{row.team_id.toUpperCase()}</Text>
+            {query.data.rows.map((row) => {
+              const team = teamById.get(row.team_id);
+              return (
+                <View key={row.team_id} style={styles.row}>
+                  <Text style={styles.rank}>{row.rank}</Text>
+                  {team ? (
+                    <TeamFlagBall2D flagCode={team.flag_code} size={28} />
+                  ) : (
+                    <View style={styles.flagFallback} />
+                  )}
+                  <View style={styles.teamCol}>
+                    <Text style={styles.teamName}>
+                      {team?.name ?? row.team_id.toUpperCase()}
+                    </Text>
+                  </View>
+                  <Text style={styles.points}>{row.points}</Text>
+                  <MovementBadge movement={row.movement} />
                 </View>
-                <Text style={styles.points}>{row.points}</Text>
-                <MovementBadge movement={row.movement} />
-              </View>
-            ))}
+              );
+            })}
           </View>
         ) : null}
       </ScrollView>
@@ -75,13 +94,14 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  rank: { width: 34, fontSize: 15, fontWeight: '700', color: Colors.light.text },
-  teamCol: { flex: 1 },
-  teamName: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
-  points: { width: 48, textAlign: 'right', fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  movement: { width: 56, textAlign: 'right', fontSize: 12, fontWeight: '700' },
+  rank: { width: 30, fontSize: 15, fontWeight: '700', color: Colors.light.text },
+  flagFallback: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E5E7EB' },
+  teamCol: { flex: 1, paddingLeft: Spacing.one },
+  teamName: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
+  points: { width: 42, textAlign: 'right', fontSize: 14, fontWeight: '600', color: Colors.light.text },
+  movement: { width: 52, textAlign: 'right', fontSize: 12, fontWeight: '700' },
   movementUp: { color: '#059669' },
   movementDown: { color: '#DC2626' },
-  movementFlat: { width: 56, textAlign: 'right', fontSize: 14, color: Colors.light.textSecondary },
-  movementNew: { width: 56, textAlign: 'right', fontSize: 10, fontWeight: '700', color: Colors.light.textSecondary },
+  movementFlat: { width: 52, textAlign: 'right', fontSize: 14, color: Colors.light.textSecondary },
+  movementNew: { width: 52, textAlign: 'right', fontSize: 10, fontWeight: '700', color: Colors.light.textSecondary },
 });

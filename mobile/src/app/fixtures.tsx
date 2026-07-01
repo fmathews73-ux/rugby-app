@@ -4,9 +4,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Fixture } from '@rugby-app/shared';
 
-import { useCompetitions, useSeasons } from '@/api/hooks';
+import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
@@ -18,6 +19,7 @@ import { useQueries } from '@tanstack/react-query';
 export default function FixturesScreen() {
   const competitions = useCompetitions();
   const seasons = useSeasons();
+  const teams = useTeams();
 
   const seasonIds = useMemo(() => seasons.data?.map((s) => s.id) ?? [], [seasons.data]);
 
@@ -34,6 +36,7 @@ export default function FixturesScreen() {
   const sections = useMemo(() => {
     if (isLoading || error) return [];
     const compById = new Map(competitions.data?.map((c) => [c.id, c]) ?? []);
+    const teamById = new Map(teams.data?.map((t) => [t.id, t]) ?? []);
     const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
     const byDate = new Map<string, Fixture[]>();
     for (const fx of all) {
@@ -47,15 +50,24 @@ export default function FixturesScreen() {
       title: formatDay(day),
       data: (byDate.get(day) ?? []).slice().sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc)),
       compById,
+      teamById,
     }));
-  }, [isLoading, error, competitions.data, fixtureQueries]);
+  }, [isLoading, error, competitions.data, teams.data, fixtureQueries]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
-      <SectionList<Fixture, { title: string; data: Fixture[]; compById: Map<string, { short_name: string }> }>
+      <SectionList<
+        Fixture,
+        {
+          title: string;
+          data: Fixture[];
+          compById: Map<string, { short_name: string }>;
+          teamById: Map<string, { flag_code: string; short_name: string }>;
+        }
+      >
         sections={sections}
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section }) => (
@@ -65,13 +77,23 @@ export default function FixturesScreen() {
         )}
         renderItem={({ item, section }) => {
           const comp = section.compById.get(item.competition_id);
+          const home = section.teamById.get(item.home_team_id);
+          const away = section.teamById.get(item.away_team_id);
           return (
             <View style={styles.row}>
               <Text style={styles.timeCol}>{item.kickoff_utc.slice(11, 16)}</Text>
               <View style={styles.mainCol}>
-                <Text style={styles.matchupText}>
-                  {item.home_team_id.toUpperCase()} · {item.away_team_id.toUpperCase()}
-                </Text>
+                <View style={styles.matchupRow}>
+                  {home ? <TeamFlagBall2D flagCode={home.flag_code} size={22} /> : null}
+                  <Text style={styles.matchupText}>
+                    {home?.short_name ?? item.home_team_id.toUpperCase()}
+                  </Text>
+                  <Text style={styles.matchupSep}>·</Text>
+                  {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
+                  <Text style={styles.matchupText}>
+                    {away?.short_name ?? item.away_team_id.toUpperCase()}
+                  </Text>
+                </View>
                 <Text style={styles.metaText}>
                   {comp?.short_name ?? item.competition_id} · {item.venue}
                 </Text>
@@ -129,9 +151,11 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   timeCol: { width: 52, fontSize: 13, fontWeight: '600', color: Colors.light.text },
-  mainCol: { flex: 1, gap: 2 },
-  matchupText: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
-  metaText: { fontSize: 12, color: Colors.light.textSecondary },
+  mainCol: { flex: 1, gap: 4 },
+  matchupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  matchupText: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
+  matchupSep: { fontSize: 14, color: Colors.light.textSecondary, marginHorizontal: 2 },
+  metaText: { fontSize: 11, color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
 });
