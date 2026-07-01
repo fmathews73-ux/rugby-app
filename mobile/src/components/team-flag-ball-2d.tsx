@@ -2,12 +2,11 @@ import { Image, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
 /**
- * Cheap, list-safe pseudo-3D flag chip: a circle-clipped flag PNG with an SVG
- * radial-highlight overlay (top-left) and rim shadow (bottom-right). Works at
- * any size, renders instantly, safe to put in a FlatList with 30+ items.
- *
- * For hero moments (team detail page), use TeamFlagBall3D — actual sphere
- * geometry with texture-mapped flag.
+ * The single flag chip used everywhere in the app — from the 20 px opponent
+ * badges on fixture rows up to the 110 px hero on the team detail page.
+ * A circle-clipped flagcdn PNG with an SVG radial-highlight overlay (top-left)
+ * and rim shadow (bottom-right) fakes the sphere look without any 3D machinery.
+ * List-safe: renders instantly, safe to put in a FlatList with 30+ items.
  */
 export function TeamFlagBall2D({
   flagCode,

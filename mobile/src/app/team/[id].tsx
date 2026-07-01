@@ -9,12 +9,8 @@ import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Team detail. Hero is a 2D flag ball at the same visual style as every other
- * flag chip in the app — consistent aesthetic per owner direction. The 3D
- * component + its deps remain in-tree for a possible future mini-phase; if
- * bundle-size trimming is wanted later, remove `team-flag-ball-3d.tsx`,
- * `error-boundary.tsx`, and uninstall `three`, `@react-three/fiber`,
- * `@react-three/drei`, `expo-gl`. Below the hero: team meta + recent /
+ * Team detail. Hero is a 110 px 2D flag ball at the same visual style as
+ * every other flag chip in the app. Below the hero: team meta + recent /
  * upcoming fixtures. Squad + stats deferred until the squad picker and
  * register #12 (KPI list) land.
  */
