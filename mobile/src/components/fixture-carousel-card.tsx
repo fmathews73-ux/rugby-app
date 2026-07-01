@@ -233,16 +233,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scoreBoxWinner: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1.5,
-    borderColor: ACCENT,
+    backgroundColor: Colors.light.text,
   },
   scoreText: {
     fontSize: 22,
     fontWeight: '700',
     color: Colors.light.text,
   },
-  scoreTextWinner: { color: ACCENT },
+  scoreTextWinner: { color: '#FFFFFF' },
   statusText: {
     fontSize: 15,
     fontWeight: '600',
