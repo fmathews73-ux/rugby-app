@@ -264,11 +264,11 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingTop: Spacing.three,
   },
-  dot: { width: 8, height: 8, borderRadius: 999 },
+  dot: { width: 6, height: 6, borderRadius: 999 },
   dotActive: { backgroundColor: ACCENT },
   dotInactive: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: ACCENT,
   },
 });

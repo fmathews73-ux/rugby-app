@@ -240,14 +240,14 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
   },
   dot: {
-    width: 8,
-    height: 8,
+    width: 6,
+    height: 6,
     borderRadius: 999,
   },
   dotActive: { backgroundColor: ACCENT },
   dotInactive: {
     backgroundColor: 'transparent',
-    borderWidth: 1.5,
+    borderWidth: 1,
     borderColor: ACCENT,
   },
 });
