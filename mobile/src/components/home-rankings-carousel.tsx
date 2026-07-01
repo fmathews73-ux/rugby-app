@@ -190,8 +190,8 @@ const styles = StyleSheet.create({
   },
   title: { fontSize: 16, fontWeight: '700', color: Colors.light.text },
   genderLabel: {
-    fontSize: 16,
-    fontWeight: '300',
+    fontSize: 13,
+    fontWeight: '400',
     color: Colors.light.textSecondary,
   },
   subtitle: {
