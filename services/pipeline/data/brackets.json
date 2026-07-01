@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "id": "world-cup-2027-bracket",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "rounds": [
+      {
+        "name": "Round of 16",
+        "fixture_ids": []
+      },
+      {
+        "name": "Quarter-final",
+        "fixture_ids": []
+      },
+      {
+        "name": "Semi-final",
+        "fixture_ids": []
+      },
+      {
+        "name": "Bronze final",
+        "fixture_ids": []
+      },
+      {
+        "name": "Final",
+        "fixture_ids": []
+      }
+    ]
+  }
+]

@@ -10,6 +10,7 @@
  */
 
 import type {
+  Bracket,
   Competition,
   CompetitionId,
   Fixture,
@@ -18,7 +19,7 @@ import type {
   TeamId,
 } from '@rugby-app/shared/types';
 
-import { HOME_VENUE } from './registry.js';
+import { HOME_VENUE, RWC_2027_VENUES } from './registry.js';
 
 export const TODAY_ISO = '2026-07-01';
 
@@ -28,6 +29,10 @@ export interface CompetitionBundle {
   fixtures: Fixture[];
   /** Team ids playing in this season — used for squad + standings scoping. */
   team_ids: readonly TeamId[];
+  /** Optional pool assignment for pool-and-knockout competitions. Group id → team ids. */
+  pools?: Record<string, readonly TeamId[]>;
+  /** Optional knockout tree for pool-and-knockout competitions. */
+  bracket?: Bracket;
 }
 
 /** Helper: derive fixture status from kickoff vs. TODAY_ISO. */
@@ -227,16 +232,89 @@ const AUTUMN_TESTS_2026: CompetitionBundle = (() => {
   };
 })();
 
-// ─── World Cup 2027 (placeholder — upcoming, no fixtures yet) ────────────────
-// Modelling the actual RWC 2027 bracket requires Tier-2 team entities (24-team
-// format has ~14 Tier-2 sides in the pool stage). Per PRD §3.4 v1 scope is
-// "Men's Tier 1 only" — I've flagged this as a scope decision needing owner
-// input before generating fixtures. Left as: Competition + Season entities
-// exist, no Fixtures, no Bracket, status 'upcoming'.
+// ─── Rugby World Cup 2027 (upcoming — Tier 1 + Tier 2, per PRD §3.4 v0.5) ───
+// Fully modelled after the v0.5 scope broadening. 24 teams / 6 pools of 4 /
+// pool stage (36 matches) → Round of 16 (12 pool winners+runners-up + 4 best
+// third-placed) → QF → SF → Bronze + Final.
+//
+// Knockout fixture assignments depend on pool outcomes and are unknown until
+// the tournament runs. The Bracket entity carries the round structure with
+// empty fixture_ids arrays — populated by a real-data cutover or a downstream
+// simulation, not synthesised here.
+//
+// Pool seeding follows standard World Rugby practice: each pool contains one
+// team from each of four bands. Bands here approximate current-year rankings.
 
 const WORLD_CUP_2027: CompetitionBundle = (() => {
   const cid: CompetitionId = 'world-cup';
   const sid: SeasonId = 'world-cup-2027';
+
+  const pools: Record<string, readonly TeamId[]> = {
+    'Pool A': ['nzl', 'wal', 'geo', 'chi'],
+    'Pool B': ['rsa', 'ita', 'sam', 'nam'],
+    'Pool C': ['ire', 'jpn', 'tga', 'rou'],
+    'Pool D': ['fra', 'fij', 'usa', 'zim'],
+    'Pool E': ['eng', 'sco', 'uru', 'hkg'],
+    'Pool F': ['aus', 'arg', 'por', 'esp'],
+  };
+
+  const allTeams: TeamId[] = Object.values(pools).flat();
+
+  /** Round-robin match order for a pool of 4: 6 games in 3 rounds where
+   * each team plays exactly once per round. */
+  const POOL_ROUND_ROBIN: readonly (readonly [number, number])[] = [
+    [0, 1], [2, 3], // Round 1
+    [0, 2], [1, 3], // Round 2
+    [0, 3], [1, 2], // Round 3
+  ];
+
+  // Pool-stage dates: three rounds spread across Oct 1-25, 2027.
+  // Rounds spaced ~1 week apart; each round takes a Fri-Sun weekend.
+  const POOL_ROUND_DATES: readonly [string, string][] = [
+    ['2027-10-02T08:00:00Z', '2027-10-03T08:00:00Z'], // Round 1
+    ['2027-10-09T08:00:00Z', '2027-10-10T08:00:00Z'], // Round 2
+    ['2027-10-16T08:00:00Z', '2027-10-17T08:00:00Z'], // Round 3
+  ];
+
+  const fixtures: Fixture[] = [];
+  const poolLetters = Object.keys(pools);
+  poolLetters.forEach((poolName, poolIdx) => {
+    const teams = pools[poolName];
+    if (!teams) return;
+    POOL_ROUND_ROBIN.forEach(([i, j], gameIdx) => {
+      const roundIdx = Math.floor(gameIdx / 2);
+      const isFirstGameOfRound = gameIdx % 2 === 0;
+      const roundDates = POOL_ROUND_DATES[roundIdx];
+      if (!roundDates) return;
+      const kickoff = isFirstGameOfRound ? roundDates[0] : roundDates[1];
+      const home = teams[i];
+      const away = teams[j];
+      if (!home || !away) return;
+      const venue = RWC_2027_VENUES[
+        (poolIdx * 6 + gameIdx) % RWC_2027_VENUES.length
+      ] ?? 'TBC';
+      fixtures.push(fx(
+        `rwc27-${poolName.replace(' ', '').toLowerCase()}-g${gameIdx + 1}`,
+        cid, sid,
+        `${poolName} · Round ${roundIdx + 1}`,
+        home, away, kickoff, venue,
+      ));
+    });
+  });
+
+  const bracket: Bracket = {
+    id: `${sid}-bracket`,
+    competition_id: cid,
+    season_id: sid,
+    rounds: [
+      { name: 'Round of 16', fixture_ids: [] },
+      { name: 'Quarter-final', fixture_ids: [] },
+      { name: 'Semi-final', fixture_ids: [] },
+      { name: 'Bronze final', fixture_ids: [] },
+      { name: 'Final', fixture_ids: [] },
+    ],
+  };
+
   return {
     competition: {
       id: cid,
@@ -249,8 +327,10 @@ const WORLD_CUP_2027: CompetitionBundle = (() => {
       id: sid, competition_id: cid, year_label: '2027',
       start_date: '2027-10-01', end_date: '2027-11-13', status: 'upcoming',
     },
-    team_ids: [],
-    fixtures: [],
+    team_ids: allTeams,
+    pools,
+    fixtures,
+    bracket,
   };
 })();
 

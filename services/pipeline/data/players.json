@@ -9898,5 +9898,7925 @@
     "height_cm": 206,
     "weight_kg": 129,
     "cap_count": 66
+  },
+  {
+    "id": "nzl-p001",
+    "team_id": "nzl",
+    "name": "Felix Langford",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1996-12-09",
+    "height_cm": 180,
+    "weight_kg": 129,
+    "cap_count": 45
+  },
+  {
+    "id": "nzl-p002",
+    "team_id": "nzl",
+    "name": "Noah Ashcombe",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1990-07-24",
+    "height_cm": 187,
+    "weight_kg": 120,
+    "cap_count": 36
+  },
+  {
+    "id": "nzl-p003",
+    "team_id": "nzl",
+    "name": "Alex Halliwell",
+    "primary_position": "hooker",
+    "date_of_birth": "1992-07-10",
+    "height_cm": 175,
+    "weight_kg": 119,
+    "cap_count": 57
+  },
+  {
+    "id": "nzl-p004",
+    "team_id": "nzl",
+    "name": "Adrian Leighton",
+    "primary_position": "hooker",
+    "date_of_birth": "2006-05-19",
+    "height_cm": 176,
+    "weight_kg": 109,
+    "cap_count": 28
+  },
+  {
+    "id": "nzl-p005",
+    "team_id": "nzl",
+    "name": "Kyle Northwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-04-22",
+    "height_cm": 185,
+    "weight_kg": 116,
+    "cap_count": 60
+  },
+  {
+    "id": "nzl-p006",
+    "team_id": "nzl",
+    "name": "Ulrich Sinclair",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2002-05-18",
+    "height_cm": 185,
+    "weight_kg": 133,
+    "cap_count": 54
+  },
+  {
+    "id": "nzl-p007",
+    "team_id": "nzl",
+    "name": "Liam Ravenscroft",
+    "primary_position": "lock",
+    "date_of_birth": "1990-01-19",
+    "height_cm": 202,
+    "weight_kg": 120,
+    "cap_count": 8
+  },
+  {
+    "id": "nzl-p008",
+    "team_id": "nzl",
+    "name": "Marcus Jennings",
+    "primary_position": "lock",
+    "date_of_birth": "1994-01-24",
+    "height_cm": 203,
+    "weight_kg": 118,
+    "cap_count": 0
+  },
+  {
+    "id": "nzl-p009",
+    "team_id": "nzl",
+    "name": "Adrian Jarrow",
+    "primary_position": "lock",
+    "date_of_birth": "1997-09-18",
+    "height_cm": 198,
+    "weight_kg": 130,
+    "cap_count": 59
+  },
+  {
+    "id": "nzl-p010",
+    "team_id": "nzl",
+    "name": "Isaac Everley",
+    "primary_position": "lock",
+    "date_of_birth": "1998-05-13",
+    "height_cm": 206,
+    "weight_kg": 118,
+    "cap_count": 45
+  },
+  {
+    "id": "nzl-p011",
+    "team_id": "nzl",
+    "name": "Oliver Ravenscroft",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2001-04-21",
+    "height_cm": 200,
+    "weight_kg": 110,
+    "cap_count": 77
+  },
+  {
+    "id": "nzl-p012",
+    "team_id": "nzl",
+    "name": "Ivan Northwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1991-04-11",
+    "height_cm": 200,
+    "weight_kg": 105,
+    "cap_count": 20
+  },
+  {
+    "id": "nzl-p013",
+    "team_id": "nzl",
+    "name": "Noah Ivory",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1995-03-03",
+    "height_cm": 195,
+    "weight_kg": 108,
+    "cap_count": 87
+  },
+  {
+    "id": "nzl-p014",
+    "team_id": "nzl",
+    "name": "Thomas Jarrow",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-01-15",
+    "height_cm": 185,
+    "weight_kg": 101,
+    "cap_count": 88
+  },
+  {
+    "id": "nzl-p015",
+    "team_id": "nzl",
+    "name": "Isaac Winford",
+    "primary_position": "number-8",
+    "date_of_birth": "1995-04-19",
+    "height_cm": 200,
+    "weight_kg": 110,
+    "cap_count": 14
+  },
+  {
+    "id": "nzl-p016",
+    "team_id": "nzl",
+    "name": "Finn Cartwright",
+    "primary_position": "number-8",
+    "date_of_birth": "1998-07-17",
+    "height_cm": 193,
+    "weight_kg": 123,
+    "cap_count": 5
+  },
+  {
+    "id": "nzl-p017",
+    "team_id": "nzl",
+    "name": "Nathan Quenton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2007-09-26",
+    "height_cm": 174,
+    "weight_kg": 86,
+    "cap_count": 39
+  },
+  {
+    "id": "nzl-p018",
+    "team_id": "nzl",
+    "name": "Daniel Everley",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2001-07-05",
+    "height_cm": 176,
+    "weight_kg": 82,
+    "cap_count": 47
+  },
+  {
+    "id": "nzl-p019",
+    "team_id": "nzl",
+    "name": "Finn Ashford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-02-18",
+    "height_cm": 185,
+    "weight_kg": 91,
+    "cap_count": 36
+  },
+  {
+    "id": "nzl-p020",
+    "team_id": "nzl",
+    "name": "Vincent Grayling",
+    "primary_position": "fly-half",
+    "date_of_birth": "1990-12-11",
+    "height_cm": 190,
+    "weight_kg": 86,
+    "cap_count": 83
+  },
+  {
+    "id": "nzl-p021",
+    "team_id": "nzl",
+    "name": "Samuel Ivory",
+    "primary_position": "left-wing",
+    "date_of_birth": "2000-12-16",
+    "height_cm": 180,
+    "weight_kg": 94,
+    "cap_count": 1
+  },
+  {
+    "id": "nzl-p022",
+    "team_id": "nzl",
+    "name": "Ryan Ingleby",
+    "primary_position": "left-wing",
+    "date_of_birth": "1991-05-04",
+    "height_cm": 188,
+    "weight_kg": 93,
+    "cap_count": 8
+  },
+  {
+    "id": "nzl-p023",
+    "team_id": "nzl",
+    "name": "Daniel Pemberton",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1996-08-01",
+    "height_cm": 186,
+    "weight_kg": 103,
+    "cap_count": 63
+  },
+  {
+    "id": "nzl-p024",
+    "team_id": "nzl",
+    "name": "Harry Sinclair",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2004-02-27",
+    "height_cm": 182,
+    "weight_kg": 95,
+    "cap_count": 20
+  },
+  {
+    "id": "nzl-p025",
+    "team_id": "nzl",
+    "name": "Callum Gainsborough",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1991-09-20",
+    "height_cm": 192,
+    "weight_kg": 90,
+    "cap_count": 68
+  },
+  {
+    "id": "nzl-p026",
+    "team_id": "nzl",
+    "name": "Ben Thornton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1991-02-14",
+    "height_cm": 192,
+    "weight_kg": 91,
+    "cap_count": 44
+  },
+  {
+    "id": "nzl-p027",
+    "team_id": "nzl",
+    "name": "Nathan Harwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1991-10-02",
+    "height_cm": 193,
+    "weight_kg": 89,
+    "cap_count": 43
+  },
+  {
+    "id": "nzl-p028",
+    "team_id": "nzl",
+    "name": "Oliver Sinclair",
+    "primary_position": "right-wing",
+    "date_of_birth": "1989-06-27",
+    "height_cm": 186,
+    "weight_kg": 97,
+    "cap_count": 64
+  },
+  {
+    "id": "nzl-p029",
+    "team_id": "nzl",
+    "name": "Quinn Vance",
+    "primary_position": "fullback",
+    "date_of_birth": "1992-03-26",
+    "height_cm": 195,
+    "weight_kg": 98,
+    "cap_count": 11
+  },
+  {
+    "id": "nzl-p030",
+    "team_id": "nzl",
+    "name": "Nathan Danforth",
+    "primary_position": "fullback",
+    "date_of_birth": "2000-09-02",
+    "height_cm": 186,
+    "weight_kg": 98,
+    "cap_count": 36
+  },
+  {
+    "id": "nzl-p031",
+    "team_id": "nzl",
+    "name": "Thomas Sinclair",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2002-03-04",
+    "height_cm": 199,
+    "weight_kg": 106,
+    "cap_count": 1
+  },
+  {
+    "id": "nzl-p032",
+    "team_id": "nzl",
+    "name": "Mason Ashford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-04-22",
+    "height_cm": 190,
+    "weight_kg": 106,
+    "cap_count": 87
+  },
+  {
+    "id": "nzl-p033",
+    "team_id": "nzl",
+    "name": "Harry Northwood",
+    "primary_position": "lock",
+    "date_of_birth": "1991-04-24",
+    "height_cm": 204,
+    "weight_kg": 115,
+    "cap_count": 54
+  },
+  {
+    "id": "wal-p001",
+    "team_id": "wal",
+    "name": "Ryan Denholm",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1995-05-12",
+    "height_cm": 187,
+    "weight_kg": 114,
+    "cap_count": 4
+  },
+  {
+    "id": "wal-p002",
+    "team_id": "wal",
+    "name": "Daniel Merrick",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1999-10-17",
+    "height_cm": 189,
+    "weight_kg": 120,
+    "cap_count": 55
+  },
+  {
+    "id": "wal-p003",
+    "team_id": "wal",
+    "name": "Quinn Ashcombe",
+    "primary_position": "hooker",
+    "date_of_birth": "2003-10-14",
+    "height_cm": 179,
+    "weight_kg": 107,
+    "cap_count": 52
+  },
+  {
+    "id": "wal-p004",
+    "team_id": "wal",
+    "name": "Kieran Kilbride",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-12-06",
+    "height_cm": 185,
+    "weight_kg": 115,
+    "cap_count": 89
+  },
+  {
+    "id": "wal-p005",
+    "team_id": "wal",
+    "name": "Damian Bramley",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-07-10",
+    "height_cm": 180,
+    "weight_kg": 119,
+    "cap_count": 88
+  },
+  {
+    "id": "wal-p006",
+    "team_id": "wal",
+    "name": "Lucas Jennings",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1989-07-09",
+    "height_cm": 181,
+    "weight_kg": 130,
+    "cap_count": 18
+  },
+  {
+    "id": "wal-p007",
+    "team_id": "wal",
+    "name": "Ulrich Quenton",
+    "primary_position": "lock",
+    "date_of_birth": "1996-12-27",
+    "height_cm": 195,
+    "weight_kg": 122,
+    "cap_count": 33
+  },
+  {
+    "id": "wal-p008",
+    "team_id": "wal",
+    "name": "Kieran Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "2001-07-27",
+    "height_cm": 209,
+    "weight_kg": 115,
+    "cap_count": 71
+  },
+  {
+    "id": "wal-p009",
+    "team_id": "wal",
+    "name": "Thomas Ashford",
+    "primary_position": "lock",
+    "date_of_birth": "2001-12-21",
+    "height_cm": 207,
+    "weight_kg": 123,
+    "cap_count": 65
+  },
+  {
+    "id": "wal-p010",
+    "team_id": "wal",
+    "name": "Xavier Vance",
+    "primary_position": "lock",
+    "date_of_birth": "1996-05-10",
+    "height_cm": 207,
+    "weight_kg": 129,
+    "cap_count": 29
+  },
+  {
+    "id": "wal-p011",
+    "team_id": "wal",
+    "name": "Isaac Kilbride",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1994-03-03",
+    "height_cm": 200,
+    "weight_kg": 111,
+    "cap_count": 38
+  },
+  {
+    "id": "wal-p012",
+    "team_id": "wal",
+    "name": "Oliver Ormsby",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2000-02-22",
+    "height_cm": 196,
+    "weight_kg": 107,
+    "cap_count": 18
+  },
+  {
+    "id": "wal-p013",
+    "team_id": "wal",
+    "name": "Mason Ashford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1993-09-03",
+    "height_cm": 191,
+    "weight_kg": 114,
+    "cap_count": 74
+  },
+  {
+    "id": "wal-p014",
+    "team_id": "wal",
+    "name": "Henri Halliwell",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2003-08-26",
+    "height_cm": 182,
+    "weight_kg": 106,
+    "cap_count": 25
+  },
+  {
+    "id": "wal-p015",
+    "team_id": "wal",
+    "name": "Ben Portway",
+    "primary_position": "number-8",
+    "date_of_birth": "1989-04-07",
+    "height_cm": 191,
+    "weight_kg": 111,
+    "cap_count": 39
+  },
+  {
+    "id": "wal-p016",
+    "team_id": "wal",
+    "name": "Adrian Yardley",
+    "primary_position": "number-8",
+    "date_of_birth": "1993-09-16",
+    "height_cm": 191,
+    "weight_kg": 125,
+    "cap_count": 7
+  },
+  {
+    "id": "wal-p017",
+    "team_id": "wal",
+    "name": "Jack Elsworth",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1997-10-21",
+    "height_cm": 171,
+    "weight_kg": 89,
+    "cap_count": 58
+  },
+  {
+    "id": "wal-p018",
+    "team_id": "wal",
+    "name": "Julian Jennings",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2007-08-07",
+    "height_cm": 177,
+    "weight_kg": 92,
+    "cap_count": 72
+  },
+  {
+    "id": "wal-p019",
+    "team_id": "wal",
+    "name": "Lucas Kingsford",
+    "primary_position": "fly-half",
+    "date_of_birth": "2004-05-17",
+    "height_cm": 182,
+    "weight_kg": 83,
+    "cap_count": 76
+  },
+  {
+    "id": "wal-p020",
+    "team_id": "wal",
+    "name": "Daniel Milburn",
+    "primary_position": "fly-half",
+    "date_of_birth": "1994-10-20",
+    "height_cm": 188,
+    "weight_kg": 89,
+    "cap_count": 18
+  },
+  {
+    "id": "wal-p021",
+    "team_id": "wal",
+    "name": "Quinn Northwood",
+    "primary_position": "left-wing",
+    "date_of_birth": "2006-08-03",
+    "height_cm": 190,
+    "weight_kg": 98,
+    "cap_count": 37
+  },
+  {
+    "id": "wal-p022",
+    "team_id": "wal",
+    "name": "Xavier Sinclair",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-07-27",
+    "height_cm": 189,
+    "weight_kg": 94,
+    "cap_count": 46
+  },
+  {
+    "id": "wal-p023",
+    "team_id": "wal",
+    "name": "Alex Cartwright",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1997-09-21",
+    "height_cm": 191,
+    "weight_kg": 92,
+    "cap_count": 85
+  },
+  {
+    "id": "wal-p024",
+    "team_id": "wal",
+    "name": "Felix Farraday",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-04-14",
+    "height_cm": 185,
+    "weight_kg": 103,
+    "cap_count": 61
+  },
+  {
+    "id": "wal-p025",
+    "team_id": "wal",
+    "name": "Isaac Ingleby",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2005-04-13",
+    "height_cm": 180,
+    "weight_kg": 99,
+    "cap_count": 56
+  },
+  {
+    "id": "wal-p026",
+    "team_id": "wal",
+    "name": "Alex Danforth",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2002-03-19",
+    "height_cm": 191,
+    "weight_kg": 92,
+    "cap_count": 21
+  },
+  {
+    "id": "wal-p027",
+    "team_id": "wal",
+    "name": "William Ravenscroft",
+    "primary_position": "right-wing",
+    "date_of_birth": "1989-10-19",
+    "height_cm": 184,
+    "weight_kg": 95,
+    "cap_count": 35
+  },
+  {
+    "id": "wal-p028",
+    "team_id": "wal",
+    "name": "Nathan Thornton",
+    "primary_position": "right-wing",
+    "date_of_birth": "2005-03-16",
+    "height_cm": 187,
+    "weight_kg": 90,
+    "cap_count": 62
+  },
+  {
+    "id": "wal-p029",
+    "team_id": "wal",
+    "name": "Felix Denholm",
+    "primary_position": "fullback",
+    "date_of_birth": "2006-09-05",
+    "height_cm": 188,
+    "weight_kg": 93,
+    "cap_count": 16
+  },
+  {
+    "id": "wal-p030",
+    "team_id": "wal",
+    "name": "Cameron Winford",
+    "primary_position": "fullback",
+    "date_of_birth": "2007-03-17",
+    "height_cm": 190,
+    "weight_kg": 100,
+    "cap_count": 38
+  },
+  {
+    "id": "wal-p031",
+    "team_id": "wal",
+    "name": "Damian Ashford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2007-10-20",
+    "height_cm": 199,
+    "weight_kg": 110,
+    "cap_count": 44
+  },
+  {
+    "id": "wal-p032",
+    "team_id": "wal",
+    "name": "Oliver Grayling",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2001-01-16",
+    "height_cm": 182,
+    "weight_kg": 106,
+    "cap_count": 84
+  },
+  {
+    "id": "wal-p033",
+    "team_id": "wal",
+    "name": "Isaac Blackmore",
+    "primary_position": "lock",
+    "date_of_birth": "1998-10-19",
+    "height_cm": 200,
+    "weight_kg": 130,
+    "cap_count": 20
+  },
+  {
+    "id": "geo-p001",
+    "team_id": "geo",
+    "name": "Finn Danforth",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1991-09-25",
+    "height_cm": 181,
+    "weight_kg": 113,
+    "cap_count": 28
+  },
+  {
+    "id": "geo-p002",
+    "team_id": "geo",
+    "name": "Ethan Quenton",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-07-05",
+    "height_cm": 183,
+    "weight_kg": 121,
+    "cap_count": 37
+  },
+  {
+    "id": "geo-p003",
+    "team_id": "geo",
+    "name": "William Farraday",
+    "primary_position": "hooker",
+    "date_of_birth": "1991-05-05",
+    "height_cm": 177,
+    "weight_kg": 118,
+    "cap_count": 25
+  },
+  {
+    "id": "geo-p004",
+    "team_id": "geo",
+    "name": "Marcus Harwood",
+    "primary_position": "hooker",
+    "date_of_birth": "1993-06-19",
+    "height_cm": 187,
+    "weight_kg": 106,
+    "cap_count": 54
+  },
+  {
+    "id": "geo-p005",
+    "team_id": "geo",
+    "name": "Damian Crestwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1997-11-14",
+    "height_cm": 189,
+    "weight_kg": 132,
+    "cap_count": 47
+  },
+  {
+    "id": "geo-p006",
+    "team_id": "geo",
+    "name": "Adrian Ashford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1990-09-11",
+    "height_cm": 187,
+    "weight_kg": 128,
+    "cap_count": 33
+  },
+  {
+    "id": "geo-p007",
+    "team_id": "geo",
+    "name": "Daniel Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "2003-12-10",
+    "height_cm": 195,
+    "weight_kg": 125,
+    "cap_count": 5
+  },
+  {
+    "id": "geo-p008",
+    "team_id": "geo",
+    "name": "Bruno Ingleby",
+    "primary_position": "lock",
+    "date_of_birth": "2002-09-20",
+    "height_cm": 208,
+    "weight_kg": 128,
+    "cap_count": 16
+  },
+  {
+    "id": "geo-p009",
+    "team_id": "geo",
+    "name": "Nathan Thornton",
+    "primary_position": "lock",
+    "date_of_birth": "1995-05-05",
+    "height_cm": 207,
+    "weight_kg": 130,
+    "cap_count": 66
+  },
+  {
+    "id": "geo-p010",
+    "team_id": "geo",
+    "name": "Elliot Thornton",
+    "primary_position": "lock",
+    "date_of_birth": "2005-04-15",
+    "height_cm": 202,
+    "weight_kg": 123,
+    "cap_count": 28
+  },
+  {
+    "id": "geo-p011",
+    "team_id": "geo",
+    "name": "Ivan Jennings",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1998-08-10",
+    "height_cm": 200,
+    "weight_kg": 117,
+    "cap_count": 51
+  },
+  {
+    "id": "geo-p012",
+    "team_id": "geo",
+    "name": "William Cartwright",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1994-08-13",
+    "height_cm": 197,
+    "weight_kg": 113,
+    "cap_count": 15
+  },
+  {
+    "id": "geo-p013",
+    "team_id": "geo",
+    "name": "Ryan Merrick",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1993-10-01",
+    "height_cm": 195,
+    "weight_kg": 100,
+    "cap_count": 44
+  },
+  {
+    "id": "geo-p014",
+    "team_id": "geo",
+    "name": "Samuel Ravenscroft",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-10-14",
+    "height_cm": 180,
+    "weight_kg": 114,
+    "cap_count": 53
+  },
+  {
+    "id": "geo-p015",
+    "team_id": "geo",
+    "name": "Ulrich Crestwood",
+    "primary_position": "number-8",
+    "date_of_birth": "2005-09-15",
+    "height_cm": 198,
+    "weight_kg": 117,
+    "cap_count": 36
+  },
+  {
+    "id": "geo-p016",
+    "team_id": "geo",
+    "name": "Cameron Grayling",
+    "primary_position": "number-8",
+    "date_of_birth": "2006-12-17",
+    "height_cm": 195,
+    "weight_kg": 114,
+    "cap_count": 67
+  },
+  {
+    "id": "geo-p017",
+    "team_id": "geo",
+    "name": "William Langford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1991-11-19",
+    "height_cm": 171,
+    "weight_kg": 83,
+    "cap_count": 71
+  },
+  {
+    "id": "geo-p018",
+    "team_id": "geo",
+    "name": "Mason Ivory",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2006-07-23",
+    "height_cm": 171,
+    "weight_kg": 90,
+    "cap_count": 33
+  },
+  {
+    "id": "geo-p019",
+    "team_id": "geo",
+    "name": "Ivan Ivory",
+    "primary_position": "fly-half",
+    "date_of_birth": "1996-04-20",
+    "height_cm": 176,
+    "weight_kg": 87,
+    "cap_count": 30
+  },
+  {
+    "id": "geo-p020",
+    "team_id": "geo",
+    "name": "Elliot Langford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1992-09-05",
+    "height_cm": 176,
+    "weight_kg": 90,
+    "cap_count": 3
+  },
+  {
+    "id": "geo-p021",
+    "team_id": "geo",
+    "name": "Elliot Yardley",
+    "primary_position": "left-wing",
+    "date_of_birth": "1998-05-24",
+    "height_cm": 182,
+    "weight_kg": 93,
+    "cap_count": 29
+  },
+  {
+    "id": "geo-p022",
+    "team_id": "geo",
+    "name": "Cameron Yardley",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-02-08",
+    "height_cm": 181,
+    "weight_kg": 96,
+    "cap_count": 28
+  },
+  {
+    "id": "geo-p023",
+    "team_id": "geo",
+    "name": "Ivan Ormsby",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-06-24",
+    "height_cm": 183,
+    "weight_kg": 101,
+    "cap_count": 55
+  },
+  {
+    "id": "geo-p024",
+    "team_id": "geo",
+    "name": "Xavier Portway",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2000-04-04",
+    "height_cm": 192,
+    "weight_kg": 102,
+    "cap_count": 60
+  },
+  {
+    "id": "geo-p025",
+    "team_id": "geo",
+    "name": "Bruno Halliwell",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1989-05-22",
+    "height_cm": 181,
+    "weight_kg": 93,
+    "cap_count": 36
+  },
+  {
+    "id": "geo-p026",
+    "team_id": "geo",
+    "name": "Samuel Elsworth",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1989-05-27",
+    "height_cm": 193,
+    "weight_kg": 97,
+    "cap_count": 53
+  },
+  {
+    "id": "geo-p027",
+    "team_id": "geo",
+    "name": "George Blackmore",
+    "primary_position": "right-wing",
+    "date_of_birth": "2006-10-10",
+    "height_cm": 190,
+    "weight_kg": 92,
+    "cap_count": 62
+  },
+  {
+    "id": "geo-p028",
+    "team_id": "geo",
+    "name": "Liam Danforth",
+    "primary_position": "right-wing",
+    "date_of_birth": "1989-01-21",
+    "height_cm": 191,
+    "weight_kg": 96,
+    "cap_count": 24
+  },
+  {
+    "id": "geo-p029",
+    "team_id": "geo",
+    "name": "Samuel Everley",
+    "primary_position": "fullback",
+    "date_of_birth": "1998-03-15",
+    "height_cm": 194,
+    "weight_kg": 104,
+    "cap_count": 44
+  },
+  {
+    "id": "geo-p030",
+    "team_id": "geo",
+    "name": "Noah Ivory",
+    "primary_position": "fullback",
+    "date_of_birth": "2000-07-15",
+    "height_cm": 187,
+    "weight_kg": 90,
+    "cap_count": 14
+  },
+  {
+    "id": "geo-p031",
+    "team_id": "geo",
+    "name": "Finn Oakden",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1994-03-11",
+    "height_cm": 188,
+    "weight_kg": 110,
+    "cap_count": 52
+  },
+  {
+    "id": "geo-p032",
+    "team_id": "geo",
+    "name": "Julian Jarrow",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-09-01",
+    "height_cm": 184,
+    "weight_kg": 111,
+    "cap_count": 15
+  },
+  {
+    "id": "geo-p033",
+    "team_id": "geo",
+    "name": "Ben Ashford",
+    "primary_position": "lock",
+    "date_of_birth": "1998-01-10",
+    "height_cm": 202,
+    "weight_kg": 116,
+    "cap_count": 48
+  },
+  {
+    "id": "chi-p001",
+    "team_id": "chi",
+    "name": "Daniel Sinclair",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1992-11-11",
+    "height_cm": 188,
+    "weight_kg": 119,
+    "cap_count": 9
+  },
+  {
+    "id": "chi-p002",
+    "team_id": "chi",
+    "name": "Nathan Underhill",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1994-08-07",
+    "height_cm": 179,
+    "weight_kg": 117,
+    "cap_count": 23
+  },
+  {
+    "id": "chi-p003",
+    "team_id": "chi",
+    "name": "Yannick Ashcombe",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-05-26",
+    "height_cm": 186,
+    "weight_kg": 115,
+    "cap_count": 84
+  },
+  {
+    "id": "chi-p004",
+    "team_id": "chi",
+    "name": "Finn Underhill",
+    "primary_position": "hooker",
+    "date_of_birth": "1989-11-07",
+    "height_cm": 178,
+    "weight_kg": 107,
+    "cap_count": 83
+  },
+  {
+    "id": "chi-p005",
+    "team_id": "chi",
+    "name": "Oliver Blackmore",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-02-26",
+    "height_cm": 189,
+    "weight_kg": 120,
+    "cap_count": 57
+  },
+  {
+    "id": "chi-p006",
+    "team_id": "chi",
+    "name": "Isaac Vance",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1997-08-07",
+    "height_cm": 186,
+    "weight_kg": 128,
+    "cap_count": 42
+  },
+  {
+    "id": "chi-p007",
+    "team_id": "chi",
+    "name": "Finn Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "2007-03-10",
+    "height_cm": 208,
+    "weight_kg": 119,
+    "cap_count": 39
+  },
+  {
+    "id": "chi-p008",
+    "team_id": "chi",
+    "name": "Vincent Danforth",
+    "primary_position": "lock",
+    "date_of_birth": "2003-12-19",
+    "height_cm": 209,
+    "weight_kg": 116,
+    "cap_count": 29
+  },
+  {
+    "id": "chi-p009",
+    "team_id": "chi",
+    "name": "Damian Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "1992-05-07",
+    "height_cm": 196,
+    "weight_kg": 123,
+    "cap_count": 50
+  },
+  {
+    "id": "chi-p010",
+    "team_id": "chi",
+    "name": "Vincent Leighton",
+    "primary_position": "lock",
+    "date_of_birth": "2003-11-08",
+    "height_cm": 205,
+    "weight_kg": 119,
+    "cap_count": 69
+  },
+  {
+    "id": "chi-p011",
+    "team_id": "chi",
+    "name": "Mason Langford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2007-07-03",
+    "height_cm": 197,
+    "weight_kg": 116,
+    "cap_count": 89
+  },
+  {
+    "id": "chi-p012",
+    "team_id": "chi",
+    "name": "Vincent Ivory",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-02-13",
+    "height_cm": 194,
+    "weight_kg": 107,
+    "cap_count": 67
+  },
+  {
+    "id": "chi-p013",
+    "team_id": "chi",
+    "name": "George Ravenscroft",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1999-08-09",
+    "height_cm": 190,
+    "weight_kg": 100,
+    "cap_count": 57
+  },
+  {
+    "id": "chi-p014",
+    "team_id": "chi",
+    "name": "Henri Elsworth",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-07-03",
+    "height_cm": 191,
+    "weight_kg": 104,
+    "cap_count": 33
+  },
+  {
+    "id": "chi-p015",
+    "team_id": "chi",
+    "name": "Harry Yardley",
+    "primary_position": "number-8",
+    "date_of_birth": "1991-02-19",
+    "height_cm": 199,
+    "weight_kg": 119,
+    "cap_count": 47
+  },
+  {
+    "id": "chi-p016",
+    "team_id": "chi",
+    "name": "Ben Ivory",
+    "primary_position": "number-8",
+    "date_of_birth": "2004-03-08",
+    "height_cm": 189,
+    "weight_kg": 119,
+    "cap_count": 26
+  },
+  {
+    "id": "chi-p017",
+    "team_id": "chi",
+    "name": "Gareth Jennings",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1996-12-02",
+    "height_cm": 174,
+    "weight_kg": 85,
+    "cap_count": 74
+  },
+  {
+    "id": "chi-p018",
+    "team_id": "chi",
+    "name": "Elliot Ivory",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1998-10-03",
+    "height_cm": 176,
+    "weight_kg": 87,
+    "cap_count": 48
+  },
+  {
+    "id": "chi-p019",
+    "team_id": "chi",
+    "name": "Elliot Thornton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-08-20",
+    "height_cm": 178,
+    "weight_kg": 95,
+    "cap_count": 82
+  },
+  {
+    "id": "chi-p020",
+    "team_id": "chi",
+    "name": "Jack Ashcombe",
+    "primary_position": "fly-half",
+    "date_of_birth": "2000-09-16",
+    "height_cm": 179,
+    "weight_kg": 92,
+    "cap_count": 83
+  },
+  {
+    "id": "chi-p021",
+    "team_id": "chi",
+    "name": "Bruno Merrick",
+    "primary_position": "left-wing",
+    "date_of_birth": "1993-02-06",
+    "height_cm": 190,
+    "weight_kg": 98,
+    "cap_count": 15
+  },
+  {
+    "id": "chi-p022",
+    "team_id": "chi",
+    "name": "Adrian Kingsford",
+    "primary_position": "left-wing",
+    "date_of_birth": "1992-04-23",
+    "height_cm": 186,
+    "weight_kg": 93,
+    "cap_count": 25
+  },
+  {
+    "id": "chi-p023",
+    "team_id": "chi",
+    "name": "Julian Vance",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2003-08-21",
+    "height_cm": 188,
+    "weight_kg": 99,
+    "cap_count": 68
+  },
+  {
+    "id": "chi-p024",
+    "team_id": "chi",
+    "name": "Ryan Northwood",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2002-06-21",
+    "height_cm": 181,
+    "weight_kg": 92,
+    "cap_count": 77
+  },
+  {
+    "id": "chi-p025",
+    "team_id": "chi",
+    "name": "Xavier Danforth",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2003-08-04",
+    "height_cm": 183,
+    "weight_kg": 98,
+    "cap_count": 28
+  },
+  {
+    "id": "chi-p026",
+    "team_id": "chi",
+    "name": "Zac Crestwood",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1996-10-08",
+    "height_cm": 192,
+    "weight_kg": 99,
+    "cap_count": 35
+  },
+  {
+    "id": "chi-p027",
+    "team_id": "chi",
+    "name": "Kieran Ingleby",
+    "primary_position": "right-wing",
+    "date_of_birth": "1992-06-26",
+    "height_cm": 188,
+    "weight_kg": 88,
+    "cap_count": 0
+  },
+  {
+    "id": "chi-p028",
+    "team_id": "chi",
+    "name": "Ryan Northwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1995-08-22",
+    "height_cm": 191,
+    "weight_kg": 94,
+    "cap_count": 32
+  },
+  {
+    "id": "chi-p029",
+    "team_id": "chi",
+    "name": "Julian Thornton",
+    "primary_position": "fullback",
+    "date_of_birth": "1991-01-10",
+    "height_cm": 189,
+    "weight_kg": 91,
+    "cap_count": 46
+  },
+  {
+    "id": "chi-p030",
+    "team_id": "chi",
+    "name": "Oliver Langford",
+    "primary_position": "fullback",
+    "date_of_birth": "1991-07-24",
+    "height_cm": 180,
+    "weight_kg": 95,
+    "cap_count": 80
+  },
+  {
+    "id": "chi-p031",
+    "team_id": "chi",
+    "name": "Marcus Vance",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-02-02",
+    "height_cm": 197,
+    "weight_kg": 105,
+    "cap_count": 43
+  },
+  {
+    "id": "chi-p032",
+    "team_id": "chi",
+    "name": "Elliot Elsworth",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2002-08-08",
+    "height_cm": 190,
+    "weight_kg": 102,
+    "cap_count": 15
+  },
+  {
+    "id": "chi-p033",
+    "team_id": "chi",
+    "name": "Felix Pemberton",
+    "primary_position": "lock",
+    "date_of_birth": "2002-03-07",
+    "height_cm": 197,
+    "weight_kg": 116,
+    "cap_count": 15
+  },
+  {
+    "id": "rsa-p001",
+    "team_id": "rsa",
+    "name": "George Jennings",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1999-02-09",
+    "height_cm": 189,
+    "weight_kg": 115,
+    "cap_count": 5
+  },
+  {
+    "id": "rsa-p002",
+    "team_id": "rsa",
+    "name": "Finn Jennings",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1995-03-16",
+    "height_cm": 188,
+    "weight_kg": 129,
+    "cap_count": 6
+  },
+  {
+    "id": "rsa-p003",
+    "team_id": "rsa",
+    "name": "Ethan Jennings",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-03-11",
+    "height_cm": 176,
+    "weight_kg": 117,
+    "cap_count": 72
+  },
+  {
+    "id": "rsa-p004",
+    "team_id": "rsa",
+    "name": "Callum Blackmore",
+    "primary_position": "hooker",
+    "date_of_birth": "2000-08-24",
+    "height_cm": 176,
+    "weight_kg": 107,
+    "cap_count": 74
+  },
+  {
+    "id": "rsa-p005",
+    "team_id": "rsa",
+    "name": "Thomas Milburn",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1994-02-10",
+    "height_cm": 184,
+    "weight_kg": 127,
+    "cap_count": 72
+  },
+  {
+    "id": "rsa-p006",
+    "team_id": "rsa",
+    "name": "Yannick Merrick",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2006-04-07",
+    "height_cm": 183,
+    "weight_kg": 121,
+    "cap_count": 78
+  },
+  {
+    "id": "rsa-p007",
+    "team_id": "rsa",
+    "name": "Xavier Portway",
+    "primary_position": "lock",
+    "date_of_birth": "2000-10-06",
+    "height_cm": 195,
+    "weight_kg": 126,
+    "cap_count": 54
+  },
+  {
+    "id": "rsa-p008",
+    "team_id": "rsa",
+    "name": "Cameron Blackmore",
+    "primary_position": "lock",
+    "date_of_birth": "1998-10-06",
+    "height_cm": 197,
+    "weight_kg": 129,
+    "cap_count": 76
+  },
+  {
+    "id": "rsa-p009",
+    "team_id": "rsa",
+    "name": "Callum Ashford",
+    "primary_position": "lock",
+    "date_of_birth": "1990-04-25",
+    "height_cm": 198,
+    "weight_kg": 116,
+    "cap_count": 65
+  },
+  {
+    "id": "rsa-p010",
+    "team_id": "rsa",
+    "name": "Mason Yardley",
+    "primary_position": "lock",
+    "date_of_birth": "1989-02-26",
+    "height_cm": 206,
+    "weight_kg": 120,
+    "cap_count": 33
+  },
+  {
+    "id": "rsa-p011",
+    "team_id": "rsa",
+    "name": "Kyle Kingsford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1999-12-20",
+    "height_cm": 199,
+    "weight_kg": 107,
+    "cap_count": 55
+  },
+  {
+    "id": "rsa-p012",
+    "team_id": "rsa",
+    "name": "Zac Yardley",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1994-09-18",
+    "height_cm": 191,
+    "weight_kg": 107,
+    "cap_count": 20
+  },
+  {
+    "id": "rsa-p013",
+    "team_id": "rsa",
+    "name": "Quinn Langford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-12-05",
+    "height_cm": 193,
+    "weight_kg": 98,
+    "cap_count": 70
+  },
+  {
+    "id": "rsa-p014",
+    "team_id": "rsa",
+    "name": "Isaac Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-04-19",
+    "height_cm": 192,
+    "weight_kg": 105,
+    "cap_count": 72
+  },
+  {
+    "id": "rsa-p015",
+    "team_id": "rsa",
+    "name": "Mason Crestwood",
+    "primary_position": "number-8",
+    "date_of_birth": "1994-11-08",
+    "height_cm": 193,
+    "weight_kg": 113,
+    "cap_count": 71
+  },
+  {
+    "id": "rsa-p016",
+    "team_id": "rsa",
+    "name": "Isaac Crestwood",
+    "primary_position": "number-8",
+    "date_of_birth": "1989-08-15",
+    "height_cm": 190,
+    "weight_kg": 108,
+    "cap_count": 46
+  },
+  {
+    "id": "rsa-p017",
+    "team_id": "rsa",
+    "name": "Felix Pemberton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1989-09-08",
+    "height_cm": 180,
+    "weight_kg": 92,
+    "cap_count": 33
+  },
+  {
+    "id": "rsa-p018",
+    "team_id": "rsa",
+    "name": "Nathan Merrick",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1996-08-07",
+    "height_cm": 183,
+    "weight_kg": 91,
+    "cap_count": 42
+  },
+  {
+    "id": "rsa-p019",
+    "team_id": "rsa",
+    "name": "Zac Oakden",
+    "primary_position": "fly-half",
+    "date_of_birth": "1989-11-04",
+    "height_cm": 178,
+    "weight_kg": 82,
+    "cap_count": 59
+  },
+  {
+    "id": "rsa-p020",
+    "team_id": "rsa",
+    "name": "Patrick Northwood",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-02-07",
+    "height_cm": 180,
+    "weight_kg": 92,
+    "cap_count": 66
+  },
+  {
+    "id": "rsa-p021",
+    "team_id": "rsa",
+    "name": "Ben Fairhurst",
+    "primary_position": "left-wing",
+    "date_of_birth": "1995-10-11",
+    "height_cm": 187,
+    "weight_kg": 89,
+    "cap_count": 76
+  },
+  {
+    "id": "rsa-p022",
+    "team_id": "rsa",
+    "name": "Bruno Ashcombe",
+    "primary_position": "left-wing",
+    "date_of_birth": "1994-03-23",
+    "height_cm": 185,
+    "weight_kg": 89,
+    "cap_count": 71
+  },
+  {
+    "id": "rsa-p023",
+    "team_id": "rsa",
+    "name": "Vincent Yardley",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2007-08-03",
+    "height_cm": 188,
+    "weight_kg": 99,
+    "cap_count": 87
+  },
+  {
+    "id": "rsa-p024",
+    "team_id": "rsa",
+    "name": "Gareth Fairhurst",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1998-01-22",
+    "height_cm": 185,
+    "weight_kg": 100,
+    "cap_count": 8
+  },
+  {
+    "id": "rsa-p025",
+    "team_id": "rsa",
+    "name": "Ivan Everley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1992-05-02",
+    "height_cm": 182,
+    "weight_kg": 95,
+    "cap_count": 32
+  },
+  {
+    "id": "rsa-p026",
+    "team_id": "rsa",
+    "name": "Julian Quenton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2006-08-18",
+    "height_cm": 192,
+    "weight_kg": 102,
+    "cap_count": 89
+  },
+  {
+    "id": "rsa-p027",
+    "team_id": "rsa",
+    "name": "Patrick Elsworth",
+    "primary_position": "right-wing",
+    "date_of_birth": "1991-05-13",
+    "height_cm": 192,
+    "weight_kg": 91,
+    "cap_count": 87
+  },
+  {
+    "id": "rsa-p028",
+    "team_id": "rsa",
+    "name": "Thomas Denholm",
+    "primary_position": "right-wing",
+    "date_of_birth": "1999-09-20",
+    "height_cm": 191,
+    "weight_kg": 92,
+    "cap_count": 12
+  },
+  {
+    "id": "rsa-p029",
+    "team_id": "rsa",
+    "name": "Liam Vance",
+    "primary_position": "fullback",
+    "date_of_birth": "2006-07-14",
+    "height_cm": 191,
+    "weight_kg": 92,
+    "cap_count": 32
+  },
+  {
+    "id": "rsa-p030",
+    "team_id": "rsa",
+    "name": "Jack Winford",
+    "primary_position": "fullback",
+    "date_of_birth": "2005-09-19",
+    "height_cm": 186,
+    "weight_kg": 101,
+    "cap_count": 55
+  },
+  {
+    "id": "rsa-p031",
+    "team_id": "rsa",
+    "name": "Bruno Blackmore",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2007-05-10",
+    "height_cm": 193,
+    "weight_kg": 118,
+    "cap_count": 0
+  },
+  {
+    "id": "rsa-p032",
+    "team_id": "rsa",
+    "name": "Daniel Northwood",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2003-11-02",
+    "height_cm": 181,
+    "weight_kg": 104,
+    "cap_count": 21
+  },
+  {
+    "id": "rsa-p033",
+    "team_id": "rsa",
+    "name": "Isaac Portway",
+    "primary_position": "lock",
+    "date_of_birth": "1993-09-17",
+    "height_cm": 199,
+    "weight_kg": 120,
+    "cap_count": 75
+  },
+  {
+    "id": "ita-p001",
+    "team_id": "ita",
+    "name": "Damian Fairhurst",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-06-04",
+    "height_cm": 180,
+    "weight_kg": 116,
+    "cap_count": 3
+  },
+  {
+    "id": "ita-p002",
+    "team_id": "ita",
+    "name": "Harry Norwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1998-03-11",
+    "height_cm": 188,
+    "weight_kg": 122,
+    "cap_count": 48
+  },
+  {
+    "id": "ita-p003",
+    "team_id": "ita",
+    "name": "Felix Milburn",
+    "primary_position": "hooker",
+    "date_of_birth": "2004-12-08",
+    "height_cm": 182,
+    "weight_kg": 110,
+    "cap_count": 76
+  },
+  {
+    "id": "ita-p004",
+    "team_id": "ita",
+    "name": "Xavier Merrick",
+    "primary_position": "hooker",
+    "date_of_birth": "1994-04-20",
+    "height_cm": 184,
+    "weight_kg": 112,
+    "cap_count": 51
+  },
+  {
+    "id": "ita-p005",
+    "team_id": "ita",
+    "name": "Isaac Vance",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1996-04-17",
+    "height_cm": 186,
+    "weight_kg": 126,
+    "cap_count": 82
+  },
+  {
+    "id": "ita-p006",
+    "team_id": "ita",
+    "name": "Elliot Northwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2006-07-21",
+    "height_cm": 191,
+    "weight_kg": 134,
+    "cap_count": 42
+  },
+  {
+    "id": "ita-p007",
+    "team_id": "ita",
+    "name": "Gareth Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1999-02-27",
+    "height_cm": 208,
+    "weight_kg": 115,
+    "cap_count": 19
+  },
+  {
+    "id": "ita-p008",
+    "team_id": "ita",
+    "name": "Oliver Portway",
+    "primary_position": "lock",
+    "date_of_birth": "1992-09-20",
+    "height_cm": 204,
+    "weight_kg": 118,
+    "cap_count": 49
+  },
+  {
+    "id": "ita-p009",
+    "team_id": "ita",
+    "name": "Daniel Everley",
+    "primary_position": "lock",
+    "date_of_birth": "2007-03-04",
+    "height_cm": 206,
+    "weight_kg": 129,
+    "cap_count": 79
+  },
+  {
+    "id": "ita-p010",
+    "team_id": "ita",
+    "name": "Callum Milburn",
+    "primary_position": "lock",
+    "date_of_birth": "1997-05-09",
+    "height_cm": 204,
+    "weight_kg": 118,
+    "cap_count": 8
+  },
+  {
+    "id": "ita-p011",
+    "team_id": "ita",
+    "name": "Elliot Ravenscroft",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1995-10-08",
+    "height_cm": 190,
+    "weight_kg": 106,
+    "cap_count": 24
+  },
+  {
+    "id": "ita-p012",
+    "team_id": "ita",
+    "name": "Cameron Vance",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1992-04-10",
+    "height_cm": 200,
+    "weight_kg": 109,
+    "cap_count": 89
+  },
+  {
+    "id": "ita-p013",
+    "team_id": "ita",
+    "name": "Yannick Pemberton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-06-16",
+    "height_cm": 192,
+    "weight_kg": 113,
+    "cap_count": 37
+  },
+  {
+    "id": "ita-p014",
+    "team_id": "ita",
+    "name": "Thomas Halliwell",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2004-08-04",
+    "height_cm": 187,
+    "weight_kg": 104,
+    "cap_count": 73
+  },
+  {
+    "id": "ita-p015",
+    "team_id": "ita",
+    "name": "Thomas Norwood",
+    "primary_position": "number-8",
+    "date_of_birth": "1990-04-25",
+    "height_cm": 199,
+    "weight_kg": 111,
+    "cap_count": 2
+  },
+  {
+    "id": "ita-p016",
+    "team_id": "ita",
+    "name": "Lucas Sinclair",
+    "primary_position": "number-8",
+    "date_of_birth": "1991-08-02",
+    "height_cm": 194,
+    "weight_kg": 112,
+    "cap_count": 44
+  },
+  {
+    "id": "ita-p017",
+    "team_id": "ita",
+    "name": "Yannick Milburn",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1990-12-12",
+    "height_cm": 184,
+    "weight_kg": 85,
+    "cap_count": 25
+  },
+  {
+    "id": "ita-p018",
+    "team_id": "ita",
+    "name": "Xavier Everley",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1991-06-07",
+    "height_cm": 178,
+    "weight_kg": 87,
+    "cap_count": 38
+  },
+  {
+    "id": "ita-p019",
+    "team_id": "ita",
+    "name": "Xavier Kilbride",
+    "primary_position": "fly-half",
+    "date_of_birth": "1990-02-12",
+    "height_cm": 189,
+    "weight_kg": 86,
+    "cap_count": 79
+  },
+  {
+    "id": "ita-p020",
+    "team_id": "ita",
+    "name": "Felix Jarrow",
+    "primary_position": "fly-half",
+    "date_of_birth": "2006-07-17",
+    "height_cm": 189,
+    "weight_kg": 89,
+    "cap_count": 14
+  },
+  {
+    "id": "ita-p021",
+    "team_id": "ita",
+    "name": "Henri Quenton",
+    "primary_position": "left-wing",
+    "date_of_birth": "2004-12-21",
+    "height_cm": 181,
+    "weight_kg": 88,
+    "cap_count": 86
+  },
+  {
+    "id": "ita-p022",
+    "team_id": "ita",
+    "name": "Alex Kingsford",
+    "primary_position": "left-wing",
+    "date_of_birth": "1996-01-11",
+    "height_cm": 189,
+    "weight_kg": 97,
+    "cap_count": 13
+  },
+  {
+    "id": "ita-p023",
+    "team_id": "ita",
+    "name": "Ivan Everley",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2007-12-22",
+    "height_cm": 185,
+    "weight_kg": 97,
+    "cap_count": 44
+  },
+  {
+    "id": "ita-p024",
+    "team_id": "ita",
+    "name": "Isaac Pemberton",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1994-11-13",
+    "height_cm": 181,
+    "weight_kg": 90,
+    "cap_count": 52
+  },
+  {
+    "id": "ita-p025",
+    "team_id": "ita",
+    "name": "Henri Underhill",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1999-09-13",
+    "height_cm": 188,
+    "weight_kg": 88,
+    "cap_count": 40
+  },
+  {
+    "id": "ita-p026",
+    "team_id": "ita",
+    "name": "Patrick Leighton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2006-09-24",
+    "height_cm": 191,
+    "weight_kg": 97,
+    "cap_count": 46
+  },
+  {
+    "id": "ita-p027",
+    "team_id": "ita",
+    "name": "Ulrich Pemberton",
+    "primary_position": "right-wing",
+    "date_of_birth": "1992-12-07",
+    "height_cm": 181,
+    "weight_kg": 100,
+    "cap_count": 86
+  },
+  {
+    "id": "ita-p028",
+    "team_id": "ita",
+    "name": "Finn Ashford",
+    "primary_position": "right-wing",
+    "date_of_birth": "2002-09-10",
+    "height_cm": 181,
+    "weight_kg": 92,
+    "cap_count": 57
+  },
+  {
+    "id": "ita-p029",
+    "team_id": "ita",
+    "name": "Damian Cartwright",
+    "primary_position": "fullback",
+    "date_of_birth": "2004-11-03",
+    "height_cm": 185,
+    "weight_kg": 91,
+    "cap_count": 43
+  },
+  {
+    "id": "ita-p030",
+    "team_id": "ita",
+    "name": "Alex Yardley",
+    "primary_position": "fullback",
+    "date_of_birth": "1995-11-20",
+    "height_cm": 188,
+    "weight_kg": 102,
+    "cap_count": 86
+  },
+  {
+    "id": "ita-p031",
+    "team_id": "ita",
+    "name": "Yannick Norwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2001-01-19",
+    "height_cm": 195,
+    "weight_kg": 107,
+    "cap_count": 15
+  },
+  {
+    "id": "ita-p032",
+    "team_id": "ita",
+    "name": "Ivan Leighton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2006-11-06",
+    "height_cm": 180,
+    "weight_kg": 103,
+    "cap_count": 4
+  },
+  {
+    "id": "ita-p033",
+    "team_id": "ita",
+    "name": "Thomas Elsworth",
+    "primary_position": "lock",
+    "date_of_birth": "2001-05-05",
+    "height_cm": 204,
+    "weight_kg": 121,
+    "cap_count": 12
+  },
+  {
+    "id": "sam-p001",
+    "team_id": "sam",
+    "name": "Kieran Ashcombe",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1990-08-10",
+    "height_cm": 182,
+    "weight_kg": 123,
+    "cap_count": 54
+  },
+  {
+    "id": "sam-p002",
+    "team_id": "sam",
+    "name": "Damian Jennings",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2007-07-27",
+    "height_cm": 184,
+    "weight_kg": 122,
+    "cap_count": 43
+  },
+  {
+    "id": "sam-p003",
+    "team_id": "sam",
+    "name": "Alex Underhill",
+    "primary_position": "hooker",
+    "date_of_birth": "2001-07-08",
+    "height_cm": 178,
+    "weight_kg": 110,
+    "cap_count": 59
+  },
+  {
+    "id": "sam-p004",
+    "team_id": "sam",
+    "name": "Adrian Harwood",
+    "primary_position": "hooker",
+    "date_of_birth": "1990-04-19",
+    "height_cm": 184,
+    "weight_kg": 119,
+    "cap_count": 73
+  },
+  {
+    "id": "sam-p005",
+    "team_id": "sam",
+    "name": "Oliver Leighton",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2006-03-07",
+    "height_cm": 193,
+    "weight_kg": 128,
+    "cap_count": 10
+  },
+  {
+    "id": "sam-p006",
+    "team_id": "sam",
+    "name": "Henri Oakden",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1993-07-27",
+    "height_cm": 191,
+    "weight_kg": 117,
+    "cap_count": 30
+  },
+  {
+    "id": "sam-p007",
+    "team_id": "sam",
+    "name": "Ethan Harwood",
+    "primary_position": "lock",
+    "date_of_birth": "1998-08-25",
+    "height_cm": 203,
+    "weight_kg": 124,
+    "cap_count": 4
+  },
+  {
+    "id": "sam-p008",
+    "team_id": "sam",
+    "name": "Alex Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1989-04-12",
+    "height_cm": 196,
+    "weight_kg": 124,
+    "cap_count": 71
+  },
+  {
+    "id": "sam-p009",
+    "team_id": "sam",
+    "name": "Felix Langford",
+    "primary_position": "lock",
+    "date_of_birth": "2003-08-08",
+    "height_cm": 198,
+    "weight_kg": 118,
+    "cap_count": 56
+  },
+  {
+    "id": "sam-p010",
+    "team_id": "sam",
+    "name": "Bruno Underhill",
+    "primary_position": "lock",
+    "date_of_birth": "1990-06-25",
+    "height_cm": 205,
+    "weight_kg": 123,
+    "cap_count": 26
+  },
+  {
+    "id": "sam-p011",
+    "team_id": "sam",
+    "name": "Damian Jennings",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-01-22",
+    "height_cm": 189,
+    "weight_kg": 120,
+    "cap_count": 32
+  },
+  {
+    "id": "sam-p012",
+    "team_id": "sam",
+    "name": "Damian Leighton",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1991-04-22",
+    "height_cm": 188,
+    "weight_kg": 116,
+    "cap_count": 58
+  },
+  {
+    "id": "sam-p013",
+    "team_id": "sam",
+    "name": "Oliver Halliwell",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-03-16",
+    "height_cm": 193,
+    "weight_kg": 104,
+    "cap_count": 25
+  },
+  {
+    "id": "sam-p014",
+    "team_id": "sam",
+    "name": "Elliot Ormsby",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-04-05",
+    "height_cm": 191,
+    "weight_kg": 113,
+    "cap_count": 44
+  },
+  {
+    "id": "sam-p015",
+    "team_id": "sam",
+    "name": "Vincent Portway",
+    "primary_position": "number-8",
+    "date_of_birth": "2001-09-07",
+    "height_cm": 198,
+    "weight_kg": 110,
+    "cap_count": 11
+  },
+  {
+    "id": "sam-p016",
+    "team_id": "sam",
+    "name": "Nathan Jennings",
+    "primary_position": "number-8",
+    "date_of_birth": "1997-03-05",
+    "height_cm": 199,
+    "weight_kg": 118,
+    "cap_count": 60
+  },
+  {
+    "id": "sam-p017",
+    "team_id": "sam",
+    "name": "Ethan Jennings",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1992-12-23",
+    "height_cm": 181,
+    "weight_kg": 80,
+    "cap_count": 34
+  },
+  {
+    "id": "sam-p018",
+    "team_id": "sam",
+    "name": "Noah Ivory",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1997-08-19",
+    "height_cm": 182,
+    "weight_kg": 87,
+    "cap_count": 7
+  },
+  {
+    "id": "sam-p019",
+    "team_id": "sam",
+    "name": "Harry Jarrow",
+    "primary_position": "fly-half",
+    "date_of_birth": "2005-05-22",
+    "height_cm": 188,
+    "weight_kg": 92,
+    "cap_count": 3
+  },
+  {
+    "id": "sam-p020",
+    "team_id": "sam",
+    "name": "Thomas Underhill",
+    "primary_position": "fly-half",
+    "date_of_birth": "1991-09-14",
+    "height_cm": 186,
+    "weight_kg": 82,
+    "cap_count": 62
+  },
+  {
+    "id": "sam-p021",
+    "team_id": "sam",
+    "name": "Finn Gainsborough",
+    "primary_position": "left-wing",
+    "date_of_birth": "1993-05-11",
+    "height_cm": 188,
+    "weight_kg": 92,
+    "cap_count": 28
+  },
+  {
+    "id": "sam-p022",
+    "team_id": "sam",
+    "name": "Ethan Everley",
+    "primary_position": "left-wing",
+    "date_of_birth": "1999-07-23",
+    "height_cm": 183,
+    "weight_kg": 88,
+    "cap_count": 41
+  },
+  {
+    "id": "sam-p023",
+    "team_id": "sam",
+    "name": "Adrian Underhill",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1989-04-14",
+    "height_cm": 188,
+    "weight_kg": 91,
+    "cap_count": 73
+  },
+  {
+    "id": "sam-p024",
+    "team_id": "sam",
+    "name": "Kieran Ravenscroft",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1994-09-16",
+    "height_cm": 192,
+    "weight_kg": 95,
+    "cap_count": 35
+  },
+  {
+    "id": "sam-p025",
+    "team_id": "sam",
+    "name": "Kyle Ormsby",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1993-10-17",
+    "height_cm": 184,
+    "weight_kg": 94,
+    "cap_count": 82
+  },
+  {
+    "id": "sam-p026",
+    "team_id": "sam",
+    "name": "Ethan Norwood",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1991-03-26",
+    "height_cm": 190,
+    "weight_kg": 93,
+    "cap_count": 67
+  },
+  {
+    "id": "sam-p027",
+    "team_id": "sam",
+    "name": "Nathan Pemberton",
+    "primary_position": "right-wing",
+    "date_of_birth": "1991-02-04",
+    "height_cm": 189,
+    "weight_kg": 92,
+    "cap_count": 14
+  },
+  {
+    "id": "sam-p028",
+    "team_id": "sam",
+    "name": "Liam Norwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "2004-04-20",
+    "height_cm": 193,
+    "weight_kg": 93,
+    "cap_count": 49
+  },
+  {
+    "id": "sam-p029",
+    "team_id": "sam",
+    "name": "Lucas Sinclair",
+    "primary_position": "fullback",
+    "date_of_birth": "1990-10-15",
+    "height_cm": 181,
+    "weight_kg": 96,
+    "cap_count": 58
+  },
+  {
+    "id": "sam-p030",
+    "team_id": "sam",
+    "name": "George Norwood",
+    "primary_position": "fullback",
+    "date_of_birth": "2001-07-13",
+    "height_cm": 192,
+    "weight_kg": 97,
+    "cap_count": 11
+  },
+  {
+    "id": "sam-p031",
+    "team_id": "sam",
+    "name": "Julian Kilbride",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2007-12-22",
+    "height_cm": 189,
+    "weight_kg": 109,
+    "cap_count": 34
+  },
+  {
+    "id": "sam-p032",
+    "team_id": "sam",
+    "name": "Ivan Portway",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-08-03",
+    "height_cm": 180,
+    "weight_kg": 106,
+    "cap_count": 50
+  },
+  {
+    "id": "sam-p033",
+    "team_id": "sam",
+    "name": "Ivan Denholm",
+    "primary_position": "lock",
+    "date_of_birth": "1999-03-09",
+    "height_cm": 197,
+    "weight_kg": 129,
+    "cap_count": 9
+  },
+  {
+    "id": "nam-p001",
+    "team_id": "nam",
+    "name": "Jack Ashcombe",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2006-02-04",
+    "height_cm": 180,
+    "weight_kg": 124,
+    "cap_count": 42
+  },
+  {
+    "id": "nam-p002",
+    "team_id": "nam",
+    "name": "Elliot Norwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2002-11-19",
+    "height_cm": 187,
+    "weight_kg": 128,
+    "cap_count": 29
+  },
+  {
+    "id": "nam-p003",
+    "team_id": "nam",
+    "name": "Daniel Jennings",
+    "primary_position": "hooker",
+    "date_of_birth": "1990-09-19",
+    "height_cm": 188,
+    "weight_kg": 110,
+    "cap_count": 69
+  },
+  {
+    "id": "nam-p004",
+    "team_id": "nam",
+    "name": "Yannick Kingsford",
+    "primary_position": "hooker",
+    "date_of_birth": "1996-09-02",
+    "height_cm": 180,
+    "weight_kg": 115,
+    "cap_count": 0
+  },
+  {
+    "id": "nam-p005",
+    "team_id": "nam",
+    "name": "Damian Leighton",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-08-13",
+    "height_cm": 191,
+    "weight_kg": 127,
+    "cap_count": 23
+  },
+  {
+    "id": "nam-p006",
+    "team_id": "nam",
+    "name": "Alex Ashcombe",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-07-01",
+    "height_cm": 187,
+    "weight_kg": 135,
+    "cap_count": 10
+  },
+  {
+    "id": "nam-p007",
+    "team_id": "nam",
+    "name": "Oliver Blackmore",
+    "primary_position": "lock",
+    "date_of_birth": "1992-09-14",
+    "height_cm": 201,
+    "weight_kg": 127,
+    "cap_count": 81
+  },
+  {
+    "id": "nam-p008",
+    "team_id": "nam",
+    "name": "Jack Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "2005-03-02",
+    "height_cm": 205,
+    "weight_kg": 121,
+    "cap_count": 26
+  },
+  {
+    "id": "nam-p009",
+    "team_id": "nam",
+    "name": "Harry Pemberton",
+    "primary_position": "lock",
+    "date_of_birth": "1990-12-18",
+    "height_cm": 195,
+    "weight_kg": 125,
+    "cap_count": 70
+  },
+  {
+    "id": "nam-p010",
+    "team_id": "nam",
+    "name": "Gareth Halliwell",
+    "primary_position": "lock",
+    "date_of_birth": "2000-10-20",
+    "height_cm": 202,
+    "weight_kg": 126,
+    "cap_count": 45
+  },
+  {
+    "id": "nam-p011",
+    "team_id": "nam",
+    "name": "Damian Kingsford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1991-07-14",
+    "height_cm": 199,
+    "weight_kg": 113,
+    "cap_count": 49
+  },
+  {
+    "id": "nam-p012",
+    "team_id": "nam",
+    "name": "Oliver Sinclair",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2005-04-21",
+    "height_cm": 199,
+    "weight_kg": 107,
+    "cap_count": 80
+  },
+  {
+    "id": "nam-p013",
+    "team_id": "nam",
+    "name": "Liam Milburn",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1989-03-06",
+    "height_cm": 189,
+    "weight_kg": 102,
+    "cap_count": 14
+  },
+  {
+    "id": "nam-p014",
+    "team_id": "nam",
+    "name": "Quinn Oakden",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1996-01-18",
+    "height_cm": 193,
+    "weight_kg": 107,
+    "cap_count": 79
+  },
+  {
+    "id": "nam-p015",
+    "team_id": "nam",
+    "name": "Thomas Merrick",
+    "primary_position": "number-8",
+    "date_of_birth": "1993-06-24",
+    "height_cm": 197,
+    "weight_kg": 119,
+    "cap_count": 77
+  },
+  {
+    "id": "nam-p016",
+    "team_id": "nam",
+    "name": "Ulrich Norwood",
+    "primary_position": "number-8",
+    "date_of_birth": "2003-06-13",
+    "height_cm": 200,
+    "weight_kg": 115,
+    "cap_count": 13
+  },
+  {
+    "id": "nam-p017",
+    "team_id": "nam",
+    "name": "Damian Kingsford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1989-07-08",
+    "height_cm": 176,
+    "weight_kg": 80,
+    "cap_count": 55
+  },
+  {
+    "id": "nam-p018",
+    "team_id": "nam",
+    "name": "George Halliwell",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2003-10-11",
+    "height_cm": 170,
+    "weight_kg": 85,
+    "cap_count": 77
+  },
+  {
+    "id": "nam-p019",
+    "team_id": "nam",
+    "name": "Ivan Ormsby",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-04-09",
+    "height_cm": 183,
+    "weight_kg": 85,
+    "cap_count": 79
+  },
+  {
+    "id": "nam-p020",
+    "team_id": "nam",
+    "name": "Cameron Bramley",
+    "primary_position": "fly-half",
+    "date_of_birth": "1990-06-26",
+    "height_cm": 189,
+    "weight_kg": 82,
+    "cap_count": 10
+  },
+  {
+    "id": "nam-p021",
+    "team_id": "nam",
+    "name": "George Northwood",
+    "primary_position": "left-wing",
+    "date_of_birth": "1999-11-04",
+    "height_cm": 185,
+    "weight_kg": 93,
+    "cap_count": 14
+  },
+  {
+    "id": "nam-p022",
+    "team_id": "nam",
+    "name": "Elliot Oakden",
+    "primary_position": "left-wing",
+    "date_of_birth": "2006-09-04",
+    "height_cm": 187,
+    "weight_kg": 93,
+    "cap_count": 74
+  },
+  {
+    "id": "nam-p023",
+    "team_id": "nam",
+    "name": "Mason Cartwright",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-12-12",
+    "height_cm": 181,
+    "weight_kg": 94,
+    "cap_count": 35
+  },
+  {
+    "id": "nam-p024",
+    "team_id": "nam",
+    "name": "Zac Portway",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2007-11-02",
+    "height_cm": 191,
+    "weight_kg": 103,
+    "cap_count": 81
+  },
+  {
+    "id": "nam-p025",
+    "team_id": "nam",
+    "name": "Quinn Ormsby",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2001-03-13",
+    "height_cm": 191,
+    "weight_kg": 94,
+    "cap_count": 18
+  },
+  {
+    "id": "nam-p026",
+    "team_id": "nam",
+    "name": "Kyle Leighton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1993-06-05",
+    "height_cm": 185,
+    "weight_kg": 98,
+    "cap_count": 32
+  },
+  {
+    "id": "nam-p027",
+    "team_id": "nam",
+    "name": "George Merrick",
+    "primary_position": "right-wing",
+    "date_of_birth": "1993-07-07",
+    "height_cm": 187,
+    "weight_kg": 98,
+    "cap_count": 73
+  },
+  {
+    "id": "nam-p028",
+    "team_id": "nam",
+    "name": "Isaac Elsworth",
+    "primary_position": "right-wing",
+    "date_of_birth": "1989-03-10",
+    "height_cm": 185,
+    "weight_kg": 92,
+    "cap_count": 66
+  },
+  {
+    "id": "nam-p029",
+    "team_id": "nam",
+    "name": "Harry Halliwell",
+    "primary_position": "fullback",
+    "date_of_birth": "1994-05-20",
+    "height_cm": 186,
+    "weight_kg": 95,
+    "cap_count": 68
+  },
+  {
+    "id": "nam-p030",
+    "team_id": "nam",
+    "name": "Bruno Northwood",
+    "primary_position": "fullback",
+    "date_of_birth": "1990-05-05",
+    "height_cm": 180,
+    "weight_kg": 101,
+    "cap_count": 74
+  },
+  {
+    "id": "nam-p031",
+    "team_id": "nam",
+    "name": "Samuel Langford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1992-12-07",
+    "height_cm": 189,
+    "weight_kg": 108,
+    "cap_count": 72
+  },
+  {
+    "id": "nam-p032",
+    "team_id": "nam",
+    "name": "Noah Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1996-02-19",
+    "height_cm": 182,
+    "weight_kg": 107,
+    "cap_count": 56
+  },
+  {
+    "id": "nam-p033",
+    "team_id": "nam",
+    "name": "Gareth Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "1997-10-24",
+    "height_cm": 201,
+    "weight_kg": 115,
+    "cap_count": 28
+  },
+  {
+    "id": "ire-p001",
+    "team_id": "ire",
+    "name": "Kieran Northwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2004-08-19",
+    "height_cm": 186,
+    "weight_kg": 117,
+    "cap_count": 31
+  },
+  {
+    "id": "ire-p002",
+    "team_id": "ire",
+    "name": "Zac Blackmore",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2007-03-27",
+    "height_cm": 180,
+    "weight_kg": 118,
+    "cap_count": 77
+  },
+  {
+    "id": "ire-p003",
+    "team_id": "ire",
+    "name": "Julian Ashcombe",
+    "primary_position": "hooker",
+    "date_of_birth": "1996-07-12",
+    "height_cm": 182,
+    "weight_kg": 107,
+    "cap_count": 75
+  },
+  {
+    "id": "ire-p004",
+    "team_id": "ire",
+    "name": "Kieran Yardley",
+    "primary_position": "hooker",
+    "date_of_birth": "1994-06-09",
+    "height_cm": 176,
+    "weight_kg": 113,
+    "cap_count": 85
+  },
+  {
+    "id": "ire-p005",
+    "team_id": "ire",
+    "name": "Ethan Kilbride",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2007-11-25",
+    "height_cm": 184,
+    "weight_kg": 115,
+    "cap_count": 16
+  },
+  {
+    "id": "ire-p006",
+    "team_id": "ire",
+    "name": "Harry Elsworth",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-10-07",
+    "height_cm": 183,
+    "weight_kg": 133,
+    "cap_count": 77
+  },
+  {
+    "id": "ire-p007",
+    "team_id": "ire",
+    "name": "Lucas Vance",
+    "primary_position": "lock",
+    "date_of_birth": "1994-05-27",
+    "height_cm": 209,
+    "weight_kg": 120,
+    "cap_count": 41
+  },
+  {
+    "id": "ire-p008",
+    "team_id": "ire",
+    "name": "Ivan Northwood",
+    "primary_position": "lock",
+    "date_of_birth": "2004-10-26",
+    "height_cm": 200,
+    "weight_kg": 128,
+    "cap_count": 44
+  },
+  {
+    "id": "ire-p009",
+    "team_id": "ire",
+    "name": "Nathan Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1990-08-12",
+    "height_cm": 203,
+    "weight_kg": 121,
+    "cap_count": 70
+  },
+  {
+    "id": "ire-p010",
+    "team_id": "ire",
+    "name": "Adrian Underhill",
+    "primary_position": "lock",
+    "date_of_birth": "1997-04-27",
+    "height_cm": 195,
+    "weight_kg": 116,
+    "cap_count": 6
+  },
+  {
+    "id": "ire-p011",
+    "team_id": "ire",
+    "name": "Ryan Gainsborough",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1989-06-03",
+    "height_cm": 200,
+    "weight_kg": 105,
+    "cap_count": 25
+  },
+  {
+    "id": "ire-p012",
+    "team_id": "ire",
+    "name": "Xavier Danforth",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1990-06-03",
+    "height_cm": 194,
+    "weight_kg": 106,
+    "cap_count": 25
+  },
+  {
+    "id": "ire-p013",
+    "team_id": "ire",
+    "name": "Adrian Ormsby",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-07-27",
+    "height_cm": 194,
+    "weight_kg": 112,
+    "cap_count": 11
+  },
+  {
+    "id": "ire-p014",
+    "team_id": "ire",
+    "name": "Bruno Everley",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-11-13",
+    "height_cm": 194,
+    "weight_kg": 98,
+    "cap_count": 30
+  },
+  {
+    "id": "ire-p015",
+    "team_id": "ire",
+    "name": "Daniel Danforth",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-03-27",
+    "height_cm": 193,
+    "weight_kg": 109,
+    "cap_count": 46
+  },
+  {
+    "id": "ire-p016",
+    "team_id": "ire",
+    "name": "Felix Sinclair",
+    "primary_position": "number-8",
+    "date_of_birth": "1996-04-16",
+    "height_cm": 194,
+    "weight_kg": 119,
+    "cap_count": 34
+  },
+  {
+    "id": "ire-p017",
+    "team_id": "ire",
+    "name": "Xavier Vance",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2004-04-18",
+    "height_cm": 181,
+    "weight_kg": 89,
+    "cap_count": 14
+  },
+  {
+    "id": "ire-p018",
+    "team_id": "ire",
+    "name": "Xavier Grayling",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2000-03-12",
+    "height_cm": 172,
+    "weight_kg": 85,
+    "cap_count": 45
+  },
+  {
+    "id": "ire-p019",
+    "team_id": "ire",
+    "name": "Elliot Leighton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1994-09-24",
+    "height_cm": 190,
+    "weight_kg": 83,
+    "cap_count": 10
+  },
+  {
+    "id": "ire-p020",
+    "team_id": "ire",
+    "name": "Patrick Langford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-03-01",
+    "height_cm": 189,
+    "weight_kg": 91,
+    "cap_count": 3
+  },
+  {
+    "id": "ire-p021",
+    "team_id": "ire",
+    "name": "Bruno Vance",
+    "primary_position": "left-wing",
+    "date_of_birth": "1991-05-12",
+    "height_cm": 187,
+    "weight_kg": 93,
+    "cap_count": 83
+  },
+  {
+    "id": "ire-p022",
+    "team_id": "ire",
+    "name": "Felix Ivory",
+    "primary_position": "left-wing",
+    "date_of_birth": "1991-07-19",
+    "height_cm": 191,
+    "weight_kg": 93,
+    "cap_count": 56
+  },
+  {
+    "id": "ire-p023",
+    "team_id": "ire",
+    "name": "Lucas Gainsborough",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2003-04-03",
+    "height_cm": 187,
+    "weight_kg": 94,
+    "cap_count": 58
+  },
+  {
+    "id": "ire-p024",
+    "team_id": "ire",
+    "name": "Henri Ashcombe",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1992-12-12",
+    "height_cm": 189,
+    "weight_kg": 94,
+    "cap_count": 74
+  },
+  {
+    "id": "ire-p025",
+    "team_id": "ire",
+    "name": "William Everley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2006-02-22",
+    "height_cm": 180,
+    "weight_kg": 89,
+    "cap_count": 25
+  },
+  {
+    "id": "ire-p026",
+    "team_id": "ire",
+    "name": "Nathan Everley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-05-26",
+    "height_cm": 181,
+    "weight_kg": 94,
+    "cap_count": 55
+  },
+  {
+    "id": "ire-p027",
+    "team_id": "ire",
+    "name": "Lucas Harwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1994-06-03",
+    "height_cm": 189,
+    "weight_kg": 94,
+    "cap_count": 6
+  },
+  {
+    "id": "ire-p028",
+    "team_id": "ire",
+    "name": "Isaac Portway",
+    "primary_position": "right-wing",
+    "date_of_birth": "1998-10-11",
+    "height_cm": 186,
+    "weight_kg": 100,
+    "cap_count": 59
+  },
+  {
+    "id": "ire-p029",
+    "team_id": "ire",
+    "name": "Bruno Ashford",
+    "primary_position": "fullback",
+    "date_of_birth": "1993-03-05",
+    "height_cm": 195,
+    "weight_kg": 96,
+    "cap_count": 38
+  },
+  {
+    "id": "ire-p030",
+    "team_id": "ire",
+    "name": "Callum Leighton",
+    "primary_position": "fullback",
+    "date_of_birth": "1996-07-19",
+    "height_cm": 193,
+    "weight_kg": 104,
+    "cap_count": 2
+  },
+  {
+    "id": "ire-p031",
+    "team_id": "ire",
+    "name": "Ben Jennings",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1992-11-18",
+    "height_cm": 199,
+    "weight_kg": 119,
+    "cap_count": 42
+  },
+  {
+    "id": "ire-p032",
+    "team_id": "ire",
+    "name": "Ethan Ivory",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2007-02-04",
+    "height_cm": 192,
+    "weight_kg": 104,
+    "cap_count": 15
+  },
+  {
+    "id": "ire-p033",
+    "team_id": "ire",
+    "name": "Elliot Kilbride",
+    "primary_position": "lock",
+    "date_of_birth": "1996-11-08",
+    "height_cm": 198,
+    "weight_kg": 119,
+    "cap_count": 0
+  },
+  {
+    "id": "jpn-p001",
+    "team_id": "jpn",
+    "name": "Alex Grayling",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1991-10-12",
+    "height_cm": 181,
+    "weight_kg": 112,
+    "cap_count": 46
+  },
+  {
+    "id": "jpn-p002",
+    "team_id": "jpn",
+    "name": "Noah Yardley",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2004-08-19",
+    "height_cm": 185,
+    "weight_kg": 122,
+    "cap_count": 68
+  },
+  {
+    "id": "jpn-p003",
+    "team_id": "jpn",
+    "name": "Marcus Jarrow",
+    "primary_position": "hooker",
+    "date_of_birth": "1999-11-09",
+    "height_cm": 179,
+    "weight_kg": 118,
+    "cap_count": 20
+  },
+  {
+    "id": "jpn-p004",
+    "team_id": "jpn",
+    "name": "Damian Ormsby",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-06-20",
+    "height_cm": 184,
+    "weight_kg": 120,
+    "cap_count": 22
+  },
+  {
+    "id": "jpn-p005",
+    "team_id": "jpn",
+    "name": "Quinn Kilbride",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1989-01-21",
+    "height_cm": 188,
+    "weight_kg": 134,
+    "cap_count": 56
+  },
+  {
+    "id": "jpn-p006",
+    "team_id": "jpn",
+    "name": "Alex Yardley",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2000-07-17",
+    "height_cm": 185,
+    "weight_kg": 127,
+    "cap_count": 49
+  },
+  {
+    "id": "jpn-p007",
+    "team_id": "jpn",
+    "name": "William Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "1994-11-01",
+    "height_cm": 210,
+    "weight_kg": 126,
+    "cap_count": 26
+  },
+  {
+    "id": "jpn-p008",
+    "team_id": "jpn",
+    "name": "Ulrich Farraday",
+    "primary_position": "lock",
+    "date_of_birth": "1994-09-04",
+    "height_cm": 197,
+    "weight_kg": 120,
+    "cap_count": 38
+  },
+  {
+    "id": "jpn-p009",
+    "team_id": "jpn",
+    "name": "Damian Grayling",
+    "primary_position": "lock",
+    "date_of_birth": "2002-07-05",
+    "height_cm": 197,
+    "weight_kg": 130,
+    "cap_count": 10
+  },
+  {
+    "id": "jpn-p010",
+    "team_id": "jpn",
+    "name": "Callum Thornton",
+    "primary_position": "lock",
+    "date_of_birth": "2002-04-21",
+    "height_cm": 196,
+    "weight_kg": 116,
+    "cap_count": 37
+  },
+  {
+    "id": "jpn-p011",
+    "team_id": "jpn",
+    "name": "Samuel Ravenscroft",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1991-02-26",
+    "height_cm": 197,
+    "weight_kg": 107,
+    "cap_count": 85
+  },
+  {
+    "id": "jpn-p012",
+    "team_id": "jpn",
+    "name": "Noah Gainsborough",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2006-10-02",
+    "height_cm": 198,
+    "weight_kg": 119,
+    "cap_count": 47
+  },
+  {
+    "id": "jpn-p013",
+    "team_id": "jpn",
+    "name": "Ulrich Ingleby",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1997-01-17",
+    "height_cm": 195,
+    "weight_kg": 106,
+    "cap_count": 67
+  },
+  {
+    "id": "jpn-p014",
+    "team_id": "jpn",
+    "name": "Xavier Jennings",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-09-17",
+    "height_cm": 186,
+    "weight_kg": 98,
+    "cap_count": 81
+  },
+  {
+    "id": "jpn-p015",
+    "team_id": "jpn",
+    "name": "George Ormsby",
+    "primary_position": "number-8",
+    "date_of_birth": "2007-02-07",
+    "height_cm": 193,
+    "weight_kg": 110,
+    "cap_count": 70
+  },
+  {
+    "id": "jpn-p016",
+    "team_id": "jpn",
+    "name": "Kieran Oakden",
+    "primary_position": "number-8",
+    "date_of_birth": "1997-04-17",
+    "height_cm": 199,
+    "weight_kg": 125,
+    "cap_count": 30
+  },
+  {
+    "id": "jpn-p017",
+    "team_id": "jpn",
+    "name": "Quinn Leighton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1998-05-25",
+    "height_cm": 172,
+    "weight_kg": 86,
+    "cap_count": 55
+  },
+  {
+    "id": "jpn-p018",
+    "team_id": "jpn",
+    "name": "Daniel Crestwood",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1995-01-25",
+    "height_cm": 177,
+    "weight_kg": 84,
+    "cap_count": 8
+  },
+  {
+    "id": "jpn-p019",
+    "team_id": "jpn",
+    "name": "Callum Quenton",
+    "primary_position": "fly-half",
+    "date_of_birth": "2001-04-11",
+    "height_cm": 187,
+    "weight_kg": 85,
+    "cap_count": 77
+  },
+  {
+    "id": "jpn-p020",
+    "team_id": "jpn",
+    "name": "Cameron Blackmore",
+    "primary_position": "fly-half",
+    "date_of_birth": "2001-12-06",
+    "height_cm": 183,
+    "weight_kg": 90,
+    "cap_count": 78
+  },
+  {
+    "id": "jpn-p021",
+    "team_id": "jpn",
+    "name": "Zac Crestwood",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-10-19",
+    "height_cm": 187,
+    "weight_kg": 91,
+    "cap_count": 32
+  },
+  {
+    "id": "jpn-p022",
+    "team_id": "jpn",
+    "name": "George Sinclair",
+    "primary_position": "left-wing",
+    "date_of_birth": "2000-11-08",
+    "height_cm": 185,
+    "weight_kg": 90,
+    "cap_count": 11
+  },
+  {
+    "id": "jpn-p023",
+    "team_id": "jpn",
+    "name": "Cameron Milburn",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1990-08-23",
+    "height_cm": 181,
+    "weight_kg": 98,
+    "cap_count": 54
+  },
+  {
+    "id": "jpn-p024",
+    "team_id": "jpn",
+    "name": "Nathan Farraday",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1990-12-25",
+    "height_cm": 191,
+    "weight_kg": 102,
+    "cap_count": 55
+  },
+  {
+    "id": "jpn-p025",
+    "team_id": "jpn",
+    "name": "Kyle Bramley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2001-09-13",
+    "height_cm": 182,
+    "weight_kg": 94,
+    "cap_count": 66
+  },
+  {
+    "id": "jpn-p026",
+    "team_id": "jpn",
+    "name": "Kieran Everley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2005-08-15",
+    "height_cm": 181,
+    "weight_kg": 99,
+    "cap_count": 50
+  },
+  {
+    "id": "jpn-p027",
+    "team_id": "jpn",
+    "name": "Daniel Underhill",
+    "primary_position": "right-wing",
+    "date_of_birth": "2007-11-25",
+    "height_cm": 192,
+    "weight_kg": 98,
+    "cap_count": 22
+  },
+  {
+    "id": "jpn-p028",
+    "team_id": "jpn",
+    "name": "Julian Norwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1996-12-18",
+    "height_cm": 182,
+    "weight_kg": 97,
+    "cap_count": 22
+  },
+  {
+    "id": "jpn-p029",
+    "team_id": "jpn",
+    "name": "Xavier Gainsborough",
+    "primary_position": "fullback",
+    "date_of_birth": "2002-05-23",
+    "height_cm": 186,
+    "weight_kg": 96,
+    "cap_count": 3
+  },
+  {
+    "id": "jpn-p030",
+    "team_id": "jpn",
+    "name": "Elliot Gainsborough",
+    "primary_position": "fullback",
+    "date_of_birth": "2003-10-19",
+    "height_cm": 190,
+    "weight_kg": 102,
+    "cap_count": 59
+  },
+  {
+    "id": "jpn-p031",
+    "team_id": "jpn",
+    "name": "Lucas Kingsford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2004-01-15",
+    "height_cm": 197,
+    "weight_kg": 111,
+    "cap_count": 34
+  },
+  {
+    "id": "jpn-p032",
+    "team_id": "jpn",
+    "name": "Ulrich Ingleby",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2002-06-05",
+    "height_cm": 195,
+    "weight_kg": 109,
+    "cap_count": 82
+  },
+  {
+    "id": "jpn-p033",
+    "team_id": "jpn",
+    "name": "Ivan Norwood",
+    "primary_position": "lock",
+    "date_of_birth": "2004-06-25",
+    "height_cm": 207,
+    "weight_kg": 119,
+    "cap_count": 6
+  },
+  {
+    "id": "tga-p001",
+    "team_id": "tga",
+    "name": "Alex Ravenscroft",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2003-12-08",
+    "height_cm": 188,
+    "weight_kg": 114,
+    "cap_count": 34
+  },
+  {
+    "id": "tga-p002",
+    "team_id": "tga",
+    "name": "Elliot Halliwell",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2006-04-24",
+    "height_cm": 188,
+    "weight_kg": 113,
+    "cap_count": 50
+  },
+  {
+    "id": "tga-p003",
+    "team_id": "tga",
+    "name": "Lucas Grayling",
+    "primary_position": "hooker",
+    "date_of_birth": "2004-12-15",
+    "height_cm": 184,
+    "weight_kg": 107,
+    "cap_count": 78
+  },
+  {
+    "id": "tga-p004",
+    "team_id": "tga",
+    "name": "Ethan Merrick",
+    "primary_position": "hooker",
+    "date_of_birth": "2006-07-14",
+    "height_cm": 184,
+    "weight_kg": 108,
+    "cap_count": 60
+  },
+  {
+    "id": "tga-p005",
+    "team_id": "tga",
+    "name": "Nathan Harwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2005-02-12",
+    "height_cm": 191,
+    "weight_kg": 135,
+    "cap_count": 2
+  },
+  {
+    "id": "tga-p006",
+    "team_id": "tga",
+    "name": "Felix Pemberton",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2000-01-02",
+    "height_cm": 180,
+    "weight_kg": 120,
+    "cap_count": 63
+  },
+  {
+    "id": "tga-p007",
+    "team_id": "tga",
+    "name": "Bruno Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "2001-11-27",
+    "height_cm": 207,
+    "weight_kg": 120,
+    "cap_count": 5
+  },
+  {
+    "id": "tga-p008",
+    "team_id": "tga",
+    "name": "Quinn Norwood",
+    "primary_position": "lock",
+    "date_of_birth": "1999-03-26",
+    "height_cm": 197,
+    "weight_kg": 128,
+    "cap_count": 43
+  },
+  {
+    "id": "tga-p009",
+    "team_id": "tga",
+    "name": "Adrian Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1989-08-10",
+    "height_cm": 207,
+    "weight_kg": 118,
+    "cap_count": 32
+  },
+  {
+    "id": "tga-p010",
+    "team_id": "tga",
+    "name": "Finn Underhill",
+    "primary_position": "lock",
+    "date_of_birth": "2001-01-04",
+    "height_cm": 196,
+    "weight_kg": 123,
+    "cap_count": 23
+  },
+  {
+    "id": "tga-p011",
+    "team_id": "tga",
+    "name": "Ryan Ormsby",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2001-06-13",
+    "height_cm": 198,
+    "weight_kg": 109,
+    "cap_count": 74
+  },
+  {
+    "id": "tga-p012",
+    "team_id": "tga",
+    "name": "Patrick Farraday",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1998-06-12",
+    "height_cm": 188,
+    "weight_kg": 110,
+    "cap_count": 64
+  },
+  {
+    "id": "tga-p013",
+    "team_id": "tga",
+    "name": "Finn Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-11-10",
+    "height_cm": 194,
+    "weight_kg": 108,
+    "cap_count": 26
+  },
+  {
+    "id": "tga-p014",
+    "team_id": "tga",
+    "name": "Finn Kilbride",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-08-26",
+    "height_cm": 193,
+    "weight_kg": 114,
+    "cap_count": 27
+  },
+  {
+    "id": "tga-p015",
+    "team_id": "tga",
+    "name": "Liam Thornton",
+    "primary_position": "number-8",
+    "date_of_birth": "1991-07-09",
+    "height_cm": 199,
+    "weight_kg": 118,
+    "cap_count": 76
+  },
+  {
+    "id": "tga-p016",
+    "team_id": "tga",
+    "name": "Isaac Kilbride",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-09-15",
+    "height_cm": 198,
+    "weight_kg": 124,
+    "cap_count": 20
+  },
+  {
+    "id": "tga-p017",
+    "team_id": "tga",
+    "name": "Nathan Elsworth",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2006-12-22",
+    "height_cm": 174,
+    "weight_kg": 81,
+    "cap_count": 17
+  },
+  {
+    "id": "tga-p018",
+    "team_id": "tga",
+    "name": "William Merrick",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2002-01-23",
+    "height_cm": 184,
+    "weight_kg": 83,
+    "cap_count": 4
+  },
+  {
+    "id": "tga-p019",
+    "team_id": "tga",
+    "name": "Harry Cartwright",
+    "primary_position": "fly-half",
+    "date_of_birth": "2004-10-11",
+    "height_cm": 185,
+    "weight_kg": 83,
+    "cap_count": 36
+  },
+  {
+    "id": "tga-p020",
+    "team_id": "tga",
+    "name": "Damian Blackmore",
+    "primary_position": "fly-half",
+    "date_of_birth": "1992-01-11",
+    "height_cm": 182,
+    "weight_kg": 91,
+    "cap_count": 38
+  },
+  {
+    "id": "tga-p021",
+    "team_id": "tga",
+    "name": "Marcus Ivory",
+    "primary_position": "left-wing",
+    "date_of_birth": "1990-09-15",
+    "height_cm": 182,
+    "weight_kg": 94,
+    "cap_count": 89
+  },
+  {
+    "id": "tga-p022",
+    "team_id": "tga",
+    "name": "Daniel Langford",
+    "primary_position": "left-wing",
+    "date_of_birth": "1998-02-27",
+    "height_cm": 184,
+    "weight_kg": 100,
+    "cap_count": 48
+  },
+  {
+    "id": "tga-p023",
+    "team_id": "tga",
+    "name": "Alex Blackmore",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1996-06-17",
+    "height_cm": 193,
+    "weight_kg": 90,
+    "cap_count": 77
+  },
+  {
+    "id": "tga-p024",
+    "team_id": "tga",
+    "name": "William Merrick",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1994-01-17",
+    "height_cm": 192,
+    "weight_kg": 100,
+    "cap_count": 83
+  },
+  {
+    "id": "tga-p025",
+    "team_id": "tga",
+    "name": "Daniel Ravenscroft",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1999-03-09",
+    "height_cm": 189,
+    "weight_kg": 96,
+    "cap_count": 28
+  },
+  {
+    "id": "tga-p026",
+    "team_id": "tga",
+    "name": "Ben Ashcombe",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2005-02-20",
+    "height_cm": 190,
+    "weight_kg": 98,
+    "cap_count": 12
+  },
+  {
+    "id": "tga-p027",
+    "team_id": "tga",
+    "name": "Quinn Yardley",
+    "primary_position": "right-wing",
+    "date_of_birth": "1995-12-08",
+    "height_cm": 186,
+    "weight_kg": 93,
+    "cap_count": 62
+  },
+  {
+    "id": "tga-p028",
+    "team_id": "tga",
+    "name": "Alex Northwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1995-09-17",
+    "height_cm": 187,
+    "weight_kg": 88,
+    "cap_count": 66
+  },
+  {
+    "id": "tga-p029",
+    "team_id": "tga",
+    "name": "Zac Kilbride",
+    "primary_position": "fullback",
+    "date_of_birth": "2004-11-26",
+    "height_cm": 187,
+    "weight_kg": 102,
+    "cap_count": 51
+  },
+  {
+    "id": "tga-p030",
+    "team_id": "tga",
+    "name": "Bruno Kilbride",
+    "primary_position": "fullback",
+    "date_of_birth": "1998-06-05",
+    "height_cm": 191,
+    "weight_kg": 98,
+    "cap_count": 53
+  },
+  {
+    "id": "tga-p031",
+    "team_id": "tga",
+    "name": "Finn Jennings",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2004-10-21",
+    "height_cm": 196,
+    "weight_kg": 115,
+    "cap_count": 71
+  },
+  {
+    "id": "tga-p032",
+    "team_id": "tga",
+    "name": "Lucas Sinclair",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2007-12-09",
+    "height_cm": 195,
+    "weight_kg": 101,
+    "cap_count": 35
+  },
+  {
+    "id": "tga-p033",
+    "team_id": "tga",
+    "name": "Nathan Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1997-10-21",
+    "height_cm": 210,
+    "weight_kg": 118,
+    "cap_count": 47
+  },
+  {
+    "id": "rou-p001",
+    "team_id": "rou",
+    "name": "Julian Denholm",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1989-05-16",
+    "height_cm": 190,
+    "weight_kg": 125,
+    "cap_count": 15
+  },
+  {
+    "id": "rou-p002",
+    "team_id": "rou",
+    "name": "Noah Grayling",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2002-10-04",
+    "height_cm": 186,
+    "weight_kg": 122,
+    "cap_count": 6
+  },
+  {
+    "id": "rou-p003",
+    "team_id": "rou",
+    "name": "Damian Oakden",
+    "primary_position": "hooker",
+    "date_of_birth": "2002-01-14",
+    "height_cm": 187,
+    "weight_kg": 107,
+    "cap_count": 69
+  },
+  {
+    "id": "rou-p004",
+    "team_id": "rou",
+    "name": "Thomas Everley",
+    "primary_position": "hooker",
+    "date_of_birth": "2005-08-05",
+    "height_cm": 176,
+    "weight_kg": 108,
+    "cap_count": 24
+  },
+  {
+    "id": "rou-p005",
+    "team_id": "rou",
+    "name": "Alex Yardley",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1997-11-08",
+    "height_cm": 192,
+    "weight_kg": 122,
+    "cap_count": 52
+  },
+  {
+    "id": "rou-p006",
+    "team_id": "rou",
+    "name": "Vincent Vance",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2002-07-04",
+    "height_cm": 192,
+    "weight_kg": 116,
+    "cap_count": 5
+  },
+  {
+    "id": "rou-p007",
+    "team_id": "rou",
+    "name": "Vincent Jarrow",
+    "primary_position": "lock",
+    "date_of_birth": "1990-08-23",
+    "height_cm": 204,
+    "weight_kg": 119,
+    "cap_count": 13
+  },
+  {
+    "id": "rou-p008",
+    "team_id": "rou",
+    "name": "Kyle Denholm",
+    "primary_position": "lock",
+    "date_of_birth": "1992-03-13",
+    "height_cm": 199,
+    "weight_kg": 119,
+    "cap_count": 68
+  },
+  {
+    "id": "rou-p009",
+    "team_id": "rou",
+    "name": "Vincent Pemberton",
+    "primary_position": "lock",
+    "date_of_birth": "2001-07-25",
+    "height_cm": 201,
+    "weight_kg": 129,
+    "cap_count": 54
+  },
+  {
+    "id": "rou-p010",
+    "team_id": "rou",
+    "name": "Ben Ivory",
+    "primary_position": "lock",
+    "date_of_birth": "2001-05-22",
+    "height_cm": 201,
+    "weight_kg": 129,
+    "cap_count": 84
+  },
+  {
+    "id": "rou-p011",
+    "team_id": "rou",
+    "name": "William Merrick",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2003-12-11",
+    "height_cm": 198,
+    "weight_kg": 116,
+    "cap_count": 46
+  },
+  {
+    "id": "rou-p012",
+    "team_id": "rou",
+    "name": "Daniel Milburn",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1999-03-03",
+    "height_cm": 198,
+    "weight_kg": 107,
+    "cap_count": 3
+  },
+  {
+    "id": "rou-p013",
+    "team_id": "rou",
+    "name": "Julian Grayling",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2005-08-08",
+    "height_cm": 184,
+    "weight_kg": 115,
+    "cap_count": 45
+  },
+  {
+    "id": "rou-p014",
+    "team_id": "rou",
+    "name": "Nathan Jarrow",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2007-01-10",
+    "height_cm": 193,
+    "weight_kg": 100,
+    "cap_count": 67
+  },
+  {
+    "id": "rou-p015",
+    "team_id": "rou",
+    "name": "Cameron Kilbride",
+    "primary_position": "number-8",
+    "date_of_birth": "2006-08-17",
+    "height_cm": 190,
+    "weight_kg": 113,
+    "cap_count": 23
+  },
+  {
+    "id": "rou-p016",
+    "team_id": "rou",
+    "name": "Ethan Bramley",
+    "primary_position": "number-8",
+    "date_of_birth": "1992-05-09",
+    "height_cm": 199,
+    "weight_kg": 110,
+    "cap_count": 26
+  },
+  {
+    "id": "rou-p017",
+    "team_id": "rou",
+    "name": "Alex Crestwood",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1997-09-03",
+    "height_cm": 177,
+    "weight_kg": 91,
+    "cap_count": 57
+  },
+  {
+    "id": "rou-p018",
+    "team_id": "rou",
+    "name": "Thomas Winford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2006-08-22",
+    "height_cm": 180,
+    "weight_kg": 82,
+    "cap_count": 84
+  },
+  {
+    "id": "rou-p019",
+    "team_id": "rou",
+    "name": "Ben Milburn",
+    "primary_position": "fly-half",
+    "date_of_birth": "2007-06-07",
+    "height_cm": 175,
+    "weight_kg": 83,
+    "cap_count": 14
+  },
+  {
+    "id": "rou-p020",
+    "team_id": "rou",
+    "name": "Kieran Thornton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1999-01-10",
+    "height_cm": 188,
+    "weight_kg": 93,
+    "cap_count": 84
+  },
+  {
+    "id": "rou-p021",
+    "team_id": "rou",
+    "name": "Adrian Kilbride",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-09-07",
+    "height_cm": 187,
+    "weight_kg": 93,
+    "cap_count": 87
+  },
+  {
+    "id": "rou-p022",
+    "team_id": "rou",
+    "name": "Gareth Jarrow",
+    "primary_position": "left-wing",
+    "date_of_birth": "2003-10-15",
+    "height_cm": 187,
+    "weight_kg": 92,
+    "cap_count": 76
+  },
+  {
+    "id": "rou-p023",
+    "team_id": "rou",
+    "name": "Ivan Vance",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1989-03-15",
+    "height_cm": 180,
+    "weight_kg": 100,
+    "cap_count": 68
+  },
+  {
+    "id": "rou-p024",
+    "team_id": "rou",
+    "name": "Bruno Pemberton",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1991-03-14",
+    "height_cm": 186,
+    "weight_kg": 92,
+    "cap_count": 3
+  },
+  {
+    "id": "rou-p025",
+    "team_id": "rou",
+    "name": "Liam Ashcombe",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2006-07-10",
+    "height_cm": 180,
+    "weight_kg": 94,
+    "cap_count": 19
+  },
+  {
+    "id": "rou-p026",
+    "team_id": "rou",
+    "name": "Marcus Underhill",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-02-19",
+    "height_cm": 186,
+    "weight_kg": 101,
+    "cap_count": 17
+  },
+  {
+    "id": "rou-p027",
+    "team_id": "rou",
+    "name": "Finn Pemberton",
+    "primary_position": "right-wing",
+    "date_of_birth": "1993-03-01",
+    "height_cm": 193,
+    "weight_kg": 96,
+    "cap_count": 0
+  },
+  {
+    "id": "rou-p028",
+    "team_id": "rou",
+    "name": "Xavier Bramley",
+    "primary_position": "right-wing",
+    "date_of_birth": "1990-02-19",
+    "height_cm": 181,
+    "weight_kg": 92,
+    "cap_count": 35
+  },
+  {
+    "id": "rou-p029",
+    "team_id": "rou",
+    "name": "Xavier Blackmore",
+    "primary_position": "fullback",
+    "date_of_birth": "2001-01-10",
+    "height_cm": 183,
+    "weight_kg": 98,
+    "cap_count": 45
+  },
+  {
+    "id": "rou-p030",
+    "team_id": "rou",
+    "name": "Nathan Everley",
+    "primary_position": "fullback",
+    "date_of_birth": "1993-08-05",
+    "height_cm": 181,
+    "weight_kg": 99,
+    "cap_count": 59
+  },
+  {
+    "id": "rou-p031",
+    "team_id": "rou",
+    "name": "Ivan Everley",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1992-10-27",
+    "height_cm": 197,
+    "weight_kg": 109,
+    "cap_count": 80
+  },
+  {
+    "id": "rou-p032",
+    "team_id": "rou",
+    "name": "Samuel Jarrow",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-03-07",
+    "height_cm": 191,
+    "weight_kg": 110,
+    "cap_count": 52
+  },
+  {
+    "id": "rou-p033",
+    "team_id": "rou",
+    "name": "Oliver Danforth",
+    "primary_position": "lock",
+    "date_of_birth": "2000-12-08",
+    "height_cm": 204,
+    "weight_kg": 124,
+    "cap_count": 22
+  },
+  {
+    "id": "fra-p001",
+    "team_id": "fra",
+    "name": "Elliot Vance",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2002-12-12",
+    "height_cm": 184,
+    "weight_kg": 110,
+    "cap_count": 61
+  },
+  {
+    "id": "fra-p002",
+    "team_id": "fra",
+    "name": "Kieran Ashford",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1994-07-15",
+    "height_cm": 185,
+    "weight_kg": 120,
+    "cap_count": 5
+  },
+  {
+    "id": "fra-p003",
+    "team_id": "fra",
+    "name": "Mason Yardley",
+    "primary_position": "hooker",
+    "date_of_birth": "2003-08-18",
+    "height_cm": 175,
+    "weight_kg": 120,
+    "cap_count": 68
+  },
+  {
+    "id": "fra-p004",
+    "team_id": "fra",
+    "name": "Vincent Everley",
+    "primary_position": "hooker",
+    "date_of_birth": "1993-06-10",
+    "height_cm": 183,
+    "weight_kg": 106,
+    "cap_count": 15
+  },
+  {
+    "id": "fra-p005",
+    "team_id": "fra",
+    "name": "Jack Oakden",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1995-03-23",
+    "height_cm": 187,
+    "weight_kg": 128,
+    "cap_count": 84
+  },
+  {
+    "id": "fra-p006",
+    "team_id": "fra",
+    "name": "Ethan Crestwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-03-14",
+    "height_cm": 186,
+    "weight_kg": 133,
+    "cap_count": 48
+  },
+  {
+    "id": "fra-p007",
+    "team_id": "fra",
+    "name": "Lucas Langford",
+    "primary_position": "lock",
+    "date_of_birth": "1992-10-07",
+    "height_cm": 210,
+    "weight_kg": 129,
+    "cap_count": 49
+  },
+  {
+    "id": "fra-p008",
+    "team_id": "fra",
+    "name": "Callum Thornton",
+    "primary_position": "lock",
+    "date_of_birth": "2004-08-07",
+    "height_cm": 201,
+    "weight_kg": 125,
+    "cap_count": 87
+  },
+  {
+    "id": "fra-p009",
+    "team_id": "fra",
+    "name": "Yannick Blackmore",
+    "primary_position": "lock",
+    "date_of_birth": "1997-01-02",
+    "height_cm": 195,
+    "weight_kg": 120,
+    "cap_count": 75
+  },
+  {
+    "id": "fra-p010",
+    "team_id": "fra",
+    "name": "Adrian Norwood",
+    "primary_position": "lock",
+    "date_of_birth": "1993-01-08",
+    "height_cm": 209,
+    "weight_kg": 117,
+    "cap_count": 3
+  },
+  {
+    "id": "fra-p011",
+    "team_id": "fra",
+    "name": "Cameron Thornton",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2000-08-10",
+    "height_cm": 190,
+    "weight_kg": 107,
+    "cap_count": 29
+  },
+  {
+    "id": "fra-p012",
+    "team_id": "fra",
+    "name": "Bruno Blackmore",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2004-01-10",
+    "height_cm": 191,
+    "weight_kg": 112,
+    "cap_count": 4
+  },
+  {
+    "id": "fra-p013",
+    "team_id": "fra",
+    "name": "Daniel Milburn",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2004-01-07",
+    "height_cm": 180,
+    "weight_kg": 104,
+    "cap_count": 41
+  },
+  {
+    "id": "fra-p014",
+    "team_id": "fra",
+    "name": "Ulrich Oakden",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2001-01-09",
+    "height_cm": 194,
+    "weight_kg": 104,
+    "cap_count": 52
+  },
+  {
+    "id": "fra-p015",
+    "team_id": "fra",
+    "name": "Nathan Cartwright",
+    "primary_position": "number-8",
+    "date_of_birth": "1996-09-06",
+    "height_cm": 199,
+    "weight_kg": 114,
+    "cap_count": 6
+  },
+  {
+    "id": "fra-p016",
+    "team_id": "fra",
+    "name": "Ryan Farraday",
+    "primary_position": "number-8",
+    "date_of_birth": "1992-10-01",
+    "height_cm": 190,
+    "weight_kg": 121,
+    "cap_count": 7
+  },
+  {
+    "id": "fra-p017",
+    "team_id": "fra",
+    "name": "Julian Elsworth",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1996-01-12",
+    "height_cm": 174,
+    "weight_kg": 92,
+    "cap_count": 80
+  },
+  {
+    "id": "fra-p018",
+    "team_id": "fra",
+    "name": "Oliver Vance",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1997-12-06",
+    "height_cm": 180,
+    "weight_kg": 88,
+    "cap_count": 62
+  },
+  {
+    "id": "fra-p019",
+    "team_id": "fra",
+    "name": "Jack Denholm",
+    "primary_position": "fly-half",
+    "date_of_birth": "1993-04-02",
+    "height_cm": 190,
+    "weight_kg": 92,
+    "cap_count": 81
+  },
+  {
+    "id": "fra-p020",
+    "team_id": "fra",
+    "name": "William Fairhurst",
+    "primary_position": "fly-half",
+    "date_of_birth": "2007-07-05",
+    "height_cm": 175,
+    "weight_kg": 88,
+    "cap_count": 69
+  },
+  {
+    "id": "fra-p021",
+    "team_id": "fra",
+    "name": "Harry Kilbride",
+    "primary_position": "left-wing",
+    "date_of_birth": "2005-03-21",
+    "height_cm": 184,
+    "weight_kg": 88,
+    "cap_count": 89
+  },
+  {
+    "id": "fra-p022",
+    "team_id": "fra",
+    "name": "Lucas Fairhurst",
+    "primary_position": "left-wing",
+    "date_of_birth": "1992-10-22",
+    "height_cm": 188,
+    "weight_kg": 95,
+    "cap_count": 86
+  },
+  {
+    "id": "fra-p023",
+    "team_id": "fra",
+    "name": "Callum Norwood",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2004-08-21",
+    "height_cm": 191,
+    "weight_kg": 95,
+    "cap_count": 39
+  },
+  {
+    "id": "fra-p024",
+    "team_id": "fra",
+    "name": "Ben Danforth",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1996-06-15",
+    "height_cm": 188,
+    "weight_kg": 93,
+    "cap_count": 37
+  },
+  {
+    "id": "fra-p025",
+    "team_id": "fra",
+    "name": "Ivan Ivory",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1996-09-27",
+    "height_cm": 188,
+    "weight_kg": 89,
+    "cap_count": 53
+  },
+  {
+    "id": "fra-p026",
+    "team_id": "fra",
+    "name": "Damian Merrick",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1993-02-12",
+    "height_cm": 182,
+    "weight_kg": 89,
+    "cap_count": 51
+  },
+  {
+    "id": "fra-p027",
+    "team_id": "fra",
+    "name": "Henri Portway",
+    "primary_position": "right-wing",
+    "date_of_birth": "1994-12-07",
+    "height_cm": 193,
+    "weight_kg": 98,
+    "cap_count": 68
+  },
+  {
+    "id": "fra-p028",
+    "team_id": "fra",
+    "name": "Adrian Milburn",
+    "primary_position": "right-wing",
+    "date_of_birth": "1996-09-02",
+    "height_cm": 180,
+    "weight_kg": 92,
+    "cap_count": 41
+  },
+  {
+    "id": "fra-p029",
+    "team_id": "fra",
+    "name": "Noah Everley",
+    "primary_position": "fullback",
+    "date_of_birth": "1991-09-19",
+    "height_cm": 181,
+    "weight_kg": 95,
+    "cap_count": 38
+  },
+  {
+    "id": "fra-p030",
+    "team_id": "fra",
+    "name": "Nathan Oakden",
+    "primary_position": "fullback",
+    "date_of_birth": "2000-04-07",
+    "height_cm": 181,
+    "weight_kg": 98,
+    "cap_count": 19
+  },
+  {
+    "id": "fra-p031",
+    "team_id": "fra",
+    "name": "Vincent Harwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1998-05-06",
+    "height_cm": 189,
+    "weight_kg": 116,
+    "cap_count": 71
+  },
+  {
+    "id": "fra-p032",
+    "team_id": "fra",
+    "name": "Damian Danforth",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-12-26",
+    "height_cm": 194,
+    "weight_kg": 99,
+    "cap_count": 22
+  },
+  {
+    "id": "fra-p033",
+    "team_id": "fra",
+    "name": "Oliver Bramley",
+    "primary_position": "lock",
+    "date_of_birth": "1997-10-19",
+    "height_cm": 198,
+    "weight_kg": 129,
+    "cap_count": 46
+  },
+  {
+    "id": "fij-p001",
+    "team_id": "fij",
+    "name": "George Everley",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2004-10-27",
+    "height_cm": 181,
+    "weight_kg": 126,
+    "cap_count": 40
+  },
+  {
+    "id": "fij-p002",
+    "team_id": "fij",
+    "name": "Liam Crestwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-05-13",
+    "height_cm": 185,
+    "weight_kg": 113,
+    "cap_count": 48
+  },
+  {
+    "id": "fij-p003",
+    "team_id": "fij",
+    "name": "Zac Merrick",
+    "primary_position": "hooker",
+    "date_of_birth": "1997-09-11",
+    "height_cm": 186,
+    "weight_kg": 112,
+    "cap_count": 31
+  },
+  {
+    "id": "fij-p004",
+    "team_id": "fij",
+    "name": "Henri Northwood",
+    "primary_position": "hooker",
+    "date_of_birth": "2004-04-10",
+    "height_cm": 185,
+    "weight_kg": 117,
+    "cap_count": 30
+  },
+  {
+    "id": "fij-p005",
+    "team_id": "fij",
+    "name": "Gareth Jarrow",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1992-04-03",
+    "height_cm": 194,
+    "weight_kg": 122,
+    "cap_count": 20
+  },
+  {
+    "id": "fij-p006",
+    "team_id": "fij",
+    "name": "Henri Leighton",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-02-14",
+    "height_cm": 181,
+    "weight_kg": 119,
+    "cap_count": 53
+  },
+  {
+    "id": "fij-p007",
+    "team_id": "fij",
+    "name": "Alex Yardley",
+    "primary_position": "lock",
+    "date_of_birth": "1993-11-22",
+    "height_cm": 197,
+    "weight_kg": 117,
+    "cap_count": 25
+  },
+  {
+    "id": "fij-p008",
+    "team_id": "fij",
+    "name": "Kieran Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1999-06-13",
+    "height_cm": 200,
+    "weight_kg": 118,
+    "cap_count": 86
+  },
+  {
+    "id": "fij-p009",
+    "team_id": "fij",
+    "name": "Marcus Yardley",
+    "primary_position": "lock",
+    "date_of_birth": "1999-03-11",
+    "height_cm": 201,
+    "weight_kg": 130,
+    "cap_count": 14
+  },
+  {
+    "id": "fij-p010",
+    "team_id": "fij",
+    "name": "Julian Leighton",
+    "primary_position": "lock",
+    "date_of_birth": "2007-01-13",
+    "height_cm": 195,
+    "weight_kg": 129,
+    "cap_count": 73
+  },
+  {
+    "id": "fij-p011",
+    "team_id": "fij",
+    "name": "Henri Norwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1999-03-09",
+    "height_cm": 199,
+    "weight_kg": 119,
+    "cap_count": 87
+  },
+  {
+    "id": "fij-p012",
+    "team_id": "fij",
+    "name": "Jack Merrick",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-05-13",
+    "height_cm": 193,
+    "weight_kg": 107,
+    "cap_count": 38
+  },
+  {
+    "id": "fij-p013",
+    "team_id": "fij",
+    "name": "Henri Vance",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2004-03-20",
+    "height_cm": 187,
+    "weight_kg": 103,
+    "cap_count": 33
+  },
+  {
+    "id": "fij-p014",
+    "team_id": "fij",
+    "name": "Yannick Winford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-11-07",
+    "height_cm": 192,
+    "weight_kg": 103,
+    "cap_count": 83
+  },
+  {
+    "id": "fij-p015",
+    "team_id": "fij",
+    "name": "Cameron Kingsford",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-01-18",
+    "height_cm": 192,
+    "weight_kg": 111,
+    "cap_count": 87
+  },
+  {
+    "id": "fij-p016",
+    "team_id": "fij",
+    "name": "Elliot Portway",
+    "primary_position": "number-8",
+    "date_of_birth": "2003-02-27",
+    "height_cm": 200,
+    "weight_kg": 115,
+    "cap_count": 10
+  },
+  {
+    "id": "fij-p017",
+    "team_id": "fij",
+    "name": "Vincent Quenton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2003-02-26",
+    "height_cm": 172,
+    "weight_kg": 88,
+    "cap_count": 71
+  },
+  {
+    "id": "fij-p018",
+    "team_id": "fij",
+    "name": "Bruno Elsworth",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2007-10-06",
+    "height_cm": 180,
+    "weight_kg": 88,
+    "cap_count": 89
+  },
+  {
+    "id": "fij-p019",
+    "team_id": "fij",
+    "name": "Finn Northwood",
+    "primary_position": "fly-half",
+    "date_of_birth": "1989-03-05",
+    "height_cm": 177,
+    "weight_kg": 93,
+    "cap_count": 43
+  },
+  {
+    "id": "fij-p020",
+    "team_id": "fij",
+    "name": "Ivan Portway",
+    "primary_position": "fly-half",
+    "date_of_birth": "1998-07-19",
+    "height_cm": 178,
+    "weight_kg": 95,
+    "cap_count": 50
+  },
+  {
+    "id": "fij-p021",
+    "team_id": "fij",
+    "name": "Noah Denholm",
+    "primary_position": "left-wing",
+    "date_of_birth": "2005-03-12",
+    "height_cm": 193,
+    "weight_kg": 98,
+    "cap_count": 73
+  },
+  {
+    "id": "fij-p022",
+    "team_id": "fij",
+    "name": "Alex Ivory",
+    "primary_position": "left-wing",
+    "date_of_birth": "1993-02-08",
+    "height_cm": 189,
+    "weight_kg": 98,
+    "cap_count": 85
+  },
+  {
+    "id": "fij-p023",
+    "team_id": "fij",
+    "name": "Gareth Farraday",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1993-06-07",
+    "height_cm": 185,
+    "weight_kg": 93,
+    "cap_count": 33
+  },
+  {
+    "id": "fij-p024",
+    "team_id": "fij",
+    "name": "Xavier Ormsby",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2007-10-12",
+    "height_cm": 180,
+    "weight_kg": 104,
+    "cap_count": 88
+  },
+  {
+    "id": "fij-p025",
+    "team_id": "fij",
+    "name": "Noah Elsworth",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1993-04-19",
+    "height_cm": 188,
+    "weight_kg": 89,
+    "cap_count": 65
+  },
+  {
+    "id": "fij-p026",
+    "team_id": "fij",
+    "name": "Alex Yardley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-09-05",
+    "height_cm": 192,
+    "weight_kg": 99,
+    "cap_count": 8
+  },
+  {
+    "id": "fij-p027",
+    "team_id": "fij",
+    "name": "Mason Oakden",
+    "primary_position": "right-wing",
+    "date_of_birth": "1993-09-24",
+    "height_cm": 182,
+    "weight_kg": 98,
+    "cap_count": 27
+  },
+  {
+    "id": "fij-p028",
+    "team_id": "fij",
+    "name": "Finn Everley",
+    "primary_position": "right-wing",
+    "date_of_birth": "1997-01-05",
+    "height_cm": 191,
+    "weight_kg": 99,
+    "cap_count": 32
+  },
+  {
+    "id": "fij-p029",
+    "team_id": "fij",
+    "name": "Adrian Farraday",
+    "primary_position": "fullback",
+    "date_of_birth": "1989-12-14",
+    "height_cm": 195,
+    "weight_kg": 91,
+    "cap_count": 79
+  },
+  {
+    "id": "fij-p030",
+    "team_id": "fij",
+    "name": "Finn Denholm",
+    "primary_position": "fullback",
+    "date_of_birth": "2006-11-13",
+    "height_cm": 194,
+    "weight_kg": 102,
+    "cap_count": 9
+  },
+  {
+    "id": "fij-p031",
+    "team_id": "fij",
+    "name": "Yannick Fairhurst",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2000-11-08",
+    "height_cm": 194,
+    "weight_kg": 114,
+    "cap_count": 11
+  },
+  {
+    "id": "fij-p032",
+    "team_id": "fij",
+    "name": "Patrick Oakden",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-10-23",
+    "height_cm": 185,
+    "weight_kg": 103,
+    "cap_count": 52
+  },
+  {
+    "id": "fij-p033",
+    "team_id": "fij",
+    "name": "Cameron Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "1991-07-27",
+    "height_cm": 204,
+    "weight_kg": 128,
+    "cap_count": 55
+  },
+  {
+    "id": "usa-p001",
+    "team_id": "usa",
+    "name": "Felix Farraday",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1994-08-14",
+    "height_cm": 180,
+    "weight_kg": 111,
+    "cap_count": 3
+  },
+  {
+    "id": "usa-p002",
+    "team_id": "usa",
+    "name": "Finn Cartwright",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1996-07-26",
+    "height_cm": 179,
+    "weight_kg": 125,
+    "cap_count": 89
+  },
+  {
+    "id": "usa-p003",
+    "team_id": "usa",
+    "name": "Ethan Norwood",
+    "primary_position": "hooker",
+    "date_of_birth": "2002-10-13",
+    "height_cm": 181,
+    "weight_kg": 114,
+    "cap_count": 22
+  },
+  {
+    "id": "usa-p004",
+    "team_id": "usa",
+    "name": "William Pemberton",
+    "primary_position": "hooker",
+    "date_of_birth": "2006-06-11",
+    "height_cm": 181,
+    "weight_kg": 115,
+    "cap_count": 53
+  },
+  {
+    "id": "usa-p005",
+    "team_id": "usa",
+    "name": "Xavier Ivory",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-08-10",
+    "height_cm": 183,
+    "weight_kg": 120,
+    "cap_count": 54
+  },
+  {
+    "id": "usa-p006",
+    "team_id": "usa",
+    "name": "Lucas Northwood",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2002-06-20",
+    "height_cm": 195,
+    "weight_kg": 130,
+    "cap_count": 70
+  },
+  {
+    "id": "usa-p007",
+    "team_id": "usa",
+    "name": "Yannick Norwood",
+    "primary_position": "lock",
+    "date_of_birth": "2002-08-08",
+    "height_cm": 199,
+    "weight_kg": 124,
+    "cap_count": 10
+  },
+  {
+    "id": "usa-p008",
+    "team_id": "usa",
+    "name": "Ethan Jarrow",
+    "primary_position": "lock",
+    "date_of_birth": "1992-01-03",
+    "height_cm": 196,
+    "weight_kg": 125,
+    "cap_count": 24
+  },
+  {
+    "id": "usa-p009",
+    "team_id": "usa",
+    "name": "William Jennings",
+    "primary_position": "lock",
+    "date_of_birth": "2002-05-18",
+    "height_cm": 203,
+    "weight_kg": 129,
+    "cap_count": 0
+  },
+  {
+    "id": "usa-p010",
+    "team_id": "usa",
+    "name": "Harry Everley",
+    "primary_position": "lock",
+    "date_of_birth": "2000-04-18",
+    "height_cm": 195,
+    "weight_kg": 120,
+    "cap_count": 12
+  },
+  {
+    "id": "usa-p011",
+    "team_id": "usa",
+    "name": "Julian Jennings",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2006-01-14",
+    "height_cm": 193,
+    "weight_kg": 106,
+    "cap_count": 54
+  },
+  {
+    "id": "usa-p012",
+    "team_id": "usa",
+    "name": "Marcus Danforth",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-04-19",
+    "height_cm": 193,
+    "weight_kg": 109,
+    "cap_count": 87
+  },
+  {
+    "id": "usa-p013",
+    "team_id": "usa",
+    "name": "Kieran Vance",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-10-05",
+    "height_cm": 189,
+    "weight_kg": 108,
+    "cap_count": 78
+  },
+  {
+    "id": "usa-p014",
+    "team_id": "usa",
+    "name": "Alex Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2002-08-25",
+    "height_cm": 180,
+    "weight_kg": 111,
+    "cap_count": 28
+  },
+  {
+    "id": "usa-p015",
+    "team_id": "usa",
+    "name": "Lucas Elsworth",
+    "primary_position": "number-8",
+    "date_of_birth": "1997-09-16",
+    "height_cm": 188,
+    "weight_kg": 122,
+    "cap_count": 82
+  },
+  {
+    "id": "usa-p016",
+    "team_id": "usa",
+    "name": "Marcus Crestwood",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-09-18",
+    "height_cm": 189,
+    "weight_kg": 115,
+    "cap_count": 62
+  },
+  {
+    "id": "usa-p017",
+    "team_id": "usa",
+    "name": "Kieran Kilbride",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1998-09-18",
+    "height_cm": 172,
+    "weight_kg": 88,
+    "cap_count": 16
+  },
+  {
+    "id": "usa-p018",
+    "team_id": "usa",
+    "name": "Patrick Denholm",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1999-12-23",
+    "height_cm": 173,
+    "weight_kg": 83,
+    "cap_count": 88
+  },
+  {
+    "id": "usa-p019",
+    "team_id": "usa",
+    "name": "William Ivory",
+    "primary_position": "fly-half",
+    "date_of_birth": "1998-11-11",
+    "height_cm": 182,
+    "weight_kg": 87,
+    "cap_count": 0
+  },
+  {
+    "id": "usa-p020",
+    "team_id": "usa",
+    "name": "Yannick Oakden",
+    "primary_position": "fly-half",
+    "date_of_birth": "2001-10-27",
+    "height_cm": 178,
+    "weight_kg": 95,
+    "cap_count": 24
+  },
+  {
+    "id": "usa-p021",
+    "team_id": "usa",
+    "name": "Marcus Blackmore",
+    "primary_position": "left-wing",
+    "date_of_birth": "1996-10-07",
+    "height_cm": 181,
+    "weight_kg": 98,
+    "cap_count": 88
+  },
+  {
+    "id": "usa-p022",
+    "team_id": "usa",
+    "name": "Finn Ravenscroft",
+    "primary_position": "left-wing",
+    "date_of_birth": "2003-05-22",
+    "height_cm": 186,
+    "weight_kg": 94,
+    "cap_count": 89
+  },
+  {
+    "id": "usa-p023",
+    "team_id": "usa",
+    "name": "Alex Winford",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2001-09-21",
+    "height_cm": 186,
+    "weight_kg": 91,
+    "cap_count": 47
+  },
+  {
+    "id": "usa-p024",
+    "team_id": "usa",
+    "name": "Nathan Elsworth",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2004-03-17",
+    "height_cm": 183,
+    "weight_kg": 93,
+    "cap_count": 44
+  },
+  {
+    "id": "usa-p025",
+    "team_id": "usa",
+    "name": "Quinn Thornton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2006-08-21",
+    "height_cm": 188,
+    "weight_kg": 92,
+    "cap_count": 66
+  },
+  {
+    "id": "usa-p026",
+    "team_id": "usa",
+    "name": "Elliot Kilbride",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1997-11-13",
+    "height_cm": 188,
+    "weight_kg": 97,
+    "cap_count": 84
+  },
+  {
+    "id": "usa-p027",
+    "team_id": "usa",
+    "name": "Marcus Denholm",
+    "primary_position": "right-wing",
+    "date_of_birth": "1992-12-26",
+    "height_cm": 188,
+    "weight_kg": 93,
+    "cap_count": 47
+  },
+  {
+    "id": "usa-p028",
+    "team_id": "usa",
+    "name": "William Vance",
+    "primary_position": "right-wing",
+    "date_of_birth": "1993-01-13",
+    "height_cm": 190,
+    "weight_kg": 96,
+    "cap_count": 86
+  },
+  {
+    "id": "usa-p029",
+    "team_id": "usa",
+    "name": "Jack Milburn",
+    "primary_position": "fullback",
+    "date_of_birth": "1998-11-22",
+    "height_cm": 195,
+    "weight_kg": 105,
+    "cap_count": 50
+  },
+  {
+    "id": "usa-p030",
+    "team_id": "usa",
+    "name": "Isaac Ashford",
+    "primary_position": "fullback",
+    "date_of_birth": "2007-02-18",
+    "height_cm": 189,
+    "weight_kg": 95,
+    "cap_count": 38
+  },
+  {
+    "id": "usa-p031",
+    "team_id": "usa",
+    "name": "Finn Ivory",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1993-04-22",
+    "height_cm": 200,
+    "weight_kg": 114,
+    "cap_count": 49
+  },
+  {
+    "id": "usa-p032",
+    "team_id": "usa",
+    "name": "Yannick Jennings",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1990-02-22",
+    "height_cm": 187,
+    "weight_kg": 114,
+    "cap_count": 68
+  },
+  {
+    "id": "usa-p033",
+    "team_id": "usa",
+    "name": "Oliver Ashcombe",
+    "primary_position": "lock",
+    "date_of_birth": "1997-06-03",
+    "height_cm": 209,
+    "weight_kg": 130,
+    "cap_count": 79
+  },
+  {
+    "id": "zim-p001",
+    "team_id": "zim",
+    "name": "Thomas Ashcombe",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1998-06-01",
+    "height_cm": 187,
+    "weight_kg": 121,
+    "cap_count": 3
+  },
+  {
+    "id": "zim-p002",
+    "team_id": "zim",
+    "name": "Felix Merrick",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2005-08-10",
+    "height_cm": 186,
+    "weight_kg": 110,
+    "cap_count": 17
+  },
+  {
+    "id": "zim-p003",
+    "team_id": "zim",
+    "name": "Cameron Jarrow",
+    "primary_position": "hooker",
+    "date_of_birth": "1991-12-02",
+    "height_cm": 180,
+    "weight_kg": 111,
+    "cap_count": 38
+  },
+  {
+    "id": "zim-p004",
+    "team_id": "zim",
+    "name": "Jack Pemberton",
+    "primary_position": "hooker",
+    "date_of_birth": "2007-07-20",
+    "height_cm": 176,
+    "weight_kg": 117,
+    "cap_count": 68
+  },
+  {
+    "id": "zim-p005",
+    "team_id": "zim",
+    "name": "Yannick Ashford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2004-12-08",
+    "height_cm": 182,
+    "weight_kg": 116,
+    "cap_count": 14
+  },
+  {
+    "id": "zim-p006",
+    "team_id": "zim",
+    "name": "Ivan Merrick",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1991-10-13",
+    "height_cm": 192,
+    "weight_kg": 129,
+    "cap_count": 30
+  },
+  {
+    "id": "zim-p007",
+    "team_id": "zim",
+    "name": "Jack Denholm",
+    "primary_position": "lock",
+    "date_of_birth": "2006-02-23",
+    "height_cm": 196,
+    "weight_kg": 119,
+    "cap_count": 54
+  },
+  {
+    "id": "zim-p008",
+    "team_id": "zim",
+    "name": "Ivan Leighton",
+    "primary_position": "lock",
+    "date_of_birth": "2006-02-21",
+    "height_cm": 197,
+    "weight_kg": 127,
+    "cap_count": 85
+  },
+  {
+    "id": "zim-p009",
+    "team_id": "zim",
+    "name": "Damian Underhill",
+    "primary_position": "lock",
+    "date_of_birth": "2004-03-15",
+    "height_cm": 195,
+    "weight_kg": 121,
+    "cap_count": 26
+  },
+  {
+    "id": "zim-p010",
+    "team_id": "zim",
+    "name": "Yannick Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "2000-03-21",
+    "height_cm": 204,
+    "weight_kg": 129,
+    "cap_count": 74
+  },
+  {
+    "id": "zim-p011",
+    "team_id": "zim",
+    "name": "Callum Fairhurst",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2003-04-27",
+    "height_cm": 188,
+    "weight_kg": 116,
+    "cap_count": 22
+  },
+  {
+    "id": "zim-p012",
+    "team_id": "zim",
+    "name": "Lucas Ingleby",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1993-04-16",
+    "height_cm": 199,
+    "weight_kg": 109,
+    "cap_count": 43
+  },
+  {
+    "id": "zim-p013",
+    "team_id": "zim",
+    "name": "Mason Winford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-12-27",
+    "height_cm": 185,
+    "weight_kg": 98,
+    "cap_count": 49
+  },
+  {
+    "id": "zim-p014",
+    "team_id": "zim",
+    "name": "William Merrick",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2004-11-25",
+    "height_cm": 183,
+    "weight_kg": 107,
+    "cap_count": 49
+  },
+  {
+    "id": "zim-p015",
+    "team_id": "zim",
+    "name": "Gareth Yardley",
+    "primary_position": "number-8",
+    "date_of_birth": "1993-07-02",
+    "height_cm": 189,
+    "weight_kg": 112,
+    "cap_count": 41
+  },
+  {
+    "id": "zim-p016",
+    "team_id": "zim",
+    "name": "George Ormsby",
+    "primary_position": "number-8",
+    "date_of_birth": "2002-11-04",
+    "height_cm": 190,
+    "weight_kg": 119,
+    "cap_count": 87
+  },
+  {
+    "id": "zim-p017",
+    "team_id": "zim",
+    "name": "Ryan Quenton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1995-10-13",
+    "height_cm": 171,
+    "weight_kg": 85,
+    "cap_count": 85
+  },
+  {
+    "id": "zim-p018",
+    "team_id": "zim",
+    "name": "Julian Thornton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2005-07-19",
+    "height_cm": 181,
+    "weight_kg": 80,
+    "cap_count": 24
+  },
+  {
+    "id": "zim-p019",
+    "team_id": "zim",
+    "name": "Jack Gainsborough",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-01-04",
+    "height_cm": 190,
+    "weight_kg": 91,
+    "cap_count": 44
+  },
+  {
+    "id": "zim-p020",
+    "team_id": "zim",
+    "name": "Jack Blackmore",
+    "primary_position": "fly-half",
+    "date_of_birth": "2005-02-17",
+    "height_cm": 182,
+    "weight_kg": 83,
+    "cap_count": 50
+  },
+  {
+    "id": "zim-p021",
+    "team_id": "zim",
+    "name": "Alex Ashcombe",
+    "primary_position": "left-wing",
+    "date_of_birth": "2002-11-22",
+    "height_cm": 193,
+    "weight_kg": 96,
+    "cap_count": 31
+  },
+  {
+    "id": "zim-p022",
+    "team_id": "zim",
+    "name": "Callum Thornton",
+    "primary_position": "left-wing",
+    "date_of_birth": "2000-01-03",
+    "height_cm": 191,
+    "weight_kg": 93,
+    "cap_count": 5
+  },
+  {
+    "id": "zim-p023",
+    "team_id": "zim",
+    "name": "Liam Fairhurst",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-07-12",
+    "height_cm": 191,
+    "weight_kg": 91,
+    "cap_count": 42
+  },
+  {
+    "id": "zim-p024",
+    "team_id": "zim",
+    "name": "Daniel Denholm",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1992-01-03",
+    "height_cm": 180,
+    "weight_kg": 91,
+    "cap_count": 29
+  },
+  {
+    "id": "zim-p025",
+    "team_id": "zim",
+    "name": "Damian Portway",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1996-04-25",
+    "height_cm": 193,
+    "weight_kg": 97,
+    "cap_count": 36
+  },
+  {
+    "id": "zim-p026",
+    "team_id": "zim",
+    "name": "Noah Fairhurst",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-03-23",
+    "height_cm": 181,
+    "weight_kg": 92,
+    "cap_count": 88
+  },
+  {
+    "id": "zim-p027",
+    "team_id": "zim",
+    "name": "Mason Ashford",
+    "primary_position": "right-wing",
+    "date_of_birth": "1999-02-12",
+    "height_cm": 184,
+    "weight_kg": 92,
+    "cap_count": 87
+  },
+  {
+    "id": "zim-p028",
+    "team_id": "zim",
+    "name": "Isaac Yardley",
+    "primary_position": "right-wing",
+    "date_of_birth": "1994-03-23",
+    "height_cm": 181,
+    "weight_kg": 95,
+    "cap_count": 21
+  },
+  {
+    "id": "zim-p029",
+    "team_id": "zim",
+    "name": "Henri Pemberton",
+    "primary_position": "fullback",
+    "date_of_birth": "2007-10-01",
+    "height_cm": 189,
+    "weight_kg": 102,
+    "cap_count": 24
+  },
+  {
+    "id": "zim-p030",
+    "team_id": "zim",
+    "name": "Adrian Quenton",
+    "primary_position": "fullback",
+    "date_of_birth": "2003-11-25",
+    "height_cm": 184,
+    "weight_kg": 93,
+    "cap_count": 12
+  },
+  {
+    "id": "zim-p031",
+    "team_id": "zim",
+    "name": "Marcus Denholm",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2006-01-04",
+    "height_cm": 195,
+    "weight_kg": 112,
+    "cap_count": 52
+  },
+  {
+    "id": "zim-p032",
+    "team_id": "zim",
+    "name": "Cameron Pemberton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-04-06",
+    "height_cm": 185,
+    "weight_kg": 104,
+    "cap_count": 40
+  },
+  {
+    "id": "zim-p033",
+    "team_id": "zim",
+    "name": "Alex Ashcombe",
+    "primary_position": "lock",
+    "date_of_birth": "2002-08-10",
+    "height_cm": 210,
+    "weight_kg": 130,
+    "cap_count": 0
+  },
+  {
+    "id": "eng-p001",
+    "team_id": "eng",
+    "name": "William Jennings",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1992-08-19",
+    "height_cm": 183,
+    "weight_kg": 112,
+    "cap_count": 54
+  },
+  {
+    "id": "eng-p002",
+    "team_id": "eng",
+    "name": "Yannick Grayling",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2002-03-13",
+    "height_cm": 190,
+    "weight_kg": 110,
+    "cap_count": 86
+  },
+  {
+    "id": "eng-p003",
+    "team_id": "eng",
+    "name": "Felix Cartwright",
+    "primary_position": "hooker",
+    "date_of_birth": "1993-06-19",
+    "height_cm": 181,
+    "weight_kg": 118,
+    "cap_count": 7
+  },
+  {
+    "id": "eng-p004",
+    "team_id": "eng",
+    "name": "Harry Everley",
+    "primary_position": "hooker",
+    "date_of_birth": "2000-02-06",
+    "height_cm": 184,
+    "weight_kg": 111,
+    "cap_count": 22
+  },
+  {
+    "id": "eng-p005",
+    "team_id": "eng",
+    "name": "Gareth Everley",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1995-05-27",
+    "height_cm": 188,
+    "weight_kg": 116,
+    "cap_count": 59
+  },
+  {
+    "id": "eng-p006",
+    "team_id": "eng",
+    "name": "Adrian Merrick",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-02-11",
+    "height_cm": 191,
+    "weight_kg": 133,
+    "cap_count": 52
+  },
+  {
+    "id": "eng-p007",
+    "team_id": "eng",
+    "name": "Bruno Elsworth",
+    "primary_position": "lock",
+    "date_of_birth": "1992-08-04",
+    "height_cm": 206,
+    "weight_kg": 115,
+    "cap_count": 65
+  },
+  {
+    "id": "eng-p008",
+    "team_id": "eng",
+    "name": "Liam Gainsborough",
+    "primary_position": "lock",
+    "date_of_birth": "1991-09-15",
+    "height_cm": 210,
+    "weight_kg": 117,
+    "cap_count": 42
+  },
+  {
+    "id": "eng-p009",
+    "team_id": "eng",
+    "name": "Oliver Elsworth",
+    "primary_position": "lock",
+    "date_of_birth": "2004-11-26",
+    "height_cm": 205,
+    "weight_kg": 125,
+    "cap_count": 79
+  },
+  {
+    "id": "eng-p010",
+    "team_id": "eng",
+    "name": "Vincent Kingsford",
+    "primary_position": "lock",
+    "date_of_birth": "1996-07-09",
+    "height_cm": 195,
+    "weight_kg": 124,
+    "cap_count": 58
+  },
+  {
+    "id": "eng-p011",
+    "team_id": "eng",
+    "name": "William Denholm",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2002-02-26",
+    "height_cm": 197,
+    "weight_kg": 120,
+    "cap_count": 48
+  },
+  {
+    "id": "eng-p012",
+    "team_id": "eng",
+    "name": "Adrian Vance",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1995-08-01",
+    "height_cm": 194,
+    "weight_kg": 110,
+    "cap_count": 10
+  },
+  {
+    "id": "eng-p013",
+    "team_id": "eng",
+    "name": "Kieran Jennings",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2001-08-02",
+    "height_cm": 184,
+    "weight_kg": 105,
+    "cap_count": 86
+  },
+  {
+    "id": "eng-p014",
+    "team_id": "eng",
+    "name": "Quinn Bramley",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2007-07-05",
+    "height_cm": 181,
+    "weight_kg": 99,
+    "cap_count": 29
+  },
+  {
+    "id": "eng-p015",
+    "team_id": "eng",
+    "name": "George Gainsborough",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-02-15",
+    "height_cm": 196,
+    "weight_kg": 108,
+    "cap_count": 19
+  },
+  {
+    "id": "eng-p016",
+    "team_id": "eng",
+    "name": "Mason Portway",
+    "primary_position": "number-8",
+    "date_of_birth": "2003-03-16",
+    "height_cm": 190,
+    "weight_kg": 121,
+    "cap_count": 89
+  },
+  {
+    "id": "eng-p017",
+    "team_id": "eng",
+    "name": "Henri Jennings",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1994-10-03",
+    "height_cm": 184,
+    "weight_kg": 87,
+    "cap_count": 89
+  },
+  {
+    "id": "eng-p018",
+    "team_id": "eng",
+    "name": "Xavier Portway",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1990-04-20",
+    "height_cm": 179,
+    "weight_kg": 87,
+    "cap_count": 14
+  },
+  {
+    "id": "eng-p019",
+    "team_id": "eng",
+    "name": "Julian Halliwell",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-01-04",
+    "height_cm": 182,
+    "weight_kg": 82,
+    "cap_count": 3
+  },
+  {
+    "id": "eng-p020",
+    "team_id": "eng",
+    "name": "Marcus Pemberton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-01-24",
+    "height_cm": 176,
+    "weight_kg": 82,
+    "cap_count": 5
+  },
+  {
+    "id": "eng-p021",
+    "team_id": "eng",
+    "name": "Cameron Ashcombe",
+    "primary_position": "left-wing",
+    "date_of_birth": "2003-06-14",
+    "height_cm": 185,
+    "weight_kg": 92,
+    "cap_count": 13
+  },
+  {
+    "id": "eng-p022",
+    "team_id": "eng",
+    "name": "Damian Fairhurst",
+    "primary_position": "left-wing",
+    "date_of_birth": "2005-01-15",
+    "height_cm": 182,
+    "weight_kg": 89,
+    "cap_count": 77
+  },
+  {
+    "id": "eng-p023",
+    "team_id": "eng",
+    "name": "Mason Kilbride",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1996-09-12",
+    "height_cm": 193,
+    "weight_kg": 96,
+    "cap_count": 56
+  },
+  {
+    "id": "eng-p024",
+    "team_id": "eng",
+    "name": "Noah Thornton",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-08-05",
+    "height_cm": 183,
+    "weight_kg": 105,
+    "cap_count": 38
+  },
+  {
+    "id": "eng-p025",
+    "team_id": "eng",
+    "name": "Ben Denholm",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1992-05-21",
+    "height_cm": 181,
+    "weight_kg": 97,
+    "cap_count": 32
+  },
+  {
+    "id": "eng-p026",
+    "team_id": "eng",
+    "name": "Marcus Thornton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1997-02-14",
+    "height_cm": 184,
+    "weight_kg": 91,
+    "cap_count": 75
+  },
+  {
+    "id": "eng-p027",
+    "team_id": "eng",
+    "name": "Zac Danforth",
+    "primary_position": "right-wing",
+    "date_of_birth": "1995-01-02",
+    "height_cm": 183,
+    "weight_kg": 94,
+    "cap_count": 8
+  },
+  {
+    "id": "eng-p028",
+    "team_id": "eng",
+    "name": "Lucas Farraday",
+    "primary_position": "right-wing",
+    "date_of_birth": "1996-02-11",
+    "height_cm": 193,
+    "weight_kg": 92,
+    "cap_count": 35
+  },
+  {
+    "id": "eng-p029",
+    "team_id": "eng",
+    "name": "Julian Sinclair",
+    "primary_position": "fullback",
+    "date_of_birth": "1997-08-12",
+    "height_cm": 184,
+    "weight_kg": 101,
+    "cap_count": 23
+  },
+  {
+    "id": "eng-p030",
+    "team_id": "eng",
+    "name": "Elliot Farraday",
+    "primary_position": "fullback",
+    "date_of_birth": "2007-08-03",
+    "height_cm": 193,
+    "weight_kg": 92,
+    "cap_count": 71
+  },
+  {
+    "id": "eng-p031",
+    "team_id": "eng",
+    "name": "Harry Farraday",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2000-08-23",
+    "height_cm": 199,
+    "weight_kg": 113,
+    "cap_count": 65
+  },
+  {
+    "id": "eng-p032",
+    "team_id": "eng",
+    "name": "Vincent Everley",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2007-05-26",
+    "height_cm": 182,
+    "weight_kg": 106,
+    "cap_count": 47
+  },
+  {
+    "id": "eng-p033",
+    "team_id": "eng",
+    "name": "Alex Northwood",
+    "primary_position": "lock",
+    "date_of_birth": "1999-12-06",
+    "height_cm": 210,
+    "weight_kg": 123,
+    "cap_count": 39
+  },
+  {
+    "id": "sco-p001",
+    "team_id": "sco",
+    "name": "Ivan Milburn",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1993-06-12",
+    "height_cm": 188,
+    "weight_kg": 117,
+    "cap_count": 27
+  },
+  {
+    "id": "sco-p002",
+    "team_id": "sco",
+    "name": "Elliot Bramley",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-08-06",
+    "height_cm": 190,
+    "weight_kg": 121,
+    "cap_count": 12
+  },
+  {
+    "id": "sco-p003",
+    "team_id": "sco",
+    "name": "Daniel Farraday",
+    "primary_position": "hooker",
+    "date_of_birth": "1993-09-01",
+    "height_cm": 182,
+    "weight_kg": 113,
+    "cap_count": 37
+  },
+  {
+    "id": "sco-p004",
+    "team_id": "sco",
+    "name": "Felix Bramley",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-09-18",
+    "height_cm": 177,
+    "weight_kg": 118,
+    "cap_count": 73
+  },
+  {
+    "id": "sco-p005",
+    "team_id": "sco",
+    "name": "Callum Winford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2005-01-01",
+    "height_cm": 191,
+    "weight_kg": 135,
+    "cap_count": 89
+  },
+  {
+    "id": "sco-p006",
+    "team_id": "sco",
+    "name": "Ryan Merrick",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2003-07-08",
+    "height_cm": 191,
+    "weight_kg": 125,
+    "cap_count": 28
+  },
+  {
+    "id": "sco-p007",
+    "team_id": "sco",
+    "name": "Ethan Ingleby",
+    "primary_position": "lock",
+    "date_of_birth": "1989-04-22",
+    "height_cm": 206,
+    "weight_kg": 128,
+    "cap_count": 4
+  },
+  {
+    "id": "sco-p008",
+    "team_id": "sco",
+    "name": "Lucas Grayling",
+    "primary_position": "lock",
+    "date_of_birth": "2005-07-24",
+    "height_cm": 197,
+    "weight_kg": 117,
+    "cap_count": 68
+  },
+  {
+    "id": "sco-p009",
+    "team_id": "sco",
+    "name": "Cameron Jarrow",
+    "primary_position": "lock",
+    "date_of_birth": "2002-06-14",
+    "height_cm": 197,
+    "weight_kg": 128,
+    "cap_count": 80
+  },
+  {
+    "id": "sco-p010",
+    "team_id": "sco",
+    "name": "Adrian Ingleby",
+    "primary_position": "lock",
+    "date_of_birth": "1997-01-21",
+    "height_cm": 203,
+    "weight_kg": 119,
+    "cap_count": 45
+  },
+  {
+    "id": "sco-p011",
+    "team_id": "sco",
+    "name": "William Ormsby",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1999-01-03",
+    "height_cm": 189,
+    "weight_kg": 115,
+    "cap_count": 86
+  },
+  {
+    "id": "sco-p012",
+    "team_id": "sco",
+    "name": "Alex Ashford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1995-11-08",
+    "height_cm": 190,
+    "weight_kg": 107,
+    "cap_count": 35
+  },
+  {
+    "id": "sco-p013",
+    "team_id": "sco",
+    "name": "Xavier Ivory",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2005-06-02",
+    "height_cm": 190,
+    "weight_kg": 103,
+    "cap_count": 32
+  },
+  {
+    "id": "sco-p014",
+    "team_id": "sco",
+    "name": "Ben Danforth",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2000-01-12",
+    "height_cm": 182,
+    "weight_kg": 104,
+    "cap_count": 43
+  },
+  {
+    "id": "sco-p015",
+    "team_id": "sco",
+    "name": "Noah Halliwell",
+    "primary_position": "number-8",
+    "date_of_birth": "1992-01-27",
+    "height_cm": 194,
+    "weight_kg": 115,
+    "cap_count": 39
+  },
+  {
+    "id": "sco-p016",
+    "team_id": "sco",
+    "name": "Jack Elsworth",
+    "primary_position": "number-8",
+    "date_of_birth": "1992-10-05",
+    "height_cm": 193,
+    "weight_kg": 121,
+    "cap_count": 21
+  },
+  {
+    "id": "sco-p017",
+    "team_id": "sco",
+    "name": "Bruno Underhill",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2004-05-24",
+    "height_cm": 173,
+    "weight_kg": 86,
+    "cap_count": 10
+  },
+  {
+    "id": "sco-p018",
+    "team_id": "sco",
+    "name": "Vincent Kingsford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2000-02-09",
+    "height_cm": 174,
+    "weight_kg": 92,
+    "cap_count": 85
+  },
+  {
+    "id": "sco-p019",
+    "team_id": "sco",
+    "name": "Julian Fairhurst",
+    "primary_position": "fly-half",
+    "date_of_birth": "2001-05-02",
+    "height_cm": 189,
+    "weight_kg": 89,
+    "cap_count": 35
+  },
+  {
+    "id": "sco-p020",
+    "team_id": "sco",
+    "name": "Cameron Jarrow",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-06-03",
+    "height_cm": 176,
+    "weight_kg": 89,
+    "cap_count": 19
+  },
+  {
+    "id": "sco-p021",
+    "team_id": "sco",
+    "name": "Daniel Leighton",
+    "primary_position": "left-wing",
+    "date_of_birth": "1995-10-17",
+    "height_cm": 180,
+    "weight_kg": 99,
+    "cap_count": 59
+  },
+  {
+    "id": "sco-p022",
+    "team_id": "sco",
+    "name": "Thomas Yardley",
+    "primary_position": "left-wing",
+    "date_of_birth": "2005-01-05",
+    "height_cm": 193,
+    "weight_kg": 96,
+    "cap_count": 31
+  },
+  {
+    "id": "sco-p023",
+    "team_id": "sco",
+    "name": "Henri Harwood",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1997-12-14",
+    "height_cm": 191,
+    "weight_kg": 104,
+    "cap_count": 23
+  },
+  {
+    "id": "sco-p024",
+    "team_id": "sco",
+    "name": "Zac Ashcombe",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2000-01-08",
+    "height_cm": 183,
+    "weight_kg": 104,
+    "cap_count": 27
+  },
+  {
+    "id": "sco-p025",
+    "team_id": "sco",
+    "name": "Samuel Quenton",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1992-05-13",
+    "height_cm": 180,
+    "weight_kg": 102,
+    "cap_count": 79
+  },
+  {
+    "id": "sco-p026",
+    "team_id": "sco",
+    "name": "Bruno Harwood",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1994-02-26",
+    "height_cm": 185,
+    "weight_kg": 99,
+    "cap_count": 45
+  },
+  {
+    "id": "sco-p027",
+    "team_id": "sco",
+    "name": "Felix Kingsford",
+    "primary_position": "right-wing",
+    "date_of_birth": "2003-12-12",
+    "height_cm": 186,
+    "weight_kg": 88,
+    "cap_count": 57
+  },
+  {
+    "id": "sco-p028",
+    "team_id": "sco",
+    "name": "Harry Milburn",
+    "primary_position": "right-wing",
+    "date_of_birth": "2005-06-19",
+    "height_cm": 186,
+    "weight_kg": 93,
+    "cap_count": 50
+  },
+  {
+    "id": "sco-p029",
+    "team_id": "sco",
+    "name": "Gareth Denholm",
+    "primary_position": "fullback",
+    "date_of_birth": "2000-03-10",
+    "height_cm": 195,
+    "weight_kg": 95,
+    "cap_count": 30
+  },
+  {
+    "id": "sco-p030",
+    "team_id": "sco",
+    "name": "Isaac Fairhurst",
+    "primary_position": "fullback",
+    "date_of_birth": "1993-10-27",
+    "height_cm": 185,
+    "weight_kg": 93,
+    "cap_count": 36
+  },
+  {
+    "id": "sco-p031",
+    "team_id": "sco",
+    "name": "Bruno Crestwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1998-06-01",
+    "height_cm": 198,
+    "weight_kg": 118,
+    "cap_count": 46
+  },
+  {
+    "id": "sco-p032",
+    "team_id": "sco",
+    "name": "Mason Merrick",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-03-27",
+    "height_cm": 184,
+    "weight_kg": 105,
+    "cap_count": 15
+  },
+  {
+    "id": "sco-p033",
+    "team_id": "sco",
+    "name": "Samuel Quenton",
+    "primary_position": "lock",
+    "date_of_birth": "1991-04-05",
+    "height_cm": 197,
+    "weight_kg": 121,
+    "cap_count": 47
+  },
+  {
+    "id": "uru-p001",
+    "team_id": "uru",
+    "name": "Damian Milburn",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1989-06-03",
+    "height_cm": 182,
+    "weight_kg": 124,
+    "cap_count": 43
+  },
+  {
+    "id": "uru-p002",
+    "team_id": "uru",
+    "name": "Daniel Yardley",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-02-17",
+    "height_cm": 181,
+    "weight_kg": 119,
+    "cap_count": 1
+  },
+  {
+    "id": "uru-p003",
+    "team_id": "uru",
+    "name": "Cameron Blackmore",
+    "primary_position": "hooker",
+    "date_of_birth": "1997-09-09",
+    "height_cm": 180,
+    "weight_kg": 108,
+    "cap_count": 48
+  },
+  {
+    "id": "uru-p004",
+    "team_id": "uru",
+    "name": "Jack Harwood",
+    "primary_position": "hooker",
+    "date_of_birth": "2004-11-27",
+    "height_cm": 187,
+    "weight_kg": 107,
+    "cap_count": 49
+  },
+  {
+    "id": "uru-p005",
+    "team_id": "uru",
+    "name": "Lucas Cartwright",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1993-01-24",
+    "height_cm": 182,
+    "weight_kg": 135,
+    "cap_count": 60
+  },
+  {
+    "id": "uru-p006",
+    "team_id": "uru",
+    "name": "Finn Quenton",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2007-12-23",
+    "height_cm": 195,
+    "weight_kg": 124,
+    "cap_count": 27
+  },
+  {
+    "id": "uru-p007",
+    "team_id": "uru",
+    "name": "William Crestwood",
+    "primary_position": "lock",
+    "date_of_birth": "2006-02-24",
+    "height_cm": 207,
+    "weight_kg": 128,
+    "cap_count": 83
+  },
+  {
+    "id": "uru-p008",
+    "team_id": "uru",
+    "name": "Patrick Halliwell",
+    "primary_position": "lock",
+    "date_of_birth": "1989-01-23",
+    "height_cm": 200,
+    "weight_kg": 123,
+    "cap_count": 22
+  },
+  {
+    "id": "uru-p009",
+    "team_id": "uru",
+    "name": "Gareth Bramley",
+    "primary_position": "lock",
+    "date_of_birth": "1991-04-17",
+    "height_cm": 200,
+    "weight_kg": 119,
+    "cap_count": 74
+  },
+  {
+    "id": "uru-p010",
+    "team_id": "uru",
+    "name": "Felix Quenton",
+    "primary_position": "lock",
+    "date_of_birth": "1994-05-10",
+    "height_cm": 209,
+    "weight_kg": 122,
+    "cap_count": 50
+  },
+  {
+    "id": "uru-p011",
+    "team_id": "uru",
+    "name": "Lucas Crestwood",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2000-05-12",
+    "height_cm": 191,
+    "weight_kg": 109,
+    "cap_count": 46
+  },
+  {
+    "id": "uru-p012",
+    "team_id": "uru",
+    "name": "Felix Milburn",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2003-07-13",
+    "height_cm": 194,
+    "weight_kg": 116,
+    "cap_count": 55
+  },
+  {
+    "id": "uru-p013",
+    "team_id": "uru",
+    "name": "Noah Underhill",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2006-04-22",
+    "height_cm": 189,
+    "weight_kg": 103,
+    "cap_count": 23
+  },
+  {
+    "id": "uru-p014",
+    "team_id": "uru",
+    "name": "Finn Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2001-08-16",
+    "height_cm": 180,
+    "weight_kg": 104,
+    "cap_count": 17
+  },
+  {
+    "id": "uru-p015",
+    "team_id": "uru",
+    "name": "Bruno Ravenscroft",
+    "primary_position": "number-8",
+    "date_of_birth": "1996-05-20",
+    "height_cm": 198,
+    "weight_kg": 108,
+    "cap_count": 33
+  },
+  {
+    "id": "uru-p016",
+    "team_id": "uru",
+    "name": "Zac Langford",
+    "primary_position": "number-8",
+    "date_of_birth": "1991-06-11",
+    "height_cm": 190,
+    "weight_kg": 118,
+    "cap_count": 34
+  },
+  {
+    "id": "uru-p017",
+    "team_id": "uru",
+    "name": "Adrian Ingleby",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1993-07-07",
+    "height_cm": 172,
+    "weight_kg": 86,
+    "cap_count": 63
+  },
+  {
+    "id": "uru-p018",
+    "team_id": "uru",
+    "name": "Callum Norwood",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2002-11-14",
+    "height_cm": 176,
+    "weight_kg": 84,
+    "cap_count": 87
+  },
+  {
+    "id": "uru-p019",
+    "team_id": "uru",
+    "name": "Ethan Farraday",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-09-13",
+    "height_cm": 176,
+    "weight_kg": 82,
+    "cap_count": 53
+  },
+  {
+    "id": "uru-p020",
+    "team_id": "uru",
+    "name": "Ben Ashford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1991-05-10",
+    "height_cm": 181,
+    "weight_kg": 91,
+    "cap_count": 79
+  },
+  {
+    "id": "uru-p021",
+    "team_id": "uru",
+    "name": "Thomas Fairhurst",
+    "primary_position": "left-wing",
+    "date_of_birth": "2004-02-14",
+    "height_cm": 184,
+    "weight_kg": 96,
+    "cap_count": 39
+  },
+  {
+    "id": "uru-p022",
+    "team_id": "uru",
+    "name": "Damian Elsworth",
+    "primary_position": "left-wing",
+    "date_of_birth": "2007-12-23",
+    "height_cm": 188,
+    "weight_kg": 92,
+    "cap_count": 27
+  },
+  {
+    "id": "uru-p023",
+    "team_id": "uru",
+    "name": "Liam Norwood",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1992-02-17",
+    "height_cm": 190,
+    "weight_kg": 94,
+    "cap_count": 74
+  },
+  {
+    "id": "uru-p024",
+    "team_id": "uru",
+    "name": "Yannick Kilbride",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2004-03-04",
+    "height_cm": 192,
+    "weight_kg": 95,
+    "cap_count": 20
+  },
+  {
+    "id": "uru-p025",
+    "team_id": "uru",
+    "name": "Julian Oakden",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1996-05-24",
+    "height_cm": 193,
+    "weight_kg": 89,
+    "cap_count": 59
+  },
+  {
+    "id": "uru-p026",
+    "team_id": "uru",
+    "name": "Cameron Blackmore",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1992-09-12",
+    "height_cm": 184,
+    "weight_kg": 96,
+    "cap_count": 10
+  },
+  {
+    "id": "uru-p027",
+    "team_id": "uru",
+    "name": "Nathan Yardley",
+    "primary_position": "right-wing",
+    "date_of_birth": "2006-08-11",
+    "height_cm": 180,
+    "weight_kg": 89,
+    "cap_count": 82
+  },
+  {
+    "id": "uru-p028",
+    "team_id": "uru",
+    "name": "Yannick Kingsford",
+    "primary_position": "right-wing",
+    "date_of_birth": "1996-12-27",
+    "height_cm": 183,
+    "weight_kg": 99,
+    "cap_count": 32
+  },
+  {
+    "id": "uru-p029",
+    "team_id": "uru",
+    "name": "Yannick Grayling",
+    "primary_position": "fullback",
+    "date_of_birth": "2000-05-04",
+    "height_cm": 190,
+    "weight_kg": 103,
+    "cap_count": 30
+  },
+  {
+    "id": "uru-p030",
+    "team_id": "uru",
+    "name": "Callum Denholm",
+    "primary_position": "fullback",
+    "date_of_birth": "1997-04-03",
+    "height_cm": 180,
+    "weight_kg": 98,
+    "cap_count": 84
+  },
+  {
+    "id": "uru-p031",
+    "team_id": "uru",
+    "name": "Quinn Oakden",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-09-12",
+    "height_cm": 198,
+    "weight_kg": 115,
+    "cap_count": 39
+  },
+  {
+    "id": "uru-p032",
+    "team_id": "uru",
+    "name": "Felix Pemberton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2006-04-19",
+    "height_cm": 181,
+    "weight_kg": 114,
+    "cap_count": 32
+  },
+  {
+    "id": "uru-p033",
+    "team_id": "uru",
+    "name": "Bruno Pemberton",
+    "primary_position": "lock",
+    "date_of_birth": "1993-01-21",
+    "height_cm": 195,
+    "weight_kg": 120,
+    "cap_count": 58
+  },
+  {
+    "id": "hkg-p001",
+    "team_id": "hkg",
+    "name": "Noah Harwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1999-03-13",
+    "height_cm": 182,
+    "weight_kg": 127,
+    "cap_count": 71
+  },
+  {
+    "id": "hkg-p002",
+    "team_id": "hkg",
+    "name": "Thomas Everley",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1998-11-26",
+    "height_cm": 190,
+    "weight_kg": 130,
+    "cap_count": 17
+  },
+  {
+    "id": "hkg-p003",
+    "team_id": "hkg",
+    "name": "William Yardley",
+    "primary_position": "hooker",
+    "date_of_birth": "2001-05-14",
+    "height_cm": 180,
+    "weight_kg": 117,
+    "cap_count": 29
+  },
+  {
+    "id": "hkg-p004",
+    "team_id": "hkg",
+    "name": "Bruno Ivory",
+    "primary_position": "hooker",
+    "date_of_birth": "2003-05-01",
+    "height_cm": 176,
+    "weight_kg": 118,
+    "cap_count": 86
+  },
+  {
+    "id": "hkg-p005",
+    "team_id": "hkg",
+    "name": "Oliver Ashford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2006-11-20",
+    "height_cm": 186,
+    "weight_kg": 122,
+    "cap_count": 84
+  },
+  {
+    "id": "hkg-p006",
+    "team_id": "hkg",
+    "name": "Ivan Milburn",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1994-10-04",
+    "height_cm": 192,
+    "weight_kg": 135,
+    "cap_count": 34
+  },
+  {
+    "id": "hkg-p007",
+    "team_id": "hkg",
+    "name": "Daniel Northwood",
+    "primary_position": "lock",
+    "date_of_birth": "1989-07-01",
+    "height_cm": 207,
+    "weight_kg": 127,
+    "cap_count": 87
+  },
+  {
+    "id": "hkg-p008",
+    "team_id": "hkg",
+    "name": "William Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "2000-08-09",
+    "height_cm": 200,
+    "weight_kg": 124,
+    "cap_count": 3
+  },
+  {
+    "id": "hkg-p009",
+    "team_id": "hkg",
+    "name": "Damian Underhill",
+    "primary_position": "lock",
+    "date_of_birth": "2004-05-19",
+    "height_cm": 208,
+    "weight_kg": 125,
+    "cap_count": 32
+  },
+  {
+    "id": "hkg-p010",
+    "team_id": "hkg",
+    "name": "Ryan Gainsborough",
+    "primary_position": "lock",
+    "date_of_birth": "2001-12-27",
+    "height_cm": 198,
+    "weight_kg": 125,
+    "cap_count": 1
+  },
+  {
+    "id": "hkg-p011",
+    "team_id": "hkg",
+    "name": "Thomas Winford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2003-09-13",
+    "height_cm": 188,
+    "weight_kg": 105,
+    "cap_count": 89
+  },
+  {
+    "id": "hkg-p012",
+    "team_id": "hkg",
+    "name": "Ethan Blackmore",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1989-07-13",
+    "height_cm": 189,
+    "weight_kg": 116,
+    "cap_count": 80
+  },
+  {
+    "id": "hkg-p013",
+    "team_id": "hkg",
+    "name": "Kyle Winford",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-03-16",
+    "height_cm": 181,
+    "weight_kg": 103,
+    "cap_count": 23
+  },
+  {
+    "id": "hkg-p014",
+    "team_id": "hkg",
+    "name": "Damian Gainsborough",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2004-06-07",
+    "height_cm": 187,
+    "weight_kg": 102,
+    "cap_count": 1
+  },
+  {
+    "id": "hkg-p015",
+    "team_id": "hkg",
+    "name": "Damian Halliwell",
+    "primary_position": "number-8",
+    "date_of_birth": "2004-10-20",
+    "height_cm": 194,
+    "weight_kg": 109,
+    "cap_count": 67
+  },
+  {
+    "id": "hkg-p016",
+    "team_id": "hkg",
+    "name": "Patrick Grayling",
+    "primary_position": "number-8",
+    "date_of_birth": "1990-10-08",
+    "height_cm": 194,
+    "weight_kg": 114,
+    "cap_count": 41
+  },
+  {
+    "id": "hkg-p017",
+    "team_id": "hkg",
+    "name": "Alex Fairhurst",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2006-10-17",
+    "height_cm": 183,
+    "weight_kg": 84,
+    "cap_count": 68
+  },
+  {
+    "id": "hkg-p018",
+    "team_id": "hkg",
+    "name": "Ulrich Yardley",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1993-03-23",
+    "height_cm": 172,
+    "weight_kg": 89,
+    "cap_count": 28
+  },
+  {
+    "id": "hkg-p019",
+    "team_id": "hkg",
+    "name": "Samuel Jarrow",
+    "primary_position": "fly-half",
+    "date_of_birth": "2007-03-17",
+    "height_cm": 175,
+    "weight_kg": 93,
+    "cap_count": 81
+  },
+  {
+    "id": "hkg-p020",
+    "team_id": "hkg",
+    "name": "Daniel Winford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1999-12-26",
+    "height_cm": 185,
+    "weight_kg": 93,
+    "cap_count": 42
+  },
+  {
+    "id": "hkg-p021",
+    "team_id": "hkg",
+    "name": "Adrian Yardley",
+    "primary_position": "left-wing",
+    "date_of_birth": "2006-10-16",
+    "height_cm": 190,
+    "weight_kg": 95,
+    "cap_count": 86
+  },
+  {
+    "id": "hkg-p022",
+    "team_id": "hkg",
+    "name": "Kyle Winford",
+    "primary_position": "left-wing",
+    "date_of_birth": "1991-11-07",
+    "height_cm": 189,
+    "weight_kg": 93,
+    "cap_count": 82
+  },
+  {
+    "id": "hkg-p023",
+    "team_id": "hkg",
+    "name": "Finn Fairhurst",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2005-01-07",
+    "height_cm": 188,
+    "weight_kg": 94,
+    "cap_count": 16
+  },
+  {
+    "id": "hkg-p024",
+    "team_id": "hkg",
+    "name": "Ulrich Bramley",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1997-01-20",
+    "height_cm": 186,
+    "weight_kg": 99,
+    "cap_count": 15
+  },
+  {
+    "id": "hkg-p025",
+    "team_id": "hkg",
+    "name": "Ulrich Northwood",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1995-04-17",
+    "height_cm": 191,
+    "weight_kg": 90,
+    "cap_count": 36
+  },
+  {
+    "id": "hkg-p026",
+    "team_id": "hkg",
+    "name": "Cameron Ashford",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2001-07-21",
+    "height_cm": 188,
+    "weight_kg": 98,
+    "cap_count": 6
+  },
+  {
+    "id": "hkg-p027",
+    "team_id": "hkg",
+    "name": "Lucas Langford",
+    "primary_position": "right-wing",
+    "date_of_birth": "1991-07-04",
+    "height_cm": 183,
+    "weight_kg": 95,
+    "cap_count": 65
+  },
+  {
+    "id": "hkg-p028",
+    "team_id": "hkg",
+    "name": "Kieran Bramley",
+    "primary_position": "right-wing",
+    "date_of_birth": "1990-09-25",
+    "height_cm": 181,
+    "weight_kg": 88,
+    "cap_count": 4
+  },
+  {
+    "id": "hkg-p029",
+    "team_id": "hkg",
+    "name": "Bruno Thornton",
+    "primary_position": "fullback",
+    "date_of_birth": "1999-02-02",
+    "height_cm": 194,
+    "weight_kg": 105,
+    "cap_count": 30
+  },
+  {
+    "id": "hkg-p030",
+    "team_id": "hkg",
+    "name": "Adrian Jennings",
+    "primary_position": "fullback",
+    "date_of_birth": "1992-04-11",
+    "height_cm": 191,
+    "weight_kg": 104,
+    "cap_count": 33
+  },
+  {
+    "id": "hkg-p031",
+    "team_id": "hkg",
+    "name": "Noah Kingsford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-02-02",
+    "height_cm": 188,
+    "weight_kg": 108,
+    "cap_count": 42
+  },
+  {
+    "id": "hkg-p032",
+    "team_id": "hkg",
+    "name": "Thomas Thornton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1998-10-12",
+    "height_cm": 190,
+    "weight_kg": 115,
+    "cap_count": 41
+  },
+  {
+    "id": "hkg-p033",
+    "team_id": "hkg",
+    "name": "Ethan Quenton",
+    "primary_position": "lock",
+    "date_of_birth": "1991-01-12",
+    "height_cm": 199,
+    "weight_kg": 123,
+    "cap_count": 44
+  },
+  {
+    "id": "aus-p001",
+    "team_id": "aus",
+    "name": "Nathan Ashcombe",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2006-02-17",
+    "height_cm": 186,
+    "weight_kg": 122,
+    "cap_count": 88
+  },
+  {
+    "id": "aus-p002",
+    "team_id": "aus",
+    "name": "Oliver Gainsborough",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2000-05-25",
+    "height_cm": 180,
+    "weight_kg": 129,
+    "cap_count": 62
+  },
+  {
+    "id": "aus-p003",
+    "team_id": "aus",
+    "name": "Ulrich Grayling",
+    "primary_position": "hooker",
+    "date_of_birth": "1996-02-14",
+    "height_cm": 175,
+    "weight_kg": 114,
+    "cap_count": 15
+  },
+  {
+    "id": "aus-p004",
+    "team_id": "aus",
+    "name": "Cameron Thornton",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-07-22",
+    "height_cm": 188,
+    "weight_kg": 113,
+    "cap_count": 84
+  },
+  {
+    "id": "aus-p005",
+    "team_id": "aus",
+    "name": "William Fairhurst",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-03-21",
+    "height_cm": 193,
+    "weight_kg": 124,
+    "cap_count": 36
+  },
+  {
+    "id": "aus-p006",
+    "team_id": "aus",
+    "name": "Julian Ashcombe",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1995-08-23",
+    "height_cm": 180,
+    "weight_kg": 126,
+    "cap_count": 9
+  },
+  {
+    "id": "aus-p007",
+    "team_id": "aus",
+    "name": "Vincent Everley",
+    "primary_position": "lock",
+    "date_of_birth": "2004-03-19",
+    "height_cm": 201,
+    "weight_kg": 120,
+    "cap_count": 59
+  },
+  {
+    "id": "aus-p008",
+    "team_id": "aus",
+    "name": "Quinn Portway",
+    "primary_position": "lock",
+    "date_of_birth": "1999-06-24",
+    "height_cm": 208,
+    "weight_kg": 130,
+    "cap_count": 9
+  },
+  {
+    "id": "aus-p009",
+    "team_id": "aus",
+    "name": "Henri Sinclair",
+    "primary_position": "lock",
+    "date_of_birth": "1989-03-23",
+    "height_cm": 204,
+    "weight_kg": 119,
+    "cap_count": 69
+  },
+  {
+    "id": "aus-p010",
+    "team_id": "aus",
+    "name": "Finn Leighton",
+    "primary_position": "lock",
+    "date_of_birth": "1990-04-21",
+    "height_cm": 210,
+    "weight_kg": 118,
+    "cap_count": 66
+  },
+  {
+    "id": "aus-p011",
+    "team_id": "aus",
+    "name": "Marcus Quenton",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1990-07-17",
+    "height_cm": 200,
+    "weight_kg": 120,
+    "cap_count": 88
+  },
+  {
+    "id": "aus-p012",
+    "team_id": "aus",
+    "name": "Kyle Elsworth",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1999-04-23",
+    "height_cm": 194,
+    "weight_kg": 108,
+    "cap_count": 62
+  },
+  {
+    "id": "aus-p013",
+    "team_id": "aus",
+    "name": "William Milburn",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2006-07-14",
+    "height_cm": 185,
+    "weight_kg": 113,
+    "cap_count": 79
+  },
+  {
+    "id": "aus-p014",
+    "team_id": "aus",
+    "name": "Gareth Everley",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-07-06",
+    "height_cm": 183,
+    "weight_kg": 99,
+    "cap_count": 40
+  },
+  {
+    "id": "aus-p015",
+    "team_id": "aus",
+    "name": "Xavier Cartwright",
+    "primary_position": "number-8",
+    "date_of_birth": "1989-03-12",
+    "height_cm": 192,
+    "weight_kg": 111,
+    "cap_count": 12
+  },
+  {
+    "id": "aus-p016",
+    "team_id": "aus",
+    "name": "Cameron Leighton",
+    "primary_position": "number-8",
+    "date_of_birth": "1998-12-19",
+    "height_cm": 197,
+    "weight_kg": 115,
+    "cap_count": 87
+  },
+  {
+    "id": "aus-p017",
+    "team_id": "aus",
+    "name": "Liam Yardley",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2006-10-16",
+    "height_cm": 170,
+    "weight_kg": 86,
+    "cap_count": 47
+  },
+  {
+    "id": "aus-p018",
+    "team_id": "aus",
+    "name": "Ben Kingsford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1992-12-17",
+    "height_cm": 181,
+    "weight_kg": 86,
+    "cap_count": 1
+  },
+  {
+    "id": "aus-p019",
+    "team_id": "aus",
+    "name": "Noah Cartwright",
+    "primary_position": "fly-half",
+    "date_of_birth": "2005-12-19",
+    "height_cm": 180,
+    "weight_kg": 83,
+    "cap_count": 89
+  },
+  {
+    "id": "aus-p020",
+    "team_id": "aus",
+    "name": "Kieran Quenton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1989-09-14",
+    "height_cm": 183,
+    "weight_kg": 95,
+    "cap_count": 1
+  },
+  {
+    "id": "aus-p021",
+    "team_id": "aus",
+    "name": "Ben Ivory",
+    "primary_position": "left-wing",
+    "date_of_birth": "2004-05-20",
+    "height_cm": 186,
+    "weight_kg": 92,
+    "cap_count": 85
+  },
+  {
+    "id": "aus-p022",
+    "team_id": "aus",
+    "name": "Lucas Oakden",
+    "primary_position": "left-wing",
+    "date_of_birth": "2006-11-16",
+    "height_cm": 189,
+    "weight_kg": 97,
+    "cap_count": 76
+  },
+  {
+    "id": "aus-p023",
+    "team_id": "aus",
+    "name": "Zac Ingleby",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2001-12-03",
+    "height_cm": 185,
+    "weight_kg": 90,
+    "cap_count": 72
+  },
+  {
+    "id": "aus-p024",
+    "team_id": "aus",
+    "name": "Xavier Halliwell",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2002-05-21",
+    "height_cm": 192,
+    "weight_kg": 95,
+    "cap_count": 21
+  },
+  {
+    "id": "aus-p025",
+    "team_id": "aus",
+    "name": "Callum Bramley",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1990-02-03",
+    "height_cm": 191,
+    "weight_kg": 92,
+    "cap_count": 24
+  },
+  {
+    "id": "aus-p026",
+    "team_id": "aus",
+    "name": "Lucas Oakden",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1989-11-22",
+    "height_cm": 189,
+    "weight_kg": 91,
+    "cap_count": 20
+  },
+  {
+    "id": "aus-p027",
+    "team_id": "aus",
+    "name": "Isaac Quenton",
+    "primary_position": "right-wing",
+    "date_of_birth": "2005-05-14",
+    "height_cm": 193,
+    "weight_kg": 98,
+    "cap_count": 58
+  },
+  {
+    "id": "aus-p028",
+    "team_id": "aus",
+    "name": "Isaac Portway",
+    "primary_position": "right-wing",
+    "date_of_birth": "1989-10-25",
+    "height_cm": 185,
+    "weight_kg": 98,
+    "cap_count": 5
+  },
+  {
+    "id": "aus-p029",
+    "team_id": "aus",
+    "name": "Vincent Harwood",
+    "primary_position": "fullback",
+    "date_of_birth": "2002-09-19",
+    "height_cm": 189,
+    "weight_kg": 95,
+    "cap_count": 46
+  },
+  {
+    "id": "aus-p030",
+    "team_id": "aus",
+    "name": "Elliot Sinclair",
+    "primary_position": "fullback",
+    "date_of_birth": "1996-11-01",
+    "height_cm": 186,
+    "weight_kg": 102,
+    "cap_count": 74
+  },
+  {
+    "id": "aus-p031",
+    "team_id": "aus",
+    "name": "Samuel Underhill",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2005-03-20",
+    "height_cm": 193,
+    "weight_kg": 114,
+    "cap_count": 88
+  },
+  {
+    "id": "aus-p032",
+    "team_id": "aus",
+    "name": "Harry Quenton",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1999-03-09",
+    "height_cm": 194,
+    "weight_kg": 108,
+    "cap_count": 57
+  },
+  {
+    "id": "aus-p033",
+    "team_id": "aus",
+    "name": "Nathan Ashcombe",
+    "primary_position": "lock",
+    "date_of_birth": "2004-09-11",
+    "height_cm": 210,
+    "weight_kg": 129,
+    "cap_count": 39
+  },
+  {
+    "id": "arg-p001",
+    "team_id": "arg",
+    "name": "Julian Ivory",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1995-02-05",
+    "height_cm": 187,
+    "weight_kg": 130,
+    "cap_count": 28
+  },
+  {
+    "id": "arg-p002",
+    "team_id": "arg",
+    "name": "Isaac Milburn",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "2007-10-14",
+    "height_cm": 190,
+    "weight_kg": 123,
+    "cap_count": 82
+  },
+  {
+    "id": "arg-p003",
+    "team_id": "arg",
+    "name": "Lucas Bramley",
+    "primary_position": "hooker",
+    "date_of_birth": "2006-04-03",
+    "height_cm": 185,
+    "weight_kg": 117,
+    "cap_count": 48
+  },
+  {
+    "id": "arg-p004",
+    "team_id": "arg",
+    "name": "Daniel Sinclair",
+    "primary_position": "hooker",
+    "date_of_birth": "1994-10-04",
+    "height_cm": 179,
+    "weight_kg": 116,
+    "cap_count": 66
+  },
+  {
+    "id": "arg-p005",
+    "team_id": "arg",
+    "name": "Felix Ashford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1998-03-02",
+    "height_cm": 187,
+    "weight_kg": 132,
+    "cap_count": 2
+  },
+  {
+    "id": "arg-p006",
+    "team_id": "arg",
+    "name": "George Ashford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "2006-03-11",
+    "height_cm": 187,
+    "weight_kg": 126,
+    "cap_count": 80
+  },
+  {
+    "id": "arg-p007",
+    "team_id": "arg",
+    "name": "Cameron Halliwell",
+    "primary_position": "lock",
+    "date_of_birth": "1995-04-24",
+    "height_cm": 210,
+    "weight_kg": 116,
+    "cap_count": 14
+  },
+  {
+    "id": "arg-p008",
+    "team_id": "arg",
+    "name": "Kieran Vance",
+    "primary_position": "lock",
+    "date_of_birth": "2007-09-21",
+    "height_cm": 205,
+    "weight_kg": 115,
+    "cap_count": 81
+  },
+  {
+    "id": "arg-p009",
+    "team_id": "arg",
+    "name": "Felix Grayling",
+    "primary_position": "lock",
+    "date_of_birth": "1998-09-03",
+    "height_cm": 200,
+    "weight_kg": 118,
+    "cap_count": 49
+  },
+  {
+    "id": "arg-p010",
+    "team_id": "arg",
+    "name": "Ulrich Ormsby",
+    "primary_position": "lock",
+    "date_of_birth": "2002-09-12",
+    "height_cm": 205,
+    "weight_kg": 123,
+    "cap_count": 63
+  },
+  {
+    "id": "arg-p011",
+    "team_id": "arg",
+    "name": "Ivan Kilbride",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1995-02-25",
+    "height_cm": 199,
+    "weight_kg": 114,
+    "cap_count": 10
+  },
+  {
+    "id": "arg-p012",
+    "team_id": "arg",
+    "name": "Harry Kilbride",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1996-09-06",
+    "height_cm": 192,
+    "weight_kg": 109,
+    "cap_count": 60
+  },
+  {
+    "id": "arg-p013",
+    "team_id": "arg",
+    "name": "Jack Jarrow",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2005-03-20",
+    "height_cm": 187,
+    "weight_kg": 104,
+    "cap_count": 72
+  },
+  {
+    "id": "arg-p014",
+    "team_id": "arg",
+    "name": "Cameron Blackmore",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1991-07-10",
+    "height_cm": 190,
+    "weight_kg": 108,
+    "cap_count": 50
+  },
+  {
+    "id": "arg-p015",
+    "team_id": "arg",
+    "name": "Henri Fairhurst",
+    "primary_position": "number-8",
+    "date_of_birth": "1994-06-22",
+    "height_cm": 197,
+    "weight_kg": 117,
+    "cap_count": 38
+  },
+  {
+    "id": "arg-p016",
+    "team_id": "arg",
+    "name": "Felix Fairhurst",
+    "primary_position": "number-8",
+    "date_of_birth": "1998-10-10",
+    "height_cm": 188,
+    "weight_kg": 117,
+    "cap_count": 62
+  },
+  {
+    "id": "arg-p017",
+    "team_id": "arg",
+    "name": "Ethan Ivory",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1994-08-06",
+    "height_cm": 180,
+    "weight_kg": 83,
+    "cap_count": 14
+  },
+  {
+    "id": "arg-p018",
+    "team_id": "arg",
+    "name": "Callum Leighton",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2005-10-12",
+    "height_cm": 174,
+    "weight_kg": 89,
+    "cap_count": 71
+  },
+  {
+    "id": "arg-p019",
+    "team_id": "arg",
+    "name": "Ryan Quenton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1997-02-19",
+    "height_cm": 181,
+    "weight_kg": 95,
+    "cap_count": 76
+  },
+  {
+    "id": "arg-p020",
+    "team_id": "arg",
+    "name": "Cameron Milburn",
+    "primary_position": "fly-half",
+    "date_of_birth": "2000-03-19",
+    "height_cm": 184,
+    "weight_kg": 82,
+    "cap_count": 7
+  },
+  {
+    "id": "arg-p021",
+    "team_id": "arg",
+    "name": "Gareth Ashford",
+    "primary_position": "left-wing",
+    "date_of_birth": "2005-08-10",
+    "height_cm": 183,
+    "weight_kg": 99,
+    "cap_count": 28
+  },
+  {
+    "id": "arg-p022",
+    "team_id": "arg",
+    "name": "Ivan Milburn",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-04-20",
+    "height_cm": 186,
+    "weight_kg": 98,
+    "cap_count": 38
+  },
+  {
+    "id": "arg-p023",
+    "team_id": "arg",
+    "name": "Jack Langford",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1999-07-23",
+    "height_cm": 181,
+    "weight_kg": 92,
+    "cap_count": 18
+  },
+  {
+    "id": "arg-p024",
+    "team_id": "arg",
+    "name": "Bruno Vance",
+    "primary_position": "inside-centre",
+    "date_of_birth": "1989-08-10",
+    "height_cm": 183,
+    "weight_kg": 97,
+    "cap_count": 89
+  },
+  {
+    "id": "arg-p025",
+    "team_id": "arg",
+    "name": "Kyle Ashford",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-02-22",
+    "height_cm": 187,
+    "weight_kg": 88,
+    "cap_count": 44
+  },
+  {
+    "id": "arg-p026",
+    "team_id": "arg",
+    "name": "Samuel Ashcombe",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2002-10-17",
+    "height_cm": 181,
+    "weight_kg": 94,
+    "cap_count": 26
+  },
+  {
+    "id": "arg-p027",
+    "team_id": "arg",
+    "name": "Oliver Portway",
+    "primary_position": "right-wing",
+    "date_of_birth": "1996-04-19",
+    "height_cm": 190,
+    "weight_kg": 90,
+    "cap_count": 79
+  },
+  {
+    "id": "arg-p028",
+    "team_id": "arg",
+    "name": "Finn Pemberton",
+    "primary_position": "right-wing",
+    "date_of_birth": "1993-01-25",
+    "height_cm": 187,
+    "weight_kg": 93,
+    "cap_count": 36
+  },
+  {
+    "id": "arg-p029",
+    "team_id": "arg",
+    "name": "Cameron Milburn",
+    "primary_position": "fullback",
+    "date_of_birth": "2003-08-14",
+    "height_cm": 182,
+    "weight_kg": 96,
+    "cap_count": 1
+  },
+  {
+    "id": "arg-p030",
+    "team_id": "arg",
+    "name": "Harry Winford",
+    "primary_position": "fullback",
+    "date_of_birth": "2006-12-22",
+    "height_cm": 181,
+    "weight_kg": 91,
+    "cap_count": 36
+  },
+  {
+    "id": "arg-p031",
+    "team_id": "arg",
+    "name": "Samuel Leighton",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2002-12-27",
+    "height_cm": 193,
+    "weight_kg": 119,
+    "cap_count": 49
+  },
+  {
+    "id": "arg-p032",
+    "team_id": "arg",
+    "name": "Kieran Norwood",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1989-11-10",
+    "height_cm": 182,
+    "weight_kg": 111,
+    "cap_count": 39
+  },
+  {
+    "id": "arg-p033",
+    "team_id": "arg",
+    "name": "Gareth Thornton",
+    "primary_position": "lock",
+    "date_of_birth": "2001-06-13",
+    "height_cm": 207,
+    "weight_kg": 130,
+    "cap_count": 78
+  },
+  {
+    "id": "por-p001",
+    "team_id": "por",
+    "name": "Yannick Sinclair",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1989-05-27",
+    "height_cm": 185,
+    "weight_kg": 110,
+    "cap_count": 26
+  },
+  {
+    "id": "por-p002",
+    "team_id": "por",
+    "name": "Gareth Harwood",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1994-08-20",
+    "height_cm": 179,
+    "weight_kg": 124,
+    "cap_count": 44
+  },
+  {
+    "id": "por-p003",
+    "team_id": "por",
+    "name": "Jack Bramley",
+    "primary_position": "hooker",
+    "date_of_birth": "2002-12-02",
+    "height_cm": 188,
+    "weight_kg": 119,
+    "cap_count": 6
+  },
+  {
+    "id": "por-p004",
+    "team_id": "por",
+    "name": "Patrick Bramley",
+    "primary_position": "hooker",
+    "date_of_birth": "2007-10-16",
+    "height_cm": 181,
+    "weight_kg": 120,
+    "cap_count": 86
+  },
+  {
+    "id": "por-p005",
+    "team_id": "por",
+    "name": "Henri Everley",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1999-09-10",
+    "height_cm": 188,
+    "weight_kg": 127,
+    "cap_count": 40
+  },
+  {
+    "id": "por-p006",
+    "team_id": "por",
+    "name": "Ivan Jarrow",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1998-01-26",
+    "height_cm": 188,
+    "weight_kg": 118,
+    "cap_count": 88
+  },
+  {
+    "id": "por-p007",
+    "team_id": "por",
+    "name": "Julian Merrick",
+    "primary_position": "lock",
+    "date_of_birth": "2003-07-24",
+    "height_cm": 208,
+    "weight_kg": 128,
+    "cap_count": 51
+  },
+  {
+    "id": "por-p008",
+    "team_id": "por",
+    "name": "Ethan Danforth",
+    "primary_position": "lock",
+    "date_of_birth": "2003-02-09",
+    "height_cm": 205,
+    "weight_kg": 120,
+    "cap_count": 45
+  },
+  {
+    "id": "por-p009",
+    "team_id": "por",
+    "name": "Lucas Pemberton",
+    "primary_position": "lock",
+    "date_of_birth": "1995-06-16",
+    "height_cm": 200,
+    "weight_kg": 115,
+    "cap_count": 7
+  },
+  {
+    "id": "por-p010",
+    "team_id": "por",
+    "name": "Ulrich Ashford",
+    "primary_position": "lock",
+    "date_of_birth": "1991-08-08",
+    "height_cm": 199,
+    "weight_kg": 115,
+    "cap_count": 47
+  },
+  {
+    "id": "por-p011",
+    "team_id": "por",
+    "name": "Ryan Grayling",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2004-10-14",
+    "height_cm": 199,
+    "weight_kg": 109,
+    "cap_count": 9
+  },
+  {
+    "id": "por-p012",
+    "team_id": "por",
+    "name": "Xavier Cartwright",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2001-04-01",
+    "height_cm": 200,
+    "weight_kg": 114,
+    "cap_count": 28
+  },
+  {
+    "id": "por-p013",
+    "team_id": "por",
+    "name": "Elliot Portway",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2002-06-11",
+    "height_cm": 183,
+    "weight_kg": 108,
+    "cap_count": 11
+  },
+  {
+    "id": "por-p014",
+    "team_id": "por",
+    "name": "Kieran Denholm",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1995-12-04",
+    "height_cm": 195,
+    "weight_kg": 111,
+    "cap_count": 39
+  },
+  {
+    "id": "por-p015",
+    "team_id": "por",
+    "name": "Liam Ravenscroft",
+    "primary_position": "number-8",
+    "date_of_birth": "1996-12-24",
+    "height_cm": 198,
+    "weight_kg": 123,
+    "cap_count": 29
+  },
+  {
+    "id": "por-p016",
+    "team_id": "por",
+    "name": "Isaac Grayling",
+    "primary_position": "number-8",
+    "date_of_birth": "1989-05-18",
+    "height_cm": 197,
+    "weight_kg": 116,
+    "cap_count": 89
+  },
+  {
+    "id": "por-p017",
+    "team_id": "por",
+    "name": "Mason Langford",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1990-10-15",
+    "height_cm": 181,
+    "weight_kg": 85,
+    "cap_count": 78
+  },
+  {
+    "id": "por-p018",
+    "team_id": "por",
+    "name": "Ivan Halliwell",
+    "primary_position": "scrum-half",
+    "date_of_birth": "1995-02-15",
+    "height_cm": 175,
+    "weight_kg": 89,
+    "cap_count": 51
+  },
+  {
+    "id": "por-p019",
+    "team_id": "por",
+    "name": "Ben Leighton",
+    "primary_position": "fly-half",
+    "date_of_birth": "1998-01-03",
+    "height_cm": 190,
+    "weight_kg": 84,
+    "cap_count": 2
+  },
+  {
+    "id": "por-p020",
+    "team_id": "por",
+    "name": "Alex Halliwell",
+    "primary_position": "fly-half",
+    "date_of_birth": "1998-05-25",
+    "height_cm": 184,
+    "weight_kg": 94,
+    "cap_count": 9
+  },
+  {
+    "id": "por-p021",
+    "team_id": "por",
+    "name": "Samuel Grayling",
+    "primary_position": "left-wing",
+    "date_of_birth": "1993-12-19",
+    "height_cm": 193,
+    "weight_kg": 96,
+    "cap_count": 63
+  },
+  {
+    "id": "por-p022",
+    "team_id": "por",
+    "name": "Mason Elsworth",
+    "primary_position": "left-wing",
+    "date_of_birth": "1992-06-01",
+    "height_cm": 184,
+    "weight_kg": 99,
+    "cap_count": 65
+  },
+  {
+    "id": "por-p023",
+    "team_id": "por",
+    "name": "Gareth Leighton",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-07-24",
+    "height_cm": 189,
+    "weight_kg": 104,
+    "cap_count": 49
+  },
+  {
+    "id": "por-p024",
+    "team_id": "por",
+    "name": "Felix Kilbride",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2006-01-06",
+    "height_cm": 193,
+    "weight_kg": 105,
+    "cap_count": 68
+  },
+  {
+    "id": "por-p025",
+    "team_id": "por",
+    "name": "Lucas Fairhurst",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2002-02-01",
+    "height_cm": 190,
+    "weight_kg": 102,
+    "cap_count": 0
+  },
+  {
+    "id": "por-p026",
+    "team_id": "por",
+    "name": "Noah Portway",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2003-09-05",
+    "height_cm": 185,
+    "weight_kg": 96,
+    "cap_count": 39
+  },
+  {
+    "id": "por-p027",
+    "team_id": "por",
+    "name": "Felix Crestwood",
+    "primary_position": "right-wing",
+    "date_of_birth": "1990-11-04",
+    "height_cm": 187,
+    "weight_kg": 98,
+    "cap_count": 58
+  },
+  {
+    "id": "por-p028",
+    "team_id": "por",
+    "name": "Oliver Blackmore",
+    "primary_position": "right-wing",
+    "date_of_birth": "2007-01-02",
+    "height_cm": 188,
+    "weight_kg": 99,
+    "cap_count": 82
+  },
+  {
+    "id": "por-p029",
+    "team_id": "por",
+    "name": "Zac Ravenscroft",
+    "primary_position": "fullback",
+    "date_of_birth": "2006-07-03",
+    "height_cm": 193,
+    "weight_kg": 90,
+    "cap_count": 88
+  },
+  {
+    "id": "por-p030",
+    "team_id": "por",
+    "name": "Mason Thornton",
+    "primary_position": "fullback",
+    "date_of_birth": "1993-01-03",
+    "height_cm": 187,
+    "weight_kg": 105,
+    "cap_count": 62
+  },
+  {
+    "id": "por-p031",
+    "team_id": "por",
+    "name": "Samuel Grayling",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "1997-01-03",
+    "height_cm": 194,
+    "weight_kg": 113,
+    "cap_count": 70
+  },
+  {
+    "id": "por-p032",
+    "team_id": "por",
+    "name": "Alex Grayling",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-11-22",
+    "height_cm": 187,
+    "weight_kg": 114,
+    "cap_count": 72
+  },
+  {
+    "id": "por-p033",
+    "team_id": "por",
+    "name": "Alex Harwood",
+    "primary_position": "lock",
+    "date_of_birth": "1994-03-06",
+    "height_cm": 207,
+    "weight_kg": 127,
+    "cap_count": 46
+  },
+  {
+    "id": "esp-p001",
+    "team_id": "esp",
+    "name": "Kyle Gainsborough",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1999-05-18",
+    "height_cm": 179,
+    "weight_kg": 118,
+    "cap_count": 57
+  },
+  {
+    "id": "esp-p002",
+    "team_id": "esp",
+    "name": "Elliot Grayling",
+    "primary_position": "loose-head-prop",
+    "date_of_birth": "1993-09-24",
+    "height_cm": 187,
+    "weight_kg": 110,
+    "cap_count": 68
+  },
+  {
+    "id": "esp-p003",
+    "team_id": "esp",
+    "name": "Finn Gainsborough",
+    "primary_position": "hooker",
+    "date_of_birth": "2003-02-13",
+    "height_cm": 175,
+    "weight_kg": 115,
+    "cap_count": 74
+  },
+  {
+    "id": "esp-p004",
+    "team_id": "esp",
+    "name": "Isaac Halliwell",
+    "primary_position": "hooker",
+    "date_of_birth": "1998-05-25",
+    "height_cm": 184,
+    "weight_kg": 113,
+    "cap_count": 50
+  },
+  {
+    "id": "esp-p005",
+    "team_id": "esp",
+    "name": "Ryan Halliwell",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1995-11-13",
+    "height_cm": 194,
+    "weight_kg": 117,
+    "cap_count": 82
+  },
+  {
+    "id": "esp-p006",
+    "team_id": "esp",
+    "name": "Xavier Langford",
+    "primary_position": "tight-head-prop",
+    "date_of_birth": "1998-09-23",
+    "height_cm": 182,
+    "weight_kg": 124,
+    "cap_count": 13
+  },
+  {
+    "id": "esp-p007",
+    "team_id": "esp",
+    "name": "Oliver Kilbride",
+    "primary_position": "lock",
+    "date_of_birth": "1999-04-21",
+    "height_cm": 209,
+    "weight_kg": 119,
+    "cap_count": 32
+  },
+  {
+    "id": "esp-p008",
+    "team_id": "esp",
+    "name": "Patrick Fairhurst",
+    "primary_position": "lock",
+    "date_of_birth": "1993-02-27",
+    "height_cm": 208,
+    "weight_kg": 120,
+    "cap_count": 44
+  },
+  {
+    "id": "esp-p009",
+    "team_id": "esp",
+    "name": "Yannick Denholm",
+    "primary_position": "lock",
+    "date_of_birth": "2004-05-14",
+    "height_cm": 197,
+    "weight_kg": 125,
+    "cap_count": 14
+  },
+  {
+    "id": "esp-p010",
+    "team_id": "esp",
+    "name": "Daniel Norwood",
+    "primary_position": "lock",
+    "date_of_birth": "1989-06-27",
+    "height_cm": 209,
+    "weight_kg": 123,
+    "cap_count": 22
+  },
+  {
+    "id": "esp-p011",
+    "team_id": "esp",
+    "name": "Daniel Ivory",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2004-10-18",
+    "height_cm": 197,
+    "weight_kg": 110,
+    "cap_count": 8
+  },
+  {
+    "id": "esp-p012",
+    "team_id": "esp",
+    "name": "Patrick Vance",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2006-05-04",
+    "height_cm": 190,
+    "weight_kg": 115,
+    "cap_count": 87
+  },
+  {
+    "id": "esp-p013",
+    "team_id": "esp",
+    "name": "Xavier Elsworth",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1992-08-05",
+    "height_cm": 183,
+    "weight_kg": 100,
+    "cap_count": 24
+  },
+  {
+    "id": "esp-p014",
+    "team_id": "esp",
+    "name": "Ryan Northwood",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "2002-03-24",
+    "height_cm": 191,
+    "weight_kg": 103,
+    "cap_count": 63
+  },
+  {
+    "id": "esp-p015",
+    "team_id": "esp",
+    "name": "Damian Kingsford",
+    "primary_position": "number-8",
+    "date_of_birth": "2000-01-14",
+    "height_cm": 200,
+    "weight_kg": 110,
+    "cap_count": 52
+  },
+  {
+    "id": "esp-p016",
+    "team_id": "esp",
+    "name": "Zac Kilbride",
+    "primary_position": "number-8",
+    "date_of_birth": "1994-01-16",
+    "height_cm": 197,
+    "weight_kg": 115,
+    "cap_count": 79
+  },
+  {
+    "id": "esp-p017",
+    "team_id": "esp",
+    "name": "Felix Harwood",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2004-04-07",
+    "height_cm": 175,
+    "weight_kg": 84,
+    "cap_count": 31
+  },
+  {
+    "id": "esp-p018",
+    "team_id": "esp",
+    "name": "Gareth Oakden",
+    "primary_position": "scrum-half",
+    "date_of_birth": "2001-08-07",
+    "height_cm": 183,
+    "weight_kg": 80,
+    "cap_count": 5
+  },
+  {
+    "id": "esp-p019",
+    "team_id": "esp",
+    "name": "Jack Ashford",
+    "primary_position": "fly-half",
+    "date_of_birth": "1999-02-14",
+    "height_cm": 182,
+    "weight_kg": 94,
+    "cap_count": 28
+  },
+  {
+    "id": "esp-p020",
+    "team_id": "esp",
+    "name": "Mason Gainsborough",
+    "primary_position": "fly-half",
+    "date_of_birth": "1995-01-08",
+    "height_cm": 183,
+    "weight_kg": 94,
+    "cap_count": 71
+  },
+  {
+    "id": "esp-p021",
+    "team_id": "esp",
+    "name": "Gareth Denholm",
+    "primary_position": "left-wing",
+    "date_of_birth": "2004-11-18",
+    "height_cm": 180,
+    "weight_kg": 92,
+    "cap_count": 78
+  },
+  {
+    "id": "esp-p022",
+    "team_id": "esp",
+    "name": "Patrick Harwood",
+    "primary_position": "left-wing",
+    "date_of_birth": "1989-03-26",
+    "height_cm": 189,
+    "weight_kg": 99,
+    "cap_count": 28
+  },
+  {
+    "id": "esp-p023",
+    "team_id": "esp",
+    "name": "Noah Elsworth",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2001-05-07",
+    "height_cm": 193,
+    "weight_kg": 91,
+    "cap_count": 9
+  },
+  {
+    "id": "esp-p024",
+    "team_id": "esp",
+    "name": "Cameron Fairhurst",
+    "primary_position": "inside-centre",
+    "date_of_birth": "2001-10-16",
+    "height_cm": 190,
+    "weight_kg": 91,
+    "cap_count": 71
+  },
+  {
+    "id": "esp-p025",
+    "team_id": "esp",
+    "name": "Marcus Harwood",
+    "primary_position": "outside-centre",
+    "date_of_birth": "2004-08-18",
+    "height_cm": 186,
+    "weight_kg": 99,
+    "cap_count": 5
+  },
+  {
+    "id": "esp-p026",
+    "team_id": "esp",
+    "name": "Finn Ashcombe",
+    "primary_position": "outside-centre",
+    "date_of_birth": "1990-08-03",
+    "height_cm": 192,
+    "weight_kg": 98,
+    "cap_count": 23
+  },
+  {
+    "id": "esp-p027",
+    "team_id": "esp",
+    "name": "Damian Sinclair",
+    "primary_position": "right-wing",
+    "date_of_birth": "1997-12-01",
+    "height_cm": 183,
+    "weight_kg": 91,
+    "cap_count": 8
+  },
+  {
+    "id": "esp-p028",
+    "team_id": "esp",
+    "name": "Thomas Denholm",
+    "primary_position": "right-wing",
+    "date_of_birth": "2006-01-13",
+    "height_cm": 184,
+    "weight_kg": 92,
+    "cap_count": 10
+  },
+  {
+    "id": "esp-p029",
+    "team_id": "esp",
+    "name": "Noah Jennings",
+    "primary_position": "fullback",
+    "date_of_birth": "1998-05-17",
+    "height_cm": 195,
+    "weight_kg": 90,
+    "cap_count": 72
+  },
+  {
+    "id": "esp-p030",
+    "team_id": "esp",
+    "name": "Samuel Crestwood",
+    "primary_position": "fullback",
+    "date_of_birth": "2002-02-12",
+    "height_cm": 189,
+    "weight_kg": 100,
+    "cap_count": 70
+  },
+  {
+    "id": "esp-p031",
+    "team_id": "esp",
+    "name": "Gareth Kingsford",
+    "primary_position": "blindside-flanker",
+    "date_of_birth": "2003-04-12",
+    "height_cm": 199,
+    "weight_kg": 120,
+    "cap_count": 82
+  },
+  {
+    "id": "esp-p032",
+    "team_id": "esp",
+    "name": "Kieran Everley",
+    "primary_position": "openside-flanker",
+    "date_of_birth": "1994-04-12",
+    "height_cm": 189,
+    "weight_kg": 115,
+    "cap_count": 44
+  },
+  {
+    "id": "esp-p033",
+    "team_id": "esp",
+    "name": "Ben Oakden",
+    "primary_position": "lock",
+    "date_of_birth": "1999-12-03",
+    "height_cm": 204,
+    "weight_kg": 123,
+    "cap_count": 32
   }
 ]

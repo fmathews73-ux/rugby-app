@@ -46,11 +46,11 @@ Gaps are resolved **just-in-time, in phase order** (PRD §0, §13). When you rea
 
 ---
 
-## 3. Active blockers — updated v0.4
+## 3. Active blockers — updated v0.5
 
 Phase 1 gates that were open through v0.3 are now resolved or soft-deferred:
 
-- **Code & competition scope (PRD §3.4) — RESOLVED v0.4.** Rugby Union only (League permanent exclusion, Sevens deferred). v1 = **Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 tests, World Cup. Current season only. Pipeline / model / UI now scope to this.
+- **Code & competition scope (PRD §3.4) — RESOLVED v0.4, broadened v0.5.** Rugby Union only (League permanent exclusion, Sevens deferred). v1 = 5 competitions (Six Nations, Rugby Championship, Summer Tests, Autumn Nations Series, RWC 2027) covering **all Men's international teams — 10 Tier-1 + 18 Tier-2.** Six Nations and Rugby Championship rosters unchanged; Tier-2 teams enter via RWC 2027 and Power Rankings. Current season only.
 - **Commercial redistribution licence (register #5) — SOFT-DEFERRED v0.4.** Dev runs on a synthetic dataset per PRD §5.5. The GATE reactivates the moment real feed data enters the pipeline (before beta / soft-launch). Not a Phase 3 blocker; a hard Phase 6 blocker.
 - **Provider selection + coverage validation (register #6, #7) — moved to Phase 6.** Only matters at real-data cutover.
 

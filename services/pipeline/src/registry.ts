@@ -30,11 +30,40 @@ export const TIER_1_TEAMS: readonly Team[] = [
   { id: 'rsa', name: 'South Africa', short_name: 'RSA', primary_color: '#4A4A4A' },
 ];
 
+/** Eighteen Tier-2 Men's national teams (PRD §3.4 broadened v0.5). 14 of
+ * these qualify for RWC 2027 pools; all 18 appear in the Power Rankings
+ * surface. Colours are the SAME neutral grey placeholder — a design-system
+ * decision (register #23) will later distinguish teams properly. */
+export const TIER_2_TEAMS: readonly Team[] = [
+  { id: 'fij', name: 'Fiji', short_name: 'FIJ', primary_color: '#4A4A4A' },
+  { id: 'geo', name: 'Georgia', short_name: 'GEO', primary_color: '#4A4A4A' },
+  { id: 'jpn', name: 'Japan', short_name: 'JPN', primary_color: '#4A4A4A' },
+  { id: 'sam', name: 'Samoa', short_name: 'SAM', primary_color: '#4A4A4A' },
+  { id: 'tga', name: 'Tonga', short_name: 'TGA', primary_color: '#4A4A4A' },
+  { id: 'usa', name: 'United States', short_name: 'USA', primary_color: '#4A4A4A' },
+  { id: 'uru', name: 'Uruguay', short_name: 'URU', primary_color: '#4A4A4A' },
+  { id: 'chi', name: 'Chile', short_name: 'CHI', primary_color: '#4A4A4A' },
+  { id: 'nam', name: 'Namibia', short_name: 'NAM', primary_color: '#4A4A4A' },
+  { id: 'por', name: 'Portugal', short_name: 'POR', primary_color: '#4A4A4A' },
+  { id: 'rou', name: 'Romania', short_name: 'ROU', primary_color: '#4A4A4A' },
+  { id: 'esp', name: 'Spain', short_name: 'ESP', primary_color: '#4A4A4A' },
+  { id: 'zim', name: 'Zimbabwe', short_name: 'ZIM', primary_color: '#4A4A4A' },
+  { id: 'hkg', name: 'Hong Kong China', short_name: 'HKG', primary_color: '#4A4A4A' },
+  { id: 'can', name: 'Canada', short_name: 'CAN', primary_color: '#4A4A4A' },
+  { id: 'bra', name: 'Brazil', short_name: 'BRA', primary_color: '#4A4A4A' },
+  { id: 'ned', name: 'Netherlands', short_name: 'NED', primary_color: '#4A4A4A' },
+  { id: 'ken', name: 'Kenya', short_name: 'KEN', primary_color: '#4A4A4A' },
+];
+
+/** All Men's international teams — Tier 1 + Tier 2. Used by Power Rankings. */
+export const ALL_TEAMS: readonly Team[] = [...TIER_1_TEAMS, ...TIER_2_TEAMS];
+
 export const SIX_NATIONS_TEAM_IDS: readonly TeamId[] = ['eng', 'fra', 'ire', 'ita', 'sco', 'wal'];
 export const RUGBY_CHAMPIONSHIP_TEAM_IDS: readonly TeamId[] = ['arg', 'aus', 'nzl', 'rsa'];
 
 /** Primary home stadium per team. All are publicly known real stadiums —
- * public facts, not licensable content. */
+ * public facts, not licensable content. Tier-2 entries may be sport-neutral
+ * multi-use venues where the team plays home tests. */
 export const HOME_VENUE: Record<TeamId, string> = {
   eng: 'Twickenham Stadium',
   fra: 'Stade de France',
@@ -46,7 +75,38 @@ export const HOME_VENUE: Record<TeamId, string> = {
   aus: 'Allianz Stadium',
   nzl: 'Eden Park',
   rsa: 'Emirates Airline Park',
+  fij: 'HFC Bank Stadium',
+  geo: 'Boris Paichadze Dinamo Arena',
+  jpn: 'National Stadium',
+  sam: 'Apia Park',
+  tga: 'Teufaiva Sport Stadium',
+  usa: 'Q2 Stadium',
+  uru: 'Estadio Charrúa',
+  chi: 'Estadio San Carlos de Apoquindo',
+  nam: 'Hage Geingob Rugby Stadium',
+  por: 'Estádio Universitário de Lisboa',
+  rou: 'Stadionul Arcul de Triumf',
+  esp: 'Estadio Nacional Complutense',
+  zim: 'Harare Sports Club',
+  hkg: 'Hong Kong Stadium',
+  can: 'Starlight Stadium',
+  bra: 'Estádio Nicolau Alayon',
+  ned: 'Nationaal Rugbycentrum Amsterdam',
+  ken: 'Nyayo National Stadium',
 };
+
+/** Australian venues hosting Rugby World Cup 2027 matches. Public info,
+ * plausibly-real venue list — the tournament runs in Australia. */
+export const RWC_2027_VENUES: readonly string[] = [
+  'Stadium Australia (Sydney)',
+  'Marvel Stadium (Melbourne)',
+  'Suncorp Stadium (Brisbane)',
+  'Optus Stadium (Perth)',
+  'Adelaide Oval',
+  'Allianz Stadium (Sydney)',
+  'CommBank Stadium (Sydney)',
+  'Cbus Super Stadium (Gold Coast)',
+];
 
 /** Deliberately generic given-name pool. */
 export const FIRST_NAMES: readonly string[] = [

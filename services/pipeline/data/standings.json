@@ -154,5 +154,389 @@
         "rank": 4
       }
     ]
+  },
+  {
+    "id": "world-cup-2027-poola-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool A",
+    "rows": [
+      {
+        "team_id": "nzl",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "wal",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "geo",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "chi",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  },
+  {
+    "id": "world-cup-2027-poolb-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool B",
+    "rows": [
+      {
+        "team_id": "rsa",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "ita",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "sam",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "nam",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  },
+  {
+    "id": "world-cup-2027-poolc-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool C",
+    "rows": [
+      {
+        "team_id": "ire",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "jpn",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "tga",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "rou",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  },
+  {
+    "id": "world-cup-2027-poold-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool D",
+    "rows": [
+      {
+        "team_id": "fra",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "fij",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "usa",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "zim",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  },
+  {
+    "id": "world-cup-2027-poole-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool E",
+    "rows": [
+      {
+        "team_id": "eng",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "sco",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "uru",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "hkg",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  },
+  {
+    "id": "world-cup-2027-poolf-standings",
+    "competition_id": "world-cup",
+    "season_id": "world-cup-2027",
+    "group": "Pool F",
+    "rows": [
+      {
+        "team_id": "aus",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "arg",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "por",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "esp",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
   }
 ]

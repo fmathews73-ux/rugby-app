@@ -1,11 +1,12 @@
 # Product Requirements Document — Rugby Mobile Application
 
-**Version:** 0.4 (Draft)
+**Version:** 0.5 (Draft)
 **Date:** 1 July 2026
 **Status:** Working draft — contains open items requiring resolution
 **Intended reader:** Claude Code (build agent) + project owner
 
 **Version history**
+- **v0.5** — Team scope broadened. v1 now covers **all Men's international teams (Tier 1 + Tier 2)** — previously Tier 1 only. Same 5 competitions; the change unlocks a fully-modelled Rugby World Cup 2027 (24 teams, 6 pools of 4 → knockouts) and expands the Power Rankings surface to every Men's international side. Six Nations (6 Tier-1 teams) and Rugby Championship (4 Tier-1 teams) rosters unchanged — Tier-2 teams enter via World Cup, Rankings, and (as future scope, not now) potential Tier-1-vs-Tier-2 fixtures in the Autumn / Summer test windows. Register #2 updated. No new Tier-2-only competitions (Pacific Nations Cup, Rugby Europe Championship, etc.) — those remain future scope.
 - **v0.4** — Scope crystallised. Resolved register #1 (Rugby Union only, permanent — League is a permanent product exclusion), #2 (v1 = **Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 test matches, Rugby World Cup), #3 (Men's), #4 (current season only). Soft-deferred #5 (licensing gate) — dev builds run against a synthetic dataset per new **§5.5**; gate stays live before any real feed data enters the pipeline. Deferred #13 (proprietary rankings algorithm) — Internationals use World Rugby's stored public rankings; algorithm reactivates only when scope expands to club competitions. Added §5.5 (synthetic development data rules) and register #27 (synthetic dataset design + persistent dev-mode indicator).
 - **v0.3** — Added register #26 (publisher entity & neutral domain) as Phase 6 open item — real-name exposure via App Store developer name, bundle-ID reverse-DNS, and domain WHOIS is the primary public anonymity chokepoint once the app publishes. Filename retained as `Rugby-App-PRD-v0.2.md` to avoid cascading reference updates in every `CLAUDE.md`; rename on next material scope change.
 - **v0.2** — Mobile framework locked to **React Native via Expo (managed workflow) + Expo Router** (§6). **Web companion resolved OUT for v1** (register #18). Fixed a cross-reference (§0 now correctly points to the §13 register).
@@ -77,17 +78,21 @@ Fixtures, results, standings/brackets, team pages, player profiles, team & playe
 
 - Fantasy — `[DEFERRED to Phase 2+]`. Larger build than it appears and typically a separate data-licensing use-case. Wireframe the header entry point only; do not build.
 
-### 3.4 Code & competition scope — **RESOLVED v0.4**
+### 3.4 Code & competition scope — **RESOLVED (v0.4 base, broadened v0.5)**
 
 - **Code:** Rugby **Union only.** League is a permanent product exclusion (§3.2). Sevens is deferred (§3.2).
-- **v1 competitions — Men's Tier 1 Internationals only:**
-  - **Six Nations** (England, France, Ireland, Italy, Scotland, Wales).
-  - **Rugby Championship** (Argentina, Australia, New Zealand, South Africa).
-  - **Tier-1 test matches** during autumn and summer international windows, between Tier-1 sides.
-  - **Rugby World Cup.**
+- **v1 competitions — 5 competitions (unchanged from v0.4):**
+  - **Six Nations** — 6 Tier-1 teams (England, France, Ireland, Italy, Scotland, Wales). Round-robin.
+  - **Rugby Championship** — 4 Tier-1 teams (Argentina, Australia, New Zealand, South Africa). Double round-robin.
+  - **Summer Test Series** — Tier-1 test window (June-July). Tier-1 vs. Tier-1 in v1; Tier-1 vs. Tier-2 tests are future scope.
+  - **Autumn Nations Series** — Tier-1 test window (November). Same future-scope note.
+  - **Rugby World Cup** — 24 teams (pool + knockout). Now fully modelled after the v0.5 team-scope broadening.
+- **Teams — v0.5 broadened:** all Men's international Rugby Union teams — **Tier 1 + Tier 2**.
+  - **Tier 1 (10):** England, France, Ireland, Italy, Scotland, Wales, Argentina, Australia, New Zealand, South Africa.
+  - **Tier 2 (18):** Fiji, Georgia, Japan, Samoa, Tonga, USA, Uruguay, Chile, Namibia, Portugal, Romania, Spain, Zimbabwe, Hong Kong China, Canada, Brazil, Netherlands, Kenya. 14 of these qualify for RWC 2027; all 18 appear in the Power Rankings surface.
 - **Gender:** Men's only.
 - **Historical depth:** Current season only. Prior-season data is not surfaced anywhere in v1.
-- **Post-v1 expansion (out of scope now):** additional competitions (e.g. Pacific Nations Cup, other Tier-2 tests, women's internationals) and eventually club competitions. Do not model or build for these yet, but keep the canonical data model open enough to admit them without a rewrite.
+- **Explicit non-scope in v1** (post-v1 candidates): Tier-2-only competitions (Pacific Nations Cup, Rugby Europe Championship, etc.), Women's Internationals, club/union competitions.
 
 All Phase 3+ pipeline, canonical-model, ingestion cadence, and UI decisions now scope to this bounded set.
 
@@ -266,7 +271,7 @@ Prove licensing → build the pipeline → ship the cheap-data MVP behind a payw
 | # | Item | Tag | Phase | Blocks |
 |---|---|---|---|---|
 | 1 | Code(s): Union/League/Sevens | **RESOLVED v0.4 — Union only** (League permanent exclusion, Sevens deferred) | 1 | — |
-| 2 | v1 competitions list | **RESOLVED v0.4 — Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 tests, World Cup | 1 | — |
+| 2 | v1 competitions + team scope | **RESOLVED (v0.4 base, broadened v0.5)** — 5 competitions: Six Nations (6 T1), Rugby Championship (4 T1), Summer/Autumn Tests (T1 tests), RWC 2027 (24 teams / T1 + T2 pool + knockout). Teams: **all Men's international sides — 10 Tier-1 + 18 Tier-2.** | 1 | — |
 | 3 | Men's/Women's/both | **RESOLVED v0.4 — Men's only** | 1 | — |
 | 4 | Historical depth | **RESOLVED v0.4 — Current season only** | 1 | — |
 | 5 | Commercial redistribution licence | **SOFT-DEFERRED v0.4** — dev runs on synthetic data (§5.5); GATE reactivates before real feed data enters the pipeline (pre-beta / pre-launch) | 1 / 6 | Real-data cutover, launch |
@@ -295,4 +300,4 @@ Prove licensing → build the pipeline → ship the cheap-data MVP behind a payw
 
 ---
 
-*End of PRD v0.4. This is a living document; close open items in phase order and version up as decisions land.*
+*End of PRD v0.5. This is a living document; close open items in phase order and version up as decisions land.*

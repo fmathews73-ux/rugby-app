@@ -58,5 +58,113 @@
     "name": "South Africa",
     "short_name": "RSA",
     "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "fij",
+    "name": "Fiji",
+    "short_name": "FIJ",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "geo",
+    "name": "Georgia",
+    "short_name": "GEO",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "jpn",
+    "name": "Japan",
+    "short_name": "JPN",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "sam",
+    "name": "Samoa",
+    "short_name": "SAM",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "tga",
+    "name": "Tonga",
+    "short_name": "TGA",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "usa",
+    "name": "United States",
+    "short_name": "USA",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "uru",
+    "name": "Uruguay",
+    "short_name": "URU",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "chi",
+    "name": "Chile",
+    "short_name": "CHI",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "nam",
+    "name": "Namibia",
+    "short_name": "NAM",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "por",
+    "name": "Portugal",
+    "short_name": "POR",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "rou",
+    "name": "Romania",
+    "short_name": "ROU",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "esp",
+    "name": "Spain",
+    "short_name": "ESP",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "zim",
+    "name": "Zimbabwe",
+    "short_name": "ZIM",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "hkg",
+    "name": "Hong Kong China",
+    "short_name": "HKG",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "can",
+    "name": "Canada",
+    "short_name": "CAN",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "bra",
+    "name": "Brazil",
+    "short_name": "BRA",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "ned",
+    "name": "Netherlands",
+    "short_name": "NED",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "ken",
+    "name": "Kenya",
+    "short_name": "KEN",
+    "primary_color": "#4A4A4A"
   }
 ]

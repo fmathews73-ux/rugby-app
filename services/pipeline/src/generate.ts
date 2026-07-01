@@ -37,7 +37,7 @@ import {
   generateSquad,
   STARTING_POSITIONS,
 } from './generators.js';
-import { RUGBY_APP_SEED, TIER_1_TEAMS } from './registry.js';
+import { ALL_TEAMS, RUGBY_APP_SEED } from './registry.js';
 import { makeRng } from './rng.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -125,39 +125,67 @@ for (const bundle of ALL_COMPETITIONS) {
   }
 }
 
-// ─── Standings for round-robin competitions ──────────────────────────────────
+// ─── Standings ───────────────────────────────────────────────────────────────
+// Round-robin competitions get one table. Pool-and-knockout competitions get
+// one table per pool (group), even when the pool stage is upcoming — this
+// gives the UI a rendered "pool stage" surface with zero rows before kickoff.
 
 const standings: Standings[] = [];
 
 for (const bundle of ALL_COMPETITIONS) {
-  if (bundle.competition.format !== 'round-robin') continue;
   const completed = bundle.fixtures.filter((f) => f.status === 'completed');
-  standings.push(
-    computeStandings(
-      bundle.competition.id,
-      bundle.season.id,
-      `${bundle.season.id}-standings`,
-      bundle.team_ids,
-      completed,
-      resultByFixture,
-    ),
-  );
+
+  if (bundle.competition.format === 'round-robin') {
+    standings.push(
+      computeStandings(
+        bundle.competition.id,
+        bundle.season.id,
+        `${bundle.season.id}-standings`,
+        bundle.team_ids,
+        completed,
+        resultByFixture,
+      ),
+    );
+    continue;
+  }
+
+  if (bundle.competition.format === 'pool-and-knockout' && bundle.pools) {
+    for (const [poolName, poolTeamIds] of Object.entries(bundle.pools)) {
+      const poolFixtures = completed.filter(
+        (f) => f.round?.startsWith(poolName) ?? false,
+      );
+      const table = computeStandings(
+        bundle.competition.id,
+        bundle.season.id,
+        `${bundle.season.id}-${poolName.replace(' ', '').toLowerCase()}-standings`,
+        poolTeamIds,
+        poolFixtures,
+        resultByFixture,
+      );
+      table.group = poolName;
+      standings.push(table);
+    }
+  }
 }
 
-// ─── Rankings (3 snapshots over the current calendar year) ───────────────────
+// ─── Rankings (3 snapshots — covers ALL Men's international teams, T1 + T2) ─
 
 const rankings: RankingSnapshot[] = [];
 const snapshotDates = ['2026-01-15', '2026-04-01', TODAY_ISO];
 let prevRankByTeam: Map<TeamId, number> | null = null;
 for (const date of snapshotDates) {
-  const snap = generateRanking(rankingRng, date, TIER_1_TEAMS, prevRankByTeam);
+  const snap = generateRanking(rankingRng, date, ALL_TEAMS, prevRankByTeam);
   rankings.push(snap);
   prevRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
 }
 
-// ─── Brackets (none until World Cup fixtures are scoped) ─────────────────────
+// ─── Brackets ────────────────────────────────────────────────────────────────
+// Emit whichever bundles carry a bracket. Knockout fixture_ids are empty for
+// upcoming tournaments — they populate when pool results resolve matchups.
 
-const brackets: Bracket[] = [];
+const brackets: Bracket[] = ALL_COMPETITIONS
+  .map((b) => b.bracket)
+  .filter((b): b is Bracket => b !== undefined);
 
 // ─── Write JSON ──────────────────────────────────────────────────────────────
 
@@ -165,7 +193,7 @@ interface OutputFile { file: string; data: unknown }
 const outputs: OutputFile[] = [
   { file: 'competitions.json', data: ALL_COMPETITIONS.map((b) => b.competition) },
   { file: 'seasons.json', data: ALL_COMPETITIONS.map((b) => b.season) },
-  { file: 'teams.json', data: TIER_1_TEAMS },
+  { file: 'teams.json', data: ALL_TEAMS },
   { file: 'players.json', data: squadAcc.players },
   { file: 'squads.json', data: squadAcc.squads },
   { file: 'fixtures.json', data: ALL_COMPETITIONS.flatMap((b) => b.fixtures) },
@@ -186,7 +214,7 @@ for (const { file, data } of outputs) {
 const totals = {
   competitions: ALL_COMPETITIONS.length,
   seasons: ALL_COMPETITIONS.length,
-  teams: TIER_1_TEAMS.length,
+  teams: ALL_TEAMS.length,
   players: squadAcc.players.length,
   squads: squadAcc.squads.length,
   fixtures: ALL_COMPETITIONS.reduce((n, b) => n + b.fixtures.length, 0),
