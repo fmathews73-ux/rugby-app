@@ -9,13 +9,14 @@ import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Team detail. Hero is a large 2D flag ball. The 3D component
- * (src/components/team-flag-ball-3d.tsx) is kept in-tree for a later mini-
- * phase — three.js's HTTP TextureLoader assumes DOM globals and doesn't
- * work out-of-the-box in RN + expo-gl. Fixing it needs either expo-three
- * or a downloaded-local-file flow, which is scope creep for detail pages.
- * Below the hero: team meta + recent/upcoming fixtures. Squad + stats
- * deferred until the squad picker and register #12 (KPI list) land.
+ * Team detail. Hero is a 2D flag ball at the same visual style as every other
+ * flag chip in the app — consistent aesthetic per owner direction. The 3D
+ * component + its deps remain in-tree for a possible future mini-phase; if
+ * bundle-size trimming is wanted later, remove `team-flag-ball-3d.tsx`,
+ * `error-boundary.tsx`, and uninstall `three`, `@react-three/fiber`,
+ * `@react-three/drei`, `expo-gl`. Below the hero: team meta + recent /
+ * upcoming fixtures. Squad + stats deferred until the squad picker and
+ * register #12 (KPI list) land.
  */
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,7 +42,7 @@ export default function TeamDetailScreen() {
         ) : team.data ? (
           <>
             <View style={styles.hero}>
-              <TeamFlagBall2D flagCode={team.data.flag_code} size={220} />
+              <TeamFlagBall2D flagCode={team.data.flag_code} size={110} />
               <Text style={styles.heroName}>{team.data.name}</Text>
               <Text style={styles.heroSubtitle}>{team.data.short_name}</Text>
             </View>
