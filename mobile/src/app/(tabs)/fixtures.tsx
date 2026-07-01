@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   timeCol: { width: 52, fontSize: 13, fontWeight: '600', color: Colors.light.text },
   mainCol: { flex: 1, gap: 4 },
-  matchupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  matchupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   matchupText: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
   matchupSep: { fontSize: 14, color: Colors.light.textSecondary, marginHorizontal: 2 },
   scoreText: {
