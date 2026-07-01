@@ -1,9 +1,9 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Fixture } from '@rugby-app/shared';
+import type { Fixture, Result } from '@rugby-app/shared';
 
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
@@ -29,11 +29,10 @@ const FILTER_OPTIONS = [
  * grouped by date, chronologically. Picker at the top filters by competition.
  * Tap a row → fixture detail.
  *
- * Default view (competitionFilter = "all"): the most recent completed
- * fixture at the top + every upcoming fixture below. Users switching to a
- * specific competition see ALL fixtures for that competition (including
- * older completed ones) — the filter is treated as an explicit "browse this
- * competition" action rather than a narrowing of the default feed.
+ * On first mount the list scrolls itself so the most recent completed
+ * fixture is the top visible row. Users can scroll UP from there to see
+ * everything already completed, or DOWN to see upcoming — nothing is
+ * filtered out.
  */
 export default function FixturesScreen() {
   const router = useRouter();
@@ -55,31 +54,41 @@ export default function FixturesScreen() {
   const isLoading = competitions.isLoading || seasons.isLoading || fixtureQueries.some((q) => q.isLoading);
   const error = competitions.error ?? seasons.error ?? fixtureQueries.find((q) => q.error)?.error;
 
+  // Collect the ids of completed fixtures visible in the current view so we
+  // can batch-fetch their results and show the score inline.
+  const completedIds = useMemo(() => {
+    const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
+    const filtered =
+      competitionFilter === ALL_COMPETITIONS
+        ? all
+        : all.filter((f) => f.competition_id === competitionFilter);
+    return filtered.filter((f) => f.status === 'completed').map((f) => f.id);
+  }, [fixtureQueries, competitionFilter]);
+
+  const resultQueries = useQueries({
+    queries: completedIds.map((id) => ({
+      queryKey: ['fixtureResult', id],
+      queryFn: () => fetchJson<Result>(`/fixtures/${id}/result`),
+    })),
+  });
+
+  const resultByFixture = useMemo(() => {
+    const m = new Map<string, Result>();
+    for (const q of resultQueries) {
+      if (q.data) m.set(q.data.fixture_id, q.data);
+    }
+    return m;
+  }, [resultQueries]);
+
   const sections = useMemo(() => {
     if (isLoading || error) return [];
     const compById = new Map(competitions.data?.map((c) => [c.id, c]) ?? []);
     const teamById = new Map(teams.data?.map((t) => [t.id, t]) ?? []);
     const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
-
-    let filtered: Fixture[];
-    if (competitionFilter === ALL_COMPETITIONS) {
-      // Default view: most recent completed + everything upcoming.
-      const sortedAsc = all.slice().sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc));
-      // The most recent completed fixture is the last one whose status is
-      // "completed" — sortedAsc places completed fixtures before upcoming.
-      let mostRecentCompleted: Fixture | undefined;
-      for (const f of sortedAsc) {
-        if (f.status === 'completed') mostRecentCompleted = f;
-      }
-      const upcoming = sortedAsc.filter(
-        (f) =>
-          f.status === 'scheduled' || f.status === 'live' || f.status === 'half-time',
-      );
-      filtered = mostRecentCompleted ? [mostRecentCompleted, ...upcoming] : upcoming;
-    } else {
-      filtered = all.filter((f) => f.competition_id === competitionFilter);
-    }
-
+    const filtered =
+      competitionFilter === ALL_COMPETITIONS
+        ? all
+        : all.filter((f) => f.competition_id === competitionFilter);
     const byDate = new Map<string, Fixture[]>();
     for (const fx of filtered) {
       const day = fx.kickoff_utc.slice(0, 10);
@@ -95,6 +104,55 @@ export default function FixturesScreen() {
       teamById,
     }));
   }, [isLoading, error, competitions.data, teams.data, fixtureQueries, competitionFilter]);
+
+  /** Section+item indices of the most recent completed fixture in the current
+   * `sections` structure — used to jump-scroll on mount so that fixture is
+   * the top visible row. Iterates from the end backwards to grab the LAST
+   * completed fixture (i.e., the most recent). */
+  const mostRecentCompletedLocation = useMemo((): {
+    sectionIndex: number;
+    itemIndex: number;
+  } | null => {
+    for (let s = sections.length - 1; s >= 0; s--) {
+      const section = sections[s];
+      if (!section) continue;
+      for (let i = section.data.length - 1; i >= 0; i--) {
+        const fx = section.data[i];
+        if (fx && fx.status === 'completed') {
+          return { sectionIndex: s, itemIndex: i };
+        }
+      }
+    }
+    return null;
+  }, [sections]);
+
+  const listRef = useRef<SectionList<Fixture, { title: string; data: Fixture[]; compById: Map<string, { short_name: string }>; teamById: Map<string, { flag_code: string; short_name: string }> }>>(null);
+  const didInitialScroll = useRef(false);
+
+  useEffect(() => {
+    if (
+      !didInitialScroll.current &&
+      mostRecentCompletedLocation !== null &&
+      sections.length > 0
+    ) {
+      // Delay lets the SectionList finish its first layout before we scroll.
+      const t = setTimeout(() => {
+        try {
+          listRef.current?.scrollToLocation({
+            sectionIndex: mostRecentCompletedLocation.sectionIndex,
+            itemIndex: mostRecentCompletedLocation.itemIndex,
+            viewPosition: 0, // top of viewport
+            animated: false,
+          });
+          didInitialScroll.current = true;
+        } catch {
+          // SectionList throws if layout isn't ready — try once more.
+        }
+      }, 80);
+      return () => clearTimeout(t);
+    }
+    return undefined;
+  }, [mostRecentCompletedLocation, sections.length]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
@@ -115,7 +173,21 @@ export default function FixturesScreen() {
           teamById: Map<string, { flag_code: string; short_name: string }>;
         }
       >
+        ref={listRef}
         sections={sections}
+        onScrollToIndexFailed={() => {
+          // Fallback: retry after a tick when getItemLayout isn't cheap.
+          setTimeout(() => {
+            if (mostRecentCompletedLocation) {
+              listRef.current?.scrollToLocation({
+                sectionIndex: mostRecentCompletedLocation.sectionIndex,
+                itemIndex: mostRecentCompletedLocation.itemIndex,
+                viewPosition: 0,
+                animated: false,
+              });
+            }
+          }, 100);
+        }}
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section }) => (
           <View style={styles.dayHeader}>
@@ -126,6 +198,8 @@ export default function FixturesScreen() {
           const comp = section.compById.get(item.competition_id);
           const home = section.teamById.get(item.home_team_id);
           const away = section.teamById.get(item.away_team_id);
+          const isCompleted = item.status === 'completed';
+          const result = isCompleted ? resultByFixture.get(item.id) : undefined;
           return (
             <Pressable
               onPress={() => router.push(`/fixture/${item.id}`)}
@@ -137,17 +211,23 @@ export default function FixturesScreen() {
                   <Text style={styles.matchupText}>
                     {home?.short_name ?? item.home_team_id.toUpperCase()}
                   </Text>
-                  <Text style={styles.matchupSep}>·</Text>
-                  {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
+                  {result ? (
+                    <Text style={styles.scoreText}>
+                      {result.home_score} - {result.away_score}
+                    </Text>
+                  ) : (
+                    <Text style={styles.matchupSep}>·</Text>
+                  )}
                   <Text style={styles.matchupText}>
                     {away?.short_name ?? item.away_team_id.toUpperCase()}
                   </Text>
+                  {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
                 </View>
                 <Text style={styles.metaText}>
                   {comp?.short_name ?? item.competition_id} · {item.venue}
                 </Text>
               </View>
-              <StatusPill status={item.status} />
+              {isCompleted ? null : <StatusPill status={item.status} />}
             </Pressable>
           );
         }}
@@ -205,6 +285,12 @@ const styles = StyleSheet.create({
   matchupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   matchupText: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
   matchupSep: { fontSize: 14, color: Colors.light.textSecondary, marginHorizontal: 2 },
+  scoreText: {
+    fontSize: 15,
+    fontWeight: '700',
+    color: Colors.light.text,
+    marginHorizontal: 4,
+  },
   metaText: { fontSize: 11, color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
