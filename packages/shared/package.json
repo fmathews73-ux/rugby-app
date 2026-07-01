@@ -1,0 +1,13 @@
+{
+  "name": "@rugby-app/shared",
+  "version": "0.0.0-dev",
+  "private": true,
+  "description": "Canonical types shared by services and mobile client. No runtime code in v0 — types only.",
+  "type": "module",
+  "main": "./src/types/index.ts",
+  "types": "./src/types/index.ts",
+  "exports": {
+    ".": "./src/types/index.ts",
+    "./types": "./src/types/index.ts"
+  }
+}
