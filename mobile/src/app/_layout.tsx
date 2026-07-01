@@ -66,7 +66,7 @@ export default function RootLayout() {
 
 const styles = StyleSheet.create({
   bannerSafeArea: {
-    backgroundColor: '#B45309',
+    backgroundColor: '#F3F4F6',
   },
   appBody: {
     flex: 1,

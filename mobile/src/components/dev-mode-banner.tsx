@@ -29,16 +29,18 @@ export function DevModeBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: '#B45309',
-    paddingVertical: 4,
+    backgroundColor: '#F3F4F6',
+    paddingVertical: 3,
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
   },
   text: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.2,
+    color: '#6B7280',
+    fontSize: 10,
+    fontWeight: '600',
+    letterSpacing: 1.4,
   },
 });
