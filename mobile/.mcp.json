@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json.schemastore.org/mcp.json",
+  "_comment_scope": "Project-scoped MCP servers for the Expo mobile app. Launch Claude Code from mobile/ so these are discovered. Both servers require per-user approval on first activation (Claude Code will prompt).",
+  "mcpServers": {
+    "expo": {
+      "_comment": "Expo docs + EAS access, version-matched to the installed Expo SDK. After Claude Code starts, run /mcp inside the session to authenticate against Expo (personal access token from expo.dev — NOT a work-org token; see root CLAUDE.md §1 separation rule).",
+      "type": "http",
+      "url": "https://mcp.expo.dev/mcp"
+    },
+    "ios-simulator": {
+      "_comment": "Local iOS Simulator control for visual verification (screenshot / record_video). Pinned to ^1.6.0; MUST stay >= 1.3.3 per the pre-1.3.3 command-injection CVE noted in infra/CLAUDE.md. Interactive UI-manipulation tools (tap/type/swipe/find/install/launch) are filtered out; only observation + boot/list simulators remain.",
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "ios-simulator-mcp@^1.6.0"],
+      "env": {
+        "IOS_SIMULATOR_MCP_FILTERED_TOOLS": "ui_describe_all,ui_tap,ui_type,ui_swipe,ui_describe_point,ui_find_element,ui_view,install_app,launch_app",
+        "IOS_SIMULATOR_MCP_DEFAULT_OUTPUT_DIR": "./tmp/simulator-captures"
+      }
+    }
+  }
+}

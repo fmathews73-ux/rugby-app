@@ -29,8 +29,12 @@ This file carries **Expo/React Native technical conventions** for the mobile app
 
 ## Correctness tooling (use, don't guess)
 
-- **Expo plugin + Skills** (`expo@claude-plugins-official`) — already enabled in `.claude/settings.json` by the scaffold. Use it to confirm current, version-matched Expo APIs and EAS workflows instead of relying on memory.
-- **Expo MCP Server** and **iOS Simulator MCP** — to be wired at Phase 0 close per `/infra/CLAUDE.md`. iOS Simulator MCP is the visual verification tool for screens.
+All three are wired at project scope in `mobile/` — **launch Claude Code from `mobile/`** so they are discovered:
+
+- **Expo plugin + Skills** (`expo@claude-plugins-official`) — enabled in `mobile/.claude/settings.json` by the scaffold. Use it to confirm current, version-matched Expo APIs and EAS workflows instead of relying on memory.
+- **Expo MCP Server** — remote HTTP MCP at `https://mcp.expo.dev/mcp`, registered in `mobile/.mcp.json`. Gives live access to Expo docs + EAS for the installed SDK. **Auth on first use:** run `/mcp` inside the Claude Code session and complete the OAuth flow with a personal Expo access token (from `expo.dev` under the personal identity, never a work-org token — see root CLAUDE.md §1).
+- **iOS Simulator MCP** (`ios-simulator-mcp@^1.6.0`) — local stdio MCP for visual verification. Screenshots and videos are the primary tools; the interactive UI-manipulation tools are filtered out via env so the agent cannot silently drive the simulator. Captures write to `mobile/tmp/simulator-captures/` (gitignored).
+- Pin floor for `ios-simulator-mcp` is `^1.6.0`; must NOT drop below 1.3.3 (pre-1.3.3 had a command-injection CVE — see `infra/CLAUDE.md`).
 
 ---
 
