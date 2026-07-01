@@ -1,20 +1,26 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useHealth, useLatestRanking, useTeams } from '@/api/hooks';
-import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Home. Two cards, each split into a left-third graphic column and a
- * right-two-thirds data column. Real IA per PRD §4.3 is "General
- * description / landing" with content blocks still `[INPUT NEEDED #19]`;
- * until that lands, this dashboard shape works.
+ * Home. Hero-card layout: bold coloured left panel with a large white icon,
+ * white right panel with a small eyebrow label + punchy headline + optional
+ * subtitle + pill CTA. Same skeleton for each card — one component drives the
+ * pair. Real IA per PRD §4.3 is "General description / landing" with content
+ * blocks still `[INPUT NEEDED #19]`; this hero-card shape is the working
+ * placeholder.
  */
+
+const PANEL_COLOR_A = '#4F46E5'; // indigo — Live / activity
+const PANEL_COLOR_B = '#0F766E'; // teal — Rankings / trophy
+
 export default function HomeScreen() {
+  const router = useRouter();
   const health = useHealth();
   const ranking = useLatestRanking();
   const teams = useTeams();
@@ -26,6 +32,20 @@ export default function HomeScreen() {
   }, [teams.data]);
 
   const topRankedTeam = ranking.data ? teamById.get(ranking.data.rows[0]?.team_id ?? '') : undefined;
+  const topRankRow = ranking.data?.rows[0];
+
+  const entities = health.data?.entities;
+  const fixturesLine =
+    entities !== undefined
+      ? `${entities.competitions} competitions · ${entities.teams} teams · ${entities.fixtures} fixtures`
+      : 'Loading…';
+
+  const rankingsLine =
+    topRankedTeam !== undefined && topRankRow !== undefined
+      ? `Rank 1 · ${topRankRow.points} pts`
+      : ranking.isLoading
+        ? 'Loading…'
+        : 'No snapshot yet';
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
@@ -33,84 +53,73 @@ export default function HomeScreen() {
         <Text style={styles.title}>Rugby App</Text>
         <Text style={styles.subtitle}>Men’s international rugby, all in one place.</Text>
 
-        {/* Card 1 — Live in the app */}
-        <View style={styles.card}>
-          <View style={styles.cardLeft}>
-            <View style={styles.iconCircle}>
-              <Ionicons name="pulse" size={38} color={Colors.light.text} />
-            </View>
-          </View>
-          <View style={styles.cardRight}>
-            <Text style={styles.cardTitle}>Live in the app</Text>
-            {health.isLoading ? (
-              <LoadingState />
-            ) : health.isError ? (
-              <ErrorState error={health.error} />
-            ) : health.data ? (
-              <View style={styles.metricList}>
-                <MetricRow value={health.data.entities.competitions} label="Competitions" />
-                <MetricRow value={health.data.entities.teams} label="Teams" />
-                <MetricRow value={health.data.entities.fixtures} label="Fixtures" />
-                <MetricRow value={health.data.entities.rankings} label="Rankings" />
-              </View>
-            ) : null}
-          </View>
-        </View>
+        <HeroCard
+          panelColor={PANEL_COLOR_A}
+          iconName="pulse"
+          eyebrow="Live in the app"
+          heading="Men’s international rugby"
+          body={fixturesLine}
+          ctaLabel="Fixtures"
+          onPress={() => router.push('/fixtures')}
+        />
 
-        {/* Card 2 — Latest ranking snapshot */}
-        <View style={styles.card}>
-          <View style={styles.cardLeft}>
-            {topRankedTeam ? (
-              <TeamFlagBall2D flagCode={topRankedTeam.flag_code} size={72} />
-            ) : (
-              <View style={styles.iconCircle}>
-                <Ionicons name="trophy" size={38} color={Colors.light.text} />
-              </View>
-            )}
-          </View>
-          <View style={styles.cardRight}>
-            <Text style={styles.cardTitle}>Latest ranking snapshot</Text>
-            {ranking.isLoading ? (
-              <LoadingState />
-            ) : ranking.isError ? (
-              <ErrorState error={ranking.error} />
-            ) : ranking.data ? (
-              <View style={styles.rankList}>
-                <Text style={styles.rankMeta}>{ranking.data.snapshot_date}</Text>
-                {ranking.data.rows.slice(0, 5).map((row) => {
-                  const team = teamById.get(row.team_id);
-                  return (
-                    <View key={row.team_id} style={styles.rankRow}>
-                      <Text style={styles.rankIndex}>{row.rank}.</Text>
-                      {team ? (
-                        <TeamFlagBall2D flagCode={team.flag_code} size={20} />
-                      ) : (
-                        <View style={styles.flagFallback} />
-                      )}
-                      <Text style={styles.rankTeam} numberOfLines={1}>
-                        {team?.short_name ?? row.team_id.toUpperCase()}
-                      </Text>
-                      <Text style={styles.rankPoints}>{row.points}</Text>
-                    </View>
-                  );
-                })}
-              </View>
-            ) : null}
-          </View>
-        </View>
+        <HeroCard
+          panelColor={PANEL_COLOR_B}
+          iconName="trophy"
+          eyebrow="World Rugby men’s"
+          heading={topRankedTeam?.name ?? '—'}
+          body={rankingsLine}
+          ctaLabel="Rankings"
+          onPress={() => router.push('/rankings')}
+        />
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function MetricRow({ value, label }: { value: number | undefined; label: string }) {
+// ─── Hero card ───────────────────────────────────────────────────────────────
+
+function HeroCard({
+  panelColor,
+  iconName,
+  eyebrow,
+  heading,
+  body,
+  ctaLabel,
+  onPress,
+}: {
+  panelColor: string;
+  iconName: React.ComponentProps<typeof Ionicons>['name'];
+  eyebrow: string;
+  heading: string;
+  body: string;
+  ctaLabel: string;
+  onPress: () => void;
+}) {
   return (
-    <View style={styles.metricRow}>
-      <Text style={styles.metricValue}>{value ?? '–'}</Text>
-      <Text style={styles.metricLabel}>{label}</Text>
+    <View style={styles.card}>
+      <View style={[styles.cardLeft, { backgroundColor: panelColor }]}>
+        <Ionicons name={iconName} size={54} color="#FFFFFF" />
+      </View>
+      <View style={styles.cardRight}>
+        <Text style={styles.eyebrow}>{eyebrow}</Text>
+        <Text style={styles.heading} numberOfLines={2}>
+          {heading}
+        </Text>
+        <Text style={styles.body} numberOfLines={2}>
+          {body}
+        </Text>
+        <Pressable
+          onPress={onPress}
+          style={({ pressed }) => [styles.cta, pressed && styles.ctaPressed]}>
+          <Text style={styles.ctaLabel}>{ctaLabel}</Text>
+        </Pressable>
+      </View>
     </View>
   );
 }
+
+// ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.light.background },
@@ -120,62 +129,66 @@ const styles = StyleSheet.create({
 
   card: {
     flexDirection: 'row',
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 16,
-    padding: Spacing.four,
-    gap: Spacing.three,
-    alignItems: 'center',
+    backgroundColor: '#FFFFFF',
+    borderRadius: 20,
+    overflow: 'hidden',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    // subtle iOS-style shadow
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   cardLeft: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     alignSelf: 'stretch',
+    minHeight: 180,
   },
   cardRight: {
     flex: 2,
-    gap: Spacing.three,
-  },
-
-  iconCircle: {
-    width: 72,
-    height: 72,
-    borderRadius: 999,
-    backgroundColor: Colors.light.background,
-    alignItems: 'center',
+    padding: Spacing.four,
+    gap: 8,
     justifyContent: 'center',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
   },
 
-  cardTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    letterSpacing: 1,
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.1,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
-
-  metricList: { gap: 6 },
-  metricRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.two + 2 },
-  metricValue: {
+  heading: {
     fontSize: 22,
     fontWeight: '700',
     color: Colors.light.text,
-    minWidth: 40,
+    lineHeight: 26,
   },
-  metricLabel: {
-    fontSize: 11,
+  body: {
+    fontSize: 13,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-    letterSpacing: 0.8,
+    lineHeight: 18,
+    paddingBottom: 4,
   },
 
-  rankList: { gap: 6 },
-  rankMeta: { fontSize: 11, color: Colors.light.textSecondary },
-  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  rankIndex: { fontSize: 12, fontWeight: '700', color: Colors.light.textSecondary, minWidth: 18 },
-  flagFallback: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#E5E7EB' },
-  rankTeam: { fontSize: 13, fontWeight: '600', color: Colors.light.text, flex: 1 },
-  rankPoints: { fontSize: 11, color: Colors.light.textSecondary, fontWeight: '600' },
+  cta: {
+    alignSelf: 'flex-start',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: Colors.light.text,
+    marginTop: 4,
+  },
+  ctaPressed: { backgroundColor: Colors.light.backgroundElement },
+  ctaLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.light.text,
+    letterSpacing: 0.2,
+  },
 });
