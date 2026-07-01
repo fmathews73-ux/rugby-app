@@ -1,50 +1,113 @@
-import { useLocalSearchParams } from 'expo-router';
-import { StyleSheet, Text, View } from 'react-native';
+import { Stack, useLocalSearchParams } from 'expo-router';
+import { useMemo } from 'react';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { useTeam, useTeams } from '@/api/hooks';
+import { ErrorBoundary } from '@/components/error-boundary';
+import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagBall3D } from '@/components/team-flag-ball-3d';
+import { Colors, Spacing } from '@/constants/theme';
+
 /**
- * DIAGNOSTIC — minimal team detail. No data fetching, no 3D. If this page
- * renders when you tap a Team row, the router is fine and the previous
- * failure was in the 3D component or one of its imports (three /
- * @react-three/fiber /native / expo-gl). If this page ALSO fails to
- * render, the router is misconfigured.
+ * Team detail. Hero shows the 3D flag ball IF the WebGL context and texture
+ * both load; otherwise silently falls back to a large 2D ball (same visual
+ * language, just no rotation). Below the hero: team meta + recent/upcoming
+ * fixtures with opponent short-names and dates. Squad + stats deferred until
+ * the squad picker and register #12 (KPI list) land.
  */
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
+  const team = useTeam(id ?? '');
+  const teams = useTeams();
+
+  const teamById = useMemo(() => {
+    const m = new Map<string, { name: string; flag_code: string; short_name: string }>();
+    for (const t of teams.data ?? []) {
+      m.set(t.id, { name: t.name, flag_code: t.flag_code, short_name: t.short_name });
+    }
+    return m;
+  }, [teams.data]);
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.safe}>
-      <View style={styles.center}>
-        <Text style={styles.tag}>DIAGNOSTIC</Text>
-        <Text style={styles.title}>Team detail</Text>
-        <Text style={styles.body}>
-          route params: <Text style={styles.mono}>{id ?? '(none)'}</Text>
-        </Text>
-        <Text style={styles.body}>
-          If you can read this, `router.push` and the Stack + Tabs config are
-          working. Next step: restore the 3D flag ball with proper error
-          isolation.
-        </Text>
-      </View>
+      <Stack.Screen options={{ title: team.data?.name ?? '' }} />
+      <ScrollView contentContainerStyle={styles.scroll}>
+        {team.isLoading ? (
+          <LoadingState />
+        ) : team.isError ? (
+          <ErrorState error={team.error} />
+        ) : team.data ? (
+          <>
+            <View style={styles.hero}>
+              <ErrorBoundary
+                fallback={<TeamFlagBall2D flagCode={team.data.flag_code} size={220} />}>
+                <TeamFlagBall3D flagCode={team.data.flag_code} size={240} />
+              </ErrorBoundary>
+              <Text style={styles.heroName}>{team.data.name}</Text>
+              <Text style={styles.heroSubtitle}>{team.data.short_name}</Text>
+            </View>
+
+            <View style={styles.section}>
+              <Text style={styles.sectionTitle}>Recent & upcoming</Text>
+              {team.data.fixtures.length === 0 ? (
+                <Text style={styles.emptyText}>No fixtures scheduled.</Text>
+              ) : (
+                team.data.fixtures.slice(0, 20).map((fx) => {
+                  const isHome = fx.home_team_id === id;
+                  const oppId = isHome ? fx.away_team_id : fx.home_team_id;
+                  const opp = teamById.get(oppId);
+                  return (
+                    <View key={fx.id} style={styles.fixtureRow}>
+                      <Text style={styles.fixtureDate}>{fx.kickoff_utc.slice(0, 10)}</Text>
+                      <View style={styles.fixtureMain}>
+                        <View style={styles.fixtureMatchup}>
+                          {opp ? <TeamFlagBall2D flagCode={opp.flag_code} size={20} /> : null}
+                          <Text style={styles.fixtureText}>
+                            {isHome ? 'vs' : 'at'} {opp?.short_name ?? oppId.toUpperCase()}
+                          </Text>
+                        </View>
+                        <Text style={styles.fixtureMeta}>{fx.venue}</Text>
+                      </View>
+                    </View>
+                  );
+                })
+              )}
+            </View>
+          </>
+        ) : null}
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#ffffff' },
-  center: { flex: 1, alignItems: 'center', justifyContent: 'center', padding: 24, gap: 12 },
-  tag: {
-    color: '#B45309',
-    fontSize: 10,
-    fontWeight: '800',
-    letterSpacing: 1.4,
-    borderWidth: 1,
-    borderColor: '#B45309',
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
+  safe: { flex: 1, backgroundColor: Colors.light.background },
+  scroll: { padding: Spacing.four, gap: Spacing.four, paddingBottom: 40 },
+  hero: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.four },
+  heroName: { fontSize: 28, fontWeight: '700', color: Colors.light.text, textAlign: 'center' },
+  heroSubtitle: { fontSize: 13, letterSpacing: 1.4, color: Colors.light.textSecondary, textTransform: 'uppercase' },
+  section: { gap: Spacing.two },
+  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: Colors.light.textSecondary, textTransform: 'uppercase', paddingBottom: Spacing.one },
+  fixtureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    paddingVertical: Spacing.two + 2,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
   },
-  title: { fontSize: 24, fontWeight: '700', color: '#111827', textAlign: 'center' },
-  body: { fontSize: 14, color: '#6B7280', textAlign: 'center', lineHeight: 22, maxWidth: 320 },
-  mono: { fontFamily: 'ui-monospace', color: '#111827', fontWeight: '600' },
+  fixtureDate: {
+    width: 88,
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    letterSpacing: 0.8,
+    fontWeight: '600',
+  },
+  fixtureMain: { flex: 1, gap: 2 },
+  fixtureMatchup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  fixtureText: { fontSize: 15, color: Colors.light.text, fontWeight: '600' },
+  fixtureMeta: { color: Colors.light.textSecondary, fontSize: 12 },
+  emptyText: { color: Colors.light.textSecondary, fontSize: 13 },
 });
