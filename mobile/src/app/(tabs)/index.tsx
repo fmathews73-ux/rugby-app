@@ -122,7 +122,7 @@ function HeroCard({
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+  safe: { flex: 1, backgroundColor: '#F5F5F7' },
   scroll: { padding: Spacing.four, gap: Spacing.four, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: Colors.light.text },
   subtitle: { fontSize: 14, color: Colors.light.textSecondary },
