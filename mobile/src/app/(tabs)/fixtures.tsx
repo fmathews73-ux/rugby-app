@@ -1,5 +1,6 @@
+import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
-import { SectionList, StyleSheet, Text, View } from 'react-native';
+import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Fixture } from '@rugby-app/shared';
@@ -17,6 +18,7 @@ import { useQueries } from '@tanstack/react-query';
  * competition, and the two teams.
  */
 export default function FixturesScreen() {
+  const router = useRouter();
   const competitions = useCompetitions();
   const seasons = useSeasons();
   const teams = useTeams();
@@ -80,7 +82,9 @@ export default function FixturesScreen() {
           const home = section.teamById.get(item.home_team_id);
           const away = section.teamById.get(item.away_team_id);
           return (
-            <View style={styles.row}>
+            <Pressable
+              onPress={() => router.push(`/fixture/${item.id}`)}
+              style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
               <Text style={styles.timeCol}>{item.kickoff_utc.slice(11, 16)}</Text>
               <View style={styles.mainCol}>
                 <View style={styles.matchupRow}>
@@ -99,7 +103,7 @@ export default function FixturesScreen() {
                 </Text>
               </View>
               <StatusPill status={item.status} />
-            </View>
+            </Pressable>
           );
         }}
         stickySectionHeadersEnabled={false}
@@ -150,6 +154,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.three,
   },
+  rowPressed: { backgroundColor: Colors.light.backgroundElement },
   timeCol: { width: 52, fontSize: 13, fontWeight: '600', color: Colors.light.text },
   mainCol: { flex: 1, gap: 4 },
   matchupRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
