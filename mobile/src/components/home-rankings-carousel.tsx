@@ -87,6 +87,7 @@ function MensRankingsCard() {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>World Rugby Rankings</Text>
+        <Text style={styles.genderLabel}>Men</Text>
       </View>
 
       {ranking.isLoading ? (
@@ -148,6 +149,7 @@ function WomensPlaceholderCard() {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>World Rugby Rankings</Text>
+        <Text style={styles.genderLabel}>Women</Text>
       </View>
 
       <View style={styles.placeholderBody}>
@@ -181,8 +183,17 @@ const styles = StyleSheet.create({
     elevation: 1,
     gap: Spacing.three,
   },
-  header: { gap: 2 },
+  header: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+  },
   title: { fontSize: 16, fontWeight: '700', color: Colors.light.text },
+  genderLabel: {
+    fontSize: 16,
+    fontWeight: '300',
+    color: Colors.light.textSecondary,
+  },
   subtitle: {
     fontSize: 11,
     fontWeight: '600',
