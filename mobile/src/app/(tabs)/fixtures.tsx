@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: Colors.light.text,
   },
-  metaText: { fontSize: 11, color: Colors.light.textSecondary },
+  metaText: { fontSize: 11, color: Colors.light.textSecondary, textAlign: 'center' },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
 });
