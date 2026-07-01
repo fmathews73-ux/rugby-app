@@ -1,0 +1,233 @@
+[
+  {
+    "id": "world-rugby-mens-2026-01-15",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-01-15",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "rsa",
+        "points": 90,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 2,
+        "team_id": "sco",
+        "points": 88,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 3,
+        "team_id": "wal",
+        "points": 85,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 4,
+        "team_id": "nzl",
+        "points": 84,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 5,
+        "team_id": "fra",
+        "points": 82,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 6,
+        "team_id": "eng",
+        "points": 81,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 7,
+        "team_id": "aus",
+        "points": 79,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 8,
+        "team_id": "arg",
+        "points": 77,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 9,
+        "team_id": "ita",
+        "points": 74,
+        "previous_rank": null,
+        "movement": null
+      },
+      {
+        "rank": 10,
+        "team_id": "ire",
+        "points": 73,
+        "previous_rank": null,
+        "movement": null
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-04-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-04-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "arg",
+        "points": 90,
+        "previous_rank": 8,
+        "movement": 7
+      },
+      {
+        "rank": 2,
+        "team_id": "wal",
+        "points": 88,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "eng",
+        "points": 87,
+        "previous_rank": 6,
+        "movement": 3
+      },
+      {
+        "rank": 4,
+        "team_id": "fra",
+        "points": 84,
+        "previous_rank": 5,
+        "movement": 1
+      },
+      {
+        "rank": 5,
+        "team_id": "aus",
+        "points": 82,
+        "previous_rank": 7,
+        "movement": 2
+      },
+      {
+        "rank": 6,
+        "team_id": "sco",
+        "points": 80,
+        "previous_rank": 2,
+        "movement": -4
+      },
+      {
+        "rank": 7,
+        "team_id": "rsa",
+        "points": 78,
+        "previous_rank": 1,
+        "movement": -6
+      },
+      {
+        "rank": 8,
+        "team_id": "ire",
+        "points": 76,
+        "previous_rank": 10,
+        "movement": 2
+      },
+      {
+        "rank": 9,
+        "team_id": "nzl",
+        "points": 75,
+        "previous_rank": 4,
+        "movement": -5
+      },
+      {
+        "rank": 10,
+        "team_id": "ita",
+        "points": 74,
+        "previous_rank": 9,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-07-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-07-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "ita",
+        "points": 90,
+        "previous_rank": 10,
+        "movement": 9
+      },
+      {
+        "rank": 2,
+        "team_id": "ire",
+        "points": 87,
+        "previous_rank": 8,
+        "movement": 6
+      },
+      {
+        "rank": 3,
+        "team_id": "nzl",
+        "points": 87,
+        "previous_rank": 9,
+        "movement": 6
+      },
+      {
+        "rank": 4,
+        "team_id": "sco",
+        "points": 85,
+        "previous_rank": 6,
+        "movement": 2
+      },
+      {
+        "rank": 5,
+        "team_id": "aus",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "arg",
+        "points": 80,
+        "previous_rank": 1,
+        "movement": -5
+      },
+      {
+        "rank": 7,
+        "team_id": "fra",
+        "points": 79,
+        "previous_rank": 4,
+        "movement": -3
+      },
+      {
+        "rank": 8,
+        "team_id": "wal",
+        "points": 77,
+        "previous_rank": 2,
+        "movement": -6
+      },
+      {
+        "rank": 9,
+        "team_id": "eng",
+        "points": 75,
+        "previous_rank": 3,
+        "movement": -6
+      },
+      {
+        "rank": 10,
+        "team_id": "rsa",
+        "points": 74,
+        "previous_rank": 7,
+        "movement": -3
+      }
+    ]
+  }
+]

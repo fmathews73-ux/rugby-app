@@ -1,0 +1,62 @@
+[
+  {
+    "id": "eng",
+    "name": "England",
+    "short_name": "ENG",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "fra",
+    "name": "France",
+    "short_name": "FRA",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "ire",
+    "name": "Ireland",
+    "short_name": "IRE",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "ita",
+    "name": "Italy",
+    "short_name": "ITA",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "sco",
+    "name": "Scotland",
+    "short_name": "SCO",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "wal",
+    "name": "Wales",
+    "short_name": "WAL",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "arg",
+    "name": "Argentina",
+    "short_name": "ARG",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "aus",
+    "name": "Australia",
+    "short_name": "AUS",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "nzl",
+    "name": "New Zealand",
+    "short_name": "NZL",
+    "primary_color": "#4A4A4A"
+  },
+  {
+    "id": "rsa",
+    "name": "South Africa",
+    "short_name": "RSA",
+    "primary_color": "#4A4A4A"
+  }
+]

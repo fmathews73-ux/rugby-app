@@ -1,0 +1,42 @@
+[
+  {
+    "id": "six-nations-2026",
+    "competition_id": "six-nations",
+    "year_label": "2026",
+    "start_date": "2026-02-06",
+    "end_date": "2026-03-15",
+    "status": "completed"
+  },
+  {
+    "id": "rugby-championship-2026",
+    "competition_id": "rugby-championship",
+    "year_label": "2026",
+    "start_date": "2026-08-08",
+    "end_date": "2026-09-26",
+    "status": "upcoming"
+  },
+  {
+    "id": "summer-tests-2026",
+    "competition_id": "summer-tests",
+    "year_label": "2026",
+    "start_date": "2026-06-20",
+    "end_date": "2026-07-25",
+    "status": "live"
+  },
+  {
+    "id": "autumn-tests-2026",
+    "competition_id": "autumn-tests",
+    "year_label": "2026",
+    "start_date": "2026-11-07",
+    "end_date": "2026-11-28",
+    "status": "upcoming"
+  },
+  {
+    "id": "world-cup-2027",
+    "competition_id": "world-cup",
+    "year_label": "2027",
+    "start_date": "2027-10-01",
+    "end_date": "2027-11-13",
+    "status": "upcoming"
+  }
+]

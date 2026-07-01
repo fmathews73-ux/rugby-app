@@ -1,0 +1,37 @@
+[
+  {
+    "id": "six-nations",
+    "name": "Six Nations Championship",
+    "short_name": "Six Nations",
+    "format": "round-robin",
+    "governing_body": "Six Nations Rugby"
+  },
+  {
+    "id": "rugby-championship",
+    "name": "The Rugby Championship",
+    "short_name": "Rugby Championship",
+    "format": "round-robin",
+    "governing_body": "SANZAAR"
+  },
+  {
+    "id": "summer-tests",
+    "name": "Summer Test Series",
+    "short_name": "Summer Tests",
+    "format": "test-window",
+    "governing_body": "World Rugby"
+  },
+  {
+    "id": "autumn-tests",
+    "name": "Autumn Nations Series",
+    "short_name": "Autumn Nations",
+    "format": "test-window",
+    "governing_body": "World Rugby"
+  },
+  {
+    "id": "world-cup",
+    "name": "Rugby World Cup",
+    "short_name": "World Cup",
+    "format": "pool-and-knockout",
+    "governing_body": "World Rugby"
+  }
+]

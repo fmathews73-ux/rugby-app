@@ -1,0 +1,4922 @@
+[
+  {
+    "fixture_id": "sn26-r1-fra-ita",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r1-fra-ita",
+    "team_id": "ita",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ita-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ita-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ita-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ita-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ita-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ita-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ita-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ita-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ita-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ita-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ita-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ita-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ita-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ita-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ita-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ita-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ita-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ita-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ita-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ita-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ita-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ita-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ita-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r1-sco-eng",
+    "team_id": "sco",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "sco-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "sco-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "sco-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "sco-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "sco-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "sco-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "sco-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "sco-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "sco-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "sco-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "sco-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "sco-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "sco-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "sco-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "sco-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "sco-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "sco-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "sco-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "sco-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "sco-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "sco-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "sco-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "sco-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r1-sco-eng",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r1-ire-wal",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r1-ire-wal",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-ita-eng",
+    "team_id": "ita",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ita-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ita-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ita-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ita-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ita-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ita-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ita-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ita-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ita-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ita-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ita-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ita-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ita-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ita-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ita-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ita-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ita-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ita-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ita-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ita-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ita-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ita-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ita-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-ita-eng",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-wal-sco",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-wal-sco",
+    "team_id": "sco",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "sco-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "sco-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "sco-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "sco-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "sco-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "sco-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "sco-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "sco-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "sco-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "sco-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "sco-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "sco-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "sco-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "sco-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "sco-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "sco-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "sco-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "sco-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "sco-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "sco-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "sco-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "sco-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "sco-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-fra-ire",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r2-fra-ire",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-eng-ire",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-eng-ire",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-ita-sco",
+    "team_id": "ita",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ita-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ita-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ita-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ita-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ita-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ita-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ita-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ita-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ita-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ita-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ita-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ita-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ita-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ita-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ita-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ita-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ita-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ita-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ita-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ita-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ita-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ita-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ita-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-ita-sco",
+    "team_id": "sco",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "sco-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "sco-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "sco-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "sco-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "sco-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "sco-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "sco-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "sco-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "sco-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "sco-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "sco-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "sco-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "sco-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "sco-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "sco-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "sco-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "sco-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "sco-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "sco-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "sco-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "sco-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "sco-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "sco-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-wal-fra",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r3-wal-fra",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-ire-ita",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-ire-ita",
+    "team_id": "ita",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ita-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ita-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ita-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ita-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ita-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ita-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ita-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ita-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ita-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ita-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ita-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ita-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ita-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ita-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ita-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ita-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ita-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ita-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ita-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ita-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ita-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ita-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ita-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-fra-eng",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-fra-eng",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-sco-wal",
+    "team_id": "sco",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "sco-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "sco-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "sco-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "sco-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "sco-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "sco-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "sco-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "sco-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "sco-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "sco-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "sco-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "sco-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "sco-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "sco-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "sco-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "sco-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "sco-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "sco-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "sco-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "sco-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "sco-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "sco-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "sco-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r4-sco-wal",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-wal-ita",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-wal-ita",
+    "team_id": "ita",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ita-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ita-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ita-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ita-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ita-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ita-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ita-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ita-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ita-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ita-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ita-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ita-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ita-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ita-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ita-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ita-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ita-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ita-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ita-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ita-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ita-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ita-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ita-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-ire-sco",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-ire-sco",
+    "team_id": "sco",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "sco-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "sco-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "sco-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "sco-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "sco-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "sco-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "sco-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "sco-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "sco-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "sco-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "sco-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "sco-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "sco-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "sco-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "sco-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "sco-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "sco-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "sco-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "sco-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "sco-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "sco-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "sco-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "sco-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-eng-fra",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "sn26-r5-eng-fra",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-01",
+    "team_id": "aus",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "aus-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "aus-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "aus-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "aus-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "aus-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "aus-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "aus-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "aus-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "aus-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "aus-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "aus-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "aus-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "aus-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "aus-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "aus-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "aus-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "aus-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "aus-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "aus-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "aus-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "aus-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "aus-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "aus-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-01",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-02",
+    "team_id": "nzl",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "nzl-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "nzl-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "nzl-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "nzl-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "nzl-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "nzl-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "nzl-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "nzl-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "nzl-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "nzl-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "nzl-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "nzl-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "nzl-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "nzl-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "nzl-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "nzl-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "nzl-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "nzl-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "nzl-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "nzl-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "nzl-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "nzl-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "nzl-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-02",
+    "team_id": "fra",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "fra-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "fra-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "fra-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "fra-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "fra-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "fra-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "fra-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "fra-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "fra-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "fra-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "fra-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "fra-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "fra-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "fra-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "fra-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "fra-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "fra-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "fra-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "fra-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "fra-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "fra-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "fra-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "fra-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-03",
+    "team_id": "rsa",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "rsa-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "rsa-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "rsa-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "rsa-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "rsa-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "rsa-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "rsa-p014",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "rsa-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "rsa-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "rsa-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "rsa-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "rsa-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "rsa-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "rsa-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "rsa-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "rsa-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "rsa-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "rsa-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "rsa-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "rsa-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "rsa-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "rsa-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "rsa-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-03",
+    "team_id": "ire",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "ire-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "ire-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "ire-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "ire-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "ire-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "ire-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "ire-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "ire-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "ire-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "ire-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "ire-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "ire-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "ire-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "ire-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "ire-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "ire-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "ire-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "ire-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "ire-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "ire-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "ire-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "ire-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "ire-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-04",
+    "team_id": "arg",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "arg-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "arg-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "arg-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "arg-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "arg-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "arg-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "arg-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "arg-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "arg-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "arg-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "arg-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "arg-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "arg-p025",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "arg-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "arg-p029",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "arg-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "arg-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "arg-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "arg-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "arg-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "arg-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "arg-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "arg-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-04",
+    "team_id": "wal",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "wal-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "wal-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "wal-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "wal-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "wal-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "wal-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "wal-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "wal-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "wal-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "wal-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "wal-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "wal-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "wal-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "wal-p027",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "wal-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "wal-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "wal-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "wal-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "wal-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "wal-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "wal-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "wal-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "wal-p024",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-05",
+    "team_id": "aus",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "aus-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "aus-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "aus-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "aus-p009",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "aus-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "aus-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "aus-p013",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "aus-p016",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "aus-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "aus-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "aus-p021",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "aus-p024",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "aus-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "aus-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "aus-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "aus-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "aus-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "aus-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "aus-p033",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "aus-p012",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "aus-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "aus-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "aus-p023",
+        "position": "inside-centre"
+      }
+    ]
+  },
+  {
+    "fixture_id": "st26-05",
+    "team_id": "eng",
+    "starting_xv": [
+      {
+        "shirt_number": 1,
+        "player_id": "eng-p002",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 2,
+        "player_id": "eng-p004",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 3,
+        "player_id": "eng-p005",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 4,
+        "player_id": "eng-p007",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 5,
+        "player_id": "eng-p008",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 6,
+        "player_id": "eng-p031",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 7,
+        "player_id": "eng-p032",
+        "position": "openside-flanker"
+      },
+      {
+        "shirt_number": 8,
+        "player_id": "eng-p015",
+        "position": "number-8"
+      },
+      {
+        "shirt_number": 9,
+        "player_id": "eng-p018",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 10,
+        "player_id": "eng-p020",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 11,
+        "player_id": "eng-p022",
+        "position": "left-wing"
+      },
+      {
+        "shirt_number": 12,
+        "player_id": "eng-p023",
+        "position": "inside-centre"
+      },
+      {
+        "shirt_number": 13,
+        "player_id": "eng-p026",
+        "position": "outside-centre"
+      },
+      {
+        "shirt_number": 14,
+        "player_id": "eng-p028",
+        "position": "right-wing"
+      },
+      {
+        "shirt_number": 15,
+        "player_id": "eng-p030",
+        "position": "fullback"
+      }
+    ],
+    "bench": [
+      {
+        "shirt_number": 16,
+        "player_id": "eng-p003",
+        "position": "hooker"
+      },
+      {
+        "shirt_number": 17,
+        "player_id": "eng-p001",
+        "position": "loose-head-prop"
+      },
+      {
+        "shirt_number": 18,
+        "player_id": "eng-p006",
+        "position": "tight-head-prop"
+      },
+      {
+        "shirt_number": 19,
+        "player_id": "eng-p010",
+        "position": "lock"
+      },
+      {
+        "shirt_number": 20,
+        "player_id": "eng-p011",
+        "position": "blindside-flanker"
+      },
+      {
+        "shirt_number": 21,
+        "player_id": "eng-p017",
+        "position": "scrum-half"
+      },
+      {
+        "shirt_number": 22,
+        "player_id": "eng-p019",
+        "position": "fly-half"
+      },
+      {
+        "shirt_number": 23,
+        "player_id": "eng-p024",
+        "position": "inside-centre"
+      }
+    ]
+  }
+]

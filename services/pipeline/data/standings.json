@@ -1,0 +1,158 @@
+[
+  {
+    "id": "six-nations-2026-standings",
+    "competition_id": "six-nations",
+    "season_id": "six-nations-2026",
+    "group": null,
+    "rows": [
+      {
+        "team_id": "sco",
+        "played": 5,
+        "won": 4,
+        "drawn": 0,
+        "lost": 1,
+        "points_for": 124,
+        "points_against": 105,
+        "points_difference": 19,
+        "try_bonus_points": 2,
+        "losing_bonus_points": 1,
+        "table_points": 19,
+        "rank": 1
+      },
+      {
+        "team_id": "fra",
+        "played": 5,
+        "won": 3,
+        "drawn": 0,
+        "lost": 2,
+        "points_for": 123,
+        "points_against": 114,
+        "points_difference": 9,
+        "try_bonus_points": 1,
+        "losing_bonus_points": 2,
+        "table_points": 15,
+        "rank": 2
+      },
+      {
+        "team_id": "ita",
+        "played": 5,
+        "won": 3,
+        "drawn": 0,
+        "lost": 2,
+        "points_for": 115,
+        "points_against": 106,
+        "points_difference": 9,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 2,
+        "table_points": 14,
+        "rank": 3
+      },
+      {
+        "team_id": "ire",
+        "played": 5,
+        "won": 3,
+        "drawn": 0,
+        "lost": 2,
+        "points_for": 114,
+        "points_against": 116,
+        "points_difference": -2,
+        "try_bonus_points": 2,
+        "losing_bonus_points": 0,
+        "table_points": 14,
+        "rank": 4
+      },
+      {
+        "team_id": "eng",
+        "played": 5,
+        "won": 2,
+        "drawn": 0,
+        "lost": 3,
+        "points_for": 111,
+        "points_against": 122,
+        "points_difference": -11,
+        "try_bonus_points": 1,
+        "losing_bonus_points": 2,
+        "table_points": 11,
+        "rank": 5
+      },
+      {
+        "team_id": "wal",
+        "played": 5,
+        "won": 0,
+        "drawn": 0,
+        "lost": 5,
+        "points_for": 99,
+        "points_against": 123,
+        "points_difference": -24,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 4,
+        "table_points": 4,
+        "rank": 6
+      }
+    ]
+  },
+  {
+    "id": "rugby-championship-2026-standings",
+    "competition_id": "rugby-championship",
+    "season_id": "rugby-championship-2026",
+    "group": null,
+    "rows": [
+      {
+        "team_id": "arg",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 1
+      },
+      {
+        "team_id": "aus",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 2
+      },
+      {
+        "team_id": "nzl",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 3
+      },
+      {
+        "team_id": "rsa",
+        "played": 0,
+        "won": 0,
+        "drawn": 0,
+        "lost": 0,
+        "points_for": 0,
+        "points_against": 0,
+        "points_difference": 0,
+        "try_bonus_points": 0,
+        "losing_bonus_points": 0,
+        "table_points": 0,
+        "rank": 4
+      }
+    ]
+  }
+]

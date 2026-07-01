@@ -1,0 +1,70 @@
+/**
+ * Fixed registry data: the seed, the 10 Tier-1 national teams, their home
+ * venues, and the name pools used to synthesize plausibly-fake player names.
+ *
+ * None of this is licensable content: team names are public identifiers, the
+ * stadium names are widely-known public facts, and the name pool is a
+ * curated set of common English-language given / family names deliberately
+ * chosen to be generic. Any resemblance to a real player is coincidental —
+ * per PRD §5.5 rule 3.
+ */
+
+import type { Team, TeamId } from '@rugby-app/shared/types';
+
+/** Master seed for the generator. Bump only when a shape change makes a full
+ * regeneration acceptable — never rotate silently. */
+export const RUGBY_APP_SEED = 20260701;
+
+/** Ten Tier-1 Men's national teams (PRD §3.4). Colours are NEUTRAL grays —
+ * NOT the real kit palettes (register #23 resolved: neutral placeholders). */
+export const TIER_1_TEAMS: readonly Team[] = [
+  { id: 'eng', name: 'England', short_name: 'ENG', primary_color: '#4A4A4A' },
+  { id: 'fra', name: 'France', short_name: 'FRA', primary_color: '#4A4A4A' },
+  { id: 'ire', name: 'Ireland', short_name: 'IRE', primary_color: '#4A4A4A' },
+  { id: 'ita', name: 'Italy', short_name: 'ITA', primary_color: '#4A4A4A' },
+  { id: 'sco', name: 'Scotland', short_name: 'SCO', primary_color: '#4A4A4A' },
+  { id: 'wal', name: 'Wales', short_name: 'WAL', primary_color: '#4A4A4A' },
+  { id: 'arg', name: 'Argentina', short_name: 'ARG', primary_color: '#4A4A4A' },
+  { id: 'aus', name: 'Australia', short_name: 'AUS', primary_color: '#4A4A4A' },
+  { id: 'nzl', name: 'New Zealand', short_name: 'NZL', primary_color: '#4A4A4A' },
+  { id: 'rsa', name: 'South Africa', short_name: 'RSA', primary_color: '#4A4A4A' },
+];
+
+export const SIX_NATIONS_TEAM_IDS: readonly TeamId[] = ['eng', 'fra', 'ire', 'ita', 'sco', 'wal'];
+export const RUGBY_CHAMPIONSHIP_TEAM_IDS: readonly TeamId[] = ['arg', 'aus', 'nzl', 'rsa'];
+
+/** Primary home stadium per team. All are publicly known real stadiums —
+ * public facts, not licensable content. */
+export const HOME_VENUE: Record<TeamId, string> = {
+  eng: 'Twickenham Stadium',
+  fra: 'Stade de France',
+  ire: 'Aviva Stadium',
+  ita: 'Stadio Olimpico',
+  sco: 'Murrayfield Stadium',
+  wal: 'Principality Stadium',
+  arg: 'Estadio Único Madre de Ciudades',
+  aus: 'Allianz Stadium',
+  nzl: 'Eden Park',
+  rsa: 'Emirates Airline Park',
+};
+
+/** Deliberately generic given-name pool. */
+export const FIRST_NAMES: readonly string[] = [
+  'Alex', 'Ben', 'Callum', 'Daniel', 'Ethan', 'Finn', 'George', 'Harry',
+  'Ivan', 'Jack', 'Kieran', 'Liam', 'Mason', 'Nathan', 'Oliver', 'Patrick',
+  'Quinn', 'Ryan', 'Samuel', 'Thomas', 'Ulrich', 'Vincent', 'William',
+  'Xavier', 'Yannick', 'Zac', 'Adrian', 'Bruno', 'Cameron', 'Damian',
+  'Elliot', 'Felix', 'Gareth', 'Henri', 'Isaac', 'Julian', 'Kyle', 'Lucas',
+  'Marcus', 'Noah',
+];
+
+/** Deliberately generic family-name pool. */
+export const LAST_NAMES: readonly string[] = [
+  'Ashford', 'Bramley', 'Cartwright', 'Denholm', 'Everley', 'Fairhurst',
+  'Gainsborough', 'Halliwell', 'Ingleby', 'Jarrow', 'Kingsford', 'Leighton',
+  'Merrick', 'Northwood', 'Oakden', 'Pemberton', 'Quenton', 'Ravenscroft',
+  'Sinclair', 'Thornton', 'Underhill', 'Vance', 'Winford', 'Yardley',
+  'Ashcombe', 'Blackmore', 'Crestwood', 'Danforth', 'Elsworth', 'Farraday',
+  'Grayling', 'Harwood', 'Ivory', 'Jennings', 'Kilbride', 'Langford',
+  'Milburn', 'Norwood', 'Ormsby', 'Portway',
+];

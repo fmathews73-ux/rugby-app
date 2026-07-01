@@ -1,0 +1,19 @@
+{
+  "name": "@rugby-app/pipeline",
+  "version": "0.0.0-dev",
+  "private": true,
+  "description": "Synthetic data generator (PRD §5.5 dev-only) + ingestion pipeline scaffold. Emits canonical JSON matching @rugby-app/shared types.",
+  "type": "module",
+  "scripts": {
+    "generate": "tsx src/generate.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@rugby-app/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.6.3"
+  }
+}
