@@ -37,7 +37,7 @@ export default function HomeScreen() {
   const entities = health.data?.entities;
   const fixturesLine =
     entities !== undefined
-      ? `${entities.competitions} competitions · ${entities.teams} teams · ${entities.fixtures} fixtures`
+      ? `${entities.competitions} competitions · ${entities.teams} teams`
       : 'Loading…';
 
   const rankingsLine =
@@ -57,7 +57,7 @@ export default function HomeScreen() {
           panelColor={PANEL_COLOR_A}
           iconName="pulse"
           eyebrow="Live in the app"
-          heading="Men’s international rugby"
+          heading="Rugby fixtures"
           body={fixturesLine}
           ctaLabel="Fixtures"
           onPress={() => router.push('/fixtures')}
@@ -102,11 +102,11 @@ function HeroCard({
         <Ionicons name={iconName} size={54} color="#FFFFFF" />
       </View>
       <View style={styles.cardRight}>
-        <Text style={styles.eyebrow}>{eyebrow}</Text>
-        <Text style={styles.heading} numberOfLines={2}>
+        <Text style={styles.eyebrow} numberOfLines={1}>{eyebrow}</Text>
+        <Text style={styles.heading} numberOfLines={1}>
           {heading}
         </Text>
-        <Text style={styles.body} numberOfLines={2}>
+        <Text style={styles.body} numberOfLines={1}>
           {body}
         </Text>
         <Pressable
