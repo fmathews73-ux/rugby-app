@@ -24,10 +24,10 @@ export function AppHeader() {
         <Ionicons name="person-circle-outline" size={32} color={Colors.light.text} />
       </Pressable>
 
-      {/* Centre and right slots intentionally empty — see file header. */}
       <View style={styles.centreSlot}>
-        <Text style={styles.centreSlotHidden}> </Text>
+        <Text style={styles.appName}>RUGBY+</Text>
       </View>
+      {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
       <View style={styles.rightSlot} />
     </View>
   );
@@ -53,7 +53,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  centreSlotHidden: { opacity: 0 },
+  appName: {
+    fontSize: 18,
+    fontWeight: '800',
+    color: Colors.light.text,
+    letterSpacing: 0.6,
+  },
   rightSlot: {
     minWidth: 44,
     alignItems: 'flex-end',
