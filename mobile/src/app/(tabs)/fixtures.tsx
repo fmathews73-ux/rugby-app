@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -7,18 +7,32 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
+import { CompetitionPicker } from '@/components/competition-picker';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
+const ALL_COMPETITIONS = 'all';
+
+const FILTER_OPTIONS = [
+  { id: ALL_COMPETITIONS, label: 'All' },
+  { id: 'six-nations', label: 'Six Nations' },
+  { id: 'rugby-championship', label: 'Rugby C’ship' },
+  { id: 'summer-tests', label: 'Summer' },
+  { id: 'autumn-tests', label: 'Autumn' },
+  { id: 'world-cup', label: 'World Cup' },
+] as const;
+
 /**
- * Fixtures — every fixture across the four current-season competitions,
- * grouped by date (upcoming first, past below). Each row: kickoff time,
- * competition, and the two teams.
+ * Fixtures — every fixture across the five current-season competitions,
+ * grouped by date, chronologically. Picker at the top filters by competition.
+ * Tap a row → fixture detail.
  */
 export default function FixturesScreen() {
   const router = useRouter();
+  const [competitionFilter, setCompetitionFilter] = useState<string>(ALL_COMPETITIONS);
+
   const competitions = useCompetitions();
   const seasons = useSeasons();
   const teams = useTeams();
@@ -40,8 +54,11 @@ export default function FixturesScreen() {
     const compById = new Map(competitions.data?.map((c) => [c.id, c]) ?? []);
     const teamById = new Map(teams.data?.map((t) => [t.id, t]) ?? []);
     const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
+    const filtered = competitionFilter === ALL_COMPETITIONS
+      ? all
+      : all.filter((f) => f.competition_id === competitionFilter);
     const byDate = new Map<string, Fixture[]>();
-    for (const fx of all) {
+    for (const fx of filtered) {
       const day = fx.kickoff_utc.slice(0, 10);
       const arr = byDate.get(day) ?? [];
       arr.push(fx);
@@ -54,13 +71,18 @@ export default function FixturesScreen() {
       compById,
       teamById,
     }));
-  }, [isLoading, error, competitions.data, teams.data, fixtureQueries]);
+  }, [isLoading, error, competitions.data, teams.data, fixtureQueries, competitionFilter]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+      <CompetitionPicker
+        options={FILTER_OPTIONS}
+        selected={competitionFilter}
+        onSelect={setCompetitionFilter}
+      />
       <SectionList<
         Fixture,
         {

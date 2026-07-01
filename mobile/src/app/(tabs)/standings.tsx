@@ -1,23 +1,36 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useSeasonStandings, useTeams } from '@/api/hooks';
-import { ErrorState, LoadingState } from '@/components/state-views';
+import { CompetitionPicker } from '@/components/competition-picker';
+import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Standings — Six Nations 2026 by default. Six Nations is the only current-
- * season round-robin competition that has completed fixtures at the sim's
- * "today" date (2026-07-01), so it renders a fully-populated table.
- *
- * Rugby Championship 2026 and RWC 2027 pool tables exist in the API too and
- * would render with zero rows until their fixtures play — deferred to a later
- * stage when a competition picker gets added.
+ * Standings. Picker at the top selects a competition; the query switches to
+ * the corresponding season. Six Nations and Rugby Championship each have a
+ * single round-robin table; World Cup 2027 returns one table per pool
+ * (currently all-zeros since pool matches are scheduled Oct 2027).
+ * Test-window competitions have no standings and are excluded from the picker.
  */
+
+const STANDINGS_OPTIONS = [
+  { id: 'six-nations-2026', label: 'Six Nations' },
+  { id: 'rugby-championship-2026', label: 'Rugby C’ship' },
+  { id: 'world-cup-2027', label: 'World Cup' },
+] as const;
+
+const SEASON_TITLE: Record<string, { title: string; subtitle: string }> = {
+  'six-nations-2026': { title: 'Six Nations 2026', subtitle: 'Final standings' },
+  'rugby-championship-2026': { title: 'Rugby Championship 2026', subtitle: 'Kicks off Aug 2026' },
+  'world-cup-2027': { title: 'Rugby World Cup 2027', subtitle: 'Pool stage · Oct 2027' },
+};
+
 export default function StandingsScreen() {
-  const query = useSeasonStandings('six-nations-2026');
+  const [seasonId, setSeasonId] = useState<string>(STANDINGS_OPTIONS[0].id);
+  const query = useSeasonStandings(seasonId);
   const teams = useTeams();
 
   const teamById = useMemo(() => {
@@ -26,19 +39,35 @@ export default function StandingsScreen() {
     return m;
   }, [teams.data]);
 
+  const info = SEASON_TITLE[seasonId];
+
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+      <CompetitionPicker
+        options={STANDINGS_OPTIONS}
+        selected={seasonId}
+        onSelect={setSeasonId}
+      />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Six Nations 2026</Text>
-        <Text style={styles.subtitle}>Final standings</Text>
+        <Text style={styles.title}>{info?.title ?? seasonId}</Text>
+        <Text style={styles.subtitle}>{info?.subtitle ?? ''}</Text>
 
         {query.isLoading ? (
           <LoadingState />
         ) : query.isError ? (
           <ErrorState error={query.error} />
-        ) : query.data && query.data[0] ? (
-          <StandingsTable rows={query.data[0].rows} teamById={teamById} />
-        ) : null}
+        ) : query.data && query.data.length > 0 ? (
+          query.data.map((standings) => (
+            <View key={standings.id} style={styles.tableGroup}>
+              {standings.group ? (
+                <Text style={styles.groupHeading}>{standings.group}</Text>
+              ) : null}
+              <StandingsTable rows={standings.rows} teamById={teamById} />
+            </View>
+          ))
+        ) : (
+          <EmptyState label="No standings for this competition." />
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -80,7 +109,9 @@ function StandingsTable({
             <Text style={styles.cellStat}>{r.won}</Text>
             <Text style={styles.cellStat}>{r.drawn}</Text>
             <Text style={styles.cellStat}>{r.lost}</Text>
-            <Text style={styles.cellStat}>{r.points_difference > 0 ? `+${r.points_difference}` : r.points_difference}</Text>
+            <Text style={styles.cellStat}>
+              {r.points_difference > 0 ? `+${r.points_difference}` : r.points_difference}
+            </Text>
             <Text style={[styles.cellPts, styles.cellPtsValue]}>{r.table_points}</Text>
           </View>
         );
@@ -92,8 +123,17 @@ function StandingsTable({
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.light.background },
   scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.light.text },
+  title: { fontSize: 22, fontWeight: '700', color: Colors.light.text },
   subtitle: { fontSize: 13, color: Colors.light.textSecondary, marginBottom: Spacing.two },
+  tableGroup: { gap: Spacing.one },
+  groupHeading: {
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    paddingTop: Spacing.two,
+  },
   table: {
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: 12,
