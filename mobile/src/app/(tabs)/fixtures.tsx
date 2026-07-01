@@ -220,9 +220,34 @@ export default function FixturesScreen() {
                     {home?.short_name ?? item.home_team_id.toUpperCase()}
                   </Text>
                   {result ? (
-                    <Text style={styles.scoreText}>
-                      {result.home_score} - {result.away_score}
-                    </Text>
+                    <View style={styles.scoreBoxRow}>
+                      <View
+                        style={[
+                          styles.scoreBoxSmall,
+                          result.home_score > result.away_score && styles.scoreBoxSmallWinner,
+                        ]}>
+                        <Text
+                          style={[
+                            styles.scoreBoxSmallText,
+                            result.home_score > result.away_score && styles.scoreBoxSmallTextWinner,
+                          ]}>
+                          {result.home_score}
+                        </Text>
+                      </View>
+                      <View
+                        style={[
+                          styles.scoreBoxSmall,
+                          result.away_score > result.home_score && styles.scoreBoxSmallWinner,
+                        ]}>
+                        <Text
+                          style={[
+                            styles.scoreBoxSmallText,
+                            result.away_score > result.home_score && styles.scoreBoxSmallTextWinner,
+                          ]}>
+                          {result.away_score}
+                        </Text>
+                      </View>
+                    </View>
                   ) : (
                     <Text
                       style={[styles.statusMid, statusMidExtraStyle(item.status)]}
@@ -310,13 +335,24 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: Colors.light.text,
   },
-  scoreText: {
+  scoreBoxRow: {
     width: 76,
-    textAlign: 'center',
-    fontSize: 15,
-    fontWeight: '700',
-    color: Colors.light.text,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
   },
+  scoreBoxSmall: {
+    width: 30,
+    height: 24,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
+  scoreBoxSmallText: { fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  scoreBoxSmallTextWinner: { color: '#FFFFFF' },
   statusMid: {
     width: 76,
     textAlign: 'center',
