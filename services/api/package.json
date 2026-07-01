@@ -1,0 +1,22 @@
+{
+  "name": "@rugby-app/api",
+  "version": "0.0.0-dev",
+  "private": true,
+  "description": "Read-side HTTP API. Reads the synthetic dev dataset (or, at cutover, a real feed's persisted output) and serves canonical JSON to the mobile client.",
+  "type": "module",
+  "scripts": {
+    "start": "tsx src/server.ts",
+    "test": "tsx --test test/smoke.test.ts",
+    "typecheck": "tsc --noEmit --project tsconfig.json"
+  },
+  "dependencies": {
+    "@rugby-app/pipeline": "*",
+    "@rugby-app/shared": "*",
+    "fastify": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "tsx": "^4.19.2",
+    "typescript": "~5.6.3"
+  }
+}
