@@ -1,25 +1,41 @@
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FixtureCarousel } from '@/components/fixture-carousel';
+import { HomeRankingsCard } from '@/components/home-rankings-card';
 import { Spacing } from '@/constants/theme';
 
+/** Matches the carousel's SIDE_PAD so the rankings card visually aligns to
+ * the centre carousel card. If the carousel's CARD_WIDTH formula changes,
+ * bump this too. */
+const HORIZONTAL_MARGIN = 40;
+
 /**
- * Home. A timeline carousel of 5 fixtures — the two most-recently completed,
- * the current (live / next scheduled / last completed by fallback), and the
- * next two. Nothing else on Home for now.
+ * Home. Two-stack layout:
+ *   1. A timeline carousel of 7 fixtures around the "current" match.
+ *   2. A World Rugby men's rankings preview card (top 5 + "see all").
  */
 export default function HomeScreen() {
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
-      <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
         <FixtureCarousel />
-      </View>
+        <View style={styles.rankingsWrap}>
+          <HomeRankingsCard />
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F5F5F7' },
-  container: { paddingTop: Spacing.four },
+  scrollContent: {
+    paddingTop: Spacing.four,
+    paddingBottom: Spacing.four + 16,
+    gap: Spacing.four,
+  },
+  rankingsWrap: {
+    paddingHorizontal: HORIZONTAL_MARGIN,
+  },
 });
