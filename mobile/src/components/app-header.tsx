@@ -25,7 +25,10 @@ export function AppHeader() {
       </Pressable>
 
       <View style={styles.centreSlot}>
-        <Text style={styles.appName}>RUGBY+</Text>
+        <View style={styles.appNameRow}>
+          <Text style={styles.appName}>RUGBY</Text>
+          <Ionicons name="add" size={22} color={Colors.light.text} />
+        </View>
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
       <View style={styles.rightSlot} />
@@ -52,6 +55,11 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  appNameRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 1,
   },
   appName: {
     fontSize: 18,
