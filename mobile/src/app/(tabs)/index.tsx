@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useMemo } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,10 +9,10 @@ import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Home. Deliberately dashboard-like at this stage — real IA per PRD §4.3 is
- * "General description/landing" with content blocks still `[INPUT NEEDED #19]`.
- * Until that's specified, this shows a rugby-agnostic pipeline health card
- * + a rankings tease with 2D flag balls.
+ * Home. Two cards, each split into a left-third graphic column and a
+ * right-two-thirds data column. Real IA per PRD §4.3 is "General
+ * description / landing" with content blocks still `[INPUT NEEDED #19]`;
+ * until that lands, this dashboard shape works.
  */
 export default function HomeScreen() {
   const health = useHealth();
@@ -24,65 +25,87 @@ export default function HomeScreen() {
     return m;
   }, [teams.data]);
 
+  const topRankedTeam = ranking.data ? teamById.get(ranking.data.rows[0]?.team_id ?? '') : undefined;
+
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
         <Text style={styles.title}>Rugby App</Text>
         <Text style={styles.subtitle}>Men’s international rugby, all in one place.</Text>
 
+        {/* Card 1 — Live in the app */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Live in the app</Text>
-          {health.isLoading ? (
-            <LoadingState />
-          ) : health.isError ? (
-            <ErrorState error={health.error} />
-          ) : health.data ? (
-            <View style={styles.metricsRow}>
-              <Metric label="Competitions" value={health.data.entities.competitions} />
-              <Metric label="Teams" value={health.data.entities.teams} />
-              <Metric label="Fixtures" value={health.data.entities.fixtures} />
-              <Metric label="Rankings" value={health.data.entities.rankings} />
+          <View style={styles.cardLeft}>
+            <View style={styles.iconCircle}>
+              <Ionicons name="pulse" size={38} color={Colors.light.text} />
             </View>
-          ) : null}
+          </View>
+          <View style={styles.cardRight}>
+            <Text style={styles.cardTitle}>Live in the app</Text>
+            {health.isLoading ? (
+              <LoadingState />
+            ) : health.isError ? (
+              <ErrorState error={health.error} />
+            ) : health.data ? (
+              <View style={styles.metricList}>
+                <MetricRow value={health.data.entities.competitions} label="Competitions" />
+                <MetricRow value={health.data.entities.teams} label="Teams" />
+                <MetricRow value={health.data.entities.fixtures} label="Fixtures" />
+                <MetricRow value={health.data.entities.rankings} label="Rankings" />
+              </View>
+            ) : null}
+          </View>
         </View>
 
+        {/* Card 2 — Latest ranking snapshot */}
         <View style={styles.card}>
-          <Text style={styles.cardTitle}>Latest ranking snapshot</Text>
-          {ranking.isLoading ? (
-            <LoadingState />
-          ) : ranking.isError ? (
-            <ErrorState error={ranking.error} />
-          ) : ranking.data ? (
-            <View style={styles.rankList}>
-              <Text style={styles.rankMeta}>{ranking.data.snapshot_date}</Text>
-              {ranking.data.rows.slice(0, 5).map((row) => {
-                const team = teamById.get(row.team_id);
-                return (
-                  <View key={row.team_id} style={styles.rankRow}>
-                    <Text style={styles.rankIndex}>{row.rank}.</Text>
-                    {team ? (
-                      <TeamFlagBall2D flagCode={team.flag_code} size={26} />
-                    ) : (
-                      <View style={styles.flagFallback} />
-                    )}
-                    <Text style={styles.rankTeam}>
-                      {team?.name ?? row.team_id.toUpperCase()}
-                    </Text>
-                    <Text style={styles.rankPoints}>{row.points} pts</Text>
-                  </View>
-                );
-              })}
-            </View>
-          ) : null}
+          <View style={styles.cardLeft}>
+            {topRankedTeam ? (
+              <TeamFlagBall2D flagCode={topRankedTeam.flag_code} size={72} />
+            ) : (
+              <View style={styles.iconCircle}>
+                <Ionicons name="trophy" size={38} color={Colors.light.text} />
+              </View>
+            )}
+          </View>
+          <View style={styles.cardRight}>
+            <Text style={styles.cardTitle}>Latest ranking snapshot</Text>
+            {ranking.isLoading ? (
+              <LoadingState />
+            ) : ranking.isError ? (
+              <ErrorState error={ranking.error} />
+            ) : ranking.data ? (
+              <View style={styles.rankList}>
+                <Text style={styles.rankMeta}>{ranking.data.snapshot_date}</Text>
+                {ranking.data.rows.slice(0, 5).map((row) => {
+                  const team = teamById.get(row.team_id);
+                  return (
+                    <View key={row.team_id} style={styles.rankRow}>
+                      <Text style={styles.rankIndex}>{row.rank}.</Text>
+                      {team ? (
+                        <TeamFlagBall2D flagCode={team.flag_code} size={20} />
+                      ) : (
+                        <View style={styles.flagFallback} />
+                      )}
+                      <Text style={styles.rankTeam} numberOfLines={1}>
+                        {team?.short_name ?? row.team_id.toUpperCase()}
+                      </Text>
+                      <Text style={styles.rankPoints}>{row.points}</Text>
+                    </View>
+                  );
+                })}
+              </View>
+            ) : null}
+          </View>
         </View>
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function Metric({ label, value }: { label: string; value: number | undefined }) {
+function MetricRow({ value, label }: { value: number | undefined; label: string }) {
   return (
-    <View style={styles.metric}>
+    <View style={styles.metricRow}>
       <Text style={styles.metricValue}>{value ?? '–'}</Text>
       <Text style={styles.metricLabel}>{label}</Text>
     </View>
@@ -94,22 +117,65 @@ const styles = StyleSheet.create({
   scroll: { padding: Spacing.four, gap: Spacing.four, paddingBottom: 40 },
   title: { fontSize: 28, fontWeight: '700', color: Colors.light.text },
   subtitle: { fontSize: 14, color: Colors.light.textSecondary },
+
   card: {
+    flexDirection: 'row',
     backgroundColor: Colors.light.backgroundElement,
     borderRadius: 16,
     padding: Spacing.four,
     gap: Spacing.three,
+    alignItems: 'center',
   },
-  cardTitle: { fontSize: 12, fontWeight: '600', letterSpacing: 1, color: Colors.light.textSecondary },
-  metricsRow: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.three, justifyContent: 'space-between' },
-  metric: { flexBasis: '45%', gap: 4 },
-  metricValue: { fontSize: 26, fontWeight: '700', color: Colors.light.text },
-  metricLabel: { fontSize: 12, color: Colors.light.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
-  rankList: { gap: 8 },
-  rankMeta: { fontSize: 12, color: Colors.light.textSecondary },
-  rankRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two },
-  rankIndex: { fontSize: 14, fontWeight: '600', color: Colors.light.textSecondary, minWidth: 22 },
-  flagFallback: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#E5E7EB' },
-  rankTeam: { fontSize: 15, fontWeight: '600', color: Colors.light.text, flex: 1 },
-  rankPoints: { fontSize: 12, color: Colors.light.textSecondary },
+  cardLeft: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'stretch',
+  },
+  cardRight: {
+    flex: 2,
+    gap: Spacing.three,
+  },
+
+  iconCircle: {
+    width: 72,
+    height: 72,
+    borderRadius: 999,
+    backgroundColor: Colors.light.background,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+  },
+
+  cardTitle: {
+    fontSize: 12,
+    fontWeight: '600',
+    letterSpacing: 1,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
+
+  metricList: { gap: 6 },
+  metricRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.two + 2 },
+  metricValue: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: Colors.light.text,
+    minWidth: 40,
+  },
+  metricLabel: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+
+  rankList: { gap: 6 },
+  rankMeta: { fontSize: 11, color: Colors.light.textSecondary },
+  rankRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  rankIndex: { fontSize: 12, fontWeight: '700', color: Colors.light.textSecondary, minWidth: 18 },
+  flagFallback: { width: 20, height: 20, borderRadius: 10, backgroundColor: '#E5E7EB' },
+  rankTeam: { fontSize: 13, fontWeight: '600', color: Colors.light.text, flex: 1 },
+  rankPoints: { fontSize: 11, color: Colors.light.textSecondary, fontWeight: '600' },
 });
