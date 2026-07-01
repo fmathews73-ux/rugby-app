@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
@@ -191,6 +192,11 @@ export default function FixturesScreen() {
         keyExtractor={(item) => item.id}
         renderSectionHeader={({ section }) => (
           <View style={styles.dayHeader}>
+            <Ionicons
+              name="calendar-outline"
+              size={12}
+              color={Colors.light.textSecondary}
+            />
             <Text style={styles.dayHeaderText}>{section.title}</Text>
           </View>
         )}
@@ -275,6 +281,9 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.light.background },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   dayHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
     backgroundColor: Colors.light.background,
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two,
