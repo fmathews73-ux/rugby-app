@@ -4,18 +4,18 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTeam, useTeams } from '@/api/hooks';
-import { ErrorBoundary } from '@/components/error-boundary';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { TeamFlagBall3D } from '@/components/team-flag-ball-3d';
 import { Colors, Spacing } from '@/constants/theme';
 
 /**
- * Team detail. Hero shows the 3D flag ball IF the WebGL context and texture
- * both load; otherwise silently falls back to a large 2D ball (same visual
- * language, just no rotation). Below the hero: team meta + recent/upcoming
- * fixtures with opponent short-names and dates. Squad + stats deferred until
- * the squad picker and register #12 (KPI list) land.
+ * Team detail. Hero is a large 2D flag ball. The 3D component
+ * (src/components/team-flag-ball-3d.tsx) is kept in-tree for a later mini-
+ * phase — three.js's HTTP TextureLoader assumes DOM globals and doesn't
+ * work out-of-the-box in RN + expo-gl. Fixing it needs either expo-three
+ * or a downloaded-local-file flow, which is scope creep for detail pages.
+ * Below the hero: team meta + recent/upcoming fixtures. Squad + stats
+ * deferred until the squad picker and register #12 (KPI list) land.
  */
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -41,10 +41,7 @@ export default function TeamDetailScreen() {
         ) : team.data ? (
           <>
             <View style={styles.hero}>
-              <ErrorBoundary
-                fallback={<TeamFlagBall2D flagCode={team.data.flag_code} size={220} />}>
-                <TeamFlagBall3D flagCode={team.data.flag_code} size={240} />
-              </ErrorBoundary>
+              <TeamFlagBall2D flagCode={team.data.flag_code} size={220} />
               <Text style={styles.heroName}>{team.data.name}</Text>
               <Text style={styles.heroSubtitle}>{team.data.short_name}</Text>
             </View>
