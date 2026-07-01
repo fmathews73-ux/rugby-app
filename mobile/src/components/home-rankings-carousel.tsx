@@ -121,7 +121,7 @@ function MensRankingsCard() {
         onPress={() => router.push('/rankings')}
         style={({ pressed }) => [styles.footer, pressed && styles.footerPressed]}>
         <Text style={styles.footerText}>See all rankings</Text>
-        <Ionicons name="chevron-forward" size={16} color={ACCENT} />
+        <Ionicons name="chevron-forward" size={16} color={Colors.light.text} />
       </Pressable>
     </View>
   );
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
   },
   footerPressed: { opacity: 0.5 },
-  footerText: { fontSize: 13, fontWeight: '700', color: ACCENT, letterSpacing: 0.2 },
+  footerText: { fontSize: 13, fontWeight: '700', color: Colors.light.text, letterSpacing: 0.2 },
 
   placeholderBody: {
     alignItems: 'center',
