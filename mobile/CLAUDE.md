@@ -1,6 +1,3 @@
-<!-- Destination: /mobile/CLAUDE.md  (the Expo app root — sits alongside AGENTS.md) -->
-<!-- Draft v0.2 — Inherits root /CLAUDE.md. Imports AGENTS.md for Expo technical conventions. -->
-
 @AGENTS.md
 
 # CLAUDE.md — Mobile app (Expo / React Native, iOS + Android)
@@ -13,10 +10,10 @@ Reference pattern is a **data app, not a media app** (PRD §1) — no live video
 
 ## Framework (locked — v0.2)
 
-- **Expo, managed workflow**, React Native. Created with `create-expo-app`.
-- **Expo Router** for navigation — file-based routing under `app/`; screen files map to the IA below.
-- **Native iOS + Android only. Web is OUT for v1** (register #18 resolved: OUT). Do not add `react-native-web`, web targets, or web-only dependencies.
-- Expo **SDK version** is whatever `create-expo-app` installs (latest stable); it is pinned in `package.json` and tracked by `AGENTS.md`'s Expo docs pointer. Use the Expo plugin/skills + Expo MCP for version-matched APIs rather than guessing.
+- **Expo, managed workflow**, React Native. Created with `create-expo-app`. **Installed SDK: 57** (pinned in `package.json`).
+- **Expo Router** for navigation — file-based routing under `src/app/` (Expo now uses `src/app/`, not the older top-level `app/`); screen files map to the IA below.
+- **Native iOS + Android only. Web is OUT for v1** (register #18 resolved: OUT). The scaffold's default web target, `react-native-web`, `react-dom`, and `web` script were removed on merge. Do not re-add.
+- Expo **SDK version** is whatever `create-expo-app` installed (currently 57), pinned in `package.json` and tracked by `AGENTS.md`'s Expo docs pointer. Use the Expo plugin/skills + Expo MCP for version-matched APIs rather than guessing.
 
 ---
 
@@ -51,3 +48,12 @@ Reference pattern is a **data app, not a media app** (PRD §1) — no live video
 ## Not in v1
 
 Live video, AR, betting/odds, ads, a Fantasy build, and **web** are all out. Fantasy is a header entry point only.
+
+---
+
+## Scaffold state at Phase 0 end
+
+- `app.json`: `name`/`slug` = `mobile` (placeholder — will change with brand decision, register #23). `ios.bundleIdentifier` / `android.package` not yet set — depend on register #26 (neutral domain for reverse-DNS bundle IDs).
+- `LICENSE` was deleted on scaffold merge — the template's default Expo-copyright MIT is misleading for a repo we own, and the actual licence decision is tied to register #26. Add back at Phase 6 when the publisher entity is decided.
+- Default two-tab starter screens (`src/app/index.tsx`, `src/app/explore.tsx`) are placeholders; will be replaced by the real IA when Phase 5 begins.
+- `node_modules/` not installed yet — run `npm install` inside `mobile/` before first `expo start`.
