@@ -87,11 +87,6 @@ function MensRankingsCard() {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>World Rugby Rankings</Text>
-        {ranking.data ? (
-          <Text style={styles.subtitle}>Men’s · Snapshot {ranking.data.snapshot_date}</Text>
-        ) : (
-          <Text style={styles.subtitle}>Men’s</Text>
-        )}
       </View>
 
       {ranking.isLoading ? (
@@ -153,7 +148,6 @@ function WomensPlaceholderCard() {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>World Rugby Rankings</Text>
-        <Text style={styles.subtitle}>Women’s</Text>
       </View>
 
       <View style={styles.placeholderBody}>
