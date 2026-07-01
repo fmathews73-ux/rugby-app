@@ -1,11 +1,12 @@
 # Product Requirements Document — Rugby Mobile Application
 
-**Version:** 0.3 (Draft)
+**Version:** 0.4 (Draft)
 **Date:** 1 July 2026
 **Status:** Working draft — contains open items requiring resolution
 **Intended reader:** Claude Code (build agent) + project owner
 
 **Version history**
+- **v0.4** — Scope crystallised. Resolved register #1 (Rugby Union only, permanent — League is a permanent product exclusion), #2 (v1 = **Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 test matches, Rugby World Cup), #3 (Men's), #4 (current season only). Soft-deferred #5 (licensing gate) — dev builds run against a synthetic dataset per new **§5.5**; gate stays live before any real feed data enters the pipeline. Deferred #13 (proprietary rankings algorithm) — Internationals use World Rugby's stored public rankings; algorithm reactivates only when scope expands to club competitions. Added §5.5 (synthetic development data rules) and register #27 (synthetic dataset design + persistent dev-mode indicator).
 - **v0.3** — Added register #26 (publisher entity & neutral domain) as Phase 6 open item — real-name exposure via App Store developer name, bundle-ID reverse-DNS, and domain WHOIS is the primary public anonymity chokepoint once the app publishes. Filename retained as `Rugby-App-PRD-v0.2.md` to avoid cascading reference updates in every `CLAUDE.md`; rename on next material scope change.
 - **v0.2** — Mobile framework locked to **React Native via Expo (managed workflow) + Expo Router** (§6). **Web companion resolved OUT for v1** (register #18). Fixed a cross-reference (§0 now correctly points to the §13 register).
 - **v0.1** — Initial working draft.
@@ -69,21 +70,26 @@ Fixtures, results, standings/brackets, team pages, player profiles, team & playe
 - AR features (pitch overlays, wayfinding) — excluded.
 - Betting/odds — `[INPUT NEEDED]` excluded by default; if ever included it introduces regulatory/licensing obligations and must be treated as a separate workstream.
 - **Web companion — OUT for v1** (resolved v0.2, register #18). Native iOS + Android only.
+- **Rugby League — permanent product exclusion** (resolved v0.4). This is a Union app; no League fixtures, teams, stats, or rankings appear anywhere in the product.
+- **Rugby Sevens — OUT for v1** (resolved v0.4). May be revisited as a scope expansion later; do not build for it now.
 
 ### 3.3 Deferred
 
 - Fantasy — `[DEFERRED to Phase 2+]`. Larger build than it appears and typically a separate data-licensing use-case. Wireframe the header entry point only; do not build.
 
-### 3.4 Code & competition scope — `[GATE — Phase 1]`
+### 3.4 Code & competition scope — **RESOLVED v0.4**
 
-The single most important undefined item. Not yet specified:
+- **Code:** Rugby **Union only.** League is a permanent product exclusion (§3.2). Sevens is deferred (§3.2).
+- **v1 competitions — Men's Tier 1 Internationals only:**
+  - **Six Nations** (England, France, Ireland, Italy, Scotland, Wales).
+  - **Rugby Championship** (Argentina, Australia, New Zealand, South Africa).
+  - **Tier-1 test matches** during autumn and summer international windows, between Tier-1 sides.
+  - **Rugby World Cup.**
+- **Gender:** Men's only.
+- **Historical depth:** Current season only. Prior-season data is not surfaced anywhere in v1.
+- **Post-v1 expansion (out of scope now):** additional competitions (e.g. Pacific Nations Cup, other Tier-2 tests, women's internationals) and eventually club competitions. Do not model or build for these yet, but keep the canonical data model open enough to admit them without a rewrite.
 
-- `[INPUT NEEDED]` Which code(s): Rugby Union, Rugby League, and/or Sevens?
-- `[INPUT NEEDED]` Which competitions for v1 (e.g. international windows, and/or specific club/league competitions)? Keep v1 bounded.
-- `[INPUT NEEDED]` Men's, Women's, or both?
-- `[INPUT NEEDED]` Historical depth required (how many past seasons)?
-
-All data licensing, cost, testing, and normalisation work depends on this. Resolve before any feed selection.
+All Phase 3+ pipeline, canonical-model, ingestion cadence, and UI decisions now scope to this bounded set.
 
 ---
 
@@ -118,7 +124,8 @@ Home · Fixtures · Standings · Teams · Stats · Power Rankings
 
 ### 5.1 Strategy (decided)
 
-Launch on aggregator-tier data for cost reasons; retain premium (Opta/Stats Perform-grade) as a documented future upgrade, not a launch dependency. The normalisation layer (§6) exists specifically to make that upgrade a config change, not a rewrite.
+**Sequence: synthetic → aggregator → premium** (v0.4).
+Build against a **synthetic development dataset** (see §5.5) first — validates the pipeline shape, canonical model, API surface, and every screen without any paid feed commitment or licensing exposure. Swap to aggregator-tier data before public launch (cost reason). Retain premium (Opta/Stats Perform-grade) as a documented future upgrade, not a launch dependency. The normalisation layer (§6) exists specifically to make each transition a config change, not a rewrite.
 
 ### 5.2 Provider shortlist
 
@@ -134,6 +141,17 @@ Commercial redistribution rights must be confirmed **in writing** before any pai
 ### 5.4 News source — `[INPUT NEEDED / RESEARCH REQUIRED — Phase 2]`
 
 "News" appears in Fixtures and Teams but its source is undefined (feed-provided? RSS aggregation? editorial? licensed wire?). Each has different cost, legal, and build implications.
+
+### 5.5 Synthetic development data — RESOLVED v0.4 (dev only)
+
+Until real feed data enters the pipeline, all pipeline / API / client work runs against a synthetic dataset shaped for the §3.4 scope (Men's Tier 1 Internationals, current season). Non-negotiable rules:
+
+- **Shape identical to canonical model.** Synthetic records go through the same adapter interface a real feed will later use — the client and API cannot tell them apart. Swapping to a licensed feed is an adapter change only.
+- **National team names are real** (public identifiers, not licensable content). Team crests / logos are trademarked and must NOT be included — neutral placeholder marks only, per §10.
+- **Player names are plausibly fake.** Never real players tied to fabricated stats — even privately, that carries defamation risk. Real player data enters only via a licensed feed post-launch.
+- **Fixtures may mirror the real published international calendar** (public record). Results, live scores, per-match stats, and rankings are fully synthetic and must be **visibly labelled** in the UI (persistent dev-mode indicator on every screen that renders any synthetic field).
+- **Never ship synthetic data to a production build.** Gate synthetic data to `__DEV__` / dev-client / EAS internal preview only; store builds must fail hard if a synthetic adapter is present. Any code path that could leak synthetic data into a public build is a release blocker.
+- **Licensing gate (register #5) remains live** for the moment real feed data enters the pipeline — before beta / soft-launch, not before dev. See §5.3.
 
 ---
 
@@ -170,8 +188,8 @@ Acceptable live-score latency is undefined (sub-minute? a few minutes?). Poll-re
 
 ## 7. Power Rankings (owned IP)
 
-- **International teams:** use official public governing-body rankings. `[RESEARCH REQUIRED — Phase 2]` Confirm the official ranking source, its update cadence, and terms of reuse for the in-scope competitions/codes.
-- **Club/union teams & players:** proprietary algorithm — the app's key differentiator and defensible IP. `[INPUT NEEDED — Phase 2]` Algorithm spec undefined. Define: input metrics, weightings, normalisation method, recompute cadence, and cold-start handling. Must be documented before build.
+- **International teams (v1):** use **World Rugby's official public men's rankings**. `[RESEARCH REQUIRED — Phase 2]` Confirm update cadence and terms of reuse. Rankings are **stored, not computed** — no proprietary algorithm is needed for v1. Synthetic dev builds show synthetic ranking snapshots per §5.5.
+- **Club/union teams & players — DEFERRED (post-v1 only, v0.4).** The proprietary algorithm — the app's key differentiator and defensible IP — only becomes relevant when scope expands to club competitions. Spec (input metrics, weightings, normalisation, recompute cadence, cold-start handling) remains undefined until that expansion is agreed. Do not build any club-rankings compute path in v1.
 
 ---
 
@@ -247,33 +265,34 @@ Prove licensing → build the pipeline → ship the cheap-data MVP behind a payw
 
 | # | Item | Tag | Phase | Blocks |
 |---|---|---|---|---|
-| 1 | Code(s): Union/League/Sevens | INPUT | 1 | Feed, everything |
-| 2 | v1 competitions list | INPUT | 1 | Feed, licensing |
-| 3 | Men's/Women's/both | INPUT | 1 | Feed scope |
-| 4 | Historical depth | INPUT | 1 | Data model, cost |
-| 5 | Commercial redistribution licence | GATE | 1 | Phases 3+ |
-| 6 | Provider selection | RESEARCH | 1 | Pipeline |
-| 7 | Line-up / per-match stats / bracket / coaching-staff availability | RESEARCH | 1 | Fixtures, Teams, Standings |
+| 1 | Code(s): Union/League/Sevens | **RESOLVED v0.4 — Union only** (League permanent exclusion, Sevens deferred) | 1 | — |
+| 2 | v1 competitions list | **RESOLVED v0.4 — Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 tests, World Cup | 1 | — |
+| 3 | Men's/Women's/both | **RESOLVED v0.4 — Men's only** | 1 | — |
+| 4 | Historical depth | **RESOLVED v0.4 — Current season only** | 1 | — |
+| 5 | Commercial redistribution licence | **SOFT-DEFERRED v0.4** — dev runs on synthetic data (§5.5); GATE reactivates before real feed data enters the pipeline (pre-beta / pre-launch) | 1 / 6 | Real-data cutover, launch |
+| 6 | Provider selection | RESEARCH | 6 (pre-launch cutover) | Real-data pipeline swap |
+| 7 | Line-up / per-match stats / bracket / coaching-staff availability | RESEARCH | 6 (pre-launch cutover) | Fixtures, Teams, Standings — deferred with provider selection |
 | 8 | News source | INPUT/RESEARCH | 2 | News surfaces |
 | 9 | Target persona(s) | INPUT | 2 | Screen priority, paywall line |
-| 10 | Target geography | INPUT | 0 | Pricing, compliance, licensing territory |
+| 10 | Target geography | **RESOLVED v0.3 — Global by default** | 0 | — |
 | 11 | Competitor scan | RESEARCH | 2 | Differentiation |
 | 12 | Explicit stats/KPI field list | INPUT | 2 | Stats screen |
-| 13 | Power-rankings algorithm spec | INPUT | 2 | Rankings, IP |
-| 14 | Official intl-ranking source & terms | RESEARCH | 2 | Rankings |
+| 13 | Power-rankings algorithm spec | **DEFERRED v0.4** — post-v1 (activates only with club-competitions scope expansion) | 2+ | Club rankings, IP |
+| 14 | Official intl-ranking source & terms | RESEARCH | 2 — narrowed to **World Rugby men's rankings** (per §3.4 scope) | Rankings |
 | 15 | Profile screen contents | INPUT | 4 | Profile |
 | 16 | Auth methods / mandatory account | INPUT | 4 | Auth |
 | 17 | Real-time latency target | INPUT | 4 | Redis/WebSocket tier |
-| 18 | Web companion in/out | **RESOLVED v0.2 — OUT (native only)** | 5 | Client scope |
+| 18 | Web companion in/out | **RESOLVED v0.2 — OUT (native only)** | 5 | — |
 | 19 | Home screen content blocks | INPUT | 5 | Home |
 | 20 | Final pricing (annual, trial, regional) | INPUT | 6 | Billing |
 | 21 | Store fee structure at build time | RESEARCH | 6 | Economics |
 | 22 | Alternative monetisation (ads/one-off) | INPUT | 6 | Billing |
-| 23 | Brand identity (name/logo/palette/type) | INPUT | 0/2 | UI |
+| 23 | Brand identity (name/logo/palette/type) | **RESOLVED v0.3 — Neutral placeholders, do not invent** | 0/2 | UI (locked to placeholders) |
 | 24 | NFRs (perf/availability/compliance/etc.) | INPUT/RESEARCH | 2 | Hardening |
 | 25 | Fantasy scope | DEFERRED | 2+ | — |
 | 26 | Publisher entity (LLC / sole-prop / other) + neutral domain — governs App Store & Play Store developer name (public), bundle/package reverse-DNS, and WHOIS on the app's domain. Repo stays private throughout dev; this bites at store submission. | INPUT | 6 | Store submission, brand, bundle IDs |
+| 27 | Synthetic dataset design + persistent dev-mode indicator — canonical entities, generator strategy, indicator UI treatment. Must respect §5.5 rules (fake player names, real team names, no crests, no leak to prod). | INPUT | 3 | Phase 3 pipeline |
 
 ---
 
-*End of PRD v0.3. This is a living document; close open items in phase order and version up as decisions land.*
+*End of PRD v0.4. This is a living document; close open items in phase order and version up as decisions land.*

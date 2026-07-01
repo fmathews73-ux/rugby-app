@@ -46,13 +46,18 @@ Gaps are resolved **just-in-time, in phase order** (PRD §0, §13). When you rea
 
 ---
 
-## 3. Active blockers — nothing is unblocked yet
+## 3. Active blockers — updated v0.4
 
-Phase 1 holds the decisions everything else depends on. Until these land, there is **no feed integration, no data-model finalisation, and no paid commitment.**
+Phase 1 gates that were open through v0.3 are now resolved or soft-deferred:
 
-- **[GATE] Commercial redistribution licence** (register #5). Must be confirmed **in writing** before any paid feed commitment or any build against a feed. Blocks Phases 3+.
-- **[GATE] Code & competition scope** (PRD §3.4) — which code(s), which competitions, men's / women's / both, historical depth. Blocks feed selection.
-- **[RESEARCH] Provider selection + coverage validation** (register #6, #7).
+- **Code & competition scope (PRD §3.4) — RESOLVED v0.4.** Rugby Union only (League permanent exclusion, Sevens deferred). v1 = **Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 tests, World Cup. Current season only. Pipeline / model / UI now scope to this.
+- **Commercial redistribution licence (register #5) — SOFT-DEFERRED v0.4.** Dev runs on a synthetic dataset per PRD §5.5. The GATE reactivates the moment real feed data enters the pipeline (before beta / soft-launch). Not a Phase 3 blocker; a hard Phase 6 blocker.
+- **Provider selection + coverage validation (register #6, #7) — moved to Phase 6.** Only matters at real-data cutover.
+
+**New hard rules from v0.4 (see §9):**
+- Never ship the synthetic dev dataset to a production build.
+- Every screen rendering synthetic data must show a persistent dev-mode indicator.
+- Fake player names only; real national team names OK; no team crests / logos.
 
 ---
 
@@ -120,9 +125,15 @@ Repo structure (monorepo vs. split) is not yet decided. Confirm before scaffoldi
 
 ## 9. Never do
 
-- Never invent: app name, brand, colours, geography, competitions, pricing, the stats/KPI field list, or power-ranking weights. All are open items.
+- Never invent: app name, brand, colours, pricing, or the stats/KPI field list. All are open items. (Geography, competitions, code, and gender were resolved in v0.3–v0.4 — see PRD §3.4 and register.)
+- Never build for Rugby League — it is a **permanent product exclusion** (v0.4, register #1). No League fixtures, teams, stats, or rankings anywhere.
 - Never target **web** in v1 (register #18 resolved OUT) — native iOS + Android only.
-- Never sign up for or call a **paid** feed before the licensing GATE clears.
+- Never sign up for or call a **paid** feed before the licensing GATE reactivates for real data (register #5).
+- **Never ship the synthetic dev dataset to a production build** (v0.4, register #27). Gate synthetic data to `__DEV__` / dev-client / EAS internal preview only. Any code path that could leak synthetic data into a store build is a release blocker. Store builds must fail hard if a synthetic adapter is present.
+- **Never render synthetic data without a persistent dev-mode indicator** on the screen (v0.4).
+- **Never fabricate stats against real player names** — use plausibly-fake names in synthetic data (v0.4). Real team names are fine.
+- **Never include real team crests / logos** — trademarked; neutral placeholders only until a licensed image path is established.
 - Never pre-emptively build the real-time (Redis / WebSocket) tier — deferred behind a latency decision (#17) and real demand. Poll-refresh is fine for MVP.
 - Never add betting/odds, ads, live video, AR, or Fantasy in v1.
+- Never build any **club-level rankings compute path** in v1 (v0.4, register #13 deferred). Internationals use World Rugby's stored public rankings only.
 - Never commit under a work identity or reference an employer anywhere.
