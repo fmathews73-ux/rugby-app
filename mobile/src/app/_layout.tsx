@@ -43,14 +43,14 @@ export default function RootLayout() {
             <Stack>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
               <Stack.Screen
-                name="teams/[id]"
+                name="team/[id]"
                 options={{
                   headerBackTitle: 'Teams',
                   title: '',
                 }}
               />
               <Stack.Screen
-                name="fixtures/[id]"
+                name="fixture/[id]"
                 options={{
                   headerBackTitle: 'Fixtures',
                   title: '',

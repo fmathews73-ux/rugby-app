@@ -56,7 +56,7 @@ export default function TeamsScreen() {
               </View>
             ) : (
               <Pressable
-                onPress={() => router.push(`/teams/${item.team.id}`)}
+                onPress={() => router.push(`/team/${item.team.id}`)}
                 style={({ pressed }) => [styles.teamRow, pressed && styles.teamRowPressed]}>
                 <TeamFlagBall2D flagCode={item.team.flag_code} size={44} />
                 <View style={styles.teamText}>
