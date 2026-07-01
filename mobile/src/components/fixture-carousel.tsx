@@ -21,20 +21,21 @@ const ACCENT = '#4F46E5';
 const CARD_GAP = 12;
 
 /**
- * Timeline carousel of 5 fixtures across all competitions.
+ * Timeline carousel of 7 fixtures across all competitions.
  *
  * Centre card = the "current" fixture chosen by priority:
  *   1. Any live / half-time match.
  *   2. Otherwise the next scheduled match (kickoff >= now).
  *   3. Otherwise the most recent completed match.
  *
- * The 2 cards to the left of centre are the two immediately-preceding
- * fixtures in chronological order; the 2 to the right are the next two.
- * Fewer than 5 render if the window is at the ends of the sorted list.
+ * The 3 cards to the left of centre are the immediately-preceding fixtures
+ * in chronological order; the 3 to the right are the next three. Fewer than
+ * 7 render if the window is at the ends of the sorted list.
  *
  * Horizontal `<ScrollView>` with snap-to-interval + a paged-look dot
  * indicator underneath. No extra deps.
  */
+const CARDS_EITHER_SIDE = 3;
 export function FixtureCarousel() {
   const { width: screenWidth } = useWindowDimensions();
   const CARD_WIDTH = Math.round(screenWidth - 80);
@@ -85,15 +86,15 @@ export function FixtureCarousel() {
 
   const windowFixtures = useMemo(() => {
     if (currentIdx === -1 || allFixtures.length === 0) return [];
-    const start = Math.max(0, currentIdx - 2);
-    const end = Math.min(allFixtures.length, currentIdx + 3);
+    const start = Math.max(0, currentIdx - CARDS_EITHER_SIDE);
+    const end = Math.min(allFixtures.length, currentIdx + CARDS_EITHER_SIDE + 1);
     return allFixtures.slice(start, end);
   }, [allFixtures, currentIdx]);
 
   // Where in the window is the centre / current fixture?
   const centreIndexInWindow = useMemo(() => {
     if (currentIdx === -1) return 0;
-    return currentIdx - Math.max(0, currentIdx - 2);
+    return currentIdx - Math.max(0, currentIdx - CARDS_EITHER_SIDE);
   }, [currentIdx]);
 
   // Fetch results only for fixtures that might have one.
