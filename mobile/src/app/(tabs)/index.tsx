@@ -130,7 +130,7 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     backgroundColor: '#FFFFFF',
-    borderRadius: 20,
+    borderRadius: 12,
     overflow: 'hidden',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
