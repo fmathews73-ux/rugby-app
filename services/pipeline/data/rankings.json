@@ -1,8 +1,8 @@
 [
   {
-    "id": "world-rugby-mens-2026-01-15",
+    "id": "world-rugby-mens-2025-07-01",
     "source": "world-rugby-mens",
-    "snapshot_date": "2026-01-15",
+    "snapshot_date": "2025-07-01",
     "rows": [
       {
         "rank": 1,
@@ -199,6 +199,1630 @@
         "points": 39,
         "previous_rank": null,
         "movement": null
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2025-08-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2025-08-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "bra",
+        "points": 88,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "por",
+        "points": 87,
+        "previous_rank": 2,
+        "movement": -1
+      },
+      {
+        "rank": 4,
+        "team_id": "sam",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "wal",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "ita",
+        "points": 80,
+        "previous_rank": 6,
+        "movement": 0
+      },
+      {
+        "rank": 7,
+        "team_id": "chi",
+        "points": 79,
+        "previous_rank": 8,
+        "movement": 1
+      },
+      {
+        "rank": 8,
+        "team_id": "ned",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "ire",
+        "points": 75,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "ken",
+        "points": 73,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "nzl",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "tga",
+        "points": 69,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "jpn",
+        "points": 67,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "uru",
+        "points": 65,
+        "previous_rank": 15,
+        "movement": 1
+      },
+      {
+        "rank": 15,
+        "team_id": "rsa",
+        "points": 63,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "sco",
+        "points": 62,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "eng",
+        "points": 60,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "nam",
+        "points": 57,
+        "previous_rank": 20,
+        "movement": 2
+      },
+      {
+        "rank": 19,
+        "team_id": "fij",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 0
+      },
+      {
+        "rank": 20,
+        "team_id": "hkg",
+        "points": 54,
+        "previous_rank": 21,
+        "movement": 1
+      },
+      {
+        "rank": 21,
+        "team_id": "zim",
+        "points": 52,
+        "previous_rank": 18,
+        "movement": -3
+      },
+      {
+        "rank": 22,
+        "team_id": "esp",
+        "points": 51,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "aus",
+        "points": 49,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "rou",
+        "points": 46,
+        "previous_rank": 26,
+        "movement": 2
+      },
+      {
+        "rank": 25,
+        "team_id": "geo",
+        "points": 45,
+        "previous_rank": 27,
+        "movement": 2
+      },
+      {
+        "rank": 26,
+        "team_id": "can",
+        "points": 42,
+        "previous_rank": 25,
+        "movement": -1
+      },
+      {
+        "rank": 27,
+        "team_id": "fra",
+        "points": 40,
+        "previous_rank": 24,
+        "movement": -3
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2025-09-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2025-09-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 91,
+        "previous_rank": 3,
+        "movement": 2
+      },
+      {
+        "rank": 2,
+        "team_id": "bra",
+        "points": 87,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "usa",
+        "points": 87,
+        "previous_rank": 1,
+        "movement": -2
+      },
+      {
+        "rank": 4,
+        "team_id": "sam",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "wal",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "ned",
+        "points": 78,
+        "previous_rank": 8,
+        "movement": 1
+      },
+      {
+        "rank": 8,
+        "team_id": "chi",
+        "points": 76,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "ire",
+        "points": 75,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "tga",
+        "points": 73,
+        "previous_rank": 12,
+        "movement": 2
+      },
+      {
+        "rank": 11,
+        "team_id": "jpn",
+        "points": 72,
+        "previous_rank": 13,
+        "movement": 2
+      },
+      {
+        "rank": 12,
+        "team_id": "ken",
+        "points": 68,
+        "previous_rank": 10,
+        "movement": -2
+      },
+      {
+        "rank": 13,
+        "team_id": "uru",
+        "points": 68,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "nzl",
+        "points": 66,
+        "previous_rank": 11,
+        "movement": -3
+      },
+      {
+        "rank": 15,
+        "team_id": "rsa",
+        "points": 63,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "sco",
+        "points": 61,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "eng",
+        "points": 59,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "nam",
+        "points": 57,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "hkg",
+        "points": 55,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
+        "rank": 20,
+        "team_id": "zim",
+        "points": 54,
+        "previous_rank": 21,
+        "movement": 1
+      },
+      {
+        "rank": 21,
+        "team_id": "fij",
+        "points": 52,
+        "previous_rank": 19,
+        "movement": -2
+      },
+      {
+        "rank": 22,
+        "team_id": "esp",
+        "points": 49,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "aus",
+        "points": 49,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 46,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "rou",
+        "points": 44,
+        "previous_rank": 24,
+        "movement": -1
+      },
+      {
+        "rank": 26,
+        "team_id": "can",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "fra",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 38,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2025-10-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2025-10-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "bra",
+        "points": 90,
+        "previous_rank": 2,
+        "movement": 1
+      },
+      {
+        "rank": 2,
+        "team_id": "usa",
+        "points": 88,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "por",
+        "points": 87,
+        "previous_rank": 1,
+        "movement": -2
+      },
+      {
+        "rank": 4,
+        "team_id": "sam",
+        "points": 83,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "wal",
+        "points": 81,
+        "previous_rank": 6,
+        "movement": 0
+      },
+      {
+        "rank": 7,
+        "team_id": "ned",
+        "points": 79,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "chi",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "ire",
+        "points": 75,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "tga",
+        "points": 72,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "jpn",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": 0
+      },
+      {
+        "rank": 12,
+        "team_id": "nzl",
+        "points": 68,
+        "previous_rank": 14,
+        "movement": 2
+      },
+      {
+        "rank": 13,
+        "team_id": "rsa",
+        "points": 67,
+        "previous_rank": 15,
+        "movement": 2
+      },
+      {
+        "rank": 14,
+        "team_id": "ken",
+        "points": 66,
+        "previous_rank": 12,
+        "movement": -2
+      },
+      {
+        "rank": 15,
+        "team_id": "uru",
+        "points": 63,
+        "previous_rank": 13,
+        "movement": -2
+      },
+      {
+        "rank": 16,
+        "team_id": "eng",
+        "points": 61,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "nam",
+        "points": 60,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "sco",
+        "points": 58,
+        "previous_rank": 16,
+        "movement": -2
+      },
+      {
+        "rank": 19,
+        "team_id": "hkg",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": 0
+      },
+      {
+        "rank": 20,
+        "team_id": "zim",
+        "points": 54,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "esp",
+        "points": 52,
+        "previous_rank": 22,
+        "movement": 1
+      },
+      {
+        "rank": 22,
+        "team_id": "aus",
+        "points": 50,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "fij",
+        "points": 48,
+        "previous_rank": 21,
+        "movement": -2
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 46,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "rou",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 43,
+        "previous_rank": 27,
+        "movement": 1
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 38,
+        "previous_rank": 26,
+        "movement": -2
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2025-11-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2025-11-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "bra",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "usa",
+        "points": 87,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "sam",
+        "points": 86,
+        "previous_rank": 4,
+        "movement": 1
+      },
+      {
+        "rank": 4,
+        "team_id": "por",
+        "points": 84,
+        "previous_rank": 3,
+        "movement": -1
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 81,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "chi",
+        "points": 80,
+        "previous_rank": 8,
+        "movement": 2
+      },
+      {
+        "rank": 7,
+        "team_id": "wal",
+        "points": 80,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "ned",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "tga",
+        "points": 75,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "ire",
+        "points": 73,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "nzl",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "jpn",
+        "points": 68,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "rsa",
+        "points": 68,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "ken",
+        "points": 65,
+        "previous_rank": 14,
+        "movement": 0
+      },
+      {
+        "rank": 15,
+        "team_id": "uru",
+        "points": 64,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "eng",
+        "points": 62,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "nam",
+        "points": 59,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "hkg",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 1
+      },
+      {
+        "rank": 19,
+        "team_id": "sco",
+        "points": 56,
+        "previous_rank": 18,
+        "movement": -1
+      },
+      {
+        "rank": 20,
+        "team_id": "zim",
+        "points": 53,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "fij",
+        "points": 52,
+        "previous_rank": 23,
+        "movement": 2
+      },
+      {
+        "rank": 22,
+        "team_id": "aus",
+        "points": 50,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "esp",
+        "points": 49,
+        "previous_rank": 21,
+        "movement": -2
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 47,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "rou",
+        "points": 44,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2025-12-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2025-12-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "bra",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "sam",
+        "points": 88,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "por",
+        "points": 86,
+        "previous_rank": 4,
+        "movement": 1
+      },
+      {
+        "rank": 4,
+        "team_id": "usa",
+        "points": 85,
+        "previous_rank": 2,
+        "movement": -2
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "wal",
+        "points": 81,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "chi",
+        "points": 79,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "ned",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "tga",
+        "points": 75,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "nzl",
+        "points": 73,
+        "previous_rank": 11,
+        "movement": 1
+      },
+      {
+        "rank": 11,
+        "team_id": "ire",
+        "points": 71,
+        "previous_rank": 10,
+        "movement": -1
+      },
+      {
+        "rank": 12,
+        "team_id": "rsa",
+        "points": 69,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "jpn",
+        "points": 68,
+        "previous_rank": 12,
+        "movement": -1
+      },
+      {
+        "rank": 14,
+        "team_id": "uru",
+        "points": 66,
+        "previous_rank": 15,
+        "movement": 1
+      },
+      {
+        "rank": 15,
+        "team_id": "ken",
+        "points": 64,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 62,
+        "previous_rank": 18,
+        "movement": 2
+      },
+      {
+        "rank": 17,
+        "team_id": "eng",
+        "points": 60,
+        "previous_rank": 16,
+        "movement": -1
+      },
+      {
+        "rank": 18,
+        "team_id": "nam",
+        "points": 58,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "fij",
+        "points": 56,
+        "previous_rank": 21,
+        "movement": 2
+      },
+      {
+        "rank": 20,
+        "team_id": "sco",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "zim",
+        "points": 52,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
+        "team_id": "geo",
+        "points": 50,
+        "previous_rank": 24,
+        "movement": 2
+      },
+      {
+        "rank": 23,
+        "team_id": "esp",
+        "points": 48,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "rou",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "aus",
+        "points": 45,
+        "previous_rank": 22,
+        "movement": -3
+      },
+      {
+        "rank": 26,
+        "team_id": "arg",
+        "points": 42,
+        "previous_rank": 27,
+        "movement": 1
+      },
+      {
+        "rank": 27,
+        "team_id": "fra",
+        "points": 40,
+        "previous_rank": 26,
+        "movement": -1
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-01-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-01-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "sam",
+        "points": 89,
+        "previous_rank": 2,
+        "movement": 1
+      },
+      {
+        "rank": 2,
+        "team_id": "por",
+        "points": 87,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "bra",
+        "points": 87,
+        "previous_rank": 1,
+        "movement": -2
+      },
+      {
+        "rank": 4,
+        "team_id": "wal",
+        "points": 84,
+        "previous_rank": 6,
+        "movement": 2
+      },
+      {
+        "rank": 5,
+        "team_id": "usa",
+        "points": 83,
+        "previous_rank": 4,
+        "movement": -1
+      },
+      {
+        "rank": 6,
+        "team_id": "ita",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "ned",
+        "points": 78,
+        "previous_rank": 8,
+        "movement": 1
+      },
+      {
+        "rank": 8,
+        "team_id": "chi",
+        "points": 76,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "nzl",
+        "points": 75,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "tga",
+        "points": 73,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "rsa",
+        "points": 71,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "jpn",
+        "points": 68,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "ire",
+        "points": 68,
+        "previous_rank": 11,
+        "movement": -2
+      },
+      {
+        "rank": 14,
+        "team_id": "uru",
+        "points": 64,
+        "previous_rank": 14,
+        "movement": 0
+      },
+      {
+        "rank": 15,
+        "team_id": "hkg",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "ken",
+        "points": 61,
+        "previous_rank": 15,
+        "movement": -1
+      },
+      {
+        "rank": 17,
+        "team_id": "nam",
+        "points": 60,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "eng",
+        "points": 58,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "sco",
+        "points": 56,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
+        "rank": 20,
+        "team_id": "fij",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "zim",
+        "points": 52,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "geo",
+        "points": 49,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "esp",
+        "points": 49,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "aus",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "rou",
+        "points": 45,
+        "previous_rank": 24,
+        "movement": -1
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 43,
+        "previous_rank": 27,
+        "movement": 1
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
+        "points": 40,
+        "previous_rank": 26,
+        "movement": -1
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 40,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-02-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-02-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 90,
+        "previous_rank": 2,
+        "movement": 1
+      },
+      {
+        "rank": 2,
+        "team_id": "sam",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": -1
+      },
+      {
+        "rank": 3,
+        "team_id": "bra",
+        "points": 86,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "wal",
+        "points": 85,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "usa",
+        "points": 81,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "ned",
+        "points": 78,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "tga",
+        "points": 77,
+        "previous_rank": 10,
+        "movement": 2
+      },
+      {
+        "rank": 9,
+        "team_id": "nzl",
+        "points": 75,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "rsa",
+        "points": 74,
+        "previous_rank": 11,
+        "movement": 1
+      },
+      {
+        "rank": 11,
+        "team_id": "chi",
+        "points": 72,
+        "previous_rank": 8,
+        "movement": -3
+      },
+      {
+        "rank": 12,
+        "team_id": "ire",
+        "points": 69,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "uru",
+        "points": 67,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "jpn",
+        "points": 66,
+        "previous_rank": 12,
+        "movement": -2
+      },
+      {
+        "rank": 15,
+        "team_id": "ken",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "nam",
+        "points": 62,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 59,
+        "previous_rank": 15,
+        "movement": -2
+      },
+      {
+        "rank": 18,
+        "team_id": "sco",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 1
+      },
+      {
+        "rank": 19,
+        "team_id": "zim",
+        "points": 57,
+        "previous_rank": 21,
+        "movement": 2
+      },
+      {
+        "rank": 20,
+        "team_id": "eng",
+        "points": 54,
+        "previous_rank": 18,
+        "movement": -2
+      },
+      {
+        "rank": 21,
+        "team_id": "esp",
+        "points": 53,
+        "previous_rank": 23,
+        "movement": 2
+      },
+      {
+        "rank": 22,
+        "team_id": "fij",
+        "points": 51,
+        "previous_rank": 20,
+        "movement": -2
+      },
+      {
+        "rank": 23,
+        "team_id": "aus",
+        "points": 49,
+        "previous_rank": 24,
+        "movement": 1
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 47,
+        "previous_rank": 22,
+        "movement": -2
+      },
+      {
+        "rank": 25,
+        "team_id": "rou",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "can",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-03-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-03-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 91,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "sam",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "bra",
+        "points": 86,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "wal",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "ned",
+        "points": 80,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "usa",
+        "points": 79,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "tga",
+        "points": 77,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "rsa",
+        "points": 74,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "nzl",
+        "points": 73,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "ire",
+        "points": 71,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "chi",
+        "points": 69,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "uru",
+        "points": 68,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "nam",
+        "points": 65,
+        "previous_rank": 16,
+        "movement": 2
+      },
+      {
+        "rank": 15,
+        "team_id": "ken",
+        "points": 64,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "jpn",
+        "points": 62,
+        "previous_rank": 14,
+        "movement": -2
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 59,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "sco",
+        "points": 58,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "fij",
+        "points": 56,
+        "previous_rank": 22,
+        "movement": 3
+      },
+      {
+        "rank": 20,
+        "team_id": "zim",
+        "points": 54,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "esp",
+        "points": 52,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "eng",
+        "points": 51,
+        "previous_rank": 20,
+        "movement": -2
+      },
+      {
+        "rank": 23,
+        "team_id": "rou",
+        "points": 48,
+        "previous_rank": 25,
+        "movement": 2
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 46,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "aus",
+        "points": 45,
+        "previous_rank": 23,
+        "movement": -2
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
+        "points": 40,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
       }
     ]
   },
@@ -209,199 +1833,605 @@
     "rows": [
       {
         "rank": 1,
-        "team_id": "ken",
-        "points": 90,
-        "previous_rank": 10,
-        "movement": 9
+        "team_id": "por",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": 0
       },
       {
         "rank": 2,
         "team_id": "bra",
-        "points": 88,
+        "points": 89,
         "previous_rank": 3,
         "movement": 1
       },
       {
         "rank": 3,
-        "team_id": "esp",
+        "team_id": "ita",
         "points": 86,
-        "previous_rank": 22,
-        "movement": 19
+        "previous_rank": 5,
+        "movement": 2
       },
       {
         "rank": 4,
-        "team_id": "ire",
-        "points": 85,
-        "previous_rank": 9,
-        "movement": 5
+        "team_id": "sam",
+        "points": 84,
+        "previous_rank": 2,
+        "movement": -2
       },
       {
         "rank": 5,
-        "team_id": "nzl",
+        "team_id": "wal",
         "points": 83,
-        "previous_rank": 12,
-        "movement": 7
+        "previous_rank": 4,
+        "movement": -1
       },
       {
         "rank": 6,
-        "team_id": "tga",
+        "team_id": "rsa",
         "points": 81,
-        "previous_rank": 11,
-        "movement": 5
+        "previous_rank": 9,
+        "movement": 3
       },
       {
         "rank": 7,
-        "team_id": "geo",
-        "points": 78,
-        "previous_rank": 27,
-        "movement": 20
+        "team_id": "tga",
+        "points": 79,
+        "previous_rank": 8,
+        "movement": 1
       },
       {
         "rank": 8,
-        "team_id": "rsa",
+        "team_id": "ned",
         "points": 77,
-        "previous_rank": 14,
-        "movement": 6
+        "previous_rank": 6,
+        "movement": -2
       },
       {
         "rank": 9,
-        "team_id": "aus",
+        "team_id": "usa",
         "points": 75,
-        "previous_rank": 23,
-        "movement": 14
+        "previous_rank": 7,
+        "movement": -2
       },
       {
         "rank": 10,
-        "team_id": "eng",
+        "team_id": "nzl",
         "points": 73,
-        "previous_rank": 17,
-        "movement": 7
+        "previous_rank": 10,
+        "movement": 0
       },
       {
         "rank": 11,
-        "team_id": "rou",
+        "team_id": "chi",
         "points": 71,
-        "previous_rank": 26,
-        "movement": 15
+        "previous_rank": 12,
+        "movement": 1
       },
       {
         "rank": 12,
-        "team_id": "por",
-        "points": 68,
-        "previous_rank": 2,
-        "movement": -10
+        "team_id": "ire",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": -1
       },
       {
         "rank": 13,
+        "team_id": "nam",
+        "points": 68,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "uru",
+        "points": 65,
+        "previous_rank": 13,
+        "movement": -1
+      },
+      {
+        "rank": 15,
         "team_id": "jpn",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "ken",
+        "points": 61,
+        "previous_rank": 15,
+        "movement": -1
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 59,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "fij",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 1
+      },
+      {
+        "rank": 19,
+        "team_id": "zim",
+        "points": 55,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
+        "rank": 20,
+        "team_id": "sco",
+        "points": 54,
+        "previous_rank": 18,
+        "movement": -2
+      },
+      {
+        "rank": 21,
+        "team_id": "esp",
+        "points": 51,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "rou",
+        "points": 51,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "aus",
+        "points": 49,
+        "previous_rank": 25,
+        "movement": 2
+      },
+      {
+        "rank": 24,
+        "team_id": "geo",
+        "points": 47,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "eng",
+        "points": 44,
+        "previous_rank": 22,
+        "movement": -3
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 43,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "can",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-05-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-05-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "sam",
+        "points": 88,
+        "previous_rank": 4,
+        "movement": 2
+      },
+      {
+        "rank": 3,
+        "team_id": "bra",
+        "points": 85,
+        "previous_rank": 2,
+        "movement": -1
+      },
+      {
+        "rank": 4,
+        "team_id": "ita",
+        "points": 84,
+        "previous_rank": 3,
+        "movement": -1
+      },
+      {
+        "rank": 5,
+        "team_id": "rsa",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "wal",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "usa",
+        "points": 78,
+        "previous_rank": 9,
+        "movement": 2
+      },
+      {
+        "rank": 8,
+        "team_id": "tga",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "ned",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "nzl",
+        "points": 73,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "chi",
+        "points": 71,
+        "previous_rank": 11,
+        "movement": 0
+      },
+      {
+        "rank": 12,
+        "team_id": "jpn",
+        "points": 69,
+        "previous_rank": 15,
+        "movement": 3
+      },
+      {
+        "rank": 13,
+        "team_id": "nam",
         "points": 67,
         "previous_rank": 13,
         "movement": 0
       },
       {
         "rank": 14,
-        "team_id": "arg",
+        "team_id": "uru",
         "points": 65,
-        "previous_rank": 28,
-        "movement": 14
+        "previous_rank": 14,
+        "movement": 0
       },
       {
         "rank": 15,
-        "team_id": "wal",
-        "points": 63,
-        "previous_rank": 5,
-        "movement": -10
+        "team_id": "ire",
+        "points": 64,
+        "previous_rank": 12,
+        "movement": -3
       },
       {
         "rank": 16,
-        "team_id": "hkg",
-        "points": 61,
-        "previous_rank": 21,
-        "movement": 5
+        "team_id": "ken",
+        "points": 62,
+        "previous_rank": 16,
+        "movement": 0
       },
       {
         "rank": 17,
-        "team_id": "ita",
-        "points": 60,
-        "previous_rank": 6,
-        "movement": -11
-      },
-      {
-        "rank": 18,
         "team_id": "fij",
-        "points": 58,
-        "previous_rank": 19,
+        "points": 59,
+        "previous_rank": 18,
         "movement": 1
       },
       {
+        "rank": 18,
+        "team_id": "sco",
+        "points": 59,
+        "previous_rank": 20,
+        "movement": 2
+      },
+      {
         "rank": 19,
-        "team_id": "usa",
-        "points": 55,
-        "previous_rank": 1,
-        "movement": -18
+        "team_id": "hkg",
+        "points": 56,
+        "previous_rank": 17,
+        "movement": -2
       },
       {
         "rank": 20,
         "team_id": "zim",
-        "points": 55,
-        "previous_rank": 18,
-        "movement": -2
+        "points": 54,
+        "previous_rank": 19,
+        "movement": -1
       },
       {
         "rank": 21,
-        "team_id": "sam",
-        "points": 52,
-        "previous_rank": 4,
-        "movement": -17
+        "team_id": "esp",
+        "points": 51,
+        "previous_rank": 21,
+        "movement": 0
       },
       {
         "rank": 22,
-        "team_id": "can",
-        "points": 50,
-        "previous_rank": 25,
-        "movement": 3
+        "team_id": "rou",
+        "points": 51,
+        "previous_rank": 22,
+        "movement": 0
       },
       {
         "rank": 23,
-        "team_id": "sco",
-        "points": 49,
-        "previous_rank": 16,
-        "movement": -7
+        "team_id": "aus",
+        "points": 48,
+        "previous_rank": 23,
+        "movement": 0
       },
       {
         "rank": 24,
-        "team_id": "uru",
-        "points": 47,
-        "previous_rank": 15,
-        "movement": -9
+        "team_id": "eng",
+        "points": 46,
+        "previous_rank": 25,
+        "movement": 1
       },
       {
         "rank": 25,
-        "team_id": "fra",
+        "team_id": "geo",
         "points": 44,
         "previous_rank": 24,
         "movement": -1
       },
       {
         "rank": 26,
-        "team_id": "nam",
+        "team_id": "fra",
         "points": 43,
-        "previous_rank": 20,
-        "movement": -6
+        "previous_rank": 26,
+        "movement": 0
       },
       {
         "rank": 27,
-        "team_id": "ned",
+        "team_id": "can",
         "points": 40,
-        "previous_rank": 7,
-        "movement": -20
+        "previous_rank": 27,
+        "movement": 0
       },
       {
         "rank": 28,
-        "team_id": "chi",
-        "points": 38,
+        "team_id": "arg",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-mens-2026-06-01",
+    "source": "world-rugby-mens",
+    "snapshot_date": "2026-06-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "sam",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "bra",
+        "points": 87,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "ita",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "rsa",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "tga",
+        "points": 80,
         "previous_rank": 8,
-        "movement": -20
+        "movement": 2
+      },
+      {
+        "rank": 7,
+        "team_id": "usa",
+        "points": 78,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "wal",
+        "points": 78,
+        "previous_rank": 6,
+        "movement": -2
+      },
+      {
+        "rank": 9,
+        "team_id": "ned",
+        "points": 74,
+        "previous_rank": 9,
+        "movement": 0
+      },
+      {
+        "rank": 10,
+        "team_id": "nzl",
+        "points": 73,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "jpn",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "chi",
+        "points": 68,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "uru",
+        "points": 68,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "nam",
+        "points": 65,
+        "previous_rank": 13,
+        "movement": -1
+      },
+      {
+        "rank": 15,
+        "team_id": "ken",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "ire",
+        "points": 62,
+        "previous_rank": 15,
+        "movement": -1
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 59,
+        "previous_rank": 19,
+        "movement": 2
+      },
+      {
+        "rank": 18,
+        "team_id": "sco",
+        "points": 57,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "fij",
+        "points": 56,
+        "previous_rank": 17,
+        "movement": -2
+      },
+      {
+        "rank": 20,
+        "team_id": "zim",
+        "points": 54,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "esp",
+        "points": 52,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "rou",
+        "points": 49,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "aus",
+        "points": 47,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "eng",
+        "points": 46,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "geo",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "fra",
+        "points": 43,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "can",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
       }
     ]
   },
@@ -412,206 +2442,206 @@
     "rows": [
       {
         "rank": 1,
-        "team_id": "arg",
-        "points": 89,
-        "previous_rank": 14,
-        "movement": 13
+        "team_id": "bra",
+        "points": 90,
+        "previous_rank": 3,
+        "movement": 2
       },
       {
         "rank": 2,
-        "team_id": "fij",
+        "team_id": "ita",
         "points": 89,
-        "previous_rank": 18,
-        "movement": 16
+        "previous_rank": 4,
+        "movement": 2
       },
       {
         "rank": 3,
-        "team_id": "sco",
-        "points": 87,
-        "previous_rank": 23,
-        "movement": 20
+        "team_id": "por",
+        "points": 86,
+        "previous_rank": 1,
+        "movement": -2
       },
       {
         "rank": 4,
-        "team_id": "bra",
-        "points": 83,
+        "team_id": "sam",
+        "points": 85,
         "previous_rank": 2,
         "movement": -2
       },
       {
         "rank": 5,
-        "team_id": "aus",
-        "points": 83,
-        "previous_rank": 9,
-        "movement": 4
+        "team_id": "rsa",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
       },
       {
         "rank": 6,
-        "team_id": "zim",
+        "team_id": "tga",
         "points": 81,
-        "previous_rank": 20,
-        "movement": 14
+        "previous_rank": 6,
+        "movement": 0
       },
       {
         "rank": 7,
-        "team_id": "ned",
-        "points": 79,
-        "previous_rank": 27,
-        "movement": 20
+        "team_id": "usa",
+        "points": 78,
+        "previous_rank": 7,
+        "movement": 0
       },
       {
         "rank": 8,
-        "team_id": "ken",
+        "team_id": "wal",
         "points": 76,
-        "previous_rank": 1,
-        "movement": -7
+        "previous_rank": 8,
+        "movement": 0
       },
       {
         "rank": 9,
-        "team_id": "nam",
+        "team_id": "nzl",
         "points": 75,
-        "previous_rank": 26,
-        "movement": 17
+        "previous_rank": 10,
+        "movement": 1
       },
       {
         "rank": 10,
-        "team_id": "rsa",
-        "points": 73,
-        "previous_rank": 8,
-        "movement": -2
+        "team_id": "jpn",
+        "points": 74,
+        "previous_rank": 11,
+        "movement": 1
       },
       {
         "rank": 11,
-        "team_id": "uru",
-        "points": 71,
-        "previous_rank": 24,
-        "movement": 13
+        "team_id": "ned",
+        "points": 70,
+        "previous_rank": 9,
+        "movement": -2
       },
       {
         "rank": 12,
-        "team_id": "nzl",
+        "team_id": "chi",
         "points": 69,
-        "previous_rank": 5,
-        "movement": -7
+        "previous_rank": 12,
+        "movement": 0
       },
       {
         "rank": 13,
-        "team_id": "can",
+        "team_id": "ire",
         "points": 68,
-        "previous_rank": 22,
-        "movement": 9
+        "previous_rank": 16,
+        "movement": 3
       },
       {
         "rank": 14,
-        "team_id": "fra",
-        "points": 65,
-        "previous_rank": 25,
-        "movement": 11
+        "team_id": "uru",
+        "points": 66,
+        "previous_rank": 13,
+        "movement": -1
       },
       {
         "rank": 15,
-        "team_id": "usa",
+        "team_id": "nam",
         "points": 64,
-        "previous_rank": 19,
-        "movement": 4
+        "previous_rank": 14,
+        "movement": -1
       },
       {
         "rank": 16,
-        "team_id": "eng",
+        "team_id": "ken",
         "points": 62,
-        "previous_rank": 10,
-        "movement": -6
+        "previous_rank": 15,
+        "movement": -1
       },
       {
         "rank": 17,
-        "team_id": "tga",
-        "points": 59,
-        "previous_rank": 6,
-        "movement": -11
+        "team_id": "sco",
+        "points": 60,
+        "previous_rank": 18,
+        "movement": 1
       },
       {
         "rank": 18,
-        "team_id": "por",
+        "team_id": "hkg",
         "points": 58,
-        "previous_rank": 12,
-        "movement": -6
+        "previous_rank": 17,
+        "movement": -1
       },
       {
         "rank": 19,
-        "team_id": "esp",
+        "team_id": "fij",
         "points": 56,
-        "previous_rank": 3,
-        "movement": -16
+        "previous_rank": 19,
+        "movement": 0
       },
       {
         "rank": 20,
-        "team_id": "wal",
+        "team_id": "esp",
         "points": 54,
-        "previous_rank": 15,
-        "movement": -5
+        "previous_rank": 21,
+        "movement": 1
       },
       {
         "rank": 21,
-        "team_id": "hkg",
-        "points": 51,
-        "previous_rank": 16,
-        "movement": -5
+        "team_id": "zim",
+        "points": 53,
+        "previous_rank": 20,
+        "movement": -1
       },
       {
         "rank": 22,
-        "team_id": "chi",
-        "points": 51,
-        "previous_rank": 28,
-        "movement": 6
+        "team_id": "rou",
+        "points": 50,
+        "previous_rank": 22,
+        "movement": 0
       },
       {
         "rank": 23,
-        "team_id": "ire",
-        "points": 49,
-        "previous_rank": 4,
-        "movement": -19
+        "team_id": "eng",
+        "points": 48,
+        "previous_rank": 24,
+        "movement": 1
       },
       {
         "rank": 24,
-        "team_id": "sam",
-        "points": 46,
-        "previous_rank": 21,
-        "movement": -3
+        "team_id": "geo",
+        "points": 47,
+        "previous_rank": 25,
+        "movement": 1
       },
       {
         "rank": 25,
-        "team_id": "rou",
-        "points": 45,
-        "previous_rank": 11,
-        "movement": -14
+        "team_id": "aus",
+        "points": 44,
+        "previous_rank": 23,
+        "movement": -2
       },
       {
         "rank": 26,
-        "team_id": "geo",
+        "team_id": "arg",
         "points": 42,
-        "previous_rank": 7,
-        "movement": -19
+        "previous_rank": 27,
+        "movement": 1
       },
       {
         "rank": 27,
-        "team_id": "ita",
-        "points": 40,
-        "previous_rank": 17,
-        "movement": -10
+        "team_id": "can",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
       },
       {
         "rank": 28,
-        "team_id": "jpn",
-        "points": 38,
-        "previous_rank": 13,
-        "movement": -15
+        "team_id": "fra",
+        "points": 39,
+        "previous_rank": 26,
+        "movement": -2
       }
     ]
   },
   {
-    "id": "world-rugby-womens-2026-01-15",
+    "id": "world-rugby-womens-2025-07-01",
     "source": "world-rugby-womens",
-    "snapshot_date": "2026-01-15",
+    "snapshot_date": "2025-07-01",
     "rows": [
       {
         "rank": 1,
@@ -812,16 +2842,828 @@
     ]
   },
   {
-    "id": "world-rugby-womens-2026-04-01",
+    "id": "world-rugby-womens-2025-08-01",
     "source": "world-rugby-womens",
-    "snapshot_date": "2026-04-01",
+    "snapshot_date": "2025-08-01",
     "rows": [
       {
         "rank": 1,
+        "team_id": "usa",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "jpn",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "tga",
+        "points": 85,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "uru",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "por",
+        "points": 81,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "aus",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "can",
+        "points": 78,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "ned",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "chi",
+        "points": 75,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "rou",
+        "points": 73,
+        "previous_rank": 11,
+        "movement": 1
+      },
+      {
+        "rank": 11,
+        "team_id": "ita",
+        "points": 70,
+        "previous_rank": 9,
+        "movement": -2
+      },
+      {
+        "rank": 12,
+        "team_id": "zim",
+        "points": 69,
+        "previous_rank": 14,
+        "movement": 2
+      },
+      {
+        "rank": 13,
+        "team_id": "geo",
+        "points": 68,
+        "previous_rank": 12,
+        "movement": -1
+      },
+      {
+        "rank": 14,
         "team_id": "nam",
-        "points": 91,
+        "points": 66,
         "previous_rank": 13,
-        "movement": 12
+        "movement": -1
+      },
+      {
+        "rank": 15,
+        "team_id": "fij",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 62,
+        "previous_rank": 15,
+        "movement": -1
+      },
+      {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 60,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "sam",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 1
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 55,
+        "previous_rank": 18,
+        "movement": -1
+      },
+      {
+        "rank": 20,
+        "team_id": "fra",
+        "points": 54,
+        "previous_rank": 22,
+        "movement": 2
+      },
+      {
+        "rank": 21,
+        "team_id": "sco",
+        "points": 52,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
+        "team_id": "bra",
+        "points": 50,
+        "previous_rank": 21,
+        "movement": -1
+      },
+      {
+        "rank": 23,
+        "team_id": "eng",
+        "points": 48,
+        "previous_rank": 24,
+        "movement": 1
+      },
+      {
+        "rank": 24,
+        "team_id": "ire",
+        "points": 46,
+        "previous_rank": 26,
+        "movement": 2
+      },
+      {
+        "rank": 25,
+        "team_id": "arg",
+        "points": 44,
+        "previous_rank": 23,
+        "movement": -2
+      },
+      {
+        "rank": 26,
+        "team_id": "esp",
+        "points": 43,
+        "previous_rank": 25,
+        "movement": -1
+      },
+      {
+        "rank": 27,
+        "team_id": "ken",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "wal",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2025-09-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2025-09-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "jpn",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "tga",
+        "points": 86,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "uru",
+        "points": 85,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "aus",
+        "points": 83,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "por",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "chi",
+        "points": 78,
+        "previous_rank": 9,
+        "movement": 2
+      },
+      {
+        "rank": 8,
+        "team_id": "can",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
+      },
+      {
+        "rank": 9,
+        "team_id": "ned",
+        "points": 75,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "ita",
+        "points": 73,
+        "previous_rank": 11,
+        "movement": 1
+      },
+      {
+        "rank": 11,
+        "team_id": "rou",
+        "points": 71,
+        "previous_rank": 10,
+        "movement": -1
+      },
+      {
+        "rank": 12,
+        "team_id": "nam",
+        "points": 70,
+        "previous_rank": 14,
+        "movement": 2
+      },
+      {
+        "rank": 13,
+        "team_id": "geo",
+        "points": 67,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "zim",
+        "points": 66,
+        "previous_rank": 12,
+        "movement": -2
+      },
+      {
+        "rank": 15,
+        "team_id": "fij",
+        "points": 62,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "nzl",
+        "points": 62,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 60,
+        "previous_rank": 16,
+        "movement": -1
+      },
+      {
+        "rank": 18,
+        "team_id": "sam",
+        "points": 57,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": 0
+      },
+      {
+        "rank": 20,
+        "team_id": "bra",
+        "points": 53,
+        "previous_rank": 22,
+        "movement": 2
+      },
+      {
+        "rank": 21,
+        "team_id": "fra",
+        "points": 52,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
+        "team_id": "eng",
+        "points": 51,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "sco",
+        "points": 48,
+        "previous_rank": 21,
+        "movement": -2
+      },
+      {
+        "rank": 24,
+        "team_id": "arg",
+        "points": 46,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "ire",
+        "points": 44,
+        "previous_rank": 24,
+        "movement": -1
+      },
+      {
+        "rank": 26,
+        "team_id": "wal",
+        "points": 43,
+        "previous_rank": 28,
+        "movement": 2
+      },
+      {
+        "rank": 27,
+        "team_id": "esp",
+        "points": 41,
+        "previous_rank": 26,
+        "movement": -1
+      },
+      {
+        "rank": 28,
+        "team_id": "ken",
+        "points": 39,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2025-10-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2025-10-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 91,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "jpn",
+        "points": 87,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "tga",
+        "points": 86,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "aus",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 1
+      },
+      {
+        "rank": 5,
+        "team_id": "por",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "uru",
+        "points": 80,
+        "previous_rank": 4,
+        "movement": -2
+      },
+      {
+        "rank": 7,
+        "team_id": "chi",
+        "points": 78,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "ita",
+        "points": 78,
+        "previous_rank": 10,
+        "movement": 2
+      },
+      {
+        "rank": 9,
+        "team_id": "can",
+        "points": 74,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "ned",
+        "points": 74,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "rou",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": 0
+      },
+      {
+        "rank": 12,
+        "team_id": "nam",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 0
+      },
+      {
+        "rank": 13,
+        "team_id": "zim",
+        "points": 67,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "geo",
+        "points": 65,
+        "previous_rank": 13,
+        "movement": -1
+      },
+      {
+        "rank": 15,
+        "team_id": "fij",
+        "points": 63,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 61,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "rsa",
+        "points": 59,
+        "previous_rank": 19,
+        "movement": 2
+      },
+      {
+        "rank": 18,
+        "team_id": "nzl",
+        "points": 58,
+        "previous_rank": 16,
+        "movement": -2
+      },
+      {
+        "rank": 19,
+        "team_id": "sam",
+        "points": 55,
+        "previous_rank": 18,
+        "movement": -1
+      },
+      {
+        "rank": 20,
+        "team_id": "bra",
+        "points": 54,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "fra",
+        "points": 53,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "eng",
+        "points": 51,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "sco",
+        "points": 48,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "wal",
+        "points": 45,
+        "previous_rank": 26,
+        "movement": 2
+      },
+      {
+        "rank": 25,
+        "team_id": "ire",
+        "points": 43,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "arg",
+        "points": 42,
+        "previous_rank": 24,
+        "movement": -2
+      },
+      {
+        "rank": 27,
+        "team_id": "esp",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "ken",
+        "points": 38,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2025-11-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2025-11-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "jpn",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "tga",
+        "points": 87,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "aus",
+        "points": 85,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "uru",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "por",
+        "points": 81,
+        "previous_rank": 5,
+        "movement": -1
+      },
+      {
+        "rank": 7,
+        "team_id": "chi",
+        "points": 79,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "ita",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "ned",
+        "points": 75,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "can",
+        "points": 73,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "rou",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": 0
+      },
+      {
+        "rank": 12,
+        "team_id": "nam",
+        "points": 69,
+        "previous_rank": 12,
+        "movement": 0
+      },
+      {
+        "rank": 13,
+        "team_id": "fij",
+        "points": 68,
+        "previous_rank": 15,
+        "movement": 2
+      },
+      {
+        "rank": 14,
+        "team_id": "zim",
+        "points": 65,
+        "previous_rank": 13,
+        "movement": -1
+      },
+      {
+        "rank": 15,
+        "team_id": "geo",
+        "points": 64,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 61,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 59,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "rsa",
+        "points": 57,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "fra",
+        "points": 56,
+        "previous_rank": 21,
+        "movement": 2
+      },
+      {
+        "rank": 20,
+        "team_id": "sam",
+        "points": 54,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "bra",
+        "points": 52,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
+        "team_id": "sco",
+        "points": 50,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "ire",
+        "points": 48,
+        "previous_rank": 25,
+        "movement": 2
+      },
+      {
+        "rank": 24,
+        "team_id": "eng",
+        "points": 47,
+        "previous_rank": 22,
+        "movement": -2
+      },
+      {
+        "rank": 25,
+        "team_id": "wal",
+        "points": 44,
+        "previous_rank": 24,
+        "movement": -1
+      },
+      {
+        "rank": 26,
+        "team_id": "arg",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "ken",
+        "points": 41,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "esp",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2025-12-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2025-12-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
       },
       {
         "rank": 2,
@@ -833,184 +3675,1402 @@
       {
         "rank": 3,
         "team_id": "aus",
-        "points": 86,
-        "previous_rank": 5,
-        "movement": 2
+        "points": 87,
+        "previous_rank": 4,
+        "movement": 1
       },
       {
         "rank": 4,
-        "team_id": "uru",
-        "points": 83,
-        "previous_rank": 4,
-        "movement": 0
+        "team_id": "tga",
+        "points": 84,
+        "previous_rank": 3,
+        "movement": -1
       },
       {
         "rank": 5,
-        "team_id": "fij",
-        "points": 82,
-        "previous_rank": 16,
-        "movement": 11
+        "team_id": "uru",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 0
       },
       {
         "rank": 6,
-        "team_id": "nzl",
-        "points": 80,
-        "previous_rank": 17,
-        "movement": 11
+        "team_id": "por",
+        "points": 81,
+        "previous_rank": 6,
+        "movement": 0
       },
       {
         "rank": 7,
-        "team_id": "geo",
-        "points": 78,
-        "previous_rank": 12,
-        "movement": 5
+        "team_id": "ita",
+        "points": 79,
+        "previous_rank": 8,
+        "movement": 1
       },
       {
         "rank": 8,
-        "team_id": "ita",
-        "points": 76,
-        "previous_rank": 9,
-        "movement": 1
+        "team_id": "chi",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
       },
       {
         "rank": 9,
-        "team_id": "zim",
-        "points": 75,
-        "previous_rank": 14,
-        "movement": 5
+        "team_id": "can",
+        "points": 76,
+        "previous_rank": 10,
+        "movement": 1
       },
       {
         "rank": 10,
-        "team_id": "arg",
+        "team_id": "ned",
         "points": 73,
-        "previous_rank": 23,
-        "movement": 13
+        "previous_rank": 9,
+        "movement": -1
       },
       {
         "rank": 11,
-        "team_id": "sam",
+        "team_id": "fij",
         "points": 71,
-        "previous_rank": 19,
-        "movement": 8
-      },
-      {
-        "rank": 12,
-        "team_id": "hkg",
-        "points": 69,
-        "previous_rank": 15,
-        "movement": 3
-      },
-      {
-        "rank": 13,
-        "team_id": "fra",
-        "points": 67,
-        "previous_rank": 22,
-        "movement": 9
-      },
-      {
-        "rank": 14,
-        "team_id": "ned",
-        "points": 66,
-        "previous_rank": 8,
-        "movement": -6
-      },
-      {
-        "rank": 15,
-        "team_id": "wal",
-        "points": 64,
-        "previous_rank": 28,
-        "movement": 13
-      },
-      {
-        "rank": 16,
-        "team_id": "bra",
-        "points": 61,
-        "previous_rank": 21,
-        "movement": 5
-      },
-      {
-        "rank": 17,
-        "team_id": "rsa",
-        "points": 60,
-        "previous_rank": 18,
-        "movement": 1
-      },
-      {
-        "rank": 18,
-        "team_id": "sco",
-        "points": 58,
-        "previous_rank": 20,
+        "previous_rank": 13,
         "movement": 2
       },
       {
+        "rank": 12,
+        "team_id": "rou",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "nam",
+        "points": 68,
+        "previous_rank": 12,
+        "movement": -1
+      },
+      {
+        "rank": 14,
+        "team_id": "geo",
+        "points": 66,
+        "previous_rank": 15,
+        "movement": 1
+      },
+      {
+        "rank": 15,
+        "team_id": "zim",
+        "points": 62,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 61,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 60,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "rsa",
+        "points": 58,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
         "rank": 19,
-        "team_id": "por",
-        "points": 55,
-        "previous_rank": 6,
-        "movement": -13
+        "team_id": "fra",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 0
       },
       {
         "rank": 20,
-        "team_id": "tga",
+        "team_id": "sam",
         "points": 53,
-        "previous_rank": 3,
-        "movement": -17
+        "previous_rank": 20,
+        "movement": 0
       },
       {
         "rank": 21,
-        "team_id": "usa",
+        "team_id": "bra",
         "points": 52,
-        "previous_rank": 1,
-        "movement": -20
+        "previous_rank": 21,
+        "movement": 0
       },
       {
         "rank": 22,
-        "team_id": "chi",
-        "points": 50,
-        "previous_rank": 10,
-        "movement": -12
+        "team_id": "ire",
+        "points": 49,
+        "previous_rank": 23,
+        "movement": 1
       },
       {
         "rank": 23,
-        "team_id": "rou",
-        "points": 48,
-        "previous_rank": 11,
-        "movement": -12
+        "team_id": "wal",
+        "points": 49,
+        "previous_rank": 25,
+        "movement": 2
       },
       {
         "rank": 24,
-        "team_id": "esp",
-        "points": 46,
-        "previous_rank": 25,
-        "movement": 1
+        "team_id": "eng",
+        "points": 47,
+        "previous_rank": 24,
+        "movement": 0
       },
       {
         "rank": 25,
-        "team_id": "can",
+        "team_id": "sco",
         "points": 44,
-        "previous_rank": 7,
-        "movement": -18
+        "previous_rank": 22,
+        "movement": -3
       },
       {
         "rank": 26,
-        "team_id": "ken",
+        "team_id": "arg",
         "points": 42,
-        "previous_rank": 27,
-        "movement": 1
+        "previous_rank": 26,
+        "movement": 0
       },
       {
         "rank": 27,
+        "team_id": "ken",
+        "points": 41,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "esp",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-01-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-01-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "jpn",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "aus",
+        "points": 87,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "por",
+        "points": 84,
+        "previous_rank": 6,
+        "movement": 2
+      },
+      {
+        "rank": 5,
+        "team_id": "uru",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "ita",
+        "points": 80,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "tga",
+        "points": 78,
+        "previous_rank": 4,
+        "movement": -3
+      },
+      {
+        "rank": 8,
+        "team_id": "ned",
+        "points": 76,
+        "previous_rank": 10,
+        "movement": 2
+      },
+      {
+        "rank": 9,
+        "team_id": "fij",
+        "points": 75,
+        "previous_rank": 11,
+        "movement": 2
+      },
+      {
+        "rank": 10,
+        "team_id": "chi",
+        "points": 74,
+        "previous_rank": 8,
+        "movement": -2
+      },
+      {
+        "rank": 11,
+        "team_id": "can",
+        "points": 72,
+        "previous_rank": 9,
+        "movement": -2
+      },
+      {
+        "rank": 12,
+        "team_id": "rou",
+        "points": 69,
+        "previous_rank": 12,
+        "movement": 0
+      },
+      {
+        "rank": 13,
+        "team_id": "geo",
+        "points": 68,
+        "previous_rank": 14,
+        "movement": 1
+      },
+      {
+        "rank": 14,
+        "team_id": "nam",
+        "points": 66,
+        "previous_rank": 13,
+        "movement": -1
+      },
+      {
+        "rank": 15,
+        "team_id": "nzl",
+        "points": 64,
+        "previous_rank": 17,
+        "movement": 2
+      },
+      {
+        "rank": 16,
+        "team_id": "zim",
+        "points": 61,
+        "previous_rank": 15,
+        "movement": -1
+      },
+      {
+        "rank": 17,
+        "team_id": "hkg",
+        "points": 59,
+        "previous_rank": 16,
+        "movement": -1
+      },
+      {
+        "rank": 18,
+        "team_id": "fra",
+        "points": 57,
+        "previous_rank": 19,
+        "movement": 1
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 55,
+        "previous_rank": 18,
+        "movement": -1
+      },
+      {
+        "rank": 20,
+        "team_id": "bra",
+        "points": 55,
+        "previous_rank": 21,
+        "movement": 1
+      },
+      {
+        "rank": 21,
+        "team_id": "sam",
+        "points": 51,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
         "team_id": "ire",
+        "points": 50,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "wal",
+        "points": 48,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
+        "team_id": "eng",
+        "points": 46,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "sco",
+        "points": 44,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "esp",
+        "points": 42,
+        "previous_rank": 28,
+        "movement": 2
+      },
+      {
+        "rank": 27,
+        "team_id": "arg",
         "points": 41,
         "previous_rank": 26,
         "movement": -1
       },
       {
         "rank": 28,
+        "team_id": "ken",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-02-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-02-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "por",
+        "points": 89,
+        "previous_rank": 4,
+        "movement": 2
+      },
+      {
+        "rank": 3,
+        "team_id": "jpn",
+        "points": 87,
+        "previous_rank": 2,
+        "movement": -1
+      },
+      {
+        "rank": 4,
+        "team_id": "aus",
+        "points": 85,
+        "previous_rank": 3,
+        "movement": -1
+      },
+      {
+        "rank": 5,
+        "team_id": "uru",
+        "points": 82,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "ita",
+        "points": 81,
+        "previous_rank": 6,
+        "movement": 0
+      },
+      {
+        "rank": 7,
+        "team_id": "tga",
+        "points": 79,
+        "previous_rank": 7,
+        "movement": 0
+      },
+      {
+        "rank": 8,
+        "team_id": "fij",
+        "points": 76,
+        "previous_rank": 9,
+        "movement": 1
+      },
+      {
+        "rank": 9,
+        "team_id": "ned",
+        "points": 75,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "chi",
+        "points": 72,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "rou",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "geo",
+        "points": 69,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "can",
+        "points": 67,
+        "previous_rank": 11,
+        "movement": -2
+      },
+      {
+        "rank": 14,
+        "team_id": "nam",
+        "points": 66,
+        "previous_rank": 14,
+        "movement": 0
+      },
+      {
+        "rank": 15,
+        "team_id": "zim",
+        "points": 63,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 61,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 59,
+        "previous_rank": 15,
+        "movement": -2
+      },
+      {
+        "rank": 18,
+        "team_id": "fra",
+        "points": 57,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 56,
+        "previous_rank": 19,
+        "movement": 0
+      },
+      {
+        "rank": 20,
+        "team_id": "bra",
+        "points": 54,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "sam",
+        "points": 53,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "ire",
+        "points": 50,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "wal",
+        "points": 48,
+        "previous_rank": 23,
+        "movement": 0
+      },
+      {
+        "rank": 24,
         "team_id": "eng",
-        "points": 38,
+        "points": 46,
         "previous_rank": 24,
-        "movement": -4
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "sco",
+        "points": 44,
+        "previous_rank": 25,
+        "movement": 0
+      },
+      {
+        "rank": 26,
+        "team_id": "esp",
+        "points": 43,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "ken",
+        "points": 40,
+        "previous_rank": 28,
+        "movement": 1
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 38,
+        "previous_rank": 27,
+        "movement": -1
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-03-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-03-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 91,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "por",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "aus",
+        "points": 86,
+        "previous_rank": 4,
+        "movement": 1
+      },
+      {
+        "rank": 4,
+        "team_id": "jpn",
+        "points": 83,
+        "previous_rank": 3,
+        "movement": -1
+      },
+      {
+        "rank": 5,
+        "team_id": "uru",
+        "points": 81,
+        "previous_rank": 5,
+        "movement": 0
+      },
+      {
+        "rank": 6,
+        "team_id": "tga",
+        "points": 80,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "ita",
+        "points": 79,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "fij",
+        "points": 76,
+        "previous_rank": 8,
+        "movement": 0
+      },
+      {
+        "rank": 9,
+        "team_id": "chi",
+        "points": 75,
+        "previous_rank": 10,
+        "movement": 1
+      },
+      {
+        "rank": 10,
+        "team_id": "ned",
+        "points": 73,
+        "previous_rank": 9,
+        "movement": -1
+      },
+      {
+        "rank": 11,
+        "team_id": "geo",
+        "points": 72,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "rou",
+        "points": 68,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "can",
+        "points": 67,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "zim",
+        "points": 66,
+        "previous_rank": 15,
+        "movement": 1
+      },
+      {
+        "rank": 15,
+        "team_id": "nam",
+        "points": 64,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "hkg",
+        "points": 61,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "fra",
+        "points": 61,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "nzl",
+        "points": 58,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "bra",
+        "points": 56,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
+        "rank": 20,
+        "team_id": "rsa",
+        "points": 54,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "sam",
+        "points": 51,
+        "previous_rank": 21,
+        "movement": 0
+      },
+      {
+        "rank": 22,
+        "team_id": "wal",
+        "points": 51,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "ire",
+        "points": 49,
+        "previous_rank": 22,
+        "movement": -1
+      },
+      {
+        "rank": 24,
+        "team_id": "sco",
+        "points": 47,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "esp",
+        "points": 45,
+        "previous_rank": 26,
+        "movement": 1
+      },
+      {
+        "rank": 26,
+        "team_id": "eng",
+        "points": 42,
+        "previous_rank": 24,
+        "movement": -2
+      },
+      {
+        "rank": 27,
+        "team_id": "ken",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 38,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-04-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-04-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "usa",
+        "points": 91,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "por",
+        "points": 88,
+        "previous_rank": 2,
+        "movement": 0
+      },
+      {
+        "rank": 3,
+        "team_id": "aus",
+        "points": 86,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "uru",
+        "points": 84,
+        "previous_rank": 5,
+        "movement": 1
+      },
+      {
+        "rank": 5,
+        "team_id": "jpn",
+        "points": 83,
+        "previous_rank": 4,
+        "movement": -1
+      },
+      {
+        "rank": 6,
+        "team_id": "ita",
+        "points": 81,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "tga",
+        "points": 80,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "chi",
+        "points": 76,
+        "previous_rank": 9,
+        "movement": 1
+      },
+      {
+        "rank": 9,
+        "team_id": "fij",
+        "points": 75,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "ned",
+        "points": 74,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "rou",
+        "points": 71,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "can",
+        "points": 68,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "geo",
+        "points": 67,
+        "previous_rank": 11,
+        "movement": -2
+      },
+      {
+        "rank": 14,
+        "team_id": "zim",
+        "points": 66,
+        "previous_rank": 14,
+        "movement": 0
+      },
+      {
+        "rank": 15,
+        "team_id": "hkg",
+        "points": 64,
+        "previous_rank": 16,
+        "movement": 1
+      },
+      {
+        "rank": 16,
+        "team_id": "nzl",
+        "points": 62,
+        "previous_rank": 18,
+        "movement": 2
+      },
+      {
+        "rank": 17,
+        "team_id": "nam",
+        "points": 60,
+        "previous_rank": 15,
+        "movement": -2
+      },
+      {
+        "rank": 18,
+        "team_id": "fra",
+        "points": 58,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 56,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
+        "rank": 20,
+        "team_id": "bra",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "wal",
+        "points": 52,
+        "previous_rank": 22,
+        "movement": 1
+      },
+      {
+        "rank": 22,
+        "team_id": "sam",
+        "points": 50,
+        "previous_rank": 21,
+        "movement": -1
+      },
+      {
+        "rank": 23,
+        "team_id": "sco",
+        "points": 47,
+        "previous_rank": 24,
+        "movement": 1
+      },
+      {
+        "rank": 24,
+        "team_id": "esp",
+        "points": 47,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "ire",
+        "points": 44,
+        "previous_rank": 23,
+        "movement": -2
+      },
+      {
+        "rank": 26,
+        "team_id": "eng",
+        "points": 42,
+        "previous_rank": 26,
+        "movement": 0
+      },
+      {
+        "rank": 27,
+        "team_id": "ken",
+        "points": 40,
+        "previous_rank": 27,
+        "movement": 0
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 39,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-05-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-05-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 89,
+        "previous_rank": 2,
+        "movement": 1
+      },
+      {
+        "rank": 2,
+        "team_id": "usa",
+        "points": 89,
+        "previous_rank": 1,
+        "movement": -1
+      },
+      {
+        "rank": 3,
+        "team_id": "aus",
+        "points": 85,
+        "previous_rank": 3,
+        "movement": 0
+      },
+      {
+        "rank": 4,
+        "team_id": "uru",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "ita",
+        "points": 81,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
+        "rank": 6,
+        "team_id": "tga",
+        "points": 80,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "jpn",
+        "points": 78,
+        "previous_rank": 5,
+        "movement": -2
+      },
+      {
+        "rank": 8,
+        "team_id": "fij",
+        "points": 76,
+        "previous_rank": 9,
+        "movement": 1
+      },
+      {
+        "rank": 9,
+        "team_id": "chi",
+        "points": 75,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "ned",
+        "points": 73,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "can",
+        "points": 70,
+        "previous_rank": 12,
+        "movement": 1
+      },
+      {
+        "rank": 12,
+        "team_id": "rou",
+        "points": 68,
+        "previous_rank": 11,
+        "movement": -1
+      },
+      {
+        "rank": 13,
+        "team_id": "geo",
+        "points": 67,
+        "previous_rank": 13,
+        "movement": 0
+      },
+      {
+        "rank": 14,
+        "team_id": "hkg",
+        "points": 65,
+        "previous_rank": 15,
+        "movement": 1
+      },
+      {
+        "rank": 15,
+        "team_id": "zim",
+        "points": 63,
+        "previous_rank": 14,
+        "movement": -1
+      },
+      {
+        "rank": 16,
+        "team_id": "nam",
+        "points": 61,
+        "previous_rank": 17,
+        "movement": 1
+      },
+      {
+        "rank": 17,
+        "team_id": "fra",
+        "points": 60,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "nzl",
+        "points": 58,
+        "previous_rank": 16,
+        "movement": -2
+      },
+      {
+        "rank": 19,
+        "team_id": "wal",
+        "points": 56,
+        "previous_rank": 21,
+        "movement": 2
+      },
+      {
+        "rank": 20,
+        "team_id": "rsa",
+        "points": 55,
+        "previous_rank": 19,
+        "movement": -1
+      },
+      {
+        "rank": 21,
+        "team_id": "bra",
+        "points": 51,
+        "previous_rank": 20,
+        "movement": -1
+      },
+      {
+        "rank": 22,
+        "team_id": "sco",
+        "points": 51,
+        "previous_rank": 23,
+        "movement": 1
+      },
+      {
+        "rank": 23,
+        "team_id": "sam",
+        "points": 49,
+        "previous_rank": 22,
+        "movement": -1
+      },
+      {
+        "rank": 24,
+        "team_id": "ire",
+        "points": 46,
+        "previous_rank": 25,
+        "movement": 1
+      },
+      {
+        "rank": 25,
+        "team_id": "esp",
+        "points": 45,
+        "previous_rank": 24,
+        "movement": -1
+      },
+      {
+        "rank": 26,
+        "team_id": "ken",
+        "points": 43,
+        "previous_rank": 27,
+        "movement": 1
+      },
+      {
+        "rank": 27,
+        "team_id": "eng",
+        "points": 41,
+        "previous_rank": 26,
+        "movement": -1
+      },
+      {
+        "rank": 28,
+        "team_id": "arg",
+        "points": 40,
+        "previous_rank": 28,
+        "movement": 0
+      }
+    ]
+  },
+  {
+    "id": "world-rugby-womens-2026-06-01",
+    "source": "world-rugby-womens",
+    "snapshot_date": "2026-06-01",
+    "rows": [
+      {
+        "rank": 1,
+        "team_id": "por",
+        "points": 90,
+        "previous_rank": 1,
+        "movement": 0
+      },
+      {
+        "rank": 2,
+        "team_id": "aus",
+        "points": 89,
+        "previous_rank": 3,
+        "movement": 1
+      },
+      {
+        "rank": 3,
+        "team_id": "usa",
+        "points": 86,
+        "previous_rank": 2,
+        "movement": -1
+      },
+      {
+        "rank": 4,
+        "team_id": "ita",
+        "points": 83,
+        "previous_rank": 5,
+        "movement": 1
+      },
+      {
+        "rank": 5,
+        "team_id": "uru",
+        "points": 82,
+        "previous_rank": 4,
+        "movement": -1
+      },
+      {
+        "rank": 6,
+        "team_id": "jpn",
+        "points": 80,
+        "previous_rank": 7,
+        "movement": 1
+      },
+      {
+        "rank": 7,
+        "team_id": "tga",
+        "points": 79,
+        "previous_rank": 6,
+        "movement": -1
+      },
+      {
+        "rank": 8,
+        "team_id": "chi",
+        "points": 77,
+        "previous_rank": 9,
+        "movement": 1
+      },
+      {
+        "rank": 9,
+        "team_id": "fij",
+        "points": 74,
+        "previous_rank": 8,
+        "movement": -1
+      },
+      {
+        "rank": 10,
+        "team_id": "ned",
+        "points": 72,
+        "previous_rank": 10,
+        "movement": 0
+      },
+      {
+        "rank": 11,
+        "team_id": "can",
+        "points": 70,
+        "previous_rank": 11,
+        "movement": 0
+      },
+      {
+        "rank": 12,
+        "team_id": "geo",
+        "points": 69,
+        "previous_rank": 13,
+        "movement": 1
+      },
+      {
+        "rank": 13,
+        "team_id": "rou",
+        "points": 67,
+        "previous_rank": 12,
+        "movement": -1
+      },
+      {
+        "rank": 14,
+        "team_id": "hkg",
+        "points": 65,
+        "previous_rank": 14,
+        "movement": 0
+      },
+      {
+        "rank": 15,
+        "team_id": "zim",
+        "points": 63,
+        "previous_rank": 15,
+        "movement": 0
+      },
+      {
+        "rank": 16,
+        "team_id": "nam",
+        "points": 62,
+        "previous_rank": 16,
+        "movement": 0
+      },
+      {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 60,
+        "previous_rank": 18,
+        "movement": 1
+      },
+      {
+        "rank": 18,
+        "team_id": "fra",
+        "points": 57,
+        "previous_rank": 17,
+        "movement": -1
+      },
+      {
+        "rank": 19,
+        "team_id": "wal",
+        "points": 56,
+        "previous_rank": 19,
+        "movement": 0
+      },
+      {
+        "rank": 20,
+        "team_id": "rsa",
+        "points": 53,
+        "previous_rank": 20,
+        "movement": 0
+      },
+      {
+        "rank": 21,
+        "team_id": "sam",
+        "points": 53,
+        "previous_rank": 23,
+        "movement": 2
+      },
+      {
+        "rank": 22,
+        "team_id": "sco",
+        "points": 51,
+        "previous_rank": 22,
+        "movement": 0
+      },
+      {
+        "rank": 23,
+        "team_id": "bra",
+        "points": 48,
+        "previous_rank": 21,
+        "movement": -2
+      },
+      {
+        "rank": 24,
+        "team_id": "ire",
+        "points": 47,
+        "previous_rank": 24,
+        "movement": 0
+      },
+      {
+        "rank": 25,
+        "team_id": "eng",
+        "points": 44,
+        "previous_rank": 27,
+        "movement": 2
+      },
+      {
+        "rank": 26,
+        "team_id": "arg",
+        "points": 43,
+        "previous_rank": 28,
+        "movement": 2
+      },
+      {
+        "rank": 27,
+        "team_id": "esp",
+        "points": 40,
+        "previous_rank": 25,
+        "movement": -2
+      },
+      {
+        "rank": 28,
+        "team_id": "ken",
+        "points": 38,
+        "previous_rank": 26,
+        "movement": -2
       }
     ]
   },
@@ -1021,199 +5081,199 @@
     "rows": [
       {
         "rank": 1,
-        "team_id": "chi",
+        "team_id": "por",
         "points": 91,
-        "previous_rank": 22,
-        "movement": 21
+        "previous_rank": 1,
+        "movement": 0
       },
       {
         "rank": 2,
-        "team_id": "bra",
+        "team_id": "usa",
         "points": 89,
-        "previous_rank": 16,
-        "movement": 14
+        "previous_rank": 3,
+        "movement": 1
       },
       {
         "rank": 3,
-        "team_id": "tga",
-        "points": 85,
-        "previous_rank": 20,
-        "movement": 17
-      },
-      {
-        "rank": 4,
-        "team_id": "geo",
-        "points": 84,
-        "previous_rank": 7,
-        "movement": 3
-      },
-      {
-        "rank": 5,
-        "team_id": "uru",
-        "points": 83,
-        "previous_rank": 4,
+        "team_id": "aus",
+        "points": 87,
+        "previous_rank": 2,
         "movement": -1
       },
       {
+        "rank": 4,
+        "team_id": "ita",
+        "points": 84,
+        "previous_rank": 4,
+        "movement": 0
+      },
+      {
+        "rank": 5,
+        "team_id": "jpn",
+        "points": 82,
+        "previous_rank": 6,
+        "movement": 1
+      },
+      {
         "rank": 6,
-        "team_id": "sco",
-        "points": 81,
-        "previous_rank": 18,
-        "movement": 12
+        "team_id": "uru",
+        "points": 80,
+        "previous_rank": 5,
+        "movement": -1
       },
       {
         "rank": 7,
-        "team_id": "fij",
+        "team_id": "ned",
         "points": 79,
-        "previous_rank": 5,
-        "movement": -2
+        "previous_rank": 10,
+        "movement": 3
       },
       {
         "rank": 8,
-        "team_id": "rou",
-        "points": 76,
-        "previous_rank": 23,
-        "movement": 15
+        "team_id": "tga",
+        "points": 77,
+        "previous_rank": 7,
+        "movement": -1
       },
       {
         "rank": 9,
-        "team_id": "zim",
-        "points": 74,
-        "previous_rank": 9,
-        "movement": 0
+        "team_id": "can",
+        "points": 75,
+        "previous_rank": 11,
+        "movement": 2
       },
       {
         "rank": 10,
-        "team_id": "eng",
-        "points": 73,
-        "previous_rank": 28,
-        "movement": 18
+        "team_id": "chi",
+        "points": 72,
+        "previous_rank": 8,
+        "movement": -2
       },
       {
         "rank": 11,
-        "team_id": "wal",
-        "points": 71,
-        "previous_rank": 15,
-        "movement": 4
+        "team_id": "fij",
+        "points": 72,
+        "previous_rank": 9,
+        "movement": -2
       },
       {
         "rank": 12,
-        "team_id": "nam",
+        "team_id": "rou",
         "points": 69,
-        "previous_rank": 1,
-        "movement": -11
+        "previous_rank": 13,
+        "movement": 1
       },
       {
         "rank": 13,
-        "team_id": "ned",
-        "points": 67,
-        "previous_rank": 14,
-        "movement": 1
+        "team_id": "geo",
+        "points": 68,
+        "previous_rank": 12,
+        "movement": -1
       },
       {
         "rank": 14,
-        "team_id": "nzl",
+        "team_id": "zim",
         "points": 66,
-        "previous_rank": 6,
-        "movement": -8
-      },
-      {
-        "rank": 15,
-        "team_id": "esp",
-        "points": 63,
-        "previous_rank": 24,
-        "movement": 9
-      },
-      {
-        "rank": 16,
-        "team_id": "rsa",
-        "points": 62,
-        "previous_rank": 17,
+        "previous_rank": 15,
         "movement": 1
       },
       {
-        "rank": 17,
-        "team_id": "arg",
-        "points": 59,
-        "previous_rank": 10,
-        "movement": -7
+        "rank": 15,
+        "team_id": "hkg",
+        "points": 63,
+        "previous_rank": 14,
+        "movement": -1
       },
       {
-        "rank": 18,
-        "team_id": "sam",
-        "points": 58,
-        "previous_rank": 11,
-        "movement": -7
-      },
-      {
-        "rank": 19,
-        "team_id": "por",
-        "points": 56,
-        "previous_rank": 19,
+        "rank": 16,
+        "team_id": "nam",
+        "points": 62,
+        "previous_rank": 16,
         "movement": 0
       },
       {
+        "rank": 17,
+        "team_id": "nzl",
+        "points": 60,
+        "previous_rank": 17,
+        "movement": 0
+      },
+      {
+        "rank": 18,
+        "team_id": "fra",
+        "points": 58,
+        "previous_rank": 18,
+        "movement": 0
+      },
+      {
+        "rank": 19,
+        "team_id": "rsa",
+        "points": 56,
+        "previous_rank": 20,
+        "movement": 1
+      },
+      {
         "rank": 20,
-        "team_id": "ken",
-        "points": 54,
-        "previous_rank": 26,
-        "movement": 6
+        "team_id": "wal",
+        "points": 53,
+        "previous_rank": 19,
+        "movement": -1
       },
       {
         "rank": 21,
-        "team_id": "aus",
+        "team_id": "sco",
         "points": 51,
-        "previous_rank": 3,
-        "movement": -18
+        "previous_rank": 22,
+        "movement": 1
       },
       {
         "rank": 22,
-        "team_id": "ita",
-        "points": 50,
-        "previous_rank": 8,
-        "movement": -14
+        "team_id": "bra",
+        "points": 49,
+        "previous_rank": 23,
+        "movement": 1
       },
       {
         "rank": 23,
-        "team_id": "jpn",
-        "points": 48,
-        "previous_rank": 2,
-        "movement": -21
+        "team_id": "sam",
+        "points": 49,
+        "previous_rank": 21,
+        "movement": -2
       },
       {
         "rank": 24,
         "team_id": "ire",
-        "points": 47,
-        "previous_rank": 27,
-        "movement": 3
+        "points": 46,
+        "previous_rank": 24,
+        "movement": 0
       },
       {
         "rank": 25,
-        "team_id": "hkg",
-        "points": 44,
-        "previous_rank": 12,
-        "movement": -13
+        "team_id": "eng",
+        "points": 45,
+        "previous_rank": 25,
+        "movement": 0
       },
       {
         "rank": 26,
-        "team_id": "usa",
+        "team_id": "arg",
         "points": 42,
-        "previous_rank": 21,
-        "movement": -5
+        "previous_rank": 26,
+        "movement": 0
       },
       {
         "rank": 27,
-        "team_id": "fra",
+        "team_id": "esp",
         "points": 40,
-        "previous_rank": 13,
-        "movement": -14
+        "previous_rank": 27,
+        "movement": 0
       },
       {
         "rank": 28,
-        "team_id": "can",
-        "points": 39,
-        "previous_rank": 25,
-        "movement": -3
+        "team_id": "ken",
+        "points": 38,
+        "previous_rank": 28,
+        "movement": 0
       }
     ]
   }

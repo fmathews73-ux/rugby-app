@@ -1,5 +1,37 @@
 [
   {
+    "id": "six-nations-2025",
+    "competition_id": "six-nations",
+    "year_label": "2025",
+    "start_date": "2025-01-31",
+    "end_date": "2025-03-15",
+    "status": "completed"
+  },
+  {
+    "id": "rugby-championship-2025",
+    "competition_id": "rugby-championship",
+    "year_label": "2025",
+    "start_date": "2025-08-16",
+    "end_date": "2025-09-27",
+    "status": "completed"
+  },
+  {
+    "id": "summer-tests-2025",
+    "competition_id": "summer-tests",
+    "year_label": "2025",
+    "start_date": "2025-06-21",
+    "end_date": "2025-07-19",
+    "status": "completed"
+  },
+  {
+    "id": "autumn-tests-2025",
+    "competition_id": "autumn-tests",
+    "year_label": "2025",
+    "start_date": "2025-11-08",
+    "end_date": "2025-11-29",
+    "status": "completed"
+  },
+  {
     "id": "six-nations-2026",
     "competition_id": "six-nations",
     "year_label": "2026",

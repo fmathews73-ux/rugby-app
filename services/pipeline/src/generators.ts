@@ -359,12 +359,15 @@ export function computeStandings(
 }
 
 /**
- * Generate a World Rugby ranking snapshot for a date. Team ordering is a
- * shuffle influenced by a base "strength" — deterministic per RNG.
+ * Generate a World Rugby ranking snapshot for a date. First snapshot in a
+ * series is a fresh shuffle; subsequent snapshots perturb the previous
+ * ranking by ±2 positions so the trajectory reads as gradual Elo-style
+ * drift rather than random reshuffling. Points are anchored to the rank
+ * (so #1 always has more points than #10) with small per-snapshot jitter.
  *
- * `source` selects mens / womens. Both use the same team pool for now —
- * different RNG forks feed different shuffles, so the two ranking tables
- * have plausibly different orderings even though the teams overlap.
+ * `source` selects mens / womens — different RNG forks feed different
+ * shuffles, so the two ranking tables have plausibly different orderings
+ * even though the team pool overlaps.
  */
 export function generateRanking(
   rng: Rng,
@@ -373,8 +376,21 @@ export function generateRanking(
   previousRankByTeam: Map<TeamId, number> | null,
   source: RankingSnapshot['source'] = 'world-rugby-mens',
 ): RankingSnapshot {
-  const shuffled = rng.shuffle([...teams]);
-  const rows: RankingRow[] = shuffled.map((t, i) => {
+  let ordered: Team[];
+  if (previousRankByTeam) {
+    // Perturb the previous ranking. Jitter magnitude tuned so most teams
+    // shift 0–2 positions per snapshot, occasional 3–4.
+    const withScore = teams.map((t) => {
+      const prev = previousRankByTeam.get(t.id) ?? teams.length;
+      const jitter = (rng.next() - 0.5) * 4; // ~[-2, +2]
+      return { team: t, score: prev + jitter };
+    });
+    withScore.sort((a, b) => a.score - b.score);
+    ordered = withScore.map((w) => w.team);
+  } else {
+    ordered = rng.shuffle([...teams]);
+  }
+  const rows: RankingRow[] = ordered.map((t, i) => {
     const rank = i + 1;
     const points = Math.round(90 - i * 1.9 + (rng.next() - 0.5) * 2);
     const previous_rank = previousRankByTeam?.get(t.id) ?? null;

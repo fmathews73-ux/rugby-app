@@ -9,15 +9,18 @@ import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextWeight } from '@/constants/theme';
 
 /**
- * Full-screen modal for picking a favourite team. All 28 international teams
- * (Tier 1 + Tier 2) sorted alphabetically in a single flat list — no tier
- * grouping. Tap a row to select; the selection is provisional until Confirm
- * is tapped. Cancel discards the change.
+ * Full-screen modal for picking a team. Default use case is picking a
+ * favourite team ("My Team") but the modal is reusable for any single-team
+ * selection — supply `title` and `confirmLabel` to retitle. Tap a row to
+ * select; the selection is provisional until Confirm is tapped. Cancel
+ * discards the change.
  */
 export function TeamPickerModal({
   visible,
   teams,
   currentTeamId,
+  title = 'My Team',
+  confirmLabel = 'Confirm',
   onCancel,
   onConfirm,
   onClear,
@@ -25,10 +28,13 @@ export function TeamPickerModal({
   visible: boolean;
   teams: readonly Team[];
   currentTeamId: string | null;
+  /** Header title. Defaults to "My Team" for the primary favourite-team flow. */
+  title?: string;
+  /** Primary-button label. Defaults to "Confirm". */
+  confirmLabel?: string;
   onCancel: () => void;
   onConfirm: (teamId: string) => void;
-  /** Resets My Team back to no-selection. Only shown when a team is currently
-   *  set — nothing to clear otherwise. */
+  /** Resets the current selection. Only shown when one is set — nothing to clear otherwise. */
   onClear?: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(currentTeamId);
@@ -54,7 +60,7 @@ export function TeamPickerModal({
           <Pressable onPress={onCancel} hitSlop={12}>
             <Text style={styles.headerAction}>Cancel</Text>
           </Pressable>
-          <Text style={styles.headerTitle}>My Team</Text>
+          <Text style={styles.headerTitle}>{title}</Text>
           {/* Right slot: Clear reset button when a team is already set,
               otherwise an invisible spacer to keep the title centred. */}
           {onClear && currentTeamId ? (
@@ -107,7 +113,7 @@ export function TeamPickerModal({
               selected === null && styles.confirmButtonDisabled,
               pressed && styles.confirmButtonPressed,
             ]}>
-            <Text style={styles.confirmButtonText}>Confirm</Text>
+            <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
           </Pressable>
         </View>
       </SafeAreaView>

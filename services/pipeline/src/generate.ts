@@ -186,12 +186,19 @@ for (const bundle of ALL_COMPETITIONS) {
 }
 
 // ─── Rankings ─────────────────────────────────────────────────────────────────
-// Three snapshots each for men's and women's — both use the same team pool for
-// now (women's teams are the same national identities as men's). Register #3
-// flipped 2026-07-02 to bring women's rankings into v1 scope.
+// 13 monthly snapshots (12-month rolling window ending at TODAY_ISO) for both
+// men's and women's rankings — feeds the Insights → Ranking Trajectory chart.
+// Real World Rugby releases weekly during test windows; a monthly cadence is a
+// reasonable simplification for the synthetic dev dataset. Register #3 flipped
+// 2026-07-02 to bring women's rankings into v1 scope.
 
 const rankings: RankingSnapshot[] = [];
-const snapshotDates = ['2026-01-15', '2026-04-01', TODAY_ISO];
+const snapshotDates = [
+  '2025-07-01', '2025-08-01', '2025-09-01', '2025-10-01',
+  '2025-11-01', '2025-12-01', '2026-01-01', '2026-02-01',
+  '2026-03-01', '2026-04-01', '2026-05-01', '2026-06-01',
+  TODAY_ISO,
+];
 
 let prevMensRankByTeam: Map<TeamId, number> | null = null;
 for (const date of snapshotDates) {

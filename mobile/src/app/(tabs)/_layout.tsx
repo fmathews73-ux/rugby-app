@@ -43,6 +43,15 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="insights"
+        options={{
+          title: 'Insights',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'analytics' : 'analytics-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="standings"
         options={{
           title: 'Standings',

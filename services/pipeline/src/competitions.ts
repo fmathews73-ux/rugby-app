@@ -64,6 +64,174 @@ function fx(
   };
 }
 
+// ─── Six Nations 2025 ────────────────────────────────────────────────────────
+// Prior season, all in the past. Home/away pairings are flipped vs. SN 2026
+// (real Six Nations alternates home ties year-to-year), giving 2025 standings
+// a distinct shape from 2026. Fully completed relative to TODAY_ISO.
+
+const SIX_NATIONS_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'six-nations';
+  const sid: SeasonId = 'six-nations-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'Six Nations Championship',
+      short_name: 'Six Nations',
+      format: 'round-robin',
+      governing_body: 'Six Nations Rugby',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-01-31', end_date: '2025-03-15', status: 'completed',
+    },
+    team_ids: ['eng', 'fra', 'ire', 'ita', 'sco', 'wal'],
+    fixtures: [
+      // Round 1
+      fx('sn25-r1-fra-wal', cid, sid, 'Round 1', 'fra', 'wal', '2025-01-31T20:15:00Z'),
+      fx('sn25-r1-sco-ita', cid, sid, 'Round 1', 'sco', 'ita', '2025-02-01T14:15:00Z'),
+      fx('sn25-r1-ire-eng', cid, sid, 'Round 1', 'ire', 'eng', '2025-02-01T16:45:00Z'),
+      // Round 2
+      fx('sn25-r2-eng-fra', cid, sid, 'Round 2', 'eng', 'fra', '2025-02-08T16:45:00Z'),
+      fx('sn25-r2-sco-ire', cid, sid, 'Round 2', 'sco', 'ire', '2025-02-09T15:00:00Z'),
+      fx('sn25-r2-ita-wal', cid, sid, 'Round 2', 'ita', 'wal', '2025-02-08T14:15:00Z'),
+      // Round 3
+      fx('sn25-r3-wal-ire', cid, sid, 'Round 3', 'wal', 'ire', '2025-02-22T14:15:00Z'),
+      fx('sn25-r3-eng-sco', cid, sid, 'Round 3', 'eng', 'sco', '2025-02-22T16:45:00Z'),
+      fx('sn25-r3-ita-fra', cid, sid, 'Round 3', 'ita', 'fra', '2025-02-23T15:00:00Z'),
+      // Round 4
+      fx('sn25-r4-ita-ire', cid, sid, 'Round 4', 'ita', 'ire', '2025-03-08T14:15:00Z'),
+      fx('sn25-r4-wal-eng', cid, sid, 'Round 4', 'wal', 'eng', '2025-03-08T16:45:00Z'),
+      fx('sn25-r4-fra-sco', cid, sid, 'Round 4', 'fra', 'sco', '2025-03-08T20:00:00Z'),
+      // Round 5 — Super Saturday
+      fx('sn25-r5-ita-eng', cid, sid, 'Round 5', 'ita', 'eng', '2025-03-15T14:15:00Z'),
+      fx('sn25-r5-wal-sco', cid, sid, 'Round 5', 'wal', 'sco', '2025-03-15T16:45:00Z'),
+      fx('sn25-r5-fra-ire', cid, sid, 'Round 5', 'fra', 'ire', '2025-03-15T20:00:00Z'),
+    ],
+  };
+})();
+
+// ─── Rugby Championship 2025 ─────────────────────────────────────────────────
+// Prior season, fully completed. Same double round-robin format as RC 2026,
+// dates shifted back a year. Gives NZL/RSA/AUS/ARG a full recent history.
+
+const RUGBY_CHAMPIONSHIP_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'rugby-championship';
+  const sid: SeasonId = 'rugby-championship-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'The Rugby Championship',
+      short_name: 'Rugby Championship',
+      format: 'round-robin',
+      governing_body: 'SANZAAR',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-08-16', end_date: '2025-09-27', status: 'completed',
+    },
+    team_ids: ['arg', 'aus', 'nzl', 'rsa'],
+    fixtures: [
+      // Round 1 (Aug 16)
+      fx('rc25-r1-arg-nzl', cid, sid, 'Round 1', 'arg', 'nzl', '2025-08-16T20:10:00Z'),
+      fx('rc25-r1-aus-rsa', cid, sid, 'Round 1', 'aus', 'rsa', '2025-08-16T09:45:00Z'),
+      // Round 2 (Aug 23)
+      fx('rc25-r2-arg-nzl-2', cid, sid, 'Round 2', 'arg', 'nzl', '2025-08-23T20:10:00Z'),
+      fx('rc25-r2-aus-rsa-2', cid, sid, 'Round 2', 'aus', 'rsa', '2025-08-23T09:45:00Z'),
+      // Round 3 (Sep 6)
+      fx('rc25-r3-arg-aus', cid, sid, 'Round 3', 'arg', 'aus', '2025-09-06T20:10:00Z'),
+      fx('rc25-r3-rsa-nzl', cid, sid, 'Round 3', 'rsa', 'nzl', '2025-09-06T15:00:00Z'),
+      // Round 4 (Sep 13)
+      fx('rc25-r4-arg-aus-2', cid, sid, 'Round 4', 'arg', 'aus', '2025-09-13T20:10:00Z'),
+      fx('rc25-r4-rsa-nzl-2', cid, sid, 'Round 4', 'rsa', 'nzl', '2025-09-13T15:00:00Z'),
+      // Round 5 (Sep 20)
+      fx('rc25-r5-nzl-arg', cid, sid, 'Round 5', 'nzl', 'arg', '2025-09-20T07:05:00Z'),
+      fx('rc25-r5-rsa-aus', cid, sid, 'Round 5', 'rsa', 'aus', '2025-09-20T15:00:00Z'),
+      // Round 6 (Sep 27)
+      fx('rc25-r6-nzl-arg-2', cid, sid, 'Round 6', 'nzl', 'arg', '2025-09-27T07:05:00Z'),
+      fx('rc25-r6-rsa-aus-2', cid, sid, 'Round 6', 'rsa', 'aus', '2025-09-27T15:00:00Z'),
+    ],
+  };
+})();
+
+// ─── Summer Tests 2025 (fully completed) ─────────────────────────────────────
+// Prior mid-year test window. All fixtures in the past. Gives every T1 team
+// 2 more completed matches feeding form + rankings history.
+
+const SUMMER_TESTS_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'summer-tests';
+  const sid: SeasonId = 'summer-tests-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'Summer Test Series',
+      short_name: 'Summer Tests',
+      format: 'test-window',
+      governing_body: 'World Rugby',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-06-21', end_date: '2025-07-19', status: 'completed',
+    },
+    team_ids: ['eng', 'fra', 'ire', 'nzl', 'aus', 'rsa', 'arg', 'wal', 'sco', 'ita'],
+    fixtures: [
+      // Weekend 1 (Jun 21)
+      fx('st25-01', cid, sid, null, 'nzl', 'eng', '2025-06-21T07:05:00Z'),
+      fx('st25-02', cid, sid, null, 'rsa', 'ita', '2025-06-21T15:00:00Z'),
+      fx('st25-03', cid, sid, null, 'aus', 'fra', '2025-06-21T09:45:00Z'),
+      fx('st25-04', cid, sid, null, 'arg', 'ire', '2025-06-21T20:10:00Z'),
+      // Weekend 2 (Jun 28)
+      fx('st25-05', cid, sid, null, 'nzl', 'eng', '2025-06-28T07:05:00Z'),
+      fx('st25-06', cid, sid, null, 'rsa', 'ita', '2025-06-28T15:00:00Z'),
+      fx('st25-07', cid, sid, null, 'aus', 'fra', '2025-06-28T09:45:00Z'),
+      fx('st25-08', cid, sid, null, 'arg', 'ire', '2025-06-28T20:10:00Z'),
+      // Weekend 3 (Jul 5)
+      fx('st25-09', cid, sid, null, 'nzl', 'wal', '2025-07-05T07:05:00Z'),
+      fx('st25-10', cid, sid, null, 'aus', 'sco', '2025-07-05T09:45:00Z'),
+    ],
+  };
+})();
+
+// ─── Autumn Nations Series 2025 (fully completed) ────────────────────────────
+// Prior autumn window. All fixtures in the past. Mirrors 2026 shape but with
+// flipped North↔South pairings so 2025 standings differ from 2026.
+
+const AUTUMN_TESTS_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'autumn-tests';
+  const sid: SeasonId = 'autumn-tests-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'Autumn Nations Series',
+      short_name: 'Autumn Nations',
+      format: 'test-window',
+      governing_body: 'World Rugby',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-11-08', end_date: '2025-11-29', status: 'completed',
+    },
+    team_ids: ['eng', 'fra', 'ire', 'sco', 'wal', 'ita', 'nzl', 'aus', 'rsa', 'arg'],
+    fixtures: [
+      // Nov 8
+      fx('at25-01', cid, sid, null, 'ire', 'nzl', '2025-11-08T20:10:00Z'),
+      fx('at25-02', cid, sid, null, 'eng', 'aus', '2025-11-08T17:40:00Z'),
+      fx('at25-03', cid, sid, null, 'sco', 'rsa', '2025-11-08T15:15:00Z'),
+      // Nov 15
+      fx('at25-04', cid, sid, null, 'wal', 'nzl', '2025-11-15T17:40:00Z'),
+      fx('at25-05', cid, sid, null, 'fra', 'arg', '2025-11-15T20:10:00Z'),
+      fx('at25-06', cid, sid, null, 'ita', 'rsa', '2025-11-15T14:10:00Z'),
+      // Nov 22
+      fx('at25-07', cid, sid, null, 'eng', 'nzl', '2025-11-22T17:40:00Z'),
+      fx('at25-08', cid, sid, null, 'ire', 'aus', '2025-11-22T20:10:00Z'),
+      fx('at25-09', cid, sid, null, 'sco', 'arg', '2025-11-22T15:15:00Z'),
+      // Nov 29
+      fx('at25-10', cid, sid, null, 'fra', 'nzl', '2025-11-29T20:10:00Z'),
+      fx('at25-11', cid, sid, null, 'wal', 'rsa', '2025-11-29T17:40:00Z'),
+      fx('at25-12', cid, sid, null, 'ita', 'arg', '2025-11-29T14:10:00Z'),
+    ],
+  };
+})();
+
 // ─── Six Nations 2026 ────────────────────────────────────────────────────────
 // Format: single round-robin, 6 teams, 15 fixtures over 5 rounds.
 // Real calendar: Feb-Mar 2026. Fully in the past relative to TODAY_ISO — every
@@ -335,6 +503,12 @@ const WORLD_CUP_2027: CompetitionBundle = (() => {
 })();
 
 export const ALL_COMPETITIONS: readonly CompetitionBundle[] = [
+  // Prior season — fully completed, feeds form + rankings history.
+  SIX_NATIONS_2025,
+  RUGBY_CHAMPIONSHIP_2025,
+  SUMMER_TESTS_2025,
+  AUTUMN_TESTS_2025,
+  // Current season.
   SIX_NATIONS_2026,
   RUGBY_CHAMPIONSHIP_2026,
   SUMMER_TESTS_2026,
