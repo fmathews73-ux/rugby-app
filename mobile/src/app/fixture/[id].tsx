@@ -233,34 +233,40 @@ function OverviewPane({
     );
   }
   return (
-    <View style={styles.statsGrid}>
-      <StatRow
-        label="Half-time"
-        values={[`${result.half_time_home}`, `${result.half_time_away}`]}
-      />
-      <StatRow label="Tries" values={[`${result.home_tries}`, `${result.away_tries}`]} />
-      <StatRow
-        label="Conversions"
-        values={[`${result.home_conversions}`, `${result.away_conversions}`]}
-      />
-      <StatRow
-        label="Penalties"
-        values={[`${result.home_penalties}`, `${result.away_penalties}`]}
-      />
-      <StatRow
-        label="Drop goals"
-        values={[`${result.home_drop_goals}`, `${result.away_drop_goals}`]}
-      />
+    <View style={styles.statsCard}>
+      <Text style={styles.statsCardTitle}>Match Statistics</Text>
+      <StatBar label="Half-time" home={result.half_time_home} away={result.half_time_away} />
+      <StatBar label="Tries" home={result.home_tries} away={result.away_tries} />
+      <StatBar label="Conversions" home={result.home_conversions} away={result.away_conversions} />
+      <StatBar label="Penalties" home={result.home_penalties} away={result.away_penalties} />
+      <StatBar label="Drop goals" home={result.home_drop_goals} away={result.away_drop_goals} />
     </View>
   );
 }
 
-function StatRow({ label, values }: { label: string; values: string[] }) {
+function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
+  const bothZero = home === 0 && away === 0;
   return (
-    <View style={styles.statRow}>
-      <Text style={styles.statValue}>{values[0] ?? ''}</Text>
+    <View style={styles.statBlock}>
       <Text style={styles.statLabel}>{label}</Text>
-      <Text style={[styles.statValue, styles.statValueRight]}>{values[1] ?? ''}</Text>
+      <View style={styles.statBarRow}>
+        <Text style={styles.statValueLeft}>{home}</Text>
+        <View style={styles.barTrack}>
+          {bothZero ? (
+            <View style={styles.barEmpty} />
+          ) : (
+            <>
+              {home > 0 ? (
+                <View style={[styles.barSegHome, { flex: home }]} />
+              ) : null}
+              {away > 0 ? (
+                <View style={[styles.barSegAway, { flex: away }]} />
+              ) : null}
+            </>
+          )}
+        </View>
+        <Text style={styles.statValueRight}>{away}</Text>
+      </View>
     </View>
   );
 }
@@ -492,24 +498,64 @@ const styles = StyleSheet.create({
   paneEmpty: { paddingVertical: Spacing.four, alignItems: 'center' },
   paneEmptyText: { color: Colors.light.textSecondary, fontSize: 13, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 
-  statsGrid: { gap: 0 },
-  statRow: {
+  statsCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    padding: Spacing.four,
+    gap: Spacing.three,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
+  statsCardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: Colors.light.text,
+    textAlign: 'center',
+    paddingBottom: Spacing.two,
+  },
+  statBlock: { gap: 6 },
+  statLabel: {
+    fontSize: 13,
+    color: Colors.light.text,
+    textAlign: 'center',
+    fontWeight: '500',
+  },
+  statBarRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: Spacing.three,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    gap: 10,
   },
-  statValue: { flex: 1, fontSize: 16, fontWeight: '700', color: Colors.light.text, textAlign: 'left' },
-  statValueRight: { textAlign: 'right' },
-  statLabel: {
-    flex: 2,
-    fontSize: 12,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    letterSpacing: 0.6,
-    textTransform: 'uppercase',
+  statValueLeft: {
+    width: 32,
+    textAlign: 'left',
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.light.text,
   },
+  statValueRight: {
+    width: 32,
+    textAlign: 'right',
+    fontSize: 16,
+    fontWeight: '700',
+    color: Colors.light.text,
+  },
+  barTrack: {
+    flex: 1,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    overflow: 'hidden',
+    gap: 3,
+  },
+  barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: '100%' },
+  barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: '100%' },
+  barEmpty: { flex: 1 },
 
   lineupContainer: { gap: Spacing.four },
   lineupTeamBlock: { gap: 4 },
