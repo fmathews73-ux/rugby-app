@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { BlurView } from 'expo-blur';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -233,41 +234,78 @@ function OverviewPane({
       </View>
     );
   }
+  const freeStats: { label: string; home: number; away: number }[] = [
+    { label: 'Possession %', home: result.home_possession_percent, away: result.away_possession_percent },
+    { label: 'Territory %', home: result.home_territory_percent, away: result.away_territory_percent },
+    { label: 'Half-time', home: result.half_time_home, away: result.half_time_away },
+    { label: 'Tries', home: result.home_tries, away: result.away_tries },
+    { label: 'Conversions', home: result.home_conversions, away: result.away_conversions },
+  ];
+
+  const premiumStats: { label: string; home: number; away: number }[] = [
+    { label: 'Penalties', home: result.home_penalties, away: result.away_penalties },
+    { label: 'Drop goals', home: result.home_drop_goals, away: result.away_drop_goals },
+    { label: 'Meters made', home: result.home_meters, away: result.away_meters },
+    { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks },
+    { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play },
+    { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won },
+    { label: 'Lineouts won', home: result.home_lineouts_won, away: result.away_lineouts_won },
+    { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made },
+    { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won },
+    { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded },
+  ];
+
   return (
     <View style={styles.statsCard}>
       <Text style={styles.statsCardTitle}>Match Statistics</Text>
 
-      <StatBar label="Possession %" home={result.home_possession_percent} away={result.away_possession_percent} />
-      <StatBar label="Territory %" home={result.home_territory_percent} away={result.away_territory_percent} />
+      {freeStats.map((s) => (
+        <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
+      ))}
 
-      <StatBar label="Half-time" home={result.half_time_home} away={result.half_time_away} />
-      <StatBar label="Tries" home={result.home_tries} away={result.away_tries} />
-      <StatBar label="Conversions" home={result.home_conversions} away={result.away_conversions} />
-      <StatBar label="Penalties" home={result.home_penalties} away={result.away_penalties} />
-      <StatBar label="Drop goals" home={result.home_drop_goals} away={result.away_drop_goals} />
-
-      <StatBar label="Meters made" home={result.home_meters} away={result.away_meters} />
-      <StatBar label="Line breaks" home={result.home_line_breaks} away={result.away_line_breaks} />
-      <StatBar label="Kicks in play" home={result.home_kicks_in_play} away={result.away_kicks_in_play} />
-
-      <StatBar label="Scrums won" home={result.home_scrums_won} away={result.away_scrums_won} />
-      <StatBar label="Lineouts won" home={result.home_lineouts_won} away={result.away_lineouts_won} />
-
-      <StatBar label="Tackles made" home={result.home_tackles_made} away={result.away_tackles_made} />
-      <StatBar label="Turnovers won" home={result.home_turnovers_won} away={result.away_turnovers_won} />
-      <StatBar label="Penalties conceded" home={result.home_penalties_conceded} away={result.away_penalties_conceded} />
-
-      <PremiumStatsBadge />
+      {IS_SUBSCRIBED ? (
+        premiumStats.map((s) => (
+          <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
+        ))
+      ) : (
+        <PremiumLockedStats stats={premiumStats} />
+      )}
     </View>
   );
 }
 
-function PremiumStatsBadge() {
+/** DEMO: hard-coded subscription flag. Real auth / entitlement check lands
+ * at Phase 6 when the paywall + billing flow ships. */
+const IS_SUBSCRIBED = false;
+
+function PremiumLockedStats({
+  stats,
+}: {
+  stats: { label: string; home: number; away: number }[];
+}) {
   return (
-    <View style={styles.premiumUnlockRow}>
-      <View style={styles.premiumUnlockBadge}>
-        <Ionicons name="star" size={13} color="#B45309" />
-        <Text style={styles.premiumUnlockText}>Advanced stats · Unlock Premium</Text>
+    <View style={styles.lockedWrap}>
+      <View style={styles.lockedContent}>
+        {stats.map((s) => (
+          <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
+        ))}
+      </View>
+      <BlurView intensity={26} tint="light" style={StyleSheet.absoluteFill} />
+      <View style={styles.lockedOverlay}>
+        <View style={styles.lockedIconCircle}>
+          <Ionicons name="lock-closed" size={22} color="#B45309" />
+        </View>
+        <Text style={styles.lockedTitle}>{stats.length} more stats</Text>
+        <Text style={styles.lockedBody}>
+          Unlock live in-play analytics + full post-match breakdowns with Premium.
+        </Text>
+        <Pressable
+          style={({ pressed }) => [styles.lockedCta, pressed && styles.lockedCtaPressed]}
+          onPress={() => {
+            /* TODO: open paywall — Phase 6 */
+          }}>
+          <Text style={styles.lockedCtaText}>Unlock Premium</Text>
+        </Pressable>
       </View>
     </View>
   );
@@ -608,26 +646,67 @@ const styles = StyleSheet.create({
   barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
   barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: 6 },
 
-  premiumUnlockRow: {
-    alignItems: 'center',
-    paddingTop: Spacing.three,
+  lockedWrap: {
+    position: 'relative',
+    marginTop: Spacing.two,
+    borderRadius: 12,
+    overflow: 'hidden',
   },
-  premiumUnlockBadge: {
-    flexDirection: 'row',
+  /** Base layer: the actual premium stat rows. They're visible underneath the
+   * blur, giving the "peek at what you'd get" effect. */
+  lockedContent: {
+    gap: Spacing.three,
+    paddingVertical: Spacing.two,
+  },
+  /** Overlay on TOP of the blur: lock icon + copy + CTA. */
+  lockedOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.four,
+    gap: Spacing.two,
+  },
+  lockedIconCircle: {
+    width: 48,
+    height: 48,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#B45309',
     backgroundColor: '#FFFBEB',
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1.5,
+    borderColor: '#B45309',
+    marginBottom: 4,
   },
-  premiumUnlockText: {
-    fontSize: 12,
+  lockedTitle: {
+    fontSize: 17,
     fontWeight: '700',
-    color: '#B45309',
-    letterSpacing: 0.5,
+    color: Colors.light.text,
+    textAlign: 'center',
+  },
+  lockedBody: {
+    fontSize: 13,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+    maxWidth: 280,
+    lineHeight: 18,
+  },
+  lockedCta: {
+    marginTop: Spacing.two,
+    paddingHorizontal: 24,
+    paddingVertical: 12,
+    borderRadius: 999,
+    backgroundColor: '#B45309',
+  },
+  lockedCtaPressed: { opacity: 0.85 },
+  lockedCtaText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+    letterSpacing: 0.4,
   },
 
   lineupContainer: { gap: Spacing.four },
