@@ -580,7 +580,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 15,
+    paddingHorizontal: 30,
     gap: 3,
   },
   barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
