@@ -15,9 +15,8 @@ import { fetchJson } from '@/api/client';
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { FixtureCarouselCard } from '@/components/fixture-carousel-card';
 import { EmptyState, LoadingState } from '@/components/state-views';
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 
-const ACCENT = '#4F46E5';
 const CARD_GAP = 12;
 
 /**
@@ -244,10 +243,10 @@ const styles = StyleSheet.create({
     height: 6,
     borderRadius: 999,
   },
-  dotActive: { backgroundColor: ACCENT },
+  dotActive: { backgroundColor: Colors.light.textSecondary },
   dotInactive: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: ACCENT,
+    borderColor: Colors.light.textSecondary,
   },
 });

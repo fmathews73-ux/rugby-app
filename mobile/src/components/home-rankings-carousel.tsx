@@ -17,7 +17,6 @@ import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
 
-const ACCENT = '#4F46E5';
 const UP = '#059669';
 const DOWN = '#DC2626';
 
@@ -225,10 +224,10 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.three,
   },
   dot: { width: 6, height: 6, borderRadius: 999 },
-  dotActive: { backgroundColor: ACCENT },
+  dotActive: { backgroundColor: Colors.light.textSecondary },
   dotInactive: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: ACCENT,
+    borderColor: Colors.light.textSecondary,
   },
 });

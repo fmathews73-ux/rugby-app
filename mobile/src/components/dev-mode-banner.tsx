@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import { getDataSource, subscribeDataSource } from '@/api/client';
 import type { DataSource } from '@/api/client';
-import { TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * Persistent dev-mode banner. Required by PRD §5.5 whenever any screen is
@@ -39,7 +39,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   text: {
-    color: '#6B7280',
+    color: Colors.light.textSecondary,
     fontSize: TextSize.xs,
     fontWeight: TextWeight.semibold,
     letterSpacing: TextTracking.wide,

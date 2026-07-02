@@ -116,7 +116,64 @@ If a proposed style doesn't fit one of the 5 sizes × 3 weights combinations, th
 
 ## 5. Colour
 
-*To be documented. Neutral placeholder palette in `Colors` (`mobile/src/constants/theme.ts`) is fine for pre-brand development. Real palette lands with PRD register #23.*
+Two families — neutral text tokens and semantic status tokens. Both are exported from `mobile/src/constants/theme.ts`. Callers must reference the token; raw hex text-colour values are drift.
+
+### 5.1 Text tokens (neutral)
+
+For anything neutral (titles, meta, body, badges), pick one of these:
+
+| Token | Value (light) | Role |
+|---|---|---|
+| `Colors.light.text` | `#000000` | Primary — titles, scores, body |
+| `Colors.light.textSecondary` | `#60646C` | Secondary — labels, meta lines, muted body, caption. Also the intentional "muted dark grey" used by the home carousel dots. |
+| `Colors.light.textInverse` | `#FFFFFF` | Text on dark backgrounds — score-box winner numbers, form W/L/D badge glyphs, destructive-button labels |
+
+Dark-mode counterparts live in `Colors.dark.*` — same semantic names, appropriate light values.
+
+**Anchor:** two neutral text tiers matches Apple HIG (`label` / `secondaryLabel` / `tertiaryLabel`) — we compress to two because a data app rarely needs three levels of muted body text. Add `textTertiary` only when a real use-case appears; do not preemptively.
+
+### 5.2 Status tokens (semantic)
+
+For anything that carries meaning — live / destructive / warning / premium — pick one of these. Never a raw hex:
+
+| Token | Value | Role |
+|---|---|---|
+| `StatusColor.live` | `#DC2626` | LIVE match indicator, destructive actions (Clear, Delete), movement-down glyph (`▼`) |
+| `StatusColor.warning` | `#F59E0B` | HALF-TIME indicator, upcoming-warning states |
+| `StatusColor.premium` | `#B45309` | Premium-tier badge, ErrorState heading. Same amber family as `warning`, one stop darker for higher weight |
+
+Anything that doesn't fit these three isn't a status colour — it's a neutral or an ad-hoc override. The former uses the neutral tokens above; the latter is a code smell.
+
+### 5.3 What NOT to add
+
+- No `accent` or `brand` colour yet — brand identity is register #23 (open). When it lands, the accent becomes a first-class token and any legacy `#4F46E5` / `#007AFF` usage collapses to it.
+- No `success` green until there's a real use — the movement-up `▲` in the rankings is currently `#059669` inline; not yet worth promoting to a token with only one usage.
+- No hard-coded whites for backgrounds — those are structural (`#FFFFFF` card fills, `#F5F5F7` page bg) and not text colours. Keep them raw for now; consolidate when we tackle §4 Elevation / cards.
+
+### 5.4 Applied convention
+
+```typescript
+// Good — neutral text
+sectionLabel: {
+  color: Colors.light.textSecondary,
+},
+title: {
+  color: Colors.light.text,
+},
+scoreWinnerText: {
+  color: Colors.light.textInverse,
+},
+
+// Good — semantic status
+liveIndicator: {
+  color: StatusColor.live,
+},
+
+// Bad — raw hex
+liveIndicator: {
+  color: '#DC2626', // ← should be StatusColor.live
+},
+```
 
 ---
 

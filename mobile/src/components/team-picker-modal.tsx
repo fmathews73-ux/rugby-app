@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Team } from '@rugby-app/shared';
 
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextWeight } from '@/constants/theme';
 
 /**
  * Full-screen modal for picking a favourite team. All 28 international teams
@@ -20,12 +20,16 @@ export function TeamPickerModal({
   currentTeamId,
   onCancel,
   onConfirm,
+  onClear,
 }: {
   visible: boolean;
   teams: readonly Team[];
   currentTeamId: string | null;
   onCancel: () => void;
   onConfirm: (teamId: string) => void;
+  /** Resets My Team back to no-selection. Only shown when a team is currently
+   *  set — nothing to clear otherwise. */
+  onClear?: () => void;
 }) {
   const [selected, setSelected] = useState<string | null>(currentTeamId);
 
@@ -51,8 +55,15 @@ export function TeamPickerModal({
             <Text style={styles.headerAction}>Cancel</Text>
           </Pressable>
           <Text style={styles.headerTitle}>My Team</Text>
-          {/* Placeholder to balance flex layout with Cancel. */}
-          <View style={styles.headerActionSpacer} />
+          {/* Right slot: Clear reset button when a team is already set,
+              otherwise an invisible spacer to keep the title centred. */}
+          {onClear && currentTeamId ? (
+            <Pressable onPress={onClear} hitSlop={12}>
+              <Text style={styles.headerActionDestructive}>Clear</Text>
+            </Pressable>
+          ) : (
+            <View style={styles.headerActionSpacer} />
+          )}
         </View>
 
         <FlatList
@@ -118,6 +129,9 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerAction: { fontSize: TextSize.md, color: Colors.light.text, fontWeight: TextWeight.semibold },
+  // Reset / clear — same weight as Cancel, tinted red to signal it undoes
+  // the current My Team selection. Matches iOS "destructive action" tone.
+  headerActionDestructive: { fontSize: TextSize.md, color: StatusColor.live, fontWeight: TextWeight.semibold },
   headerActionSpacer: { width: 60 },
   headerTitle: { fontSize: TextSize.lg, fontWeight: TextWeight.bold, color: Colors.light.text },
 
@@ -176,5 +190,5 @@ const styles = StyleSheet.create({
   },
   confirmButtonPressed: { opacity: 0.85 },
   confirmButtonDisabled: { backgroundColor: '#9CA3AF' },
-  confirmButtonText: { color: '#FFFFFF', fontSize: TextSize.md, fontWeight: TextWeight.bold },
+  confirmButtonText: { color: Colors.light.textInverse, fontSize: TextSize.md, fontWeight: TextWeight.bold },
 });

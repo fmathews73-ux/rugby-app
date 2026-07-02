@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
-import { Image, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
 
 import type { Fixture, Result } from '@rugby-app/shared';
@@ -12,10 +12,6 @@ import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { TeamPickerModal } from '@/components/team-picker-modal';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
-
-/** flagcdn image width to fetch for the header banner. w640 gives crisp
- * results on Retina at the ~130pt banner height without being wasteful. */
-const HEADER_FLAG_CDN_WIDTH = 640;
 
 const FORM_LOOKBACK = 5; // Number of recent completed fixtures to show in Form row.
 
@@ -46,23 +42,10 @@ export function MyTeamCard() {
   return (
     <View style={styles.page}>
       <View style={styles.card}>
-        {/* Team's national flag as a low-opacity banner behind the top of the
-            card. Simpler + universally scalable to every nation compared with
-            a hand-tuned colour-triad gradient. Only rendered when a team is
-            selected; empty state stays clean white. */}
-        {selectedTeam ? (
-          <View style={styles.headerFlag} pointerEvents="none">
-            <Image
-              source={{
-                uri: `https://flagcdn.com/w${HEADER_FLAG_CDN_WIDTH}/${selectedTeam.flag_code}.png`,
-              }}
-              style={styles.headerFlagImage}
-              resizeMode="cover"
-            />
-          </View>
-        ) : null}
         <View style={styles.header}>
-          <Text style={styles.title}>My Team</Text>
+          <Text style={styles.title}>
+            My Team{selectedTeam ? `: ${selectedTeam.name}` : ''}
+          </Text>
           <Pressable
             onPress={() => setPickerOpen(true)}
             hitSlop={12}
@@ -81,6 +64,10 @@ export function MyTeamCard() {
         onCancel={() => setPickerOpen(false)}
         onConfirm={(id) => {
           setMyTeamId(id);
+          setPickerOpen(false);
+        }}
+        onClear={() => {
+          setMyTeamId(null);
           setPickerOpen(false);
         }}
       />
@@ -167,21 +154,9 @@ function PopulatedBody({ teamId }: { teamId: string }) {
 
   return (
     <View style={styles.populatedBody}>
-      {/* Team identity — tap goes to team detail. Flag removed at Frank's
-          request; the surrounding gradient in `HeaderGradient` (rendered by
-          `MyTeamCard` above this) already communicates the team's flag
-          identity through its palette. */}
-      <Pressable
-        onPress={() => router.push(`/team/${teamId}`)}
-        style={({ pressed }) => [styles.teamIdentity, pressed && { opacity: 0.85 }]}>
-        <View style={styles.teamText}>
-          <Text style={styles.teamName}>{team.data.name}</Text>
-          <Text style={styles.teamShort}>{team.data.short_name}</Text>
-        </View>
-      </Pressable>
-
-      {/* Next / Last sections — each row is tappable, navigates to that
-          fixture's detail page. Chevron affords the navigation. */}
+      {/* Team identity moved into the card header (My Team: {name}). Card
+          jumps straight into Next / Last / Form. Each row is tappable and
+          navigates to that fixture's detail page — chevron affords it. */}
       <NavSection
         label="Next Match"
         rightHeader={nextMatch ? formatDateDMY(nextMatch.kickoff_utc) : undefined}
@@ -398,26 +373,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
     gap: Spacing.three,
-    // Clip the absolute-positioned gradient layer to the card's rounded
-    // rectangle — otherwise the SVG bleeds past the corners.
-    overflow: 'hidden',
-  },
-  headerFlag: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    // Enough height to cover the "My Team" title row + team-identity block
-    // (which sits just below the header when a team is selected). The Next /
-    // Last / Form sections start below this, on the card's normal white bg.
-    height: 130,
-    // 35 % opacity — team-identifying without shouting; text on top stays
-    // fully legible without extra styling.
-    opacity: 0.35,
-  },
-  headerFlagImage: {
-    width: '100%',
-    height: '100%',
   },
 
   header: {
@@ -445,20 +400,6 @@ const styles = StyleSheet.create({
   },
 
   populatedBody: { gap: Spacing.three },
-
-  teamIdentity: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-  },
-  teamText: { flex: 1, gap: 2 },
-  teamName: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text },
-  teamShort: {
-    fontSize: TextSize.xs,
-    letterSpacing: TextTracking.wide,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
-  },
 
   section: {
     // Breathing room between the section label and its body content
@@ -560,7 +501,7 @@ const styles = StyleSheet.create({
   formBadgeDraw: { backgroundColor: '#9CA3AF' },
   formBadgeUnknown: { backgroundColor: '#E5E7EB' },
   formBadgeText: {
-    color: '#FFFFFF',
+    color: Colors.light.textInverse,
     fontSize: TextSize.xs,
     fontWeight: TextWeight.bold,
   },

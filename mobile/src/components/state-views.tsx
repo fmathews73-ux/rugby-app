@@ -1,6 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing, TextSize, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, StatusColor, TextSize, TextWeight } from '@/constants/theme';
 
 export function LoadingState({ label = 'Loading…' }: { label?: string }) {
   return (
@@ -40,7 +40,7 @@ const styles = StyleSheet.create({
     fontSize: TextSize.md,
   },
   errorTitle: {
-    color: '#B45309',
+    color: StatusColor.premium,
     fontSize: TextSize.lg,
     fontWeight: TextWeight.semibold,
   },

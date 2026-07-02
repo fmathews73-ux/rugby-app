@@ -12,6 +12,9 @@ export const Colors = {
     backgroundElement: '#F0F0F3',
     backgroundSelected: '#E0E1E6',
     textSecondary: '#60646C',
+    // Text on dark backgrounds — score-box winner numbers, form W/L/D badges,
+    // dark-mode style pills.
+    textInverse: '#FFFFFF',
   },
   dark: {
     text: '#ffffff',
@@ -19,7 +22,23 @@ export const Colors = {
     backgroundElement: '#212225',
     backgroundSelected: '#2E3135',
     textSecondary: '#B0B4BA',
+    textInverse: '#000000',
   },
+} as const;
+
+/**
+ * Semantic status colours. Use `StatusColor.<name>` (never a raw hex) for
+ * anything that carries meaning — live matches, warnings, premium hints.
+ * Documented in `docs/design-system.md` §5.
+ */
+export const StatusColor = {
+  /** Live matches, destructive actions (Clear reset, remove). */
+  live: '#DC2626',
+  /** Half-time indicator, upcoming-warning states. */
+  warning: '#F59E0B',
+  /** Premium-tier badges, ErrorState messaging. Same amber family as
+   *  `warning` but a deeper stop for higher visual weight. */
+  premium: '#B45309',
 } as const;
 
 export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;

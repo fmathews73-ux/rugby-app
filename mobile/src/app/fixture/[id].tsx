@@ -17,7 +17,7 @@ import {
 } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * Fixture detail. Header shows the matchup (flag balls + team names + score
@@ -643,7 +643,7 @@ const styles = StyleSheet.create({
   },
   detailScoreBoxWinner: { backgroundColor: Colors.light.text },
   detailScoreText: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
-  detailScoreTextWinner: { color: '#FFFFFF' },
+  detailScoreTextWinner: { color: Colors.light.textInverse },
   vsMuted: { fontSize: TextSize.xl, fontWeight: TextWeight.semibold, color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   pillText: { fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
@@ -843,7 +843,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 999,
   },
-  premiumBadgeText: { color: '#B45309', fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  premiumBadgeText: { color: StatusColor.premium, fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   placeholderTitle: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, textAlign: 'center' },
   placeholderBody: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 });

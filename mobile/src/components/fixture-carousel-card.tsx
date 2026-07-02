@@ -4,10 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-
-const ACCENT = '#4F46E5';
-const LIVE_RED = '#DC2626';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * One card in the Home timeline carousel. Layout:
@@ -208,11 +205,11 @@ const styles = StyleSheet.create({
     width: 7,
     height: 7,
     borderRadius: 999,
-    backgroundColor: LIVE_RED,
+    backgroundColor: StatusColor.live,
   },
   liveLabel: {
     fontSize: TextSize.sm,
-    color: LIVE_RED,
+    color: StatusColor.live,
     fontWeight: TextWeight.bold,
   },
 
@@ -280,7 +277,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     fontVariant: ['tabular-nums'],
   },
-  scoreTextWinner: { color: '#FFFFFF' },
+  scoreTextWinner: { color: Colors.light.textInverse },
   statusText: {
     fontSize: TextSize.lg,
     fontWeight: TextWeight.semibold,
@@ -290,7 +287,7 @@ const styles = StyleSheet.create({
   statusLive: {
     fontSize: TextSize.lg,
     fontWeight: TextWeight.bold,
-    color: LIVE_RED,
+    color: StatusColor.live,
     marginHorizontal: 2,
   },
 

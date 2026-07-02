@@ -11,7 +11,7 @@ import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 const ALL_COMPETITIONS = 'all';
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
   scoreBoxSmallText: { fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
-  scoreBoxSmallTextWinner: { color: '#FFFFFF' },
+  scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   statusMid: {
     width: 76,
     textAlign: 'center',
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
   },
-  statusMidLive: { color: '#DC2626', fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
-  statusMidHalfTime: { color: '#F59E0B', fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  statusMidLive: { color: StatusColor.live, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  statusMidHalfTime: { color: StatusColor.warning, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   metaText: { fontSize: TextSize.xs, color: Colors.light.textSecondary, textAlign: 'center' },
 });
