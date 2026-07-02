@@ -260,27 +260,44 @@ function OverviewPane({
       stats: [
         { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
         { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
+        { label: 'Carries', home: result.home_carries, away: result.away_carries, premium: true },
+        { label: 'Passes', home: result.home_passes, away: result.away_passes, premium: true },
+        { label: 'Offloads', home: result.home_offloads, away: result.away_offloads, premium: true },
+      ],
+    },
+    {
+      title: 'Kicking',
+      stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
+        { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
+        { label: 'Kick metres gained', home: result.home_kick_meters, away: result.away_kick_meters, premium: true },
       ],
     },
     {
       title: 'Set Piece',
       stats: [
         { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won, premium: true },
+        { label: 'Scrums lost', home: result.home_scrums_lost, away: result.away_scrums_lost, premium: true },
         { label: 'Lineouts won', home: result.home_lineouts_won, away: result.away_lineouts_won, premium: true },
+        { label: 'Lineouts lost', home: result.home_lineouts_lost, away: result.away_lineouts_lost, premium: true },
       ],
     },
     {
       title: 'Defence',
       stats: [
         { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made, premium: true },
+        { label: 'Tackle success %', home: result.home_tackle_success_percent, away: result.away_tackle_success_percent, premium: true },
         { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won, premium: true },
+        { label: 'Turnovers conceded', home: result.home_turnovers_conceded, away: result.away_turnovers_conceded, premium: true },
       ],
     },
     {
       title: 'Discipline',
       stats: [
         { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true },
+        { label: 'Handling errors', home: result.home_handling_errors, away: result.away_handling_errors, premium: true },
+        { label: 'Yellow cards', home: result.home_yellow_cards, away: result.away_yellow_cards, premium: true },
+        { label: 'Red cards', home: result.home_red_cards, away: result.away_red_cards, premium: true },
       ],
     },
   ];

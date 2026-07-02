@@ -201,26 +201,57 @@ export interface Result {
   home_territory_percent: number;
   away_territory_percent: number;
 
+  // Attack
   home_meters: number;
   away_meters: number;
   home_line_breaks: number;
   away_line_breaks: number;
+  home_carries: number;
+  away_carries: number;
+  home_passes: number;
+  away_passes: number;
+  home_offloads: number;
+  away_offloads: number;
+
+  // Kicking
   home_kicks_in_play: number;
   away_kicks_in_play: number;
+  home_kicks_to_touch: number;
+  away_kicks_to_touch: number;
+  home_kick_meters: number;
+  away_kick_meters: number;
 
+  // Set piece
   home_scrums_won: number;
   away_scrums_won: number;
+  home_scrums_lost: number;
+  away_scrums_lost: number;
   home_lineouts_won: number;
   away_lineouts_won: number;
+  home_lineouts_lost: number;
+  away_lineouts_lost: number;
 
+  // Defence
   home_tackles_made: number;
   away_tackles_made: number;
+  /** Whole-number percentage 0-100. */
+  home_tackle_success_percent: number;
+  away_tackle_success_percent: number;
   home_turnovers_won: number;
   away_turnovers_won: number;
+  home_turnovers_conceded: number;
+  away_turnovers_conceded: number;
 
+  // Discipline
   /** Penalties given away (fouls), NOT penalty goals scored. */
   home_penalties_conceded: number;
   away_penalties_conceded: number;
+  home_handling_errors: number;
+  away_handling_errors: number;
+  home_yellow_cards: number;
+  away_yellow_cards: number;
+  home_red_cards: number;
+  away_red_cards: number;
 }
 
 /**
