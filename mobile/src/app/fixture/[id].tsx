@@ -5,13 +5,14 @@ import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Fixture, LineUp, MatchEvent, Result, Team } from '@rugby-app/shared';
+import type { Fixture, LineUp, MatchEvent, Player, Result, Team } from '@rugby-app/shared';
 
 import {
   useCompetitions,
   useFixture,
   useFixtureEvents,
   useFixtureLineups,
+  useFixturePlayers,
   useFixtureResult,
   useLatestRanking,
   useTeams,
@@ -48,6 +49,7 @@ export default function FixtureDetailScreen() {
   const fixture = useFixture(id ?? '');
   const result = useFixtureResult(id ?? '');
   const lineups = useFixtureLineups(id ?? '');
+  const players = useFixturePlayers(id ?? '');
   const teams = useTeams();
   const competitions = useCompetitions();
 
@@ -62,6 +64,12 @@ export default function FixtureDetailScreen() {
     for (const c of competitions.data ?? []) m.set(c.id, c);
     return m;
   }, [competitions.data]);
+
+  const playerById = useMemo(() => {
+    const m = new Map<string, Player>();
+    for (const p of players.data ?? []) m.set(p.id, p);
+    return m;
+  }, [players.data]);
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.safe}>
@@ -86,6 +94,7 @@ export default function FixtureDetailScreen() {
                 fixture={fixture.data}
                 homeTeam={teamById.get(fixture.data.home_team_id)}
                 awayTeam={teamById.get(fixture.data.away_team_id)}
+                playerById={playerById}
               />
             )}
             {tab === 'lineup' && (
@@ -94,6 +103,7 @@ export default function FixtureDetailScreen() {
                 lineups={lineups.data ?? []}
                 lineupsLoading={lineups.isLoading}
                 teamById={teamById}
+                playerById={playerById}
               />
             )}
             {tab === 'stats' && (
@@ -251,20 +261,30 @@ function StatusPill({ status }: { status: Fixture['status'] }) {
 // ─── Sub-tab bar ─────────────────────────────────────────────────────────────
 
 function SubTabBar({ tab, onSelect }: { tab: SubTab; onSelect: (t: SubTab) => void }) {
+  // Pill-style tabs matching the CompetitionPicker treatment at the top of
+  // the Fixtures + Standings tabs. Active pill: solid dark fill + white
+  // label. Inactive pills: transparent fill with a light hairline border.
+  // Same visual grammar across the app for "chip / segmented selector".
   return (
     <View style={styles.subTabBarWrap}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={styles.subTabBarInner}>
-        {SUB_TABS.map((t) => (
-          <Pressable key={t.id} onPress={() => onSelect(t.id)} style={styles.subTabPress}>
-            <Text style={[styles.subTabLabel, tab === t.id && styles.subTabLabelActive]}>
-              {t.label}
-            </Text>
-            {tab === t.id ? <View style={styles.subTabUnderline} /> : null}
-          </Pressable>
-        ))}
+        {SUB_TABS.map((t) => {
+          const active = tab === t.id;
+          return (
+            <Pressable
+              key={t.id}
+              onPress={() => onSelect(t.id)}
+              style={[styles.subTabPill, active ? styles.subTabPillActive : styles.subTabPillInactive]}>
+              <Text
+                style={[styles.subTabPillLabel, active ? styles.subTabPillLabelActive : styles.subTabPillLabelInactive]}>
+                {t.label}
+              </Text>
+            </Pressable>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -282,10 +302,12 @@ function OverviewPane({
   fixture,
   homeTeam,
   awayTeam,
+  playerById,
 }: {
   fixture: Fixture;
   homeTeam: Team | undefined;
   awayTeam: Team | undefined;
+  playerById: Map<string, Player>;
 }) {
   const events = useFixtureEvents(fixture.id);
   const [collapsed, setCollapsed] = useState(false);
@@ -335,6 +357,7 @@ function OverviewPane({
           fixture={fixture}
           homeTeam={homeTeam}
           awayTeam={awayTeam}
+          playerById={playerById}
         />
       ))}
       <Pressable
@@ -360,11 +383,13 @@ function TimelineRow({
   fixture,
   homeTeam,
   awayTeam,
+  playerById,
 }: {
   event: MatchEvent;
   fixture: Fixture;
   homeTeam: Team | undefined;
   awayTeam: Team | undefined;
+  playerById: Map<string, Player>;
 }) {
   const isMilestone =
     event.type === 'kick-off' ||
@@ -373,7 +398,15 @@ function TimelineRow({
     event.type === 'full-time';
   if (isMilestone) return <MilestoneBar type={event.type} />;
   const isHome = event.team_id === fixture.home_team_id;
-  return <EventRow event={event} isHome={isHome} homeTeam={homeTeam} awayTeam={awayTeam} />;
+  return (
+    <EventRow
+      event={event}
+      isHome={isHome}
+      homeTeam={homeTeam}
+      awayTeam={awayTeam}
+      playerById={playerById}
+    />
+  );
 }
 
 function MilestoneBar({ type }: { type: MatchEvent['type'] }) {
@@ -386,11 +419,46 @@ function MilestoneBar({ type }: { type: MatchEvent['type'] }) {
   return (
     <View style={styles.milestoneRow}>
       <View style={styles.milestoneBar}>
-        <Ionicons name="flag-outline" size={14} color={Colors.light.textSecondary} />
+        <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textSecondary} />
         <Text style={styles.milestoneText}>{labels[type] ?? type}</Text>
       </View>
     </View>
   );
+}
+
+/**
+ * Match-state bar for the top of the Stats pane. Same pill silhouette as
+ * MilestoneBar so the shape stays constant across states; the fill /
+ * colour / content flip per fixture status:
+ *   - completed  → grey pill + stopwatch + "FULL TIME"
+ *   - live       → red pill + red dot + white "LIVE {n}'"
+ *   - half-time  → amber pill + stopwatch + white "HALF TIME"
+ *   - scheduled  → not rendered (StatsPane returns an empty state instead)
+ */
+function StateBar({ fixture }: { fixture: Fixture }) {
+  if (fixture.status === 'completed') return <MilestoneBar type="full-time" />;
+  if (fixture.status === 'half-time') {
+    return (
+      <View style={styles.milestoneRow}>
+        <View style={[styles.milestoneBar, styles.stateBarHalfTime]}>
+          <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textInverse} />
+          <Text style={[styles.milestoneText, styles.stateBarInverseText]}>Half Time</Text>
+        </View>
+      </View>
+    );
+  }
+  if (fixture.status === 'live') {
+    const minute = Math.min(80, Math.max(0, Math.floor((Date.now() - new Date(fixture.kickoff_utc).getTime()) / 60000)));
+    return (
+      <View style={styles.milestoneRow}>
+        <View style={[styles.milestoneBar, styles.stateBarLive]}>
+          <View style={styles.stateBarLiveDot} />
+          <Text style={[styles.milestoneText, styles.stateBarInverseText]}>Live · {minute}'</Text>
+        </View>
+      </View>
+    );
+  }
+  return null;
 }
 
 function EventRow({
@@ -398,14 +466,16 @@ function EventRow({
   isHome,
   homeTeam,
   awayTeam,
+  playerById,
 }: {
   event: MatchEvent;
   isHome: boolean;
   homeTeam: Team | undefined;
   awayTeam: Team | undefined;
+  playerById: Map<string, Player>;
 }) {
   const team = isHome ? homeTeam : awayTeam;
-  const label = describeEvent(event, team);
+  const label = describeEvent(event, team, playerById);
   const minuteLabel = event.stoppage
     ? `${event.minute}'+${event.stoppage}'`
     : `${event.minute}'`;
@@ -414,7 +484,7 @@ function EventRow({
       {isHome ? (
         <>
           <View style={styles.eventSideLeft}>
-            <EventLabel event={event} label={label} align="right" />
+            <EventLabel event={event} label={label} align="right" playerById={playerById} />
             <EventIcon event={event} />
           </View>
           <Text style={styles.eventMinute}>{minuteLabel}</Text>
@@ -426,7 +496,7 @@ function EventRow({
           <Text style={styles.eventMinute}>{minuteLabel}</Text>
           <View style={styles.eventSideRight}>
             <EventIcon event={event} />
-            <EventLabel event={event} label={label} align="left" />
+            <EventLabel event={event} label={label} align="left" playerById={playerById} />
           </View>
         </>
       )}
@@ -467,20 +537,22 @@ function EventLabel({
   event,
   label,
   align,
+  playerById,
 }: {
   event: MatchEvent;
   label: string;
   align: 'left' | 'right';
+  playerById: Map<string, Player>;
 }) {
   if (event.type === 'substitution') {
     // Substitutions render as two stacked lines — the FIFA pattern. Green
     // arrow-in for the player coming ON, red arrow-out for the player OFF.
-    const off = event.player_id ?? '';
-    const on = event.related_player_id ?? '';
+    const offName = playerById.get(event.player_id ?? '')?.name ?? '';
+    const onName = playerById.get(event.related_player_id ?? '')?.name ?? '';
     return (
       <View style={[styles.subLabelWrap, align === 'right' ? styles.subLabelWrapRight : null]}>
-        <Text style={styles.subLabelLine} numberOfLines={1}>{formatPlayerId(on)}</Text>
-        <Text style={styles.subLabelLine} numberOfLines={1}>{formatPlayerId(off)}</Text>
+        <Text style={styles.subLabelLine} numberOfLines={1}>{onName}</Text>
+        <Text style={styles.subLabelLine} numberOfLines={1}>{offName}</Text>
       </View>
     );
   }
@@ -493,10 +565,14 @@ function EventLabel({
   );
 }
 
-/** Compose the display text for a non-substitution event — currently the
- *  event type ("Try", "Penalty goal", etc.). When the pipeline later
- *  attributes player names, this becomes the player's name plus event tag. */
-function describeEvent(event: MatchEvent, _team: Team | undefined): string {
+/** Compose the display text for a non-substitution event. Player name +
+ *  event type when the player lookup resolves; falls back to just the
+ *  event type ("Try", "Penalty goal") when it doesn't. */
+function describeEvent(
+  event: MatchEvent,
+  _team: Team | undefined,
+  playerById: Map<string, Player>,
+): string {
   const typeLabel: Partial<Record<MatchEvent['type'], string>> = {
     try: 'Try',
     conversion: 'Conversion',
@@ -506,15 +582,8 @@ function describeEvent(event: MatchEvent, _team: Team | undefined): string {
     'red-card': 'Red card',
   };
   const label = typeLabel[event.type] ?? event.type;
-  return `${label}${event.player_id ? ' · ' + formatPlayerId(event.player_id) : ''}`;
-}
-
-/** Player ids are shaped like `nzl-p012`; strip the team prefix and
- *  "p" so it renders as "012" (a short attribution stub). Placeholder
- *  until player-name joining lands in the pipeline. */
-function formatPlayerId(pid: string): string {
-  const parts = pid.split('-p');
-  return parts.length === 2 ? `#${parts[1]}` : pid;
+  const playerName = event.player_id ? playerById.get(event.player_id)?.name : null;
+  return playerName ? `${playerName} · ${label}` : label;
 }
 
 function StatsPane({
@@ -526,12 +595,19 @@ function StatsPane({
   result: Result | null;
   resultLoading: boolean;
 }) {
-  if (fixture.status !== 'completed') {
+  if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
         <Text style={styles.paneEmptyText}>
           Match hasn’t kicked off yet. Stats will populate once the fixture is complete.
         </Text>
+      </View>
+    );
+  }
+  if (fixture.status === 'postponed' || fixture.status === 'cancelled') {
+    return (
+      <View style={styles.paneEmpty}>
+        <Text style={styles.paneEmptyText}>Match {fixture.status} — no stats to show.</Text>
       </View>
     );
   }
@@ -613,9 +689,11 @@ function StatsPane({
 
   return (
     <View style={styles.statsCard}>
-      <View style={styles.statsCardHeader}>
-        <StatusPill status={fixture.status} />
-      </View>
+      {/* Match-state bar — same pill silhouette across states, colour
+          swaps per fixture status: full-time (grey), live (red + minute),
+          half-time (amber). Reuses the Overview timeline's MilestoneBar
+          treatment for consistency between the two panes. */}
+      <StateBar fixture={fixture} />
       {sections.map((section) => (
         <View key={section.title} style={styles.statSection}>
           <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -695,11 +773,13 @@ function LineUpPane({
   lineups,
   lineupsLoading,
   teamById,
+  playerById,
 }: {
   fixture: Fixture;
   lineups: LineUp[];
   lineupsLoading: boolean;
   teamById: Map<string, Team>;
+  playerById: Map<string, Player>;
 }) {
   if (fixture.status === 'scheduled') {
     return (
@@ -755,12 +835,12 @@ function LineUpPane({
 
       <Text style={styles.lineupSectionLabel}>Starting XV</Text>
       {startingRows.map(({ home, away }, i) => (
-        <LineUpCompareRow key={`start-${i}`} home={home} away={away} />
+        <LineUpCompareRow key={`start-${i}`} home={home} away={away} playerById={playerById} />
       ))}
 
       <Text style={styles.lineupSectionLabel}>Bench</Text>
       {benchRows.map(({ home, away }, i) => (
-        <LineUpCompareRow key={`bench-${i}`} home={home} away={away} />
+        <LineUpCompareRow key={`bench-${i}`} home={home} away={away} playerById={playerById} />
       ))}
     </View>
   );
@@ -796,25 +876,33 @@ function formatPosition(pos: string): string {
 function LineUpCompareRow({
   home,
   away,
+  playerById,
 }: {
   home: LineUpEntry | null;
   away: LineUpEntry | null;
+  playerById: Map<string, Player>;
 }) {
-  // Each side renders `[shirt#] [position]` on the home side and its
-  // mirror `[position] [shirt#]` on the away side. Each position label
-  // acts as a placeholder for the player's name; when the real feed
-  // supplies names we swap position → name, keeping the same slot.
+  // Each side renders `[shirt#] [player name]` on the home side and its
+  // mirror `[player name] [shirt#]` on the away side. Falls back to the
+  // canonical position label if the player lookup misses (shouldn't
+  // happen when the API resolves properly).
+  const homeLabel = home
+    ? playerById.get(home.player_id)?.name ?? formatPosition(home.position)
+    : '';
+  const awayLabel = away
+    ? playerById.get(away.player_id)?.name ?? formatPosition(away.position)
+    : '';
   return (
     <View style={styles.lineupCompareRow}>
       <View style={styles.lineupSideLeft}>
         <Text style={styles.lineupNumberLeft}>{home?.shirt_number ?? '·'}</Text>
         <Text style={styles.lineupPosPlayer} numberOfLines={1}>
-          {home ? formatPosition(home.position) : ''}
+          {homeLabel}
         </Text>
       </View>
       <View style={styles.lineupSideRight}>
         <Text style={[styles.lineupPosPlayer, styles.lineupPosPlayerRight]} numberOfLines={1}>
-          {away ? formatPosition(away.position) : ''}
+          {awayLabel}
         </Text>
         <Text style={styles.lineupNumberRight}>{away?.shirt_number ?? '·'}</Text>
       </View>
@@ -977,28 +1065,41 @@ const styles = StyleSheet.create({
   subTabBarWrap: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    // Matches the fixture-detail page inset used by the matchup header and
+    // all pane content. Also mirrors the CompetitionPicker's behaviour on
+    // Fixtures / Standings where pills clip at the outer wrap boundary
+    // rather than the raw screen edge — buffered fade instead of a hard
+    // cut against the phone bezel.
+    paddingHorizontal: Spacing.four,
   },
   subTabBarInner: {
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
     paddingVertical: Spacing.two + 2,
+    gap: Spacing.two,
   },
-  subTabPress: { paddingVertical: 6 },
-  subTabLabel: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
+  // Pill treatment matching CompetitionPicker on the Fixtures + Standings
+  // tabs — same shape language for "chip / segmented selector" across the
+  // app. Dimensions / radius / colours mirror `competition-picker.tsx`.
+  subTabPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
   },
-  subTabLabelActive: { color: Colors.light.text },
-  subTabUnderline: {
-    position: 'absolute',
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: 2,
+  subTabPillActive: {
     backgroundColor: Colors.light.text,
-    borderRadius: 2,
+    borderColor: Colors.light.text,
   },
+  subTabPillInactive: {
+    backgroundColor: 'transparent',
+    borderColor: '#D1D5DB',
+  },
+  subTabPillLabel: {
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    letterSpacing: 0.4,
+  },
+  subTabPillLabelActive: { color: Colors.light.background },
+  subTabPillLabelInactive: { color: Colors.light.textSecondary },
 
   pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.two },
   paneEmpty: { paddingVertical: Spacing.four, alignItems: 'center' },
@@ -1077,6 +1178,17 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
   },
+  // State-bar variants — same pill silhouette, coloured fills that swap
+  // in dynamically for live and half-time fixtures.
+  stateBarLive: { backgroundColor: StatusColor.live },
+  stateBarHalfTime: { backgroundColor: StatusColor.warning },
+  stateBarInverseText: { color: Colors.light.textInverse },
+  stateBarLiveDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
+    backgroundColor: Colors.light.textInverse,
+  },
 
   // Show More / Show Less toggle at the bottom of the timeline.
   timelineToggle: {
@@ -1108,10 +1220,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-  statsCardHeader: {
-    alignItems: 'center',
-    paddingBottom: Spacing.two,
-  },
   statSection: { gap: Spacing.three, paddingTop: 4 },
   sectionTitle: {
     fontSize: TextSize.xs,
@@ -1125,7 +1233,9 @@ const styles = StyleSheet.create({
   statBlock: { gap: 6 },
   statLabel: {
     fontSize: TextSize.sm,
-    color: Colors.light.text,
+    // Muted — the label is context, the numbers on either side are the
+    // read. Lets the values pop visually without shouting.
+    color: Colors.light.textSecondary,
     textAlign: 'center',
     fontWeight: TextWeight.regular,
   },
@@ -1134,11 +1244,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
+  // Numeric readouts flanking each stat bar. Bold to match the numeric-hero
+  // weight used across the app (score boxes, rankings tile). Home / away
+  // colour split mirrors the bar-segment token pair per design-system §5.4:
+  // home = primary text, away = secondary text.
   statValueLeft: {
     width: 32,
     textAlign: 'left',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.regular,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
     fontVariant: ['tabular-nums'],
   },
@@ -1146,8 +1260,8 @@ const styles = StyleSheet.create({
     width: 32,
     textAlign: 'right',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.regular,
-    color: Colors.light.text,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   barTrack: {
@@ -1177,8 +1291,11 @@ const styles = StyleSheet.create({
     height: 6,
   },
   barCentreGap: { width: 3, height: 6 },
-  barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
-  barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: 6 },
+  // Home / away comparative bars — on-token per design-system §5 (home =
+  // primary text, away = secondary text). No brand accent yet; brand
+  // identity (register #23) is still open.
+  barSegHome: { backgroundColor: Colors.light.text, borderRadius: 999, height: 6 },
+  barSegAway: { backgroundColor: Colors.light.textSecondary, borderRadius: 999, height: 6 },
 
   statBarRowWrap: {
     position: 'relative',

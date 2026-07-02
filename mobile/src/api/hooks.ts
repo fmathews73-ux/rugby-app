@@ -119,6 +119,18 @@ export function useFixtureEvents(fixtureId: string): UseQueryResult<MatchEvent[]
   });
 }
 
+/** All players relevant to a fixture — union of both lineups (starting +
+ *  bench) and every player_id / related_player_id in that fixture's
+ *  events. Client builds a `playerById` map to look up names inside the
+ *  Line-Up and Overview panes without per-player round trips. */
+export function useFixturePlayers(fixtureId: string): UseQueryResult<Player[]> {
+  return useQuery({
+    queryKey: ['fixturePlayers', fixtureId],
+    queryFn: () => fetchJson<Player[]>(`/fixtures/${fixtureId}/players`),
+    enabled: Boolean(fixtureId),
+  });
+}
+
 export function useTeams(): UseQueryResult<Team[]> {
   return useQuery({
     queryKey: ['teams'],

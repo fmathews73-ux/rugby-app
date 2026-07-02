@@ -101,6 +101,32 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     return store.eventsByFixture.get(req.params.id) ?? [];
   });
 
+  // Players relevant to a fixture — the union of both teams' lineup entries
+  // (starting XV + bench) and every player_id / related_player_id referenced
+  // by any of that fixture's events. Lets the client resolve player names
+  // for the Line-Up and Overview timelines in a single round trip.
+  app.get<{ Params: { id: string } }>('/fixtures/:id/players', async (req, reply) => {
+    const fixtureId = req.params.id;
+    if (!store.fixtureById.has(fixtureId)) {
+      return notFound(reply, `fixture ${fixtureId} not found`);
+    }
+    const ids = new Set<string>();
+    for (const lu of store.lineupsByFixture.get(fixtureId) ?? []) {
+      for (const e of lu.starting_xv) ids.add(e.player_id);
+      for (const e of lu.bench) ids.add(e.player_id);
+    }
+    for (const ev of store.eventsByFixture.get(fixtureId) ?? []) {
+      if (ev.player_id) ids.add(ev.player_id);
+      if (ev.related_player_id) ids.add(ev.related_player_id);
+    }
+    const players = [];
+    for (const pid of ids) {
+      const p = store.playerById.get(pid);
+      if (p) players.push(p);
+    }
+    return players;
+  });
+
   // ─── Teams ────────────────────────────────────────────────────────────────
   app.get('/teams', async () => store.teams);
 

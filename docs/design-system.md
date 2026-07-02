@@ -150,7 +150,16 @@ Anything that doesn't fit these three isn't a status colour — it's a neutral o
 - No `success` green until there's a real use — the movement-up `▲` in the rankings is currently `#059669` inline; not yet worth promoting to a token with only one usage.
 - No hard-coded whites for backgrounds — those are structural (`#FFFFFF` card fills, `#F5F5F7` page bg) and not text colours. Keep them raw for now; consolidate when we tackle §4 Elevation / cards.
 
-### 5.4 Applied convention
+### 5.4 Comparative visualisations (home vs. away)
+
+When a visualisation compares a home value to an away value — the stat bars on the fixture Stats pane are the reference implementation — the two sides use the two neutral text tokens:
+
+- **Home segment** → `Colors.light.text` (black) — sits on the left of the centre spine, growing outward.
+- **Away segment** → `Colors.light.textSecondary` (dark grey) — sits on the right, growing outward.
+
+Distinction lives in position (left / right of centre) and tone (primary / secondary), not in accent colour. Do not introduce team-specific accent colours before register #23 (brand identity) resolves — anything else is a preview brand decision made outside the register-tag protocol.
+
+### 5.5 Applied convention
 
 ```typescript
 // Good — neutral text
