@@ -139,9 +139,34 @@ function MatchupHeader({
         <TeamCol team={homeTeam} teamId={fixture.home_team_id} />
         <View style={styles.scoreCol}>
           {isCompleted && result ? (
-            <Text style={styles.score}>
-              {result.home_score} – {result.away_score}
-            </Text>
+            <View style={styles.detailScoreRow}>
+              <View
+                style={[
+                  styles.detailScoreBox,
+                  result.home_score > result.away_score && styles.detailScoreBoxWinner,
+                ]}>
+                <Text
+                  style={[
+                    styles.detailScoreText,
+                    result.home_score > result.away_score && styles.detailScoreTextWinner,
+                  ]}>
+                  {result.home_score}
+                </Text>
+              </View>
+              <View
+                style={[
+                  styles.detailScoreBox,
+                  result.away_score > result.home_score && styles.detailScoreBoxWinner,
+                ]}>
+                <Text
+                  style={[
+                    styles.detailScoreText,
+                    result.away_score > result.home_score && styles.detailScoreTextWinner,
+                  ]}>
+                  {result.away_score}
+                </Text>
+              </View>
+            </View>
           ) : (
             <Text style={styles.vsMuted}>vs</Text>
           )}
@@ -573,6 +598,18 @@ const styles = StyleSheet.create({
   teamName: { fontSize: 14, fontWeight: '600', color: Colors.light.text, textAlign: 'center' },
   scoreCol: { alignItems: 'center', gap: Spacing.two, minWidth: 96 },
   score: { fontSize: 32, fontWeight: '800', color: Colors.light.text, letterSpacing: -1 },
+  detailScoreRow: { flexDirection: 'row', gap: 4 },
+  detailScoreBox: {
+    width: 60,
+    height: 56,
+    borderRadius: 8,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  detailScoreBoxWinner: { backgroundColor: Colors.light.text },
+  detailScoreText: { fontSize: 30, fontWeight: '700', color: Colors.light.text },
+  detailScoreTextWinner: { color: '#FFFFFF' },
   vsMuted: { fontSize: 22, fontWeight: '600', color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
   pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
