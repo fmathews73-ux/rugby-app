@@ -274,25 +274,30 @@ function PremiumStatsBadge() {
 }
 
 function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
-  const bothZero = home === 0 && away === 0;
+  const maxValue = Math.max(home, away, 1);
+  const homeShare = home / maxValue;
+  const awayShare = away / maxValue;
   return (
     <View style={styles.statBlock}>
       <Text style={styles.statLabel}>{label}</Text>
       <View style={styles.statBarRow}>
         <Text style={styles.statValueLeft}>{home}</Text>
         <View style={styles.barTrack}>
-          {bothZero ? (
-            <View style={styles.barEmpty} />
-          ) : (
-            <>
-              {home > 0 ? (
-                <View style={[styles.barSegHome, { flex: home }]} />
-              ) : null}
-              {away > 0 ? (
-                <View style={[styles.barSegAway, { flex: away }]} />
-              ) : null}
-            </>
-          )}
+          {/* Left half — home pill grows from the CENTRE leftwards. */}
+          <View style={styles.barHalfLeft}>
+            {home > 0 ? (
+              <View style={[styles.barSegHome, { flex: homeShare }]} />
+            ) : null}
+            <View style={{ flex: Math.max(0.001, 1 - homeShare) }} />
+          </View>
+          <View style={styles.barCentreGap} />
+          {/* Right half — away pill grows from the CENTRE rightwards. */}
+          <View style={styles.barHalfRight}>
+            {away > 0 ? (
+              <View style={[styles.barSegAway, { flex: awayShare }]} />
+            ) : null}
+            <View style={{ flex: Math.max(0.001, 1 - awayShare) }} />
+          </View>
         </View>
         <Text style={styles.statValueRight}>{away}</Text>
       </View>
@@ -581,11 +586,27 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 30,
-    gap: 3,
   },
+  /** Both halves are equal flex so the CENTRE of the track is the meeting
+   * point regardless of the values. Home pill anchors to the right edge of
+   * the left half (i.e. adjacent to the centre); away anchors to the left
+   * edge of the right half. `row-reverse` on the left half places the home
+   * segment on the right — same visual effect. */
+  barHalfLeft: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    height: 6,
+  },
+  barHalfRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 6,
+  },
+  barCentreGap: { width: 3, height: 6 },
   barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
   barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: 6 },
-  barEmpty: { flex: 1 },
 
   premiumUnlockRow: {
     alignItems: 'center',
