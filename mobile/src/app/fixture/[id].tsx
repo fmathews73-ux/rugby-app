@@ -234,7 +234,10 @@ function OverviewPane({
   }
   return (
     <View style={styles.statsGrid}>
-      <StatRow label="Half-time" values={[`${result.half_time_home} – ${result.half_time_away}`]} />
+      <StatRow
+        label="Half-time"
+        values={[`${result.half_time_home}`, `${result.half_time_away}`]}
+      />
       <StatRow label="Tries" values={[`${result.home_tries}`, `${result.away_tries}`]} />
       <StatRow
         label="Conversions"
