@@ -234,43 +234,73 @@ function OverviewPane({
       </View>
     );
   }
-  const freeStats: { label: string; home: number; away: number }[] = [
-    { label: 'Possession %', home: result.home_possession_percent, away: result.away_possession_percent },
-    { label: 'Territory %', home: result.home_territory_percent, away: result.away_territory_percent },
-    { label: 'Half-time', home: result.half_time_home, away: result.half_time_away },
-    { label: 'Tries', home: result.home_tries, away: result.away_tries },
-    { label: 'Conversions', home: result.home_conversions, away: result.away_conversions },
-  ];
-
-  const premiumStats: { label: string; home: number; away: number }[] = [
-    { label: 'Penalties', home: result.home_penalties, away: result.away_penalties },
-    { label: 'Drop goals', home: result.home_drop_goals, away: result.away_drop_goals },
-    { label: 'Meters made', home: result.home_meters, away: result.away_meters },
-    { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks },
-    { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play },
-    { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won },
-    { label: 'Lineouts won', home: result.home_lineouts_won, away: result.away_lineouts_won },
-    { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made },
-    { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won },
-    { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded },
+  const sections: {
+    title: string;
+    stats: { label: string; home: number; away: number; premium: boolean }[];
+  }[] = [
+    {
+      title: 'Match Overview',
+      stats: [
+        { label: 'Possession %', home: result.home_possession_percent, away: result.away_possession_percent, premium: false },
+        { label: 'Territory %', home: result.home_territory_percent, away: result.away_territory_percent, premium: false },
+        { label: 'Half-time', home: result.half_time_home, away: result.half_time_away, premium: false },
+      ],
+    },
+    {
+      title: 'Scoring',
+      stats: [
+        { label: 'Tries', home: result.home_tries, away: result.away_tries, premium: false },
+        { label: 'Conversions', home: result.home_conversions, away: result.away_conversions, premium: false },
+        { label: 'Penalties', home: result.home_penalties, away: result.away_penalties, premium: true },
+        { label: 'Drop goals', home: result.home_drop_goals, away: result.away_drop_goals, premium: true },
+      ],
+    },
+    {
+      title: 'Attack',
+      stats: [
+        { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
+        { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
+        { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
+      ],
+    },
+    {
+      title: 'Set Piece',
+      stats: [
+        { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won, premium: true },
+        { label: 'Lineouts won', home: result.home_lineouts_won, away: result.away_lineouts_won, premium: true },
+      ],
+    },
+    {
+      title: 'Defence',
+      stats: [
+        { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made, premium: true },
+        { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won, premium: true },
+      ],
+    },
+    {
+      title: 'Discipline',
+      stats: [
+        { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true },
+      ],
+    },
   ];
 
   return (
     <View style={styles.statsCard}>
       <Text style={styles.statsCardTitle}>Match Statistics</Text>
-
-      {freeStats.map((s) => (
-        <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
-      ))}
-
-      {premiumStats.map((s) => (
-        <StatBar
-          key={s.label}
-          label={s.label}
-          home={s.home}
-          away={s.away}
-          locked={!IS_SUBSCRIBED}
-        />
+      {sections.map((section) => (
+        <View key={section.title} style={styles.statSection}>
+          <Text style={styles.sectionTitle}>{section.title}</Text>
+          {section.stats.map((s) => (
+            <StatBar
+              key={s.label}
+              label={s.label}
+              home={s.home}
+              away={s.away}
+              locked={s.premium && !IS_SUBSCRIBED}
+            />
+          ))}
+        </View>
       ))}
     </View>
   );
@@ -576,6 +606,16 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
     textAlign: 'center',
     paddingBottom: Spacing.two,
+  },
+  statSection: { gap: Spacing.three, paddingTop: 4 },
+  sectionTitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1.4,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    textAlign: 'center',
+    paddingTop: Spacing.one,
   },
   statBlock: { gap: 6 },
   statLabel: {
