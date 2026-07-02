@@ -263,13 +263,15 @@ function OverviewPane({
         <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
       ))}
 
-      {IS_SUBSCRIBED ? (
-        premiumStats.map((s) => (
-          <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
-        ))
-      ) : (
-        <PremiumLockedStats stats={premiumStats} />
-      )}
+      {premiumStats.map((s) => (
+        <StatBar
+          key={s.label}
+          label={s.label}
+          home={s.home}
+          away={s.away}
+          locked={!IS_SUBSCRIBED}
+        />
+      ))}
     </View>
   );
 }
@@ -278,66 +280,51 @@ function OverviewPane({
  * at Phase 6 when the paywall + billing flow ships. */
 const IS_SUBSCRIBED = false;
 
-function PremiumLockedStats({
-  stats,
+function StatBar({
+  label,
+  home,
+  away,
+  locked = false,
 }: {
-  stats: { label: string; home: number; away: number }[];
+  label: string;
+  home: number;
+  away: number;
+  locked?: boolean;
 }) {
-  return (
-    <View style={styles.lockedWrap}>
-      <View style={styles.lockedContent}>
-        {stats.map((s) => (
-          <StatBar key={s.label} label={s.label} home={s.home} away={s.away} />
-        ))}
-      </View>
-      <BlurView intensity={26} tint="light" style={StyleSheet.absoluteFill} />
-      <View style={styles.lockedOverlay}>
-        <View style={styles.lockedIconCircle}>
-          <Ionicons name="lock-closed" size={22} color="#B45309" />
-        </View>
-        <Text style={styles.lockedTitle}>{stats.length} more stats</Text>
-        <Text style={styles.lockedBody}>
-          Unlock live in-play analytics + full post-match breakdowns with Premium.
-        </Text>
-        <Pressable
-          style={({ pressed }) => [styles.lockedCta, pressed && styles.lockedCtaPressed]}
-          onPress={() => {
-            /* TODO: open paywall — Phase 6 */
-          }}>
-          <Text style={styles.lockedCtaText}>Unlock Premium</Text>
-        </Pressable>
-      </View>
-    </View>
-  );
-}
-
-function StatBar({ label, home, away }: { label: string; home: number; away: number }) {
   const maxValue = Math.max(home, away, 1);
   const homeShare = home / maxValue;
   const awayShare = away / maxValue;
   return (
     <View style={styles.statBlock}>
+      {/* Label stays crisp so locked users can still see the metric name. */}
       <Text style={styles.statLabel}>{label}</Text>
-      <View style={styles.statBarRow}>
-        <Text style={styles.statValueLeft}>{home}</Text>
-        <View style={styles.barTrack}>
-          {/* Left half — home pill grows from the CENTRE leftwards. */}
-          <View style={styles.barHalfLeft}>
-            {home > 0 ? (
-              <View style={[styles.barSegHome, { flex: homeShare }]} />
-            ) : null}
-            <View style={{ flex: Math.max(0.001, 1 - homeShare) }} />
+      <View style={styles.statBarRowWrap}>
+        <View style={styles.statBarRow}>
+          <Text style={styles.statValueLeft}>{home}</Text>
+          <View style={styles.barTrack}>
+            <View style={styles.barHalfLeft}>
+              {home > 0 ? (
+                <View style={[styles.barSegHome, { flex: homeShare }]} />
+              ) : null}
+              <View style={{ flex: Math.max(0.001, 1 - homeShare) }} />
+            </View>
+            <View style={styles.barCentreGap} />
+            <View style={styles.barHalfRight}>
+              {away > 0 ? (
+                <View style={[styles.barSegAway, { flex: awayShare }]} />
+              ) : null}
+              <View style={{ flex: Math.max(0.001, 1 - awayShare) }} />
+            </View>
           </View>
-          <View style={styles.barCentreGap} />
-          {/* Right half — away pill grows from the CENTRE rightwards. */}
-          <View style={styles.barHalfRight}>
-            {away > 0 ? (
-              <View style={[styles.barSegAway, { flex: awayShare }]} />
-            ) : null}
-            <View style={{ flex: Math.max(0.001, 1 - awayShare) }} />
-          </View>
+          <Text style={styles.statValueRight}>{away}</Text>
         </View>
-        <Text style={styles.statValueRight}>{away}</Text>
+        {locked ? (
+          <BlurView
+            intensity={30}
+            tint="light"
+            style={styles.statBlurOverlay}
+          />
+        ) : null}
       </View>
     </View>
   );
@@ -646,67 +633,21 @@ const styles = StyleSheet.create({
   barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
   barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: 6 },
 
-  lockedWrap: {
+  statBarRowWrap: {
     position: 'relative',
-    marginTop: Spacing.two,
-    borderRadius: 12,
     overflow: 'hidden',
+    borderRadius: 8,
   },
-  /** Base layer: the actual premium stat rows. They're visible underneath the
-   * blur, giving the "peek at what you'd get" effect. */
-  lockedContent: {
-    gap: Spacing.three,
-    paddingVertical: Spacing.two,
-  },
-  /** Overlay on TOP of the blur: lock icon + copy + CTA. */
-  lockedOverlay: {
+  /** Blur overlay that sits on top of the value + bar row (but underneath the
+   * label above it) when a metric is behind the premium gate. Values and
+   * segments smear into a frosted band; the label stays crisp so the user
+   * knows what they're missing. */
+  statBlurOverlay: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.two,
-  },
-  lockedIconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 999,
-    backgroundColor: '#FFFBEB',
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderWidth: 1.5,
-    borderColor: '#B45309',
-    marginBottom: 4,
-  },
-  lockedTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: Colors.light.text,
-    textAlign: 'center',
-  },
-  lockedBody: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    maxWidth: 280,
-    lineHeight: 18,
-  },
-  lockedCta: {
-    marginTop: Spacing.two,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 999,
-    backgroundColor: '#B45309',
-  },
-  lockedCtaPressed: { opacity: 0.85 },
-  lockedCtaText: {
-    color: '#FFFFFF',
-    fontSize: 14,
-    fontWeight: '700',
-    letterSpacing: 0.4,
   },
 
   lineupContainer: { gap: Spacing.four },
