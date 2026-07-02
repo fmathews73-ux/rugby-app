@@ -563,14 +563,14 @@ const styles = StyleSheet.create({
     width: 32,
     textAlign: 'left',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '400',
     color: Colors.light.text,
   },
   statValueRight: {
     width: 32,
     textAlign: 'right',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '400',
     color: Colors.light.text,
   },
   barTrack: {
