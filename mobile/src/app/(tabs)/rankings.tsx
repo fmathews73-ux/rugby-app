@@ -7,6 +7,9 @@ import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing } from '@/constants/theme';
 
+const UP = '#059669';
+const DOWN = '#DC2626';
+
 /**
  * Power Rankings — latest World Rugby men's snapshot across all 28 sides.
  * International rankings are stored, not computed (PRD §7). The proprietary
@@ -25,33 +28,38 @@ export default function RankingsScreen() {
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>Power Rankings</Text>
-        <Text style={styles.subtitle}>
-          World Rugby men’s
-          {query.data ? ` · snapshot ${query.data.snapshot_date}` : ''}
-        </Text>
+        <View style={styles.headerBlock}>
+          <Text style={styles.title}>Power Rankings</Text>
+          <Text style={styles.subtitle}>
+            World Rugby men’s
+            {query.data ? ` · snapshot ${query.data.snapshot_date}` : ''}
+          </Text>
+        </View>
 
         {query.isLoading ? (
           <LoadingState />
         ) : query.isError ? (
           <ErrorState error={query.error} />
         ) : query.data ? (
-          <View style={styles.table}>
-            {query.data.rows.map((row) => {
+          <View style={styles.card}>
+            {query.data.rows.map((row, i) => {
               const team = teamById.get(row.team_id);
+              const isLast = i === query.data.rows.length - 1;
               return (
-                <View key={row.team_id} style={styles.row}>
+                <View
+                  key={row.team_id}
+                  style={[styles.row, isLast && styles.rowLast]}>
                   <Text style={styles.rank}>{row.rank}</Text>
-                  {team ? (
-                    <TeamFlagBall2D flagCode={team.flag_code} size={28} />
-                  ) : (
-                    <View style={styles.flagFallback} />
-                  )}
-                  <View style={styles.teamCol}>
-                    <Text style={styles.teamName}>
-                      {team?.name ?? row.team_id.toUpperCase()}
-                    </Text>
+                  <View style={styles.flagWrap}>
+                    {team ? (
+                      <TeamFlagBall2D flagCode={team.flag_code} size={26} />
+                    ) : (
+                      <View style={styles.flagFallback} />
+                    )}
                   </View>
+                  <Text style={styles.teamName} numberOfLines={1}>
+                    {team?.name ?? row.team_id.toUpperCase()}
+                  </Text>
                   <Text style={styles.points}>{row.points}</Text>
                   <MovementBadge movement={row.movement} />
                 </View>
@@ -65,12 +73,8 @@ export default function RankingsScreen() {
 }
 
 function MovementBadge({ movement }: { movement: number | null }) {
-  if (movement === null) {
-    return <Text style={styles.movementNew}>NEW</Text>;
-  }
-  if (movement === 0) {
-    return <Text style={styles.movementFlat}>—</Text>;
-  }
+  if (movement === null) return <Text style={styles.movementNew}>NEW</Text>;
+  if (movement === 0) return <Text style={styles.movementFlat}>—</Text>;
   const isUp = movement > 0;
   return (
     <Text style={[styles.movement, isUp ? styles.movementUp : styles.movementDown]}>
@@ -80,11 +84,31 @@ function MovementBadge({ movement }: { movement: number | null }) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
-  scroll: { padding: Spacing.four, gap: Spacing.two, paddingBottom: 40 },
+  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
+
+  headerBlock: { gap: 4 },
   title: { fontSize: 24, fontWeight: '700', color: Colors.light.text },
-  subtitle: { fontSize: 12, color: Colors.light.textSecondary, marginBottom: Spacing.three, textTransform: 'uppercase', letterSpacing: 0.8 },
-  table: { backgroundColor: Colors.light.backgroundElement, borderRadius: 12, overflow: 'hidden' },
+  subtitle: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontWeight: '600',
+  },
+
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -92,16 +116,29 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two + 4,
     gap: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#F3F4F6',
   },
-  rank: { width: 30, fontSize: 15, fontWeight: '700', color: Colors.light.text },
-  flagFallback: { width: 28, height: 28, borderRadius: 14, backgroundColor: '#E5E7EB' },
-  teamCol: { flex: 1, paddingLeft: Spacing.one },
-  teamName: { fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  points: { width: 42, textAlign: 'right', fontSize: 14, fontWeight: '600', color: Colors.light.text },
+  rowLast: { borderBottomWidth: 0 },
+  rank: { width: 28, fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  flagWrap: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
+  flagFallback: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#E5E7EB' },
+  teamName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+    color: Colors.light.text,
+    paddingLeft: 4,
+  },
+  points: { width: 42, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
   movement: { width: 52, textAlign: 'right', fontSize: 12, fontWeight: '700' },
-  movementUp: { color: '#059669' },
-  movementDown: { color: '#DC2626' },
+  movementUp: { color: UP },
+  movementDown: { color: DOWN },
   movementFlat: { width: 52, textAlign: 'right', fontSize: 14, color: Colors.light.textSecondary },
-  movementNew: { width: 52, textAlign: 'right', fontSize: 10, fontWeight: '700', color: Colors.light.textSecondary },
+  movementNew: {
+    width: 52,
+    textAlign: 'right',
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.light.textSecondary,
+  },
 });

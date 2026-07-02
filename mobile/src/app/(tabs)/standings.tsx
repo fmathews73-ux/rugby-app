@@ -49,8 +49,10 @@ export default function StandingsScreen() {
         onSelect={setSeasonId}
       />
       <ScrollView contentContainerStyle={styles.scroll}>
-        <Text style={styles.title}>{info?.title ?? seasonId}</Text>
-        <Text style={styles.subtitle}>{info?.subtitle ?? ''}</Text>
+        <View style={styles.headerBlock}>
+          <Text style={styles.title}>{info?.title ?? seasonId}</Text>
+          <Text style={styles.subtitle}>{info?.subtitle ?? ''}</Text>
+        </View>
 
         {query.isLoading ? (
           <LoadingState />
@@ -84,7 +86,7 @@ function StandingsTable({
   teamById: Map<string, { name: string; short_name: string; flag_code: string }>;
 }) {
   return (
-    <View style={styles.table}>
+    <View style={styles.card}>
       <View style={[styles.row, styles.headerRow]}>
         <Text style={[styles.cellRank, styles.headerText]}>#</Text>
         <View style={styles.cellFlag} />
@@ -96,10 +98,11 @@ function StandingsTable({
         <Text style={[styles.cellStat, styles.headerText]}>PD</Text>
         <Text style={[styles.cellPts, styles.headerText]}>Pts</Text>
       </View>
-      {rows.map((r) => {
+      {rows.map((r, i) => {
         const team = teamById.get(r.team_id);
+        const isLast = i === rows.length - 1;
         return (
-          <View key={r.team_id} style={styles.row}>
+          <View key={r.team_id} style={[styles.row, isLast && styles.rowLast]}>
             <Text style={styles.cellRank}>{r.rank}</Text>
             <View style={styles.cellFlag}>
               {team ? <TeamFlagBall2D flagCode={team.flag_code} size={22} /> : null}
@@ -121,23 +124,40 @@ function StandingsTable({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+  safe: { flex: 1, backgroundColor: '#F5F5F7' },
   scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
+
+  headerBlock: { gap: 4 },
   title: { fontSize: 22, fontWeight: '700', color: Colors.light.text },
-  subtitle: { fontSize: 13, color: Colors.light.textSecondary, marginBottom: Spacing.two },
-  tableGroup: { gap: Spacing.one },
+  subtitle: {
+    fontSize: 11,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+    fontWeight: '600',
+  },
+
+  tableGroup: { gap: Spacing.one + 2 },
   groupHeading: {
-    fontSize: 12,
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 1,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
     paddingTop: Spacing.two,
   },
-  table: {
-    backgroundColor: Colors.light.backgroundElement,
+
+  card: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
     overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
   },
   row: {
     flexDirection: 'row',
@@ -145,14 +165,24 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two + 2,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#F3F4F6',
     gap: 4,
   },
-  headerRow: { backgroundColor: Colors.light.backgroundSelected },
-  headerText: { fontSize: 11, fontWeight: '600', color: Colors.light.textSecondary, textTransform: 'uppercase', letterSpacing: 0.8 },
-  cellRank: { width: 22, fontSize: 13, fontWeight: '600', color: Colors.light.text },
-  cellFlag: { width: 26, alignItems: 'center' },
-  cellTeam: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.light.text },
+  rowLast: { borderBottomWidth: 0 },
+  headerRow: {
+    backgroundColor: '#F9FAFB',
+    borderBottomColor: '#E5E7EB',
+  },
+  headerText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  cellRank: { width: 22, fontSize: 13, fontWeight: '700', color: Colors.light.text },
+  cellFlag: { width: 26, alignItems: 'center', justifyContent: 'center' },
+  cellTeam: { flex: 1, fontSize: 13, fontWeight: '700', color: Colors.light.text, letterSpacing: 0.4 },
   cellStat: { width: 24, textAlign: 'center', fontSize: 12, color: Colors.light.text },
   cellPts: { width: 32, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
   cellPtsValue: { color: Colors.light.text },

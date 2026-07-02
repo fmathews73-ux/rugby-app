@@ -14,7 +14,7 @@ const TIER_1_IDS = new Set(['eng', 'fra', 'ire', 'ita', 'sco', 'wal', 'arg', 'au
 
 /**
  * Teams — all 28 international sides, split by tier and sorted alphabetically
- * within tier. Tap a row → team detail (3D flag ball hero + fixtures).
+ * within tier. Tap a row → team detail.
  */
 export default function TeamsScreen() {
   const router = useRouter();
@@ -38,63 +38,126 @@ export default function TeamsScreen() {
         <ErrorState error={query.error} />
       ) : grouped ? (
         <FlatList
-          data={[
-            { kind: 'header' as const, label: 'Tier 1', count: grouped.tier1.length },
-            ...grouped.tier1.map((t) => ({ kind: 'team' as const, team: t })),
-            { kind: 'header' as const, label: 'Tier 2', count: grouped.tier2.length },
-            ...grouped.tier2.map((t) => ({ kind: 'team' as const, team: t })),
-          ]}
-          keyExtractor={(item, i) =>
-            item.kind === 'header' ? `h-${item.label}` : `t-${item.team.id}-${i}`
-          }
-          contentContainerStyle={{ paddingBottom: 40 }}
-          renderItem={({ item }) =>
-            item.kind === 'header' ? (
-              <View style={styles.groupHeader}>
-                <Text style={styles.groupHeaderText}>{item.label}</Text>
-                <Text style={styles.groupHeaderCount}>{item.count}</Text>
-              </View>
-            ) : (
+          data={buildListData(grouped.tier1, grouped.tier2)}
+          keyExtractor={(item, i) => (item.kind === 'header' ? `h-${item.label}` : `t-${item.team.id}-${i}`)}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => {
+            if (item.kind === 'header') {
+              return (
+                <View style={styles.groupHeader}>
+                  <Text style={styles.groupHeaderText}>{item.label}</Text>
+                  <Text style={styles.groupHeaderCount}>{item.count}</Text>
+                </View>
+              );
+            }
+            const isFirst = item.position === 'first' || item.position === 'only';
+            const isLast = item.position === 'last' || item.position === 'only';
+            return (
               <Pressable
                 onPress={() => router.push(`/team/${item.team.id}`)}
-                style={({ pressed }) => [styles.teamRow, pressed && styles.teamRowPressed]}>
-                <TeamFlagBall2D flagCode={item.team.flag_code} size={44} />
+                style={({ pressed }) => [
+                  styles.teamRow,
+                  isFirst && styles.teamRowFirst,
+                  isLast && styles.teamRowLast,
+                  pressed && styles.teamRowPressed,
+                ]}>
+                <TeamFlagBall2D flagCode={item.team.flag_code} size={40} />
                 <View style={styles.teamText}>
                   <Text style={styles.teamName}>{item.team.name}</Text>
                   <Text style={styles.teamShort}>{item.team.short_name}</Text>
                 </View>
               </Pressable>
-            )
-          }
+            );
+          }}
         />
       ) : null}
     </SafeAreaView>
   );
 }
 
+type ListItem =
+  | { kind: 'header'; label: string; count: number }
+  | { kind: 'team'; team: Team; position: 'first' | 'middle' | 'last' | 'only' };
+
+/** Build a flat list-item stream that includes tier headers + team rows.
+ * position on each team row is used to draw only the leading/trailing
+ * hairlines correctly inside its containing card. */
+function buildListData(tier1: Team[], tier2: Team[]): ListItem[] {
+  const items: ListItem[] = [];
+  const pushGroup = (label: string, teams: Team[]) => {
+    items.push({ kind: 'header', label, count: teams.length });
+    teams.forEach((t, i) =>
+      items.push({
+        kind: 'team',
+        team: t,
+        position:
+          teams.length === 1
+            ? 'only'
+            : i === 0
+              ? 'first'
+              : i === teams.length - 1
+                ? 'last'
+                : 'middle',
+      }),
+    );
+  };
+  pushGroup('Tier 1', tier1);
+  pushGroup('Tier 2', tier2);
+  return items;
+}
+
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  listContent: { padding: Spacing.four, paddingBottom: 40, gap: Spacing.one + 2 },
+
   groupHeader: {
     flexDirection: 'row',
     alignItems: 'baseline',
     justifyContent: 'space-between',
-    paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.two - 2,
   },
-  groupHeaderText: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: Colors.light.text, textTransform: 'uppercase' },
-  groupHeaderCount: { fontSize: 12, color: Colors.light.textSecondary },
+  groupHeaderText: {
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
+  groupHeaderCount: {
+    fontSize: 11,
+    fontWeight: '600',
+    color: Colors.light.textSecondary,
+    letterSpacing: 0.6,
+  },
+
   teamRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: Spacing.three,
     paddingVertical: Spacing.two + 4,
     gap: Spacing.three,
+    backgroundColor: '#FFFFFF',
+    borderLeftWidth: StyleSheet.hairlineWidth,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F3F4F6',
+  },
+  teamRowFirst: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E5E7EB',
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  teamRowLast: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
   },
-  teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
+  teamRowPressed: { backgroundColor: '#F3F4F6' },
   teamText: { flex: 1, gap: 2 },
   teamName: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
-  teamShort: { fontSize: 11, letterSpacing: 1, color: Colors.light.textSecondary },
+  teamShort: { fontSize: 11, letterSpacing: 1, color: Colors.light.textSecondary, fontWeight: '600' },
 });
