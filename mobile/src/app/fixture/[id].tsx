@@ -145,7 +145,10 @@ function MatchupHeader({
           ) : (
             <Text style={styles.vsMuted}>vs</Text>
           )}
-          <StatusPill status={fixture.status} />
+          {/* For completed matches the Final badge moves down into the
+              Overview card's title slot; the header only carries the
+              status pill for non-completed states. */}
+          {isCompleted ? null : <StatusPill status={fixture.status} />}
         </View>
         <TeamCol team={awayTeam} teamId={fixture.away_team_id} />
       </View>
@@ -304,7 +307,9 @@ function OverviewPane({
 
   return (
     <View style={styles.statsCard}>
-      <Text style={styles.statsCardTitle}>Match Statistics</Text>
+      <View style={styles.statsCardHeader}>
+        <StatusPill status={fixture.status} />
+      </View>
       {sections.map((section) => (
         <View key={section.title} style={styles.statSection}>
           <Text style={styles.sectionTitle}>{section.title}</Text>
@@ -617,11 +622,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
   },
-  statsCardTitle: {
-    fontSize: 18,
-    fontWeight: '400',
-    color: Colors.light.text,
-    textAlign: 'center',
+  statsCardHeader: {
+    alignItems: 'center',
     paddingBottom: Spacing.two,
   },
   statSection: { gap: Spacing.three, paddingTop: 4 },
