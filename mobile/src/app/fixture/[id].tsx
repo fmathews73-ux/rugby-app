@@ -542,7 +542,7 @@ const styles = StyleSheet.create({
   },
   statsCardTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '400',
     color: Colors.light.text,
     textAlign: 'center',
     paddingBottom: Spacing.two,
