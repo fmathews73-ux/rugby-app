@@ -15,7 +15,7 @@ import {
 import { useLatestRanking, useLatestWomensRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
 
 const UP = '#059669';
 const DOWN = '#DC2626';
@@ -114,7 +114,9 @@ function RankingsCard({ gender }: { gender: 'mens' | 'womens' }) {
                 <Text style={styles.teamName} numberOfLines={1}>
                   {team?.name ?? row.team_id.toUpperCase()}
                 </Text>
-                <Text style={styles.points}>{row.points}</Text>
+                <View style={styles.pointsBox}>
+                  <Text style={styles.pointsBoxText}>{row.points}</Text>
+                </View>
                 <MovementBadge movement={row.movement} />
               </View>
             );
@@ -194,7 +196,22 @@ const styles = StyleSheet.create({
   rank: { width: 18, fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   flagFallback: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#E5E7EB' },
   teamName: { flex: 1, fontSize: TextSize.md, fontWeight: TextWeight.semibold, color: Colors.light.text },
-  points: { width: 40, textAlign: 'right', fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  // Styled to match the winner-score box on the Fixtures list — solid dark
+  // tile with white number, 24pt tall, 4pt radius. Reads as the "hero"
+  // number in the row, consistent with the "winning score" affordance
+  // elsewhere in the app.
+  pointsBox: {
+    ...ScoreBoxSize.row,
+    backgroundColor: Colors.light.text,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pointsBoxText: {
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textInverse,
+    fontVariant: ['tabular-nums'],
+  },
   movement: { width: 52, textAlign: 'right', fontSize: TextSize.sm, fontWeight: TextWeight.bold, fontVariant: ['tabular-nums'] },
   movementUp: { color: UP },
   movementDown: { color: DOWN },

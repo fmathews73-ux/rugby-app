@@ -25,9 +25,14 @@ export function AppHeader() {
       </Pressable>
 
       <View style={styles.centreSlot}>
+        {/* Brand mark: "RUGBY" + superscripted "IQ". `alignItems: 'flex-start'`
+            on the row aligns top-edges, so the smaller IQ Text sits above
+            RUGBY's baseline — the superscript effect. Font family reserved
+            for Proxima Nova once licensed + loaded via expo-font; until
+            then the system extra-bold face carries the weight. */}
         <View style={styles.appNameRow}>
           <Text style={styles.appName}>RUGBY</Text>
-          <Ionicons name="add" size={22} color={Colors.light.text} />
+          <Text style={styles.appNameSuperscript}>IQ</Text>
         </View>
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
@@ -58,13 +63,35 @@ const styles = StyleSheet.create({
   },
   appNameRow: {
     flexDirection: 'row',
-    alignItems: 'center',
+    // flex-start aligns the top edges of RUGBY and IQ — the IQ Text is
+    // smaller so its baseline sits above RUGBY's baseline, giving the
+    // superscript effect. Do NOT set alignItems: 'center' here.
+    alignItems: 'flex-start',
     gap: 1,
   },
   appName: {
     fontSize: TextSize.xl,
-    fontWeight: TextWeight.bold,
+    // Extra-bold (800) — off the TextWeight scale, allowed as a brand-mark
+    // exception (same category as the intentional letterSpacing: -1 for
+    // hero display numbers). Do not use elsewhere.
+    fontWeight: '800',
     color: Colors.light.text,
+    // fontFamily: 'ProximaNova-ExtraBold' — reserved. Requires (a) a
+    // commercial licence from Mark Simonson Studio / Adobe Fonts and
+    // (b) the font loaded via expo-font at app startup. Falls back to
+    // system extra-bold until then.
+  },
+  appNameSuperscript: {
+    fontSize: 12, // ~55% of appName size, standard superscript ratio
+    // Normal weight — lets the "RUGBY" mark carry the visual heft while the
+    // IQ superscript reads as a lighter tagline / descriptor.
+    fontWeight: TextWeight.regular,
+    color: Colors.light.text,
+    // Small nudge down so IQ's cap-line aligns near the cap-line of
+    // RUGBY rather than sitting flush at the very top of the row.
+    marginTop: 1,
+    // Tight line-height keeps the superscript compact.
+    lineHeight: 12,
   },
   rightSlot: {
     minWidth: 44,

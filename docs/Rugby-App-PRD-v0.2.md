@@ -1,11 +1,12 @@
 # Product Requirements Document — Rugby Mobile Application
 
-**Version:** 0.5 (Draft)
-**Date:** 1 July 2026
+**Version:** 0.6 (Draft)
+**Date:** 2 July 2026
 **Status:** Working draft — contains open items requiring resolution
 **Intended reader:** Claude Code (build agent) + project owner
 
 **Version history**
+- **v0.6** — Added register #28: image rights (union crests, club logos, national team crests, coaching / player photos) bundled with provider selection at Phase 6. Clarifies that the existing "no crests / logos" rule (root `CLAUDE.md` §9) is a *placeholder default* — it unlocks only when the Phase 6 image-rights licence tier of the chosen data provider clears. Ban explicitly extended to include **union** and **club** logos, not just national team crests, since those sit on the same trademark footing.
 - **v0.5** — Team scope broadened. v1 now covers **all Men's international teams (Tier 1 + Tier 2)** — previously Tier 1 only. Same 5 competitions; the change unlocks a fully-modelled Rugby World Cup 2027 (24 teams, 6 pools of 4 → knockouts) and expands the Power Rankings surface to every Men's international side. Six Nations (6 Tier-1 teams) and Rugby Championship (4 Tier-1 teams) rosters unchanged — Tier-2 teams enter via World Cup, Rankings, and (as future scope, not now) potential Tier-1-vs-Tier-2 fixtures in the Autumn / Summer test windows. Register #2 updated. No new Tier-2-only competitions (Pacific Nations Cup, Rugby Europe Championship, etc.) — those remain future scope.
 - **v0.4** — Scope crystallised. Resolved register #1 (Rugby Union only, permanent — League is a permanent product exclusion), #2 (v1 = **Men's Tier 1 Internationals**: Six Nations, Rugby Championship, Tier-1 test matches, Rugby World Cup), #3 (Men's), #4 (current season only). Soft-deferred #5 (licensing gate) — dev builds run against a synthetic dataset per new **§5.5**; gate stays live before any real feed data enters the pipeline. Deferred #13 (proprietary rankings algorithm) — Internationals use World Rugby's stored public rankings; algorithm reactivates only when scope expands to club competitions. Added §5.5 (synthetic development data rules) and register #27 (synthetic dataset design + persistent dev-mode indicator).
 - **v0.3** — Added register #26 (publisher entity & neutral domain) as Phase 6 open item — real-name exposure via App Store developer name, bundle-ID reverse-DNS, and domain WHOIS is the primary public anonymity chokepoint once the app publishes. Filename retained as `Rugby-App-PRD-v0.2.md` to avoid cascading reference updates in every `CLAUDE.md`; rename on next material scope change.
@@ -297,7 +298,8 @@ Prove licensing → build the pipeline → ship the cheap-data MVP behind a payw
 | 25 | Fantasy scope | DEFERRED | 2+ | — |
 | 26 | Publisher entity (LLC / sole-prop / other) + neutral domain — governs App Store & Play Store developer name (public), bundle/package reverse-DNS, and WHOIS on the app's domain. Repo stays private throughout dev; this bites at store submission. | INPUT | 6 | Store submission, brand, bundle IDs |
 | 27 | Synthetic dataset design + persistent dev-mode indicator — canonical entities, generator strategy, indicator UI treatment. Must respect §5.5 rules (fake player names, real team names, no crests, no leak to prod). | INPUT | 3 | Phase 3 pipeline |
+| 28 | Image rights — union crests (RFU, FFR, NZR, IRFU, WRU, SRU, SARU, UAR, JRFU, WR itself, etc.), club logos (Premiership / Top 14 / URC / Super Rugby clubs), national team crests (springbok, silver fern, shamrock, thistle, dragon, three feathers, etc.), coaching-staff photos, player photos. Bundled with the chosen provider's licence tier at real-data cutover — most premium feeds (Sportradar, Opta / Stats Perform) ship image assets separately from data, priced separately, with per-property tiers. Determines whether the app can show any crest / logo beyond neutral placeholders + national flags, or stays on the current placeholder-and-flag-only default (root `CLAUDE.md` §9). Independent of register #5 (data redistribution licence) — image rights are a separate licence tier and can fail even when the data licence clears. | RESEARCH | 6 (pre-launch cutover) | Team detail visuals, fixture-header visuals, in-app branding beyond flags. Tied to register #6 (provider selection) and register #7 (ancillary data availability). |
 
 ---
 
-*End of PRD v0.5. This is a living document; close open items in phase order and version up as decisions land.*
+*End of PRD v0.6. This is a living document; close open items in phase order and version up as decisions land.*

@@ -92,6 +92,21 @@ export const FlagSize = {
 } as const;
 
 /**
+ * Two canonical score-box tile sizes. `row` is used for anything sitting
+ * inside a list row / table row / meta section (Fixtures list, My Team card
+ * Last Match, World Rugby Rankings points tile). `card` is used for hero
+ * / card-scale score displays (Home fixture carousel, Fixture detail
+ * header). No other sizes are allowed — spread the whole object into a
+ * StyleSheet entry so all three dimensions stay locked together.
+ *
+ * Docs: `docs/design-system.md` §6.
+ */
+export const ScoreBoxSize = {
+  row: { width: 30, height: 24, borderRadius: 4 },
+  card: { width: 52, height: 44, borderRadius: 8 },
+} as const;
+
+/**
  * Canonical type scale — 6 steps, Tailwind-style numeric names. Every text style
  * in the app must pick fontSize from here rather than raw numbers, so hierarchy
  * stays legible and the scale doesn't sprawl. Design doc in

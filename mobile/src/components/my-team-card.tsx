@@ -7,10 +7,10 @@ import { useQueries } from '@tanstack/react-query';
 import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
-import { useTeam, useTeams } from '@/api/hooks';
+import { useCompetitions, useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { TeamPickerModal } from '@/components/team-picker-modal';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
 const FORM_LOOKBACK = 5; // Number of recent completed fixtures to show in Form row.
@@ -91,6 +91,7 @@ function PopulatedBody({ teamId }: { teamId: string }) {
   const router = useRouter();
   const team = useTeam(teamId);
   const allTeams = useTeams();
+  const competitions = useCompetitions();
 
   const teamById = useMemo(() => {
     const m = new Map<string, { flag_code: string; short_name: string }>();
@@ -99,6 +100,12 @@ function PopulatedBody({ teamId }: { teamId: string }) {
     }
     return m;
   }, [allTeams.data]);
+
+  const compById = useMemo(() => {
+    const m = new Map<string, { short_name: string }>();
+    for (const c of competitions.data ?? []) m.set(c.id, { short_name: c.short_name });
+    return m;
+  }, [competitions.data]);
 
   const myTeamInfo = team.data
     ? { flag_code: team.data.flag_code, short_name: team.data.short_name }
@@ -169,6 +176,7 @@ function PopulatedBody({ teamId }: { teamId: string }) {
             oppTeam={teamById.get(
               nextMatch.home_team_id === teamId ? nextMatch.away_team_id : nextMatch.home_team_id,
             )}
+            competition={compById.get(nextMatch.competition_id)}
           />
         ) : (
           <Text style={styles.mutedRow}>No upcoming fixtures.</Text>
@@ -187,6 +195,7 @@ function PopulatedBody({ teamId }: { teamId: string }) {
             oppTeam={teamById.get(
               lastMatch.home_team_id === teamId ? lastMatch.away_team_id : lastMatch.home_team_id,
             )}
+            competition={compById.get(lastMatch.competition_id)}
             result={resultByFixture.get(lastMatch.id)}
           />
         ) : (
@@ -268,31 +277,56 @@ function FixtureLine({
   teamId,
   myTeam,
   oppTeam,
+  competition,
   result,
 }: {
   fixture: Fixture;
   teamId: string;
   myTeam: { flag_code: string; short_name: string };
   oppTeam: { flag_code: string; short_name: string } | undefined;
+  competition: { short_name: string } | undefined;
   result?: Result;
 }) {
   const isHome = fixture.home_team_id === teamId;
   const oppId = isHome ? fixture.away_team_id : fixture.home_team_id;
   const oppShort = oppTeam?.short_name ?? oppId.toUpperCase();
 
-  // Middle slot: score for completed fixtures, "vs" (home) or "at" (away) for
-  // scheduled. Keeps the layout consistent regardless of state.
+  // Middle slot: for completed fixtures, a `[score] FT [score]` cluster
+  // where the winner's box is filled dark with white number (matches the
+  // Fixtures list + World Rugby Rankings points treatment app-wide). For
+  // scheduled fixtures, the kickoff time — matches the Fixtures list
+  // upcoming-row convention.
   let middle: React.ReactNode;
   if (result) {
     const teamScore = isHome ? result.home_score : result.away_score;
     const oppScore = isHome ? result.away_score : result.home_score;
+    const teamWins = teamScore > oppScore;
+    const oppWins = oppScore > teamScore;
     middle = (
-      <Text style={styles.fixtureScore}>
-        {teamScore} – {oppScore}
-      </Text>
+      <View style={styles.scoreCluster}>
+        <View style={[styles.scoreBoxSmall, teamWins && styles.scoreBoxSmallWinner]}>
+          <Text
+            style={[
+              styles.scoreBoxSmallText,
+              teamWins && styles.scoreBoxSmallTextWinner,
+            ]}>
+            {teamScore}
+          </Text>
+        </View>
+        <Text style={styles.ftLabel}>FT</Text>
+        <View style={[styles.scoreBoxSmall, oppWins && styles.scoreBoxSmallWinner]}>
+          <Text
+            style={[
+              styles.scoreBoxSmallText,
+              oppWins && styles.scoreBoxSmallTextWinner,
+            ]}>
+            {oppScore}
+          </Text>
+        </View>
+      </View>
     );
   } else {
-    middle = <Text style={styles.fixtureVs}>{isHome ? 'vs' : 'at'}</Text>;
+    middle = <Text style={styles.fixtureTime}>{fixture.kickoff_utc.slice(11, 16)}</Text>;
   }
 
   return (
@@ -311,7 +345,7 @@ function FixtureLine({
         </View>
       </View>
       <Text style={styles.fixtureMeta} numberOfLines={1}>
-        {fixture.venue}
+        {competition?.short_name ?? fixture.competition_id} · {fixture.venue}
       </Text>
     </View>
   );
@@ -460,18 +494,44 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
   },
-  fixtureScore: {
+  // ─── Score cluster (completed fixtures) ────────────────────────────────────
+  // Same visual language as the Fixtures list winner box and the World Rugby
+  // Rankings points tile — 30×24 rounded 4pt box, dark fill + white number
+  // for the winner, light-grey fill + primary text for the loser, uppercase
+  // "FT" label between.
+  scoreCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  scoreBoxSmall: {
+    ...ScoreBoxSize.row,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
+  scoreBoxSmallText: {
     fontSize: TextSize.md,
     fontWeight: TextWeight.bold,
     color: Colors.light.text,
     fontVariant: ['tabular-nums'],
   },
-  fixtureVs: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
+  scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
+  ftLabel: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+  },
+  // Kickoff time in the middle slot for scheduled fixtures. Same treatment
+  // as the Fixtures list `timeMid` — tabular-nums, semibold, primary text —
+  // so the whole app uses one convention for "upcoming fixture middle slot".
+  fixtureTime: {
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
   fixtureMeta: {
     fontSize: TextSize.sm,

@@ -90,6 +90,17 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     return store.lineupsByFixture.get(req.params.id) ?? [];
   });
 
+  // Chronological match-event timeline for a fixture. Empty array (not 404)
+  // when the fixture has no events yet — scheduled fixtures, or completed
+  // ones missing from the synthetic dataset. Consumers can treat empty as
+  // "no data yet" without a special error branch.
+  app.get<{ Params: { id: string } }>('/fixtures/:id/events', async (req, reply) => {
+    if (!store.fixtureById.has(req.params.id)) {
+      return notFound(reply, `fixture ${req.params.id} not found`);
+    }
+    return store.eventsByFixture.get(req.params.id) ?? [];
+  });
+
   // ─── Teams ────────────────────────────────────────────────────────────────
   app.get('/teams', async () => store.teams);
 

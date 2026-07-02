@@ -177,6 +177,53 @@ liveIndicator: {
 
 ---
 
-## 6. Elevation / shadows
+## 6. Score boxes
 
-*To be documented. Currently ad-hoc `shadowOffset` / `shadowRadius` per card — should collapse to 2-3 named tiers (e.g. `hairline`, `card`, `modal`).*
+Small dark-and-light score tiles used to display paired scores and hero stats. Exported from `mobile/src/constants/theme.ts` as `ScoreBoxSize`. **Only two sizes.**
+
+| Token | Dimensions | Radius | Role | Where it appears |
+|---|---|---|---|---|
+| `ScoreBoxSize.row` | 30 × 24 pt | 4 pt | List / table row cell | Fixtures list score cells, My Team Last Match scores, World Rugby Rankings points tile |
+| `ScoreBoxSize.card` | 52 × 44 pt | 8 pt | Hero / card-scale | Home fixture carousel scores, Fixture detail header scores |
+
+**Aspect ratios:** `row` is 1.25:1 (near-square), `card` is 1.18:1 (near-square). Both intentionally close-to-square so the "score tile" visual language is consistent — the difference is scale, not shape.
+
+**Fill / text pairing:**
+- Winner box: `Colors.light.text` fill (black) + `Colors.light.textInverse` (white) text.
+- Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.text` (black) text.
+- Text weight: `TextWeight.bold`, `fontVariant: ['tabular-nums']` always.
+- Text size: `TextSize.md` for `row`, `TextSize.xl` for `card`.
+
+**Usage — spread the token so all three dimensions stay locked:**
+
+```typescript
+// Good — spread the token, so width / height / radius change together
+// if the token ever gets tuned. Nothing else in the style can drift.
+scoreBoxSmall: {
+  ...ScoreBoxSize.row,
+  backgroundColor: '#F3F4F6',
+  alignItems: 'center',
+  justifyContent: 'center',
+},
+
+// Bad — hand-coded dimensions that will drift away from the scale
+scoreBoxSmall: {
+  width: 30, height: 24, borderRadius: 4, // ← should be ScoreBoxSize.row
+  ...
+},
+```
+
+**Do not add a third size.** If a call site "needs" 40×24 for a row (or 60×56 for a hero), the design brief is wrong, not the scale. Grow the text or space, not the tile.
+
+### Match-state annotations (FT / KO / LIVE / HT)
+
+The little label between the two score boxes ("FT" for completed, "LIVE" or a minute-count for live, "HT" for half-time, kickoff time for scheduled) has two canonical treatments, mirroring the score-box scale:
+
+| Context | FT-annotation spec |
+|---|---|
+| Row (with `ScoreBoxSize.row`) | `TextSize.xs` (10pt), `TextWeight.bold`, `TextTracking.wide`, `Colors.light.textSecondary` |
+| Card (with `ScoreBoxSize.card`) | `TextSize.sm` (12pt), `TextWeight.bold`, `TextTracking.wide`, `Colors.light.textSecondary` |
+
+Both intentionally muted and small — the annotation is *informational*, not decorative. It should never compete visually with the scores it sits between.
+
+**Live / HT variants** carry the same size/weight but swap the colour token: `StatusColor.live` for a red live indicator, `StatusColor.warning` for HT amber. **KO / kickoff-time variants** use the same font size but `Colors.light.text` (primary) + `fontVariant: ['tabular-nums']` — treated as data, not annotation.

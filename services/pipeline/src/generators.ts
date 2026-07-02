@@ -8,7 +8,10 @@ import type {
   Fixture,
   LineUp,
   LineUpEntry,
+  MatchEvent,
+  MatchEventType,
   Player,
+  PlayerId,
   Position,
   RankingRow,
   RankingSnapshot,
@@ -163,20 +166,24 @@ export function generateSquad(
  * international scorelines with occasional blowouts.
  */
 export function generateResult(rng: Rng, fixture: Fixture): Result {
+  // Generate scoring components first, then derive the score from them, so
+  // 5×tries + 2×conversions + 3×penalty-goals + 3×drop-goals ALWAYS equals
+  // `home_score` / `away_score`. The event timeline (see `generateMatchEvents`)
+  // relies on this reconciliation — one try event, one conversion event, etc.,
+  // summing exactly to the recorded scoreboard.
   const homeAdvantage = rng.chance(0.6);
-  const homeBase = rng.int(10, 30);
-  const awayBase = rng.int(10, 30);
-  const home_score = homeBase + (homeAdvantage ? rng.int(0, 8) : 0);
-  const away_score = awayBase + (homeAdvantage ? 0 : rng.int(0, 8));
-
-  const home_tries = Math.floor(home_score / 8) + rng.int(0, 2);
-  const away_tries = Math.floor(away_score / 8) + rng.int(0, 2);
-  const home_conversions = Math.min(home_tries, rng.int(0, home_tries + 1));
-  const away_conversions = Math.min(away_tries, rng.int(0, away_tries + 1));
-  const home_penalties = rng.int(0, 5);
-  const away_penalties = rng.int(0, 5);
-  const home_drop_goals = rng.chance(0.15) ? 1 : 0;
-  const away_drop_goals = rng.chance(0.15) ? 1 : 0;
+  const home_tries = rng.int(2, homeAdvantage ? 6 : 4);
+  const away_tries = rng.int(2, homeAdvantage ? 4 : 6);
+  const home_conversions = Math.min(home_tries, rng.int(0, home_tries));
+  const away_conversions = Math.min(away_tries, rng.int(0, away_tries));
+  const home_penalties = rng.int(0, 4);
+  const away_penalties = rng.int(0, 4);
+  const home_drop_goals = rng.chance(0.12) ? 1 : 0;
+  const away_drop_goals = rng.chance(0.12) ? 1 : 0;
+  const home_score =
+    home_tries * 5 + home_conversions * 2 + home_penalties * 3 + home_drop_goals * 3;
+  const away_score =
+    away_tries * 5 + away_conversions * 2 + away_penalties * 3 + away_drop_goals * 3;
 
   // Possession / territory: home value 35-65, other side is 100 - that.
   const home_possession_percent = rng.int(35, 66);
@@ -381,4 +388,326 @@ export function generateRanking(
     snapshot_date: snapshotDate,
     rows,
   };
+}
+
+/**
+ * Generate a chronological match-event timeline for a completed fixture.
+ *
+ * Reconciled to the fixture's `Result`: the count of try / conversion /
+ * penalty-goal / drop-goal events equals the counts already in the result,
+ * so the timeline sums to the recorded final score. Cards and substitutions
+ * are independent of the score — plausible per-team totals.
+ *
+ * Player attribution comes from the fixture's lineups. Tries are attributed
+ * to a random player on the field. Kicks (conversions / penalty goals /
+ * drop goals) are attributed to the team's kicker — approximated as the
+ * fly-half (starting XV #10) with fallback to any starter if position 10
+ * isn't in the lineup for this synthetic run.
+ *
+ * Milestones (kick-off, half-time, second-half-start, full-time) are always
+ * emitted for a completed fixture. Team-agnostic; no player attribution.
+ *
+ * Returns events sorted ascending by (minute, stoppage) — kick-off first,
+ * full-time last. Consumers can reverse for a "recent-first" render.
+ */
+export function generateMatchEvents(
+  rng: Rng,
+  fixture: Fixture,
+  result: Result,
+  homeLineup: LineUp | undefined,
+  awayLineup: LineUp | undefined,
+): MatchEvent[] {
+  const events: MatchEvent[] = [];
+
+  // 1. Milestones — every completed match gets these four.
+  const milestone = (
+    type: MatchEventType,
+    minute: number,
+    stoppage = 0,
+  ): MatchEvent => ({
+    id: `${fixture.id}-${type}`,
+    fixture_id: fixture.id,
+    minute,
+    stoppage,
+    team_id: null,
+    player_id: null,
+    related_player_id: null,
+    type,
+    points: 0,
+  });
+  events.push(milestone('kick-off', 0));
+  events.push(milestone('half-time', 40));
+  events.push(milestone('second-half-start', 40));
+  events.push(milestone('full-time', 80));
+
+  // 2. Scoring events — emit try/conversion/penalty-goal/drop-goal counts
+  //    per team as recorded in the Result, so the timeline sums exactly to
+  //    the scoreboard.
+  const homeStarters = homeLineup?.starting_xv ?? [];
+  const awayStarters = awayLineup?.starting_xv ?? [];
+  const homeKicker = pickKicker(homeStarters);
+  const awayKicker = pickKicker(awayStarters);
+
+  addScoringForSide(rng, events, fixture, {
+    team_id: fixture.home_team_id,
+    tries: result.home_tries,
+    conversions: result.home_conversions,
+    penaltyGoals: result.home_penalties,
+    dropGoals: result.home_drop_goals,
+    starters: homeStarters,
+    kicker: homeKicker,
+    isHome: true,
+  });
+  addScoringForSide(rng, events, fixture, {
+    team_id: fixture.away_team_id,
+    tries: result.away_tries,
+    conversions: result.away_conversions,
+    penaltyGoals: result.away_penalties,
+    dropGoals: result.away_drop_goals,
+    starters: awayStarters,
+    kicker: awayKicker,
+    isHome: false,
+  });
+
+  // 3. Cards — driven by the counts in `Result`. Yellow-card minutes
+  //    scattered across both halves; red cards rare, second-half heavy.
+  addCardsForSide(rng, events, fixture, {
+    team_id: fixture.home_team_id,
+    yellows: result.home_yellow_cards,
+    reds: result.home_red_cards,
+    starters: homeStarters,
+    isHome: true,
+  });
+  addCardsForSide(rng, events, fixture, {
+    team_id: fixture.away_team_id,
+    yellows: result.away_yellow_cards,
+    reds: result.away_red_cards,
+    starters: awayStarters,
+    isHome: false,
+  });
+
+  // 4. Substitutions — rugby bench is 16-23 (8 subs). Typical usage is
+  //    3-7 subs per team, mostly in the 45'-75' window. Skip if lineups
+  //    aren't available for this fixture.
+  if (homeLineup) {
+    addSubstitutions(rng, events, fixture, {
+      team_id: fixture.home_team_id,
+      lineup: homeLineup,
+      isHome: true,
+    });
+  }
+  if (awayLineup) {
+    addSubstitutions(rng, events, fixture, {
+      team_id: fixture.away_team_id,
+      lineup: awayLineup,
+      isHome: false,
+    });
+  }
+
+  // Sort ascending by (minute, stoppage). Ties resolve stably by the order
+  // events were appended above — kick-off before first try, etc.
+  events.sort((a, b) => {
+    if (a.minute !== b.minute) return a.minute - b.minute;
+    return a.stoppage - b.stoppage;
+  });
+
+  return events;
+}
+
+// ─── Match-event helpers ─────────────────────────────────────────────────────
+
+/** Kicker for a team — the fly-half (position 10). Fallback: any starter
+ * whose position isn't listed if the fly-half slot isn't in this lineup. */
+function pickKicker(starters: readonly LineUpEntry[]): PlayerId | null {
+  const fly = starters.find((e) => e.position === 'fly-half');
+  if (fly) return fly.player_id;
+  return starters[0]?.player_id ?? null;
+}
+
+/** Random player from a starting XV. Never returns null if `starters`
+ * has at least one entry. */
+function pickRandomStarter(rng: Rng, starters: readonly LineUpEntry[]): PlayerId | null {
+  if (starters.length === 0) return null;
+  return starters[rng.int(0, starters.length - 1)]?.player_id ?? null;
+}
+
+/**
+ * Return `count` minutes spread across a range, ordered ascending, no
+ * duplicates. Used to space out scoring events across the match so the
+ * timeline reads naturally.
+ */
+function spreadMinutes(rng: Rng, count: number, from: number, to: number): number[] {
+  if (count <= 0) return [];
+  const minutes = new Set<number>();
+  while (minutes.size < count) {
+    minutes.add(rng.int(from, to));
+  }
+  return [...minutes].sort((a, b) => a - b);
+}
+
+interface SideScoring {
+  team_id: TeamId;
+  tries: number;
+  conversions: number;
+  penaltyGoals: number;
+  dropGoals: number;
+  starters: readonly LineUpEntry[];
+  kicker: PlayerId | null;
+  isHome: boolean;
+}
+
+function addScoringForSide(
+  rng: Rng,
+  out: MatchEvent[],
+  fixture: Fixture,
+  side: SideScoring,
+): void {
+  const idSuffix = side.isHome ? 'h' : 'a';
+  // Tries: spread across 1..79. Each try may be followed by a conversion
+  // attempt at the same minute; we allocate conversions up to the try
+  // count sequentially so conversions never exceed tries.
+  const tryMinutes = spreadMinutes(rng, side.tries, 1, 78);
+  const convertsRemaining = Math.min(side.conversions, side.tries);
+  for (let i = 0; i < tryMinutes.length; i++) {
+    const minute = tryMinutes[i]!;
+    out.push({
+      id: `${fixture.id}-try-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: pickRandomStarter(rng, side.starters),
+      related_player_id: null,
+      type: 'try',
+      points: 5,
+    });
+    if (i < convertsRemaining) {
+      out.push({
+        id: `${fixture.id}-conv-${idSuffix}-${i}`,
+        fixture_id: fixture.id,
+        minute,
+        stoppage: 1,
+        team_id: side.team_id,
+        player_id: side.kicker,
+        related_player_id: null,
+        type: 'conversion',
+        points: 2,
+      });
+    }
+  }
+  // Penalty goals: spread across 5..75.
+  const penMinutes = spreadMinutes(rng, side.penaltyGoals, 5, 75);
+  for (let i = 0; i < penMinutes.length; i++) {
+    out.push({
+      id: `${fixture.id}-pen-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute: penMinutes[i]!,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: side.kicker,
+      related_player_id: null,
+      type: 'penalty-goal',
+      points: 3,
+    });
+  }
+  // Drop goals: rare, spread across whole match.
+  const dropMinutes = spreadMinutes(rng, side.dropGoals, 10, 78);
+  for (let i = 0; i < dropMinutes.length; i++) {
+    out.push({
+      id: `${fixture.id}-drop-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute: dropMinutes[i]!,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: side.kicker,
+      related_player_id: null,
+      type: 'drop-goal',
+      points: 3,
+    });
+  }
+}
+
+interface SideCards {
+  team_id: TeamId;
+  yellows: number;
+  reds: number;
+  starters: readonly LineUpEntry[];
+  isHome: boolean;
+}
+
+function addCardsForSide(
+  rng: Rng,
+  out: MatchEvent[],
+  fixture: Fixture,
+  side: SideCards,
+): void {
+  const idSuffix = side.isHome ? 'h' : 'a';
+  // Yellow cards — scattered across whole match, slight second-half bias.
+  const yellowMinutes = spreadMinutes(rng, side.yellows, 15, 75);
+  for (let i = 0; i < yellowMinutes.length; i++) {
+    out.push({
+      id: `${fixture.id}-yc-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute: yellowMinutes[i]!,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: pickRandomStarter(rng, side.starters),
+      related_player_id: null,
+      type: 'yellow-card',
+      points: 0,
+    });
+  }
+  // Red cards — rare, second-half heavy.
+  const redMinutes = spreadMinutes(rng, side.reds, 40, 78);
+  for (let i = 0; i < redMinutes.length; i++) {
+    out.push({
+      id: `${fixture.id}-rc-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute: redMinutes[i]!,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: pickRandomStarter(rng, side.starters),
+      related_player_id: null,
+      type: 'red-card',
+      points: 0,
+    });
+  }
+}
+
+interface SideSubs {
+  team_id: TeamId;
+  lineup: LineUp;
+  isHome: boolean;
+}
+
+function addSubstitutions(
+  rng: Rng,
+  out: MatchEvent[],
+  fixture: Fixture,
+  side: SideSubs,
+): void {
+  const idSuffix = side.isHome ? 'h' : 'a';
+  // Number of subs — most teams make 4-7 changes in a modern rugby test.
+  const nSubs = Math.min(rng.int(4, 7), side.lineup.bench.length, side.lineup.starting_xv.length);
+  // Pick which starters come off (unique) and pair with bench players in
+  // shirt-number order (bench #16 → first sub off, etc.).
+  const startersShuffled = rng.shuffle([...side.lineup.starting_xv]);
+  const bench = [...side.lineup.bench].sort((a, b) => a.shirt_number - b.shirt_number);
+  const subMinutes = spreadMinutes(rng, nSubs, 45, 75);
+  for (let i = 0; i < nSubs; i++) {
+    const starter = startersShuffled[i];
+    const benchPlayer = bench[i];
+    if (!starter || !benchPlayer) continue;
+    out.push({
+      id: `${fixture.id}-sub-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute: subMinutes[i] ?? 60,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: starter.player_id, // coming OFF
+      related_player_id: benchPlayer.player_id, // coming ON
+      type: 'substitution',
+      points: 0,
+    });
+  }
 }

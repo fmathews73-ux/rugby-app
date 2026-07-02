@@ -19,6 +19,7 @@ import { dirname, join } from 'node:path';
 import type {
   Bracket,
   LineUp,
+  MatchEvent,
   Player,
   Position,
   RankingSnapshot,
@@ -32,6 +33,7 @@ import { ALL_COMPETITIONS, TODAY_ISO } from './competitions.js';
 import {
   computeStandings,
   generateLineUp,
+  generateMatchEvents,
   generateRanking,
   generateResult,
   generateSquad,
@@ -53,6 +55,7 @@ const resultRng = root.fork();
 const lineupRng = root.fork();
 const rankingRng = root.fork();
 const womensRankingRng = root.fork();
+const eventsRng = root.fork();
 
 // ─── Squads and players ─────────────────────────────────────────────────────
 // One squad per team per season that team participates in.
@@ -109,6 +112,7 @@ for (const [teamId, players] of squadAcc.playersByTeam) {
 const results: Result[] = [];
 const resultByFixture = new Map<string, Result>();
 const lineups: LineUp[] = [];
+const events: MatchEvent[] = [];
 
 for (const bundle of ALL_COMPETITIONS) {
   for (const fx of bundle.fixtures) {
@@ -117,11 +121,23 @@ for (const bundle of ALL_COMPETITIONS) {
     results.push(r);
     resultByFixture.set(fx.id, r);
 
+    // Lineups first — the event generator uses them for player attribution.
+    let homeLineup: LineUp | undefined;
+    let awayLineup: LineUp | undefined;
     for (const teamId of [fx.home_team_id, fx.away_team_id] as const) {
       const squad = squadAcc.squadByKey.get(`${teamId}::${bundle.season.id}`);
       const posMap = playersByTeamAndPos.get(teamId);
       if (!squad || !posMap) continue;
-      lineups.push(generateLineUp(lineupRng, fx, teamId, squad, posMap));
+      const lu = generateLineUp(lineupRng, fx, teamId, squad, posMap);
+      lineups.push(lu);
+      if (teamId === fx.home_team_id) homeLineup = lu;
+      else awayLineup = lu;
+    }
+
+    // Event timeline — reconciled to Result (try/conv/pen/drop counts match),
+    // players sourced from the lineups just produced.
+    for (const ev of generateMatchEvents(eventsRng, fx, r, homeLineup, awayLineup)) {
+      events.push(ev);
     }
   }
 }
@@ -214,6 +230,7 @@ const outputs: OutputFile[] = [
   { file: 'standings.json', data: standings },
   { file: 'brackets.json', data: brackets },
   { file: 'rankings.json', data: rankings },
+  { file: 'events.json', data: events },
 ];
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -235,6 +252,7 @@ const totals = {
   standings: standings.length,
   brackets: brackets.length,
   rankings: rankings.length,
+  events: events.length,
 };
 // eslint-disable-next-line no-console -- CLI tool output
 console.log('Wrote synthetic dataset:', totals);

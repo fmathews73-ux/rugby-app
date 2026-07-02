@@ -29,6 +29,7 @@ export type SquadId = string;
 export type StandingsId = string;
 export type BracketId = string;
 export type RankingSnapshotId = string;
+export type MatchEventId = string;
 
 // ─── Time ────────────────────────────────────────────────────────────────────
 // ISO 8601 strings, kept as aliases for documentation. Storage and API JSON
@@ -340,4 +341,63 @@ export interface RankingRow {
   points: number;
   previous_rank: number | null;
   movement: number | null; // rank_delta since previous snapshot; null if none
+}
+
+// ─── Match events (Overview timeline) ────────────────────────────────────────
+
+/**
+ * A single moment in a match's chronological timeline. Rendered as the
+ * fixture Overview pane's event feed (try, card, sub, half-time, etc.).
+ * Live-fed in prod; synthesised for dev builds reconciled to the fixture's
+ * `Result` so tries × 5 + conversions × 2 + penalty-goals × 3 +
+ * drop-goals × 3 always sums to the final score already on record.
+ *
+ * Milestones (kick-off, half-time, second-half-start, full-time) have no
+ * associated team / player. All other event types carry at least a team_id
+ * and typically a player_id.
+ *
+ * Substitutions encode both sides of the swap: `player_id` is the player
+ * coming OFF, `related_player_id` is the player coming ON.
+ */
+export type MatchEventType =
+  // Scoring — carry associated points via the `points` field.
+  | 'try'
+  | 'conversion'
+  | 'penalty-goal'
+  | 'drop-goal'
+  // Discipline.
+  | 'yellow-card'
+  | 'red-card'
+  // Substitutions — `player_id` off, `related_player_id` on.
+  | 'substitution'
+  // Whole-match milestones.
+  | 'kick-off'
+  | 'half-time'
+  | 'second-half-start'
+  | 'full-time';
+
+export interface MatchEvent {
+  id: MatchEventId;
+  fixture_id: FixtureId;
+  /** Whole-number match minute (0 = kick-off, 40 = half-time,
+   *  80 = full-time). For events during stoppage time, use the base minute
+   *  (e.g. 40) plus `stoppage`. */
+  minute: number;
+  /** Stoppage minutes on top of `minute` — e.g. 40 + stoppage 2 renders
+   *  as "40'+2'". 0 for regular time. */
+  stoppage: number;
+  /** Team the event belongs to. Null for match milestones (kick-off,
+   *  half-time, etc.) that are not team-specific. */
+  team_id: TeamId | null;
+  /** Primary player. Null for milestones. For substitutions this is the
+   *  player coming OFF. */
+  player_id: PlayerId | null;
+  /** Related player, currently only used for substitutions — the player
+   *  coming ON. Null otherwise. */
+  related_player_id: PlayerId | null;
+  type: MatchEventType;
+  /** Points scored by this event (0 for non-scoring events). Try = 5,
+   *  Conversion = 2, Penalty goal = 3, Drop goal = 3. Explicit rather
+   *  than derived so consumers don't have to hard-code the scoring table. */
+  points: number;
 }

@@ -11,6 +11,7 @@ import type {
   Fixture,
   LineUp,
   Player,
+  MatchEvent,
   RankingSnapshot,
   Result,
   Season,
@@ -103,6 +104,17 @@ export function useFixtureLineups(fixtureId: string): UseQueryResult<LineUp[]> {
   return useQuery({
     queryKey: ['fixtureLineups', fixtureId],
     queryFn: () => fetchJson<LineUp[]>(`/fixtures/${fixtureId}/lineups`),
+    enabled: Boolean(fixtureId),
+  });
+}
+
+/** Chronological match-event timeline for a fixture. Returns an empty
+ *  array (not an error) for fixtures that have no events yet — the
+ *  Overview timeline UI can treat empty as "not yet available". */
+export function useFixtureEvents(fixtureId: string): UseQueryResult<MatchEvent[]> {
+  return useQuery({
+    queryKey: ['fixtureEvents', fixtureId],
+    queryFn: () => fetchJson<MatchEvent[]>(`/fixtures/${fixtureId}/events`),
     enabled: Boolean(fixtureId),
   });
 }

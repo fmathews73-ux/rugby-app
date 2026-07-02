@@ -5,6 +5,7 @@ import { useMemo } from 'react';
 import { StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
+import { BackButton } from '@/components/back-button';
 import { DevModeBanner } from '@/components/dev-mode-banner';
 
 SplashScreen.preventAutoHideAsync();
@@ -40,22 +41,19 @@ export default function RootLayout() {
             <DevModeBanner />
           </SafeAreaView>
           <View style={styles.appBody}>
-            <Stack>
+            <Stack
+              // Detail-screen defaults: custom BackButton in place of the
+              // system iOS-blue chevron + back title. Empty screen title so
+              // the header carries no wordmark — content owns the top of
+              // the screen.
+              screenOptions={{
+                headerLeft: () => <BackButton />,
+                headerBackVisible: false, // hide the default back button
+                title: '',
+              }}>
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen
-                name="team/[id]"
-                options={{
-                  headerBackTitle: 'Teams',
-                  title: '',
-                }}
-              />
-              <Stack.Screen
-                name="fixture/[id]"
-                options={{
-                  headerBackTitle: 'Fixtures',
-                  title: '',
-                }}
-              />
+              <Stack.Screen name="team/[id]" />
+              <Stack.Screen name="fixture/[id]" />
             </Stack>
           </View>
         </SafeAreaProvider>

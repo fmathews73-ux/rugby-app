@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * One card in the Home timeline carousel. Layout:
@@ -261,9 +261,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   scoreBox: {
-    width: 52,
-    height: 44,
-    borderRadius: 8,
+    ...ScoreBoxSize.card,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -278,10 +276,15 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   scoreTextWinner: { color: Colors.light.textInverse },
+  // FT annotation for completed fixtures in the card. Uses the canonical
+  // card-scale FT spec — 12pt bold wide textSecondary — matching the
+  // fixture-detail hero and mirroring the row-scale FT at 10pt used in the
+  // list contexts. See design-system.md §6 for the two-tier FT scale.
   statusText: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
     marginHorizontal: 2,
   },
   statusLive: {

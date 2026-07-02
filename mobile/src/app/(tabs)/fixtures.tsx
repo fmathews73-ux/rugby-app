@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, SectionList, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Fixture, Result } from '@rugby-app/shared';
@@ -11,10 +11,17 @@ import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 const ALL_COMPETITIONS = 'all';
+
+/** Horizontal page margin for the day-cards — matches Home cards
+ * (FixtureCarousel / HomeRankingsCarousel / MyTeamCard) so cards align
+ * across tabs. Only viable now that the fixed left-hand time column has
+ * been dropped: the time / FT lives in the middle slot instead, so the
+ * row's total content width fits comfortably in a 40pt-margin card. */
+const HORIZONTAL_MARGIN = 40;
 
 const FILTER_OPTIONS = [
   { id: ALL_COMPETITIONS, label: 'All' },
@@ -106,171 +113,175 @@ export default function FixturesScreen() {
     }));
   }, [isLoading, error, competitions.data, teams.data, fixtureQueries, competitionFilter]);
 
-  /** Section+item indices of the most recent completed fixture in the current
-   * `sections` structure — used to jump-scroll on mount so that fixture is
-   * the top visible row. Iterates from the end backwards to grab the LAST
-   * completed fixture (i.e., the most recent). */
-  const mostRecentCompletedLocation = useMemo((): {
-    sectionIndex: number;
-    itemIndex: number;
-  } | null => {
+  /** Day-group index of the day that contains the most recent completed
+   * fixture. Used to jump-scroll on mount so that day-card sits at the top
+   * of the viewport. Iterates from the end backwards to grab the LAST
+   * completed fixture (i.e., the most recent) and returns its day. */
+  const mostRecentCompletedDayIndex = useMemo((): number | null => {
     for (let s = sections.length - 1; s >= 0; s--) {
       const section = sections[s];
       if (!section) continue;
       for (let i = section.data.length - 1; i >= 0; i--) {
         const fx = section.data[i];
-        if (fx && fx.status === 'completed') {
-          return { sectionIndex: s, itemIndex: i };
-        }
+        if (fx && fx.status === 'completed') return s;
       }
     }
     return null;
   }, [sections]);
 
-  const listRef = useRef<SectionList<Fixture, { title: string; data: Fixture[]; compById: Map<string, { short_name: string }>; teamById: Map<string, { flag_code: string; short_name: string }> }>>(null);
+  type DayGroup = (typeof sections)[number];
+  const listRef = useRef<FlatList<DayGroup>>(null);
   const didInitialScroll = useRef(false);
 
   useEffect(() => {
     if (
       !didInitialScroll.current &&
-      mostRecentCompletedLocation !== null &&
+      mostRecentCompletedDayIndex !== null &&
       sections.length > 0
     ) {
-      // Delay lets the SectionList finish its first layout before we scroll.
+      // Delay lets the FlatList finish its first layout before we scroll.
       const t = setTimeout(() => {
         try {
-          listRef.current?.scrollToLocation({
-            sectionIndex: mostRecentCompletedLocation.sectionIndex,
-            itemIndex: mostRecentCompletedLocation.itemIndex,
+          listRef.current?.scrollToIndex({
+            index: mostRecentCompletedDayIndex,
             viewPosition: 0, // top of viewport
             animated: false,
           });
           didInitialScroll.current = true;
         } catch {
-          // SectionList throws if layout isn't ready — try once more.
+          // FlatList throws if layout isn't ready — retry logic in
+          // onScrollToIndexFailed below.
         }
       }, 80);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [mostRecentCompletedLocation, sections.length]);
+  }, [mostRecentCompletedDayIndex, sections.length]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
-      <CompetitionPicker
-        options={FILTER_OPTIONS}
-        selected={competitionFilter}
-        onSelect={setCompetitionFilter}
-      />
-      <SectionList<
-        Fixture,
-        {
-          title: string;
-          data: Fixture[];
-          compById: Map<string, { short_name: string }>;
-          teamById: Map<string, { flag_code: string; short_name: string }>;
-        }
-      >
+    // No 'bottom' edge on SafeAreaView — the tab bar handles its own inset;
+    // matches Home page pattern so cards scroll cleanly under the tab bar.
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
+      <View style={styles.pickerWrap}>
+        <CompetitionPicker
+          options={FILTER_OPTIONS}
+          selected={competitionFilter}
+          onSelect={setCompetitionFilter}
+        />
+      </View>
+      <FlatList<DayGroup>
         ref={listRef}
-        sections={sections}
+        data={sections}
+        keyExtractor={(item) => item.title}
+        contentContainerStyle={styles.listContent}
         onScrollToIndexFailed={() => {
-          // Fallback: retry after a tick when getItemLayout isn't cheap.
+          // Retry once when getItemLayout isn't cheap enough at first paint.
           setTimeout(() => {
-            if (mostRecentCompletedLocation) {
-              listRef.current?.scrollToLocation({
-                sectionIndex: mostRecentCompletedLocation.sectionIndex,
-                itemIndex: mostRecentCompletedLocation.itemIndex,
+            if (mostRecentCompletedDayIndex !== null) {
+              listRef.current?.scrollToIndex({
+                index: mostRecentCompletedDayIndex,
                 viewPosition: 0,
                 animated: false,
               });
             }
           }, 100);
         }}
-        keyExtractor={(item) => item.id}
-        renderSectionHeader={({ section }) => (
-          <View style={styles.dayHeader}>
-            <Ionicons
-              name="calendar-outline"
-              size={12}
-              color={Colors.light.textSecondary}
-            />
-            <Text style={styles.dayHeaderText}>{section.title}</Text>
+        renderItem={({ item: dayGroup }) => (
+          <View style={styles.card}>
+            <View style={styles.cardHeader}>
+              <Ionicons
+                name="calendar-outline"
+                size={12}
+                color={Colors.light.textSecondary}
+              />
+              <Text style={styles.cardHeaderText}>{dayGroup.title}</Text>
+            </View>
+            {dayGroup.data.map((fx, i) => {
+              const comp = dayGroup.compById.get(fx.competition_id);
+              const home = dayGroup.teamById.get(fx.home_team_id);
+              const away = dayGroup.teamById.get(fx.away_team_id);
+              const isCompleted = fx.status === 'completed';
+              const result = isCompleted ? resultByFixture.get(fx.id) : undefined;
+              const isLast = i === dayGroup.data.length - 1;
+              return (
+                <Pressable
+                  key={fx.id}
+                  onPress={() => router.push(`/fixture/${fx.id}`)}
+                  style={({ pressed }) => [
+                    styles.row,
+                    !isLast && styles.rowDivider,
+                    pressed && styles.rowPressed,
+                  ]}>
+                  <View style={styles.matchupRow}>
+                    <View style={styles.flagWrap}>
+                      {home ? <TeamFlagBall2D flagCode={home.flag_code} size={FlagSize.row} /> : null}
+                    </View>
+                    <Text style={styles.teamCode}>
+                      {home?.short_name ?? fx.home_team_id.toUpperCase()}
+                    </Text>
+                    {result ? (
+                      // Completed: score-FT-score cluster (FT sits between the
+                      // two score boxes, replacing the fixed left-hand time column).
+                      <View style={styles.middleCompleted}>
+                        <View
+                          style={[
+                            styles.scoreBoxSmall,
+                            result.home_score > result.away_score && styles.scoreBoxSmallWinner,
+                          ]}>
+                          <Text
+                            style={[
+                              styles.scoreBoxSmallText,
+                              result.home_score > result.away_score && styles.scoreBoxSmallTextWinner,
+                            ]}>
+                            {result.home_score}
+                          </Text>
+                        </View>
+                        <Text style={styles.ftLabel}>FT</Text>
+                        <View
+                          style={[
+                            styles.scoreBoxSmall,
+                            result.away_score > result.home_score && styles.scoreBoxSmallWinner,
+                          ]}>
+                          <Text
+                            style={[
+                              styles.scoreBoxSmallText,
+                              result.away_score > result.home_score && styles.scoreBoxSmallTextWinner,
+                            ]}>
+                            {result.away_score}
+                          </Text>
+                        </View>
+                      </View>
+                    ) : fx.status === 'scheduled' ? (
+                      // Upcoming: show the kickoff time in the middle slot
+                      // (replaces the previous "Upcoming" badge).
+                      <Text style={styles.timeMid}>{fx.kickoff_utc.slice(11, 16)}</Text>
+                    ) : (
+                      // Live / half-time / postponed / cancelled: keep the
+                      // status label.
+                      <Text
+                        style={[styles.statusMid, statusMidExtraStyle(fx.status)]}
+                        numberOfLines={1}>
+                        {statusMidLabel(fx.status)}
+                      </Text>
+                    )}
+                    <Text style={styles.teamCode}>
+                      {away?.short_name ?? fx.away_team_id.toUpperCase()}
+                    </Text>
+                    <View style={styles.flagWrap}>
+                      {away ? <TeamFlagBall2D flagCode={away.flag_code} size={FlagSize.row} /> : null}
+                    </View>
+                  </View>
+                  <Text style={styles.metaText}>
+                    {comp?.short_name ?? fx.competition_id} · {fx.venue}
+                  </Text>
+                </Pressable>
+              );
+            })}
           </View>
         )}
-        renderItem={({ item, section }) => {
-          const comp = section.compById.get(item.competition_id);
-          const home = section.teamById.get(item.home_team_id);
-          const away = section.teamById.get(item.away_team_id);
-          const isCompleted = item.status === 'completed';
-          const result = isCompleted ? resultByFixture.get(item.id) : undefined;
-          return (
-            <Pressable
-              onPress={() => router.push(`/fixture/${item.id}`)}
-              style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
-              <Text style={styles.timeCol}>{item.kickoff_utc.slice(11, 16)}</Text>
-              <View style={styles.mainCol}>
-                <View style={styles.matchupRow}>
-                  <View style={styles.flagWrap}>
-                    {home ? <TeamFlagBall2D flagCode={home.flag_code} size={FlagSize.row} /> : null}
-                  </View>
-                  <Text style={styles.teamCode}>
-                    {home?.short_name ?? item.home_team_id.toUpperCase()}
-                  </Text>
-                  {result ? (
-                    <View style={styles.scoreBoxRow}>
-                      <View
-                        style={[
-                          styles.scoreBoxSmall,
-                          result.home_score > result.away_score && styles.scoreBoxSmallWinner,
-                        ]}>
-                        <Text
-                          style={[
-                            styles.scoreBoxSmallText,
-                            result.home_score > result.away_score && styles.scoreBoxSmallTextWinner,
-                          ]}>
-                          {result.home_score}
-                        </Text>
-                      </View>
-                      <View
-                        style={[
-                          styles.scoreBoxSmall,
-                          result.away_score > result.home_score && styles.scoreBoxSmallWinner,
-                        ]}>
-                        <Text
-                          style={[
-                            styles.scoreBoxSmallText,
-                            result.away_score > result.home_score && styles.scoreBoxSmallTextWinner,
-                          ]}>
-                          {result.away_score}
-                        </Text>
-                      </View>
-                    </View>
-                  ) : (
-                    <Text
-                      style={[styles.statusMid, statusMidExtraStyle(item.status)]}
-                      numberOfLines={1}>
-                      {statusMidLabel(item.status)}
-                    </Text>
-                  )}
-                  <Text style={styles.teamCode}>
-                    {away?.short_name ?? item.away_team_id.toUpperCase()}
-                  </Text>
-                  <View style={styles.flagWrap}>
-                    {away ? <TeamFlagBall2D flagCode={away.flag_code} size={FlagSize.row} /> : null}
-                  </View>
-                </View>
-                <Text style={styles.metaText}>
-                  {comp?.short_name ?? item.competition_id} · {item.venue}
-                </Text>
-              </View>
-            </Pressable>
-          );
-        }}
-        stickySectionHeadersEnabled={false}
-        contentContainerStyle={{ paddingBottom: 40 }}
       />
     </SafeAreaView>
   );
@@ -282,11 +293,12 @@ function formatDay(iso: string): string {
   return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 }
 
-/** Text shown in the middle slot of the matchup row for non-completed
- * fixtures. Completed fixtures show the score itself instead. */
+/** Text shown in the middle slot for live / half-time / postponed / cancelled
+ * fixtures. Completed fixtures render a score cluster (with FT between)
+ * and scheduled fixtures render the kickoff time — neither reaches here. */
 function statusMidLabel(status: Fixture['status']): string {
   const labels: Record<Fixture['status'], string> = {
-    scheduled: 'Upcoming',
+    scheduled: '', // not reached — time renders instead
     live: 'LIVE',
     'half-time': 'HT',
     completed: '', // not reached — score renders instead
@@ -303,30 +315,65 @@ function statusMidExtraStyle(status: Fixture['status']) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+  safe: { flex: 1, backgroundColor: '#F5F5F7' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  dayHeader: {
+  pickerWrap: {
+    // Match card horizontal margin so the picker aligns with card edges below.
+    paddingHorizontal: HORIZONTAL_MARGIN,
+    paddingTop: Spacing.four,
+    paddingBottom: Spacing.three,
+  },
+  listContent: {
+    paddingHorizontal: HORIZONTAL_MARGIN,
+    // No paddingBottom — cards scroll cleanly under the tab bar, matching
+    // the Home page pattern.
+    gap: Spacing.three,
+  },
+  card: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    // No inner padding on the card itself — the header + rows own their own
+    // padding so the row divider hairlines can span the full card width.
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+    overflow: 'hidden',
+  },
+  cardHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: Colors.light.background,
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.two,
   },
-  dayHeaderText: { fontSize: TextSize.sm, fontWeight: TextWeight.semibold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary, textTransform: 'uppercase' },
+  cardHeaderText: {
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.semibold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
   row: {
-    flexDirection: 'row',
-    alignItems: 'center',
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
-    gap: Spacing.three,
+    gap: 4,
+  },
+  rowDivider: {
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F3F4F6',
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
-  timeCol: { width: 52, fontSize: TextSize.sm, fontWeight: TextWeight.semibold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
-  mainCol: { flex: 1, gap: 4 },
-  matchupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
+  matchupRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+  },
   flagWrap: { width: FlagSize.row, height: FlagSize.row, alignItems: 'center', justifyContent: 'center' },
   teamCode: {
     width: 40,
@@ -335,17 +382,18 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.semibold,
     color: Colors.light.text,
   },
-  scoreBoxRow: {
-    width: 76,
+  // Fixed-width middle slot so the flags on either side stay at the same
+  // horizontal position row-to-row regardless of what's in the middle
+  // (completed score cluster / kickoff time / status label).
+  middleCompleted: {
+    width: 96,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 4,
+    gap: 6,
   },
   scoreBoxSmall: {
-    width: 30,
-    height: 24,
-    borderRadius: 4,
+    ...ScoreBoxSize.row,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -353,8 +401,22 @@ const styles = StyleSheet.create({
   scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
   scoreBoxSmallText: { fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
+  ftLabel: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+  },
+  timeMid: {
+    width: 96,
+    textAlign: 'center',
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
+  },
   statusMid: {
-    width: 76,
+    width: 96,
     textAlign: 'center',
     fontSize: TextSize.sm,
     fontWeight: TextWeight.semibold,

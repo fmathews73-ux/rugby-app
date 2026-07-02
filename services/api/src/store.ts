@@ -17,6 +17,7 @@ import type {
   LineUp,
   Player,
   PlayerId,
+  MatchEvent,
   RankingSnapshot,
   Result,
   Season,
@@ -65,6 +66,9 @@ export interface Store {
   rankings: readonly RankingSnapshot[];
   mensRankings: readonly RankingSnapshot[];
   womensRankings: readonly RankingSnapshot[];
+
+  events: readonly MatchEvent[];
+  eventsByFixture: ReadonlyMap<FixtureId, MatchEvent[]>;
 }
 
 function readJson<T>(dir: string, file: string): T {
@@ -100,6 +104,7 @@ export function loadStore(dataDir: string): Store {
   const standings = readJson<Standings[]>(dataDir, 'standings.json');
   const brackets = readJson<Bracket[]>(dataDir, 'brackets.json');
   const rankings = readJson<RankingSnapshot[]>(dataDir, 'rankings.json');
+  const events = readJson<MatchEvent[]>(dataDir, 'events.json');
 
   const fixturesByTeam = new Map<TeamId, Fixture[]>();
   for (const fx of fixtures) {
@@ -151,5 +156,8 @@ export function loadStore(dataDir: string): Store {
     womensRankings: rankings
       .filter((r) => r.source === 'world-rugby-womens')
       .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
+
+    events,
+    eventsByFixture: groupBy(events, (e) => e.fixture_id),
   };
 }
