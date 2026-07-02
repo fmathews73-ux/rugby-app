@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
@@ -235,11 +236,39 @@ function OverviewPane({
   return (
     <View style={styles.statsCard}>
       <Text style={styles.statsCardTitle}>Match Statistics</Text>
+
+      <StatBar label="Possession %" home={result.home_possession_percent} away={result.away_possession_percent} />
+      <StatBar label="Territory %" home={result.home_territory_percent} away={result.away_territory_percent} />
+
       <StatBar label="Half-time" home={result.half_time_home} away={result.half_time_away} />
       <StatBar label="Tries" home={result.home_tries} away={result.away_tries} />
       <StatBar label="Conversions" home={result.home_conversions} away={result.away_conversions} />
       <StatBar label="Penalties" home={result.home_penalties} away={result.away_penalties} />
       <StatBar label="Drop goals" home={result.home_drop_goals} away={result.away_drop_goals} />
+
+      <StatBar label="Meters made" home={result.home_meters} away={result.away_meters} />
+      <StatBar label="Line breaks" home={result.home_line_breaks} away={result.away_line_breaks} />
+      <StatBar label="Kicks in play" home={result.home_kicks_in_play} away={result.away_kicks_in_play} />
+
+      <StatBar label="Scrums won" home={result.home_scrums_won} away={result.away_scrums_won} />
+      <StatBar label="Lineouts won" home={result.home_lineouts_won} away={result.away_lineouts_won} />
+
+      <StatBar label="Tackles made" home={result.home_tackles_made} away={result.away_tackles_made} />
+      <StatBar label="Turnovers won" home={result.home_turnovers_won} away={result.away_turnovers_won} />
+      <StatBar label="Penalties conceded" home={result.home_penalties_conceded} away={result.away_penalties_conceded} />
+
+      <PremiumStatsBadge />
+    </View>
+  );
+}
+
+function PremiumStatsBadge() {
+  return (
+    <View style={styles.premiumUnlockRow}>
+      <View style={styles.premiumUnlockBadge}>
+        <Ionicons name="star" size={13} color="#B45309" />
+        <Text style={styles.premiumUnlockText}>Advanced stats · Unlock Premium</Text>
+      </View>
     </View>
   );
 }
@@ -546,16 +575,39 @@ const styles = StyleSheet.create({
   },
   barTrack: {
     flex: 1,
-    height: 10,
+    height: 8,
     borderRadius: 999,
     backgroundColor: '#F3F4F6',
     flexDirection: 'row',
-    overflow: 'hidden',
+    alignItems: 'center',
+    paddingHorizontal: 6,
     gap: 3,
   },
-  barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: '100%' },
-  barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: '100%' },
+  barSegHome: { backgroundColor: '#374151', borderRadius: 999, height: 6 },
+  barSegAway: { backgroundColor: '#4F46E5', borderRadius: 999, height: 6 },
   barEmpty: { flex: 1 },
+
+  premiumUnlockRow: {
+    alignItems: 'center',
+    paddingTop: Spacing.three,
+  },
+  premiumUnlockBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: '#B45309',
+    backgroundColor: '#FFFBEB',
+  },
+  premiumUnlockText: {
+    fontSize: 12,
+    fontWeight: '700',
+    color: '#B45309',
+    letterSpacing: 0.5,
+  },
 
   lineupContainer: { gap: Spacing.four },
   lineupTeamBlock: { gap: 4 },

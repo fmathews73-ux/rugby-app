@@ -178,6 +178,12 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
   const home_drop_goals = rng.chance(0.15) ? 1 : 0;
   const away_drop_goals = rng.chance(0.15) ? 1 : 0;
 
+  // Possession / territory: home value 35-65, other side is 100 - that.
+  const home_possession_percent = rng.int(35, 66);
+  const away_possession_percent = 100 - home_possession_percent;
+  const home_territory_percent = rng.int(35, 66);
+  const away_territory_percent = 100 - home_territory_percent;
+
   return {
     fixture_id: fixture.id,
     home_score,
@@ -192,6 +198,31 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     away_penalties,
     home_drop_goals,
     away_drop_goals,
+
+    home_possession_percent,
+    away_possession_percent,
+    home_territory_percent,
+    away_territory_percent,
+
+    home_meters: rng.int(300, 700),
+    away_meters: rng.int(300, 700),
+    home_line_breaks: rng.int(2, 15),
+    away_line_breaks: rng.int(2, 15),
+    home_kicks_in_play: rng.int(10, 30),
+    away_kicks_in_play: rng.int(10, 30),
+
+    home_scrums_won: rng.int(4, 11),
+    away_scrums_won: rng.int(4, 11),
+    home_lineouts_won: rng.int(8, 17),
+    away_lineouts_won: rng.int(8, 17),
+
+    home_tackles_made: rng.int(100, 200),
+    away_tackles_made: rng.int(100, 200),
+    home_turnovers_won: rng.int(3, 13),
+    away_turnovers_won: rng.int(3, 13),
+
+    home_penalties_conceded: rng.int(5, 16),
+    away_penalties_conceded: rng.int(5, 16),
   };
 }
 

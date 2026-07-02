@@ -170,13 +170,20 @@ export interface Fixture {
  * Match-level aggregate result. Only exists when Fixture.status is 'completed'
  * (or 'live' with partial values). Player-level per-match stats are register
  * #12 (Stats KPI field list, INPUT NEEDED — Phase 2) — not modelled yet.
+ *
+ * Team-level stats broaden the surface in v0.5+: possession / territory /
+ * carry / set-piece / defence / discipline counts. Advanced player-level
+ * splits (dominant tackles, ruck retention %, carries into contact, etc.)
+ * are behind the premium gate and NOT modelled here yet.
  */
 export interface Result {
   fixture_id: FixtureId;
   home_score: number;
   away_score: number;
+
   half_time_home: number;
   half_time_away: number;
+
   home_tries: number;
   away_tries: number;
   home_conversions: number;
@@ -185,6 +192,35 @@ export interface Result {
   away_penalties: number;
   home_drop_goals: number;
   away_drop_goals: number;
+
+  /** Percentage of ball possession (0-100). home + away always sums to 100. */
+  home_possession_percent: number;
+  away_possession_percent: number;
+  /** Percentage of time the ball spent in the opponent's half (0-100).
+   * home + away sums to 100. */
+  home_territory_percent: number;
+  away_territory_percent: number;
+
+  home_meters: number;
+  away_meters: number;
+  home_line_breaks: number;
+  away_line_breaks: number;
+  home_kicks_in_play: number;
+  away_kicks_in_play: number;
+
+  home_scrums_won: number;
+  away_scrums_won: number;
+  home_lineouts_won: number;
+  away_lineouts_won: number;
+
+  home_tackles_made: number;
+  away_tackles_made: number;
+  home_turnovers_won: number;
+  away_turnovers_won: number;
+
+  /** Penalties given away (fouls), NOT penalty goals scored. */
+  home_penalties_conceded: number;
+  away_penalties_conceded: number;
 }
 
 /**
