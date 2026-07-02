@@ -17,7 +17,7 @@ import {
 } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * Fixture detail. Header shows the matchup (flag balls + team names + score
@@ -135,9 +135,15 @@ function MatchupHeader({
         {competitionName ?? fixture.competition_id}
         {fixture.round ? ` · ${fixture.round}` : ''}
       </Text>
-      <View style={styles.matchupRow}>
-        <TeamCol team={homeTeam} teamId={fixture.home_team_id} />
-        <View style={styles.scoreCol}>
+      {/* Row 1 — flags + score, every item locked at FlagSize.header (56 pt)
+          so alignItems: 'center' collapses to identical vertical centres. */}
+      <View style={styles.matchupTopRow}>
+        <View style={styles.flagSlot}>
+          {homeTeam ? (
+            <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.header} />
+          ) : null}
+        </View>
+        <View style={styles.scoreSlot}>
           {isCompleted && result ? (
             <View style={styles.detailScoreRow}>
               <View
@@ -170,27 +176,43 @@ function MatchupHeader({
           ) : (
             <Text style={styles.vsMuted}>vs</Text>
           )}
-          {/* For completed matches the Final badge moves down into the
-              Overview card's title slot; the header only carries the
-              status pill for non-completed states. */}
-          {isCompleted ? null : <StatusPill status={fixture.status} />}
         </View>
-        <TeamCol team={awayTeam} teamId={fixture.away_team_id} />
+        <View style={styles.flagSlot}>
+          {awayTeam ? (
+            <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.header} />
+          ) : null}
+        </View>
       </View>
+      {/* Row 2 — team codes + names below. Empty middle slot preserves symmetry
+          around the score, so home / away labels line up under their flag. */}
+      <View style={styles.matchupLabelsRow}>
+        <View style={styles.labelCol}>
+          <Text style={styles.teamShort}>
+            {homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}
+          </Text>
+          <Text style={styles.teamName} numberOfLines={1}>
+            {homeTeam?.name ?? fixture.home_team_id}
+          </Text>
+        </View>
+        <View style={styles.scoreSlot} />
+        <View style={styles.labelCol}>
+          <Text style={styles.teamShort}>
+            {awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}
+          </Text>
+          <Text style={styles.teamName} numberOfLines={1}>
+            {awayTeam?.name ?? fixture.away_team_id}
+          </Text>
+        </View>
+      </View>
+      {/* Non-completed matches carry the status pill under the labels;
+          for completed matches, "Final" moves into the Overview card title. */}
+      {!isCompleted ? (
+        <View style={styles.statusPillWrap}>
+          <StatusPill status={fixture.status} />
+        </View>
+      ) : null}
       <Text style={styles.headerLine}>{formatKickoff(fixture.kickoff_utc)}</Text>
       <Text style={styles.headerLine}>{fixture.venue}</Text>
-    </View>
-  );
-}
-
-function TeamCol({ team, teamId }: { team: Team | undefined; teamId: string }) {
-  return (
-    <View style={styles.teamCol}>
-      {team ? <TeamFlagBall2D flagCode={team.flag_code} size={56} /> : null}
-      <Text style={styles.teamShort}>{team?.short_name ?? teamId.toUpperCase()}</Text>
-      <Text style={styles.teamName} numberOfLines={1}>
-        {team?.name ?? teamId}
-      </Text>
     </View>
   );
 }
@@ -444,7 +466,7 @@ function LineUpPane({
         return (
           <View key={lu.team_id} style={styles.lineupTeamBlock}>
             <View style={styles.lineupTeamHeader}>
-              {t ? <TeamFlagBall2D flagCode={t.flag_code} size={22} /> : null}
+              {t ? <TeamFlagBall2D flagCode={t.flag_code} size={FlagSize.row} /> : null}
               <Text style={styles.lineupTeamName}>{t?.name ?? lu.team_id.toUpperCase()}</Text>
             </View>
             <Text style={styles.lineupSectionLabel}>Starting XV</Text>
@@ -509,7 +531,7 @@ function RankingCard({
   return (
     <View style={styles.rankingCard}>
       <View style={styles.rankingLead}>
-        {team ? <TeamFlagBall2D flagCode={team.flag_code} size={34} /> : null}
+        {team ? <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} /> : null}
         <View>
           <Text style={styles.rankingName}>{team?.name ?? '—'}</Text>
           <Text style={styles.rankingSub}>Rank {row.rank}</Text>
@@ -579,25 +601,37 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerMeta: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
-  matchupRow: {
+  matchupTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
     width: '100%',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.two,
   },
-  teamCol: { flex: 1, alignItems: 'center', gap: 6 },
-  teamShort: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: Colors.light.textSecondary },
-  teamName: { fontSize: 14, fontWeight: '600', color: Colors.light.text, textAlign: 'center' },
-  scoreCol: { alignItems: 'center', gap: Spacing.two, minWidth: 96 },
-  score: { fontSize: 32, fontWeight: '800', color: Colors.light.text, letterSpacing: -1 },
+  matchupLabelsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: Spacing.three,
+    width: '100%',
+    paddingHorizontal: Spacing.two,
+    marginTop: Spacing.two,
+  },
+  flagSlot: { flex: 1, alignItems: 'center' },
+  labelCol: { flex: 1, alignItems: 'center', gap: 4 },
+  teamShort: { fontSize: TextSize.sm, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary },
+  teamName: { fontSize: TextSize.md, fontWeight: TextWeight.semibold, color: Colors.light.text, textAlign: 'center' },
+  // scoreSlot is used twice: once wrapping the score row (top) and once as an
+  // invisible spacer beneath it — same width both times so the labels sit
+  // symmetric around the score column.
+  scoreSlot: { minWidth: 124, alignItems: 'center', justifyContent: 'center' },
+  statusPillWrap: { alignItems: 'center', marginTop: Spacing.two },
+  score: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, letterSpacing: -1, fontVariant: ['tabular-nums'] },
   detailScoreRow: { flexDirection: 'row', gap: 4 },
   detailScoreBox: {
     width: 60,
@@ -608,12 +642,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   detailScoreBoxWinner: { backgroundColor: Colors.light.text },
-  detailScoreText: { fontSize: 30, fontWeight: '700', color: Colors.light.text },
+  detailScoreText: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   detailScoreTextWinner: { color: '#FFFFFF' },
-  vsMuted: { fontSize: 22, fontWeight: '600', color: Colors.light.textSecondary },
+  vsMuted: { fontSize: TextSize.xl, fontWeight: TextWeight.semibold, color: Colors.light.textSecondary },
   pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
-  pillText: { fontSize: 10, fontWeight: '700', letterSpacing: 1 },
-  headerLine: { fontSize: 12, color: Colors.light.textSecondary, textAlign: 'center' },
+  pillText: { fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  headerLine: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 
   subTabBarWrap: {
     borderBottomWidth: StyleSheet.hairlineWidth,
@@ -626,10 +660,9 @@ const styles = StyleSheet.create({
   },
   subTabPress: { paddingVertical: 6 },
   subTabLabel: {
-    fontSize: 13,
-    fontWeight: '600',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
-    letterSpacing: 0.4,
   },
   subTabLabelActive: { color: Colors.light.text },
   subTabUnderline: {
@@ -644,7 +677,7 @@ const styles = StyleSheet.create({
 
   pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.two },
   paneEmpty: { paddingVertical: Spacing.four, alignItems: 'center' },
-  paneEmptyText: { color: Colors.light.textSecondary, fontSize: 13, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
+  paneEmptyText: { color: Colors.light.textSecondary, fontSize: TextSize.sm, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 
   statsCard: {
     backgroundColor: '#FFFFFF',
@@ -665,9 +698,9 @@ const styles = StyleSheet.create({
   },
   statSection: { gap: Spacing.three, paddingTop: 4 },
   sectionTitle: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1.4,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
     textAlign: 'center',
@@ -675,10 +708,10 @@ const styles = StyleSheet.create({
   },
   statBlock: { gap: 6 },
   statLabel: {
-    fontSize: 13,
+    fontSize: TextSize.sm,
     color: Colors.light.text,
     textAlign: 'center',
-    fontWeight: '500',
+    fontWeight: TextWeight.regular,
   },
   statBarRow: {
     flexDirection: 'row',
@@ -688,16 +721,18 @@ const styles = StyleSheet.create({
   statValueLeft: {
     width: 32,
     textAlign: 'left',
-    fontSize: 16,
-    fontWeight: '400',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.regular,
     color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
   statValueRight: {
     width: 32,
     textAlign: 'right',
-    fontSize: 16,
-    fontWeight: '400',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.regular,
     color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
   barTrack: {
     flex: 1,
@@ -749,11 +784,11 @@ const styles = StyleSheet.create({
   lineupContainer: { gap: Spacing.four },
   lineupTeamBlock: { gap: 4 },
   lineupTeamHeader: { flexDirection: 'row', alignItems: 'center', gap: 6, paddingBottom: 4 },
-  lineupTeamName: { fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  lineupTeamName: { fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text },
   lineupSectionLabel: {
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 1,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
     paddingTop: Spacing.two,
@@ -767,17 +802,17 @@ const styles = StyleSheet.create({
   },
   lineupNumber: {
     width: 26,
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
-  lineupPos: { fontSize: 12, color: Colors.light.textSecondary, textTransform: 'capitalize' },
+  lineupPos: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textTransform: 'capitalize' },
 
   rankingsPane: { gap: Spacing.three },
   rankingsMeta: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.8,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
@@ -790,11 +825,11 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   rankingLead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two + 2 },
-  rankingName: { fontSize: 15, fontWeight: '700', color: Colors.light.text },
-  rankingSub: { fontSize: 11, color: Colors.light.textSecondary },
+  rankingName: { fontSize: TextSize.lg, fontWeight: TextWeight.bold, color: Colors.light.text },
+  rankingSub: { fontSize: TextSize.xs, color: Colors.light.textSecondary, fontVariant: ['tabular-nums'] },
   rankingTrail: { alignItems: 'flex-end' },
-  rankingPoints: { fontSize: 22, fontWeight: '800', color: Colors.light.text },
-  rankingPointsLabel: { fontSize: 10, color: Colors.light.textSecondary, letterSpacing: 1 },
+  rankingPoints: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  rankingPointsLabel: { fontSize: TextSize.xs, color: Colors.light.textSecondary, letterSpacing: TextTracking.wide },
 
   placeholder: {
     padding: Spacing.four,
@@ -808,7 +843,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
     borderRadius: 999,
   },
-  premiumBadgeText: { color: '#B45309', fontSize: 10, fontWeight: '800', letterSpacing: 1.4 },
-  placeholderTitle: { fontSize: 18, fontWeight: '700', color: Colors.light.text, textAlign: 'center' },
-  placeholderBody: { fontSize: 13, color: Colors.light.textSecondary, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
+  premiumBadgeText: { color: '#B45309', fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  placeholderTitle: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, textAlign: 'center' },
+  placeholderBody: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 });

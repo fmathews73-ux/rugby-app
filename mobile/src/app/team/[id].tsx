@@ -6,13 +6,13 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useTeam, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
- * Team detail. Hero is a 110 px 2D flag ball at the same visual style as
- * every other flag chip in the app. Below the hero: team meta + recent /
- * upcoming fixtures. Squad + stats deferred until the squad picker and
- * register #12 (KPI list) land.
+ * Team detail. Hero is a `FlagSize.hero` (96 pt) 2D flag ball at the same
+ * visual style as every other flag chip in the app. Below the hero: team meta
+ * + recent / upcoming fixtures. Squad + stats deferred until the squad picker
+ * and register #12 (KPI list) land.
  */
 export default function TeamDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -38,7 +38,7 @@ export default function TeamDetailScreen() {
         ) : team.data ? (
           <>
             <View style={styles.hero}>
-              <TeamFlagBall2D flagCode={team.data.flag_code} size={110} />
+              <TeamFlagBall2D flagCode={team.data.flag_code} size={FlagSize.hero} />
               <Text style={styles.heroName}>{team.data.name}</Text>
               <Text style={styles.heroSubtitle}>{team.data.short_name}</Text>
             </View>
@@ -57,7 +57,7 @@ export default function TeamDetailScreen() {
                       <Text style={styles.fixtureDate}>{fx.kickoff_utc.slice(0, 10)}</Text>
                       <View style={styles.fixtureMain}>
                         <View style={styles.fixtureMatchup}>
-                          {opp ? <TeamFlagBall2D flagCode={opp.flag_code} size={20} /> : null}
+                          {opp ? <TeamFlagBall2D flagCode={opp.flag_code} size={FlagSize.row} /> : null}
                           <Text style={styles.fixtureText}>
                             {isHome ? 'vs' : 'at'} {opp?.short_name ?? oppId.toUpperCase()}
                           </Text>
@@ -80,10 +80,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.light.background },
   scroll: { padding: Spacing.four, gap: Spacing.four, paddingBottom: 40 },
   hero: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.four },
-  heroName: { fontSize: 28, fontWeight: '700', color: Colors.light.text, textAlign: 'center' },
-  heroSubtitle: { fontSize: 13, letterSpacing: 1.4, color: Colors.light.textSecondary, textTransform: 'uppercase' },
+  heroName: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, textAlign: 'center' },
+  heroSubtitle: { fontSize: TextSize.sm, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary, textTransform: 'uppercase' },
   section: { gap: Spacing.two },
-  sectionTitle: { fontSize: 12, fontWeight: '700', letterSpacing: 1, color: Colors.light.textSecondary, textTransform: 'uppercase', paddingBottom: Spacing.one },
+  sectionTitle: { fontSize: TextSize.sm, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary, textTransform: 'uppercase', paddingBottom: Spacing.one },
   fixtureRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -94,14 +94,13 @@ const styles = StyleSheet.create({
   },
   fixtureDate: {
     width: 88,
-    fontSize: 11,
+    fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
-    letterSpacing: 0.8,
-    fontWeight: '600',
+    fontWeight: TextWeight.semibold,
   },
   fixtureMain: { flex: 1, gap: 2 },
   fixtureMatchup: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  fixtureText: { fontSize: 15, color: Colors.light.text, fontWeight: '600' },
-  fixtureMeta: { color: Colors.light.textSecondary, fontSize: 12 },
-  emptyText: { color: Colors.light.textSecondary, fontSize: 13 },
+  fixtureText: { fontSize: TextSize.lg, color: Colors.light.text, fontWeight: TextWeight.semibold },
+  fixtureMeta: { color: Colors.light.textSecondary, fontSize: TextSize.sm },
+  emptyText: { color: Colors.light.textSecondary, fontSize: TextSize.sm },
 });

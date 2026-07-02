@@ -12,10 +12,10 @@ import {
   View,
 } from 'react-native';
 
-import { useLatestRanking, useTeams } from '@/api/hooks';
+import { useLatestRanking, useLatestWomensRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
 
 const ACCENT = '#4F46E5';
 const UP = '#059669';
@@ -50,10 +50,10 @@ export function HomeRankingsCarousel() {
         onScroll={handleScroll}
         scrollEventThrottle={16}>
         <View style={[styles.page, { width: screenWidth }]}>
-          <MensRankingsCard />
+          <RankingsCard gender="mens" />
         </View>
         <View style={[styles.page, { width: screenWidth }]}>
-          <WomensPlaceholderCard />
+          <RankingsCard gender="womens" />
         </View>
       </ScrollView>
 
@@ -65,11 +65,17 @@ export function HomeRankingsCarousel() {
   );
 }
 
-// ─── Men's card ──────────────────────────────────────────────────────────────
+// ─── Shared rankings card ────────────────────────────────────────────────────
+// Same card shape for both genders — only the data source and the gender label
+// differ. Register #3 (v0.4) originally limited scope to Men's; flipped
+// 2026-07-02 to include Women's alongside.
 
-function MensRankingsCard() {
+function RankingsCard({ gender }: { gender: 'mens' | 'womens' }) {
   const router = useRouter();
-  const ranking = useLatestRanking();
+  const mensRanking = useLatestRanking();
+  const womensRanking = useLatestWomensRanking();
+  const ranking = gender === 'mens' ? mensRanking : womensRanking;
+  const genderLabel = gender === 'mens' ? 'Men' : 'Women';
   const teams = useTeams();
 
   const teamById = useMemo(
@@ -87,7 +93,7 @@ function MensRankingsCard() {
     <View style={styles.card}>
       <View style={styles.header}>
         <Text style={styles.title}>World Rugby Rankings</Text>
-        <Text style={styles.genderLabel}>Men</Text>
+        <Text style={styles.genderLabel}>{genderLabel}</Text>
       </View>
 
       {ranking.isLoading ? (
@@ -102,7 +108,7 @@ function MensRankingsCard() {
               <View key={row.team_id} style={styles.row}>
                 <Text style={styles.rank}>{row.rank}</Text>
                 {team ? (
-                  <TeamFlagBall2D flagCode={team.flag_code} size={22} />
+                  <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} />
                 ) : (
                   <View style={styles.flagFallback} />
                 )}
@@ -142,30 +148,6 @@ function MovementBadge({ movement }: { movement: number | null }) {
   );
 }
 
-// ─── Women's placeholder ─────────────────────────────────────────────────────
-
-function WomensPlaceholderCard() {
-  return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <Text style={styles.title}>World Rugby Rankings</Text>
-        <Text style={styles.genderLabel}>Women</Text>
-      </View>
-
-      <View style={styles.placeholderBody}>
-        <View style={styles.comingSoonBadge}>
-          <Text style={styles.comingSoonText}>COMING SOON</Text>
-        </View>
-        <Text style={styles.placeholderText}>
-          Women’s internationals are a future scope expansion (PRD register #3).
-          The pipeline’s adapter model already supports a second ranking source
-          — plug in the women’s data whenever it’s in scope.
-        </Text>
-      </View>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   page: {
     paddingHorizontal: PAGE_HORIZONTAL_MARGIN,
@@ -188,16 +170,15 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     justifyContent: 'space-between',
   },
-  title: { fontSize: 16, fontWeight: '700', color: Colors.light.text },
+  title: { fontSize: TextSize.lg, fontWeight: TextWeight.bold, color: Colors.light.text },
   genderLabel: {
-    fontSize: 13,
-    fontWeight: '400',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   subtitle: {
-    fontSize: 11,
-    fontWeight: '600',
-    letterSpacing: 0.8,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
@@ -211,19 +192,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
-  rank: { width: 18, fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  rank: { width: 18, fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   flagFallback: { width: 22, height: 22, borderRadius: 11, backgroundColor: '#E5E7EB' },
-  teamName: { flex: 1, fontSize: 14, fontWeight: '600', color: Colors.light.text },
-  points: { width: 40, textAlign: 'right', fontSize: 13, fontWeight: '700', color: Colors.light.text },
-  movement: { width: 52, textAlign: 'right', fontSize: 12, fontWeight: '700' },
+  teamName: { flex: 1, fontSize: TextSize.md, fontWeight: TextWeight.semibold, color: Colors.light.text },
+  points: { width: 40, textAlign: 'right', fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  movement: { width: 52, textAlign: 'right', fontSize: TextSize.sm, fontWeight: TextWeight.bold, fontVariant: ['tabular-nums'] },
   movementUp: { color: UP },
   movementDown: { color: DOWN },
-  movementFlat: { width: 52, textAlign: 'right', fontSize: 14, color: Colors.light.textSecondary },
+  movementFlat: { width: 52, textAlign: 'right', fontSize: TextSize.md, color: Colors.light.textSecondary },
   movementNew: {
     width: 52,
     textAlign: 'right',
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
   },
 
@@ -235,28 +216,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
   },
   footerPressed: { opacity: 0.5 },
-  footerText: { fontSize: 13, fontWeight: '700', color: Colors.light.text, letterSpacing: 0.2 },
-
-  placeholderBody: {
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingVertical: Spacing.four,
-  },
-  comingSoonBadge: {
-    borderWidth: 1,
-    borderColor: ACCENT,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 999,
-  },
-  comingSoonText: { color: ACCENT, fontSize: 10, fontWeight: '800', letterSpacing: 1.4 },
-  placeholderText: {
-    fontSize: 13,
-    color: Colors.light.textSecondary,
-    textAlign: 'center',
-    lineHeight: 20,
-    maxWidth: 260,
-  },
+  footerText: { fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text },
 
   dotsRow: {
     flexDirection: 'row',

@@ -354,12 +354,17 @@ export function computeStandings(
 /**
  * Generate a World Rugby ranking snapshot for a date. Team ordering is a
  * shuffle influenced by a base "strength" — deterministic per RNG.
+ *
+ * `source` selects mens / womens. Both use the same team pool for now —
+ * different RNG forks feed different shuffles, so the two ranking tables
+ * have plausibly different orderings even though the teams overlap.
  */
 export function generateRanking(
   rng: Rng,
   snapshotDate: string,
   teams: readonly Team[],
   previousRankByTeam: Map<TeamId, number> | null,
+  source: RankingSnapshot['source'] = 'world-rugby-mens',
 ): RankingSnapshot {
   const shuffled = rng.shuffle([...teams]);
   const rows: RankingRow[] = shuffled.map((t, i) => {
@@ -371,8 +376,8 @@ export function generateRanking(
   });
 
   return {
-    id: `world-rugby-mens-${snapshotDate}`,
-    source: 'world-rugby-mens',
+    id: `${source}-${snapshotDate}`,
+    source,
     snapshot_date: snapshotDate,
     rows,
   };

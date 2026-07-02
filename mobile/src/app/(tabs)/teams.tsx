@@ -8,7 +8,7 @@ import type { Team } from '@rugby-app/shared';
 import { useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 const TIER_1_IDS = new Set(['eng', 'fra', 'ire', 'ita', 'sco', 'wal', 'arg', 'aus', 'nzl', 'rsa']);
 
@@ -61,7 +61,7 @@ export default function TeamsScreen() {
                   isLast && styles.teamRowLast,
                   pressed && styles.teamRowPressed,
                 ]}>
-                <TeamFlagBall2D flagCode={item.team.flag_code} size={40} />
+                <TeamFlagBall2D flagCode={item.team.flag_code} size={FlagSize.medium} />
                 <View style={styles.teamText}>
                   <Text style={styles.teamName}>{item.team.name}</Text>
                   <Text style={styles.teamShort}>{item.team.short_name}</Text>
@@ -118,17 +118,17 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.two - 2,
   },
   groupHeaderText: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
   groupHeaderCount: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
-    letterSpacing: 0.6,
+    fontVariant: ['tabular-nums'],
   },
 
   teamRow: {
@@ -158,6 +158,6 @@ const styles = StyleSheet.create({
   },
   teamRowPressed: { backgroundColor: '#F3F4F6' },
   teamText: { flex: 1, gap: 2 },
-  teamName: { fontSize: 15, fontWeight: '600', color: Colors.light.text },
-  teamShort: { fontSize: 11, letterSpacing: 1, color: Colors.light.textSecondary, fontWeight: '600' },
+  teamName: { fontSize: TextSize.lg, fontWeight: TextWeight.semibold, color: Colors.light.text },
+  teamShort: { fontSize: TextSize.xs, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary, fontWeight: TextWeight.semibold },
 });

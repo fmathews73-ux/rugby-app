@@ -1,6 +1,6 @@
 import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextWeight } from '@/constants/theme';
 
 export function LoadingState({ label = 'Loading…' }: { label?: string }) {
   return (
@@ -37,16 +37,16 @@ const styles = StyleSheet.create({
   },
   label: {
     color: Colors.light.textSecondary,
-    fontSize: 14,
+    fontSize: TextSize.md,
   },
   errorTitle: {
     color: '#B45309',
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.semibold,
   },
   errorBody: {
     color: Colors.light.textSecondary,
-    fontSize: 13,
+    fontSize: TextSize.sm,
     textAlign: 'center',
   },
 });

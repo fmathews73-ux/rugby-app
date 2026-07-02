@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { Colors, TextSize, TextWeight } from '@/constants/theme';
 
 /**
  * Persistent header (PRD §4.1). Left: user profile avatar / entry point.
@@ -62,10 +62,9 @@ const styles = StyleSheet.create({
     gap: 1,
   },
   appName: {
-    fontSize: 18,
-    fontWeight: '800',
+    fontSize: TextSize.xl,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
-    letterSpacing: 0.6,
   },
   rightSlot: {
     minWidth: 44,

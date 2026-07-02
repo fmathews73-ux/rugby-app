@@ -134,10 +134,25 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
   });
 
   // ─── Rankings ─────────────────────────────────────────────────────────────
+  // `/rankings` = latest men's snapshot (kept for backward compatibility with
+  // the existing `useLatestRanking` client hook). Prefer `/rankings/mens` or
+  // `/rankings/womens` in any new call site.
   app.get('/rankings', async () => {
-    const latest = store.rankings[store.rankings.length - 1];
+    const latest = store.mensRankings[store.mensRankings.length - 1];
+    return latest ?? {};
+  });
+
+  app.get('/rankings/mens', async () => {
+    const latest = store.mensRankings[store.mensRankings.length - 1];
+    return latest ?? {};
+  });
+
+  app.get('/rankings/womens', async () => {
+    const latest = store.womensRankings[store.womensRankings.length - 1];
     return latest ?? {};
   });
 
   app.get('/rankings/history', async () => store.rankings);
+  app.get('/rankings/mens/history', async () => store.mensRankings);
+  app.get('/rankings/womens/history', async () => store.womensRankings);
 }

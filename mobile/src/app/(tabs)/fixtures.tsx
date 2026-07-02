@@ -11,7 +11,7 @@ import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 const ALL_COMPETITIONS = 'all';
@@ -214,7 +214,7 @@ export default function FixturesScreen() {
               <View style={styles.mainCol}>
                 <View style={styles.matchupRow}>
                   <View style={styles.flagWrap}>
-                    {home ? <TeamFlagBall2D flagCode={home.flag_code} size={22} /> : null}
+                    {home ? <TeamFlagBall2D flagCode={home.flag_code} size={FlagSize.row} /> : null}
                   </View>
                   <Text style={styles.teamCode}>
                     {home?.short_name ?? item.home_team_id.toUpperCase()}
@@ -259,7 +259,7 @@ export default function FixturesScreen() {
                     {away?.short_name ?? item.away_team_id.toUpperCase()}
                   </Text>
                   <View style={styles.flagWrap}>
-                    {away ? <TeamFlagBall2D flagCode={away.flag_code} size={22} /> : null}
+                    {away ? <TeamFlagBall2D flagCode={away.flag_code} size={FlagSize.row} /> : null}
                   </View>
                 </View>
                 <Text style={styles.metaText}>
@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  dayHeaderText: { fontSize: 12, fontWeight: '600', letterSpacing: 1, color: Colors.light.textSecondary, textTransform: 'uppercase' },
+  dayHeaderText: { fontSize: TextSize.sm, fontWeight: TextWeight.semibold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary, textTransform: 'uppercase' },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -324,15 +324,15 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
-  timeCol: { width: 52, fontSize: 13, fontWeight: '600', color: Colors.light.text },
+  timeCol: { width: 52, fontSize: TextSize.sm, fontWeight: TextWeight.semibold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   mainCol: { flex: 1, gap: 4 },
   matchupRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 8 },
-  flagWrap: { width: 22, height: 22, alignItems: 'center', justifyContent: 'center' },
+  flagWrap: { width: FlagSize.row, height: FlagSize.row, alignItems: 'center', justifyContent: 'center' },
   teamCode: {
     width: 40,
     textAlign: 'center',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.text,
   },
   scoreBoxRow: {
@@ -351,17 +351,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
-  scoreBoxSmallText: { fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  scoreBoxSmallText: { fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   scoreBoxSmallTextWinner: { color: '#FFFFFF' },
   statusMid: {
     width: 76,
     textAlign: 'center',
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
-    letterSpacing: 0.3,
   },
-  statusMidLive: { color: '#DC2626', fontWeight: '700', letterSpacing: 1 },
-  statusMidHalfTime: { color: '#F59E0B', fontWeight: '700', letterSpacing: 1 },
-  metaText: { fontSize: 11, color: Colors.light.textSecondary, textAlign: 'center' },
+  statusMidLive: { color: '#DC2626', fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  statusMidHalfTime: { color: '#F59E0B', fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  metaText: { fontSize: TextSize.xs, color: Colors.light.textSecondary, textAlign: 'center' },
 });

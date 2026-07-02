@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useLatestRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 const UP = '#059669';
 const DOWN = '#DC2626';
@@ -52,7 +52,7 @@ export default function RankingsScreen() {
                   <Text style={styles.rank}>{row.rank}</Text>
                   <View style={styles.flagWrap}>
                     {team ? (
-                      <TeamFlagBall2D flagCode={team.flag_code} size={26} />
+                      <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} />
                     ) : (
                       <View style={styles.flagFallback} />
                     )}
@@ -88,13 +88,12 @@ const styles = StyleSheet.create({
   scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
 
   headerBlock: { gap: 4 },
-  title: { fontSize: 24, fontWeight: '700', color: Colors.light.text },
+  title: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text },
   subtitle: {
-    fontSize: 11,
+    fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    fontWeight: '600',
+    fontWeight: TextWeight.semibold,
   },
 
   card: {
@@ -119,26 +118,26 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   rowLast: { borderBottomWidth: 0 },
-  rank: { width: 28, fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  rank: { width: 28, fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   flagWrap: { width: 26, height: 26, alignItems: 'center', justifyContent: 'center' },
   flagFallback: { width: 26, height: 26, borderRadius: 13, backgroundColor: '#E5E7EB' },
   teamName: {
     flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.text,
     paddingLeft: 4,
   },
-  points: { width: 42, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
-  movement: { width: 52, textAlign: 'right', fontSize: 12, fontWeight: '700' },
+  points: { width: 42, textAlign: 'right', fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  movement: { width: 52, textAlign: 'right', fontSize: TextSize.sm, fontWeight: TextWeight.bold, fontVariant: ['tabular-nums'] },
   movementUp: { color: UP },
   movementDown: { color: DOWN },
-  movementFlat: { width: 52, textAlign: 'right', fontSize: 14, color: Colors.light.textSecondary },
+  movementFlat: { width: 52, textAlign: 'right', fontSize: TextSize.md, color: Colors.light.textSecondary },
   movementNew: {
     width: 52,
     textAlign: 'right',
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
   },
 });

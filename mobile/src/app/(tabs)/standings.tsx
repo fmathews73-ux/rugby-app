@@ -6,7 +6,7 @@ import { useSeasonStandings, useTeams } from '@/api/hooks';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * Standings. Picker at the top selects a competition; the query switches to
@@ -105,7 +105,7 @@ function StandingsTable({
           <View key={r.team_id} style={[styles.row, isLast && styles.rowLast]}>
             <Text style={styles.cellRank}>{r.rank}</Text>
             <View style={styles.cellFlag}>
-              {team ? <TeamFlagBall2D flagCode={team.flag_code} size={22} /> : null}
+              {team ? <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} /> : null}
             </View>
             <Text style={styles.cellTeam}>{team?.short_name ?? r.team_id.toUpperCase()}</Text>
             <Text style={styles.cellStat}>{r.played}</Text>
@@ -128,20 +128,19 @@ const styles = StyleSheet.create({
   scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
 
   headerBlock: { gap: 4 },
-  title: { fontSize: 22, fontWeight: '700', color: Colors.light.text },
+  title: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text },
   subtitle: {
-    fontSize: 11,
+    fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
-    fontWeight: '600',
+    fontWeight: TextWeight.semibold,
   },
 
   tableGroup: { gap: Spacing.one + 2 },
   groupHeading: {
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 1,
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
     paddingTop: Spacing.two,
@@ -174,16 +173,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   headerText: {
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
-    letterSpacing: 0.8,
   },
-  cellRank: { width: 22, fontSize: 13, fontWeight: '700', color: Colors.light.text },
+  cellRank: { width: 22, fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   cellFlag: { width: 26, alignItems: 'center', justifyContent: 'center' },
-  cellTeam: { flex: 1, fontSize: 13, fontWeight: '700', color: Colors.light.text, letterSpacing: 0.4 },
-  cellStat: { width: 24, textAlign: 'center', fontSize: 12, color: Colors.light.text },
-  cellPts: { width: 32, textAlign: 'right', fontSize: 14, fontWeight: '700', color: Colors.light.text },
+  cellTeam: { flex: 1, fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text },
+  cellStat: { width: 24, textAlign: 'center', fontSize: TextSize.sm, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  cellPts: { width: 32, textAlign: 'right', fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   cellPtsValue: { color: Colors.light.text },
 });

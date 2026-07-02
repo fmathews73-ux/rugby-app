@@ -59,5 +59,51 @@ export const Spacing = {
   six: 64,
 } as const;
 
+/**
+ * Canonical sizes for `TeamFlagBall2D`. Four steps — hero / header / medium / row —
+ * following Material's avatar spec (24/40/56/96) so hierarchy is legible without
+ * near-duplicate sizes creeping in. Do not pass raw numbers to the flag component;
+ * use one of these so the scale stays 4 steps forever.
+ */
+export const FlagSize = {
+  hero: 96, // team detail page
+  header: 56, // fixture detail header, home fixture carousel cards
+  medium: 40, // teams tab rows, fixture line-up
+  row: 24, // standings, fixtures list, rankings tables, mini-carousels
+} as const;
+
+/**
+ * Canonical type scale — 6 steps, Tailwind-style numeric names. Every text style
+ * in the app must pick fontSize from here rather than raw numbers, so hierarchy
+ * stays legible and the scale doesn't sprawl. Design doc in
+ * `docs/design-system.md` explains the rationale.
+ */
+export const TextSize = {
+  xs: 10, // uppercase micro labels, dev banner, tiny pills
+  sm: 12, // caption / meta text
+  md: 14, // body default, list rows
+  lg: 16, // subtitles, section headers, prominent list rows
+  xl: 22, // screen and card titles, hero scores and hero names
+} as const;
+
+/**
+ * Weights collapsed to three. Data-app tone stays lighter with regular as the
+ * default body weight and bold reserved for headlines / scores.
+ */
+export const TextWeight = {
+  regular: '400',
+  semibold: '600',
+  bold: '700',
+} as const;
+
+/**
+ * Only two tracking values are needed. Default 0 everywhere; `wide` (1.0)
+ * for uppercase micro labels that need the standard tracking treatment.
+ */
+export const TextTracking = {
+  normal: 0,
+  wide: 1,
+} as const;
+
 export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
 export const MaxContentWidth = 800;

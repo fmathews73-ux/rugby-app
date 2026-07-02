@@ -1,19 +1,25 @@
 import { Image, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Defs, RadialGradient, Stop } from 'react-native-svg';
 
+import { FlagSize } from '@/constants/theme';
+
 /**
- * The single flag chip used everywhere in the app — from the 20 px opponent
- * badges on fixture rows up to the 110 px hero on the team detail page.
+ * The single flag chip used everywhere in the app — from the 24 pt row badges
+ * on table lists up to the 96 pt hero on the team detail page. The `size` prop
+ * is typed to only accept values from `FlagSize` (see `@/constants/theme`),
+ * so raw numbers won't compile — the scale stays 4 steps forever.
  * A circle-clipped flagcdn PNG with an SVG radial-highlight overlay (top-left)
  * and rim shadow (bottom-right) fakes the sphere look without any 3D machinery.
  * List-safe: renders instantly, safe to put in a FlatList with 30+ items.
  */
+export type FlagSizeValue = (typeof FlagSize)[keyof typeof FlagSize];
+
 export function TeamFlagBall2D({
   flagCode,
-  size = 40,
+  size = FlagSize.medium,
 }: {
   flagCode: string;
-  size?: number;
+  size?: FlagSizeValue;
 }) {
   const flagUrl = `https://flagcdn.com/w${resolveFlagWidth(size)}/${flagCode}.png`;
 

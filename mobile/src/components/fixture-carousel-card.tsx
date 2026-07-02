@@ -4,7 +4,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 const ACCENT = '#4F46E5';
 const LIVE_RED = '#DC2626';
@@ -58,21 +58,36 @@ export function FixtureCarouselCard({
 
       <Text style={styles.roundText}>{roundText}</Text>
 
-      <View style={styles.matchupRow}>
-        <View style={styles.teamCol}>
-          {homeTeam ? <TeamFlagBall2D flagCode={homeTeam.flag_code} size={44} /> : null}
-          <Text style={styles.teamCode}>{homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}</Text>
+      {/* Top row — flag + score + flag on the same horizontal centre line.
+          All three columns flex-1 so slots are equally wide, guaranteeing
+          the team labels below sit exactly under their flag. */}
+      <View style={styles.matchupTopRow}>
+        <View style={styles.flagSlot}>
+          {homeTeam ? <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} /> : null}
         </View>
 
-        <ScoreBlock
-          fixture={fixture}
-          result={result}
-          isCompleted={isCompleted}
-          isLive={isLive}
-        />
+        <View style={styles.scoreSlot}>
+          <ScoreBlock
+            fixture={fixture}
+            result={result}
+            isCompleted={isCompleted}
+            isLive={isLive}
+          />
+        </View>
 
-        <View style={styles.teamCol}>
-          {awayTeam ? <TeamFlagBall2D flagCode={awayTeam.flag_code} size={44} /> : null}
+        <View style={styles.flagSlot}>
+          {awayTeam ? <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} /> : null}
+        </View>
+      </View>
+
+      {/* Bottom row — team codes under each flag, invisible middle slot
+          matching scoreSlot width so codes stay symmetric under the flags. */}
+      <View style={styles.matchupLabelsRow}>
+        <View style={styles.labelCol}>
+          <Text style={styles.teamCode}>{homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}</Text>
+        </View>
+        <View style={styles.scoreSlot} />
+        <View style={styles.labelCol}>
           <Text style={styles.teamCode}>{awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}</Text>
         </View>
       </View>
@@ -146,7 +161,13 @@ function ScoreBlock({
   return (
     <View style={styles.scoreRowScheduled}>
       <Text style={styles.kickoffLabel}>KO</Text>
-      <Text style={styles.kickoffTime}>{kickoffTime}</Text>
+      <Text
+        style={styles.kickoffTime}
+        numberOfLines={1}
+        adjustsFontSizeToFit
+        minimumFontScale={0.7}>
+        {kickoffTime}
+      </Text>
     </View>
   );
 }
@@ -178,9 +199,9 @@ const styles = StyleSheet.create({
 
   topRow: { flexDirection: 'row', justifyContent: 'flex-start', minHeight: 18 },
   dayLabel: {
-    fontSize: 13,
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    fontWeight: '500',
+    fontWeight: TextWeight.regular,
   },
   liveIndicator: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   liveDot: {
@@ -190,32 +211,51 @@ const styles = StyleSheet.create({
     backgroundColor: LIVE_RED,
   },
   liveLabel: {
-    fontSize: 13,
+    fontSize: TextSize.sm,
     color: LIVE_RED,
-    fontWeight: '700',
+    fontWeight: TextWeight.bold,
   },
 
   roundText: {
-    fontSize: 13,
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
     marginTop: 4,
     marginBottom: Spacing.three,
   },
 
-  matchupRow: {
+  matchupTopRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.two,
-    gap: Spacing.two,
+    // Generous outer breathing gap (60) intentionally 10× the internal
+    // ScoreBlock cluster gap (6). Reads as: flag / [score-FT-score cluster] /
+    // flag — three distinct visual groups instead of five equally-spaced items.
+    // Not on the Spacing scale because this is a per-context aesthetic
+    // decision for the paired-element pattern, not a general spacing token.
+    gap: 60,
   },
-  teamCol: { alignItems: 'center', gap: 6, minWidth: 60 },
+  flagSlot: { flex: 1, alignItems: 'center' },
+  // Same style is used twice in the card: once wrapping ScoreBlock (top row)
+  // and once as an invisible spacer under it (labels row) — guarantees the
+  // team codes sit exactly under their flag.
+  scoreSlot: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  matchupLabelsRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    // Padding AND gap MUST match matchupTopRow so the three flex-1 columns are
+    // the same width in both rows — otherwise the label centres drift outward
+    // relative to the flag centres above.
+    paddingHorizontal: Spacing.two,
+    gap: 60,
+    marginTop: 6,
+  },
+  labelCol: { flex: 1, alignItems: 'center' },
   teamCode: {
-    fontSize: 17,
-    fontWeight: '700',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
-    letterSpacing: 0.6,
   },
 
   scoreRow: {
@@ -235,20 +275,21 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.text,
   },
   scoreText: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: TextSize.xl,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
   scoreTextWinner: { color: '#FFFFFF' },
   statusText: {
-    fontSize: 15,
-    fontWeight: '600',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.semibold,
     color: Colors.light.text,
     marginHorizontal: 2,
   },
   statusLive: {
-    fontSize: 15,
-    fontWeight: '700',
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.bold,
     color: LIVE_RED,
     marginHorizontal: 2,
   },
@@ -257,16 +298,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   kickoffLabel: {
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
-    letterSpacing: 1,
+    letterSpacing: TextTracking.wide,
   },
   kickoffTime: {
-    fontSize: 22,
-    fontWeight: '700',
+    fontSize: TextSize.xl,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
     marginTop: 2,
+    fontVariant: ['tabular-nums'],
   },
 
   divider: {
@@ -282,9 +324,9 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   venueText: {
-    fontSize: 14,
+    fontSize: TextSize.md,
     color: Colors.light.text,
-    fontWeight: '600',
+    fontWeight: TextWeight.semibold,
     flexShrink: 1,
   },
 });

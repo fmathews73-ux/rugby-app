@@ -63,6 +63,8 @@ export interface Store {
   bracketBySeason: ReadonlyMap<SeasonId, Bracket>;
 
   rankings: readonly RankingSnapshot[];
+  mensRankings: readonly RankingSnapshot[];
+  womensRankings: readonly RankingSnapshot[];
 }
 
 function readJson<T>(dir: string, file: string): T {
@@ -143,5 +145,11 @@ export function loadStore(dataDir: string): Store {
     bracketBySeason: indexBy(brackets, (b) => b.season_id),
 
     rankings: rankings.slice().sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
+    mensRankings: rankings
+      .filter((r) => r.source === 'world-rugby-mens')
+      .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
+    womensRankings: rankings
+      .filter((r) => r.source === 'world-rugby-womens')
+      .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
   };
 }

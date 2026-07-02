@@ -8,7 +8,9 @@
     "scheme": "rugbyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "bundleIdentifier": "com.fmathews73.rugbyapp",
+      "appleTeamId": "8GE33VJ4NE"
     },
     "android": {
       "adaptiveIcon": {

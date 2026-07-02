@@ -52,6 +52,7 @@ const squadRng = root.fork();
 const resultRng = root.fork();
 const lineupRng = root.fork();
 const rankingRng = root.fork();
+const womensRankingRng = root.fork();
 
 // ─── Squads and players ─────────────────────────────────────────────────────
 // One squad per team per season that team participates in.
@@ -168,15 +169,26 @@ for (const bundle of ALL_COMPETITIONS) {
   }
 }
 
-// ─── Rankings (3 snapshots — covers ALL Men's international teams, T1 + T2) ─
+// ─── Rankings ─────────────────────────────────────────────────────────────────
+// Three snapshots each for men's and women's — both use the same team pool for
+// now (women's teams are the same national identities as men's). Register #3
+// flipped 2026-07-02 to bring women's rankings into v1 scope.
 
 const rankings: RankingSnapshot[] = [];
 const snapshotDates = ['2026-01-15', '2026-04-01', TODAY_ISO];
-let prevRankByTeam: Map<TeamId, number> | null = null;
+
+let prevMensRankByTeam: Map<TeamId, number> | null = null;
 for (const date of snapshotDates) {
-  const snap = generateRanking(rankingRng, date, ALL_TEAMS, prevRankByTeam);
+  const snap = generateRanking(rankingRng, date, ALL_TEAMS, prevMensRankByTeam, 'world-rugby-mens');
   rankings.push(snap);
-  prevRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
+  prevMensRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
+}
+
+let prevWomensRankByTeam: Map<TeamId, number> | null = null;
+for (const date of snapshotDates) {
+  const snap = generateRanking(womensRankingRng, date, ALL_TEAMS, prevWomensRankByTeam, 'world-rugby-womens');
+  rankings.push(snap);
+  prevWomensRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
 }
 
 // ─── Brackets ────────────────────────────────────────────────────────────────

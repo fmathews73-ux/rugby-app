@@ -144,16 +144,36 @@ export function usePlayer(playerId: string): UseQueryResult<Player> {
   });
 }
 
+/**
+ * Latest men's ranking snapshot. Kept named without a `Mens` suffix so existing
+ * call sites don't churn — the mens ranking is the "default" ranking screen
+ * because it's what mainstream rugby coverage centres on. See
+ * `useLatestWomensRanking` for the women's counterpart.
+ */
 export function useLatestRanking(): UseQueryResult<RankingSnapshot> {
   return useQuery({
-    queryKey: ['ranking', 'latest'],
-    queryFn: () => fetchJson<RankingSnapshot>('/rankings'),
+    queryKey: ['ranking', 'mens', 'latest'],
+    queryFn: () => fetchJson<RankingSnapshot>('/rankings/mens'),
+  });
+}
+
+export function useLatestWomensRanking(): UseQueryResult<RankingSnapshot> {
+  return useQuery({
+    queryKey: ['ranking', 'womens', 'latest'],
+    queryFn: () => fetchJson<RankingSnapshot>('/rankings/womens'),
   });
 }
 
 export function useRankingHistory(): UseQueryResult<RankingSnapshot[]> {
   return useQuery({
-    queryKey: ['ranking', 'history'],
-    queryFn: () => fetchJson<RankingSnapshot[]>('/rankings/history'),
+    queryKey: ['ranking', 'mens', 'history'],
+    queryFn: () => fetchJson<RankingSnapshot[]>('/rankings/mens/history'),
+  });
+}
+
+export function useWomensRankingHistory(): UseQueryResult<RankingSnapshot[]> {
+  return useQuery({
+    queryKey: ['ranking', 'womens', 'history'],
+    queryFn: () => fetchJson<RankingSnapshot[]>('/rankings/womens/history'),
   });
 }
