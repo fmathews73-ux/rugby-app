@@ -30,6 +30,7 @@ export type StandingsId = string;
 export type BracketId = string;
 export type RankingSnapshotId = string;
 export type MatchEventId = string;
+export type CoachId = string;
 
 // ─── Time ────────────────────────────────────────────────────────────────────
 // ISO 8601 strings, kept as aliases for documentation. Storage and API JSON
@@ -139,6 +140,34 @@ export interface Player {
   height_cm: number;
   weight_kg: number;
   cap_count: number; // synthetic during dev; feed-supplied in prod
+}
+
+/**
+ * Coaching-staff role — the canonical set of coaching positions modelled in
+ * v1. Real feeds may or may not carry coaching data (PRD register #7); if
+ * absent at Phase 6 cutover, the coaching-staff endpoint returns an empty
+ * array and the UI section hides itself.
+ */
+export type CoachRole =
+  | 'head-coach'
+  | 'assistant-coach'
+  | 'attack-coach'
+  | 'defence-coach'
+  | 'forwards-coach'
+  | 'skills-coach'
+  | 'kicking-coach';
+
+/**
+ * A coaching-staff member associated with a team. Names in dev are
+ * plausibly-fake per PRD §5.5 (no real coaches attributed to fabricated
+ * stats). No photos in v1 — coaching-staff photos are bundled with the
+ * provider's image-rights licence tier (register #28).
+ */
+export interface Coach {
+  id: CoachId;
+  team_id: TeamId;
+  name: string;
+  role: CoachRole;
 }
 
 /**

@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 
 import type {
   Bracket,
+  Coach,
   LineUp,
   MatchEvent,
   Player,
@@ -32,6 +33,7 @@ import type {
 import { ALL_COMPETITIONS, TODAY_ISO } from './competitions.js';
 import {
   computeStandings,
+  generateCoachingStaff,
   generateLineUp,
   generateMatchEvents,
   generateRanking,
@@ -56,6 +58,7 @@ const lineupRng = root.fork();
 const rankingRng = root.fork();
 const womensRankingRng = root.fork();
 const eventsRng = root.fork();
+const coachRng = root.fork();
 
 // ─── Squads and players ─────────────────────────────────────────────────────
 // One squad per team per season that team participates in.
@@ -222,6 +225,14 @@ const brackets: Bracket[] = ALL_COMPETITIONS
   .map((b) => b.bracket)
   .filter((b): b is Bracket => b !== undefined);
 
+// ─── Coaching staff ──────────────────────────────────────────────────────────
+// One synthetic staff (head + attack + defence + forwards coach) per team.
+// Availability from real feeds is PRD register #7 — if aggregator feeds
+// don't carry coaching data, this generation is dropped and the endpoint
+// returns an empty array (UI section hides itself).
+
+const coaches: Coach[] = ALL_TEAMS.flatMap((team) => generateCoachingStaff(coachRng, team.id));
+
 // ─── Write JSON ──────────────────────────────────────────────────────────────
 
 interface OutputFile { file: string; data: unknown }
@@ -238,6 +249,7 @@ const outputs: OutputFile[] = [
   { file: 'brackets.json', data: brackets },
   { file: 'rankings.json', data: rankings },
   { file: 'events.json', data: events },
+  { file: 'coaches.json', data: coaches },
 ];
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -260,6 +272,7 @@ const totals = {
   brackets: brackets.length,
   rankings: rankings.length,
   events: events.length,
+  coaches: coaches.length,
 };
 // eslint-disable-next-line no-console -- CLI tool output
 console.log('Wrote synthetic dataset:', totals);

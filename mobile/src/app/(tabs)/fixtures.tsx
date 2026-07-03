@@ -318,8 +318,10 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: '#F5F5F7' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   pickerWrap: {
-    // Match card horizontal margin so the picker aligns with card edges below.
-    paddingHorizontal: HORIZONTAL_MARGIN,
+    // 16pt wrap + CompetitionPicker's 24pt inner = 40pt total, matching
+    // the card column's `HORIZONTAL_MARGIN` so the first pill sits flush
+    // with the card left edge below.
+    paddingHorizontal: Spacing.three,
     paddingTop: Spacing.four,
     paddingBottom: Spacing.three,
   },

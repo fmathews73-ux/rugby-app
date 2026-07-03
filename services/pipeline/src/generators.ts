@@ -5,6 +5,8 @@
  */
 
 import type {
+  Coach,
+  CoachRole,
   Fixture,
   LineUp,
   LineUpEntry,
@@ -726,4 +728,37 @@ function addSubstitutions(
       points: 0,
     });
   }
+}
+
+// ─── Coaching staff ──────────────────────────────────────────────────────────
+
+/**
+ * Canonical coaching-staff roles rendered per team. Head coach, one attack
+ * coach, one defence coach, one forwards coach — the standard four-slot
+ * international backroom. Skills / kicking coaches are optional; we skip
+ * them here to keep the section short.
+ */
+const COACH_ROLES: readonly CoachRole[] = [
+  'head-coach',
+  'attack-coach',
+  'defence-coach',
+  'forwards-coach',
+];
+
+/**
+ * Generate a fake coaching staff for a team. Names are drawn from the same
+ * plausible-name pools used for players (PRD §5.5 — fake names attached to
+ * fabricated attribution). No photos in v1; register #28 gates image rights.
+ */
+export function generateCoachingStaff(rng: Rng, teamId: TeamId): Coach[] {
+  return COACH_ROLES.map((role, i) => {
+    const first = FIRST_NAMES[Math.floor(rng.next() * FIRST_NAMES.length)] ?? 'Alex';
+    const last = LAST_NAMES[Math.floor(rng.next() * LAST_NAMES.length)] ?? 'Coach';
+    return {
+      id: `${teamId}-coach-${i + 1}`,
+      team_id: teamId,
+      name: `${first} ${last}`,
+      role,
+    };
+  });
 }

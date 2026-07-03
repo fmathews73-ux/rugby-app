@@ -10,6 +10,7 @@ import { join } from 'node:path';
 
 import type {
   Bracket,
+  Coach,
   Competition,
   CompetitionId,
   Fixture,
@@ -69,6 +70,9 @@ export interface Store {
 
   events: readonly MatchEvent[];
   eventsByFixture: ReadonlyMap<FixtureId, MatchEvent[]>;
+
+  coaches: readonly Coach[];
+  coachesByTeam: ReadonlyMap<TeamId, Coach[]>;
 }
 
 function readJson<T>(dir: string, file: string): T {
@@ -105,6 +109,7 @@ export function loadStore(dataDir: string): Store {
   const brackets = readJson<Bracket[]>(dataDir, 'brackets.json');
   const rankings = readJson<RankingSnapshot[]>(dataDir, 'rankings.json');
   const events = readJson<MatchEvent[]>(dataDir, 'events.json');
+  const coaches = readJson<Coach[]>(dataDir, 'coaches.json');
 
   const fixturesByTeam = new Map<TeamId, Fixture[]>();
   for (const fx of fixtures) {
@@ -159,5 +164,8 @@ export function loadStore(dataDir: string): Store {
 
     events,
     eventsByFixture: groupBy(events, (e) => e.fixture_id),
+
+    coaches,
+    coachesByTeam: groupBy(coaches, (c) => c.team_id),
   };
 }

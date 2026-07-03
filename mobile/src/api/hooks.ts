@@ -7,6 +7,7 @@ import { useQuery, type UseQueryResult } from '@tanstack/react-query';
 
 import type {
   Bracket,
+  Coach,
   Competition,
   Fixture,
   LineUp,
@@ -142,6 +143,17 @@ export function useTeam(teamId: string): UseQueryResult<Team & { fixtures: Fixtu
   return useQuery({
     queryKey: ['team', teamId],
     queryFn: () => fetchJson<Team & { fixtures: Fixture[] }>(`/teams/${teamId}`),
+    enabled: Boolean(teamId),
+  });
+}
+
+/** Coaching staff for a team. Returns an empty array when unavailable —
+ *  the client can hide the section rather than error out. Real-feed
+ *  coaching-staff availability is still a Phase 6 research item (register #7). */
+export function useTeamCoachingStaff(teamId: string): UseQueryResult<Coach[]> {
+  return useQuery({
+    queryKey: ['teamCoachingStaff', teamId],
+    queryFn: () => fetchJson<Coach[]>(`/teams/${teamId}/coaching-staff`),
     enabled: Boolean(teamId),
   });
 }

@@ -140,6 +140,17 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     };
   });
 
+  // Coaching staff for a team — synthetic in dev (PRD §5.5). Empty array
+  // when unavailable rather than 404 so the client can treat "no data" as a
+  // hide-the-section signal without a special error branch. Availability
+  // from real feeds is still a Phase 6 research item (register #7).
+  app.get<{ Params: { id: string } }>('/teams/:id/coaching-staff', async (req, reply) => {
+    if (!store.teamById.has(req.params.id)) {
+      return notFound(reply, `team ${req.params.id} not found`);
+    }
+    return store.coachesByTeam.get(req.params.id) ?? [];
+  });
+
   app.get<{ Params: { id: string }; Querystring: { season_id?: string } }>(
     '/teams/:id/squad',
     async (req, reply) => {

@@ -50,9 +50,14 @@ const styles = StyleSheet.create({
   wrap: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    // Horizontal padding sits on the WRAP (not inside the ScrollView) so
+    // the ScrollView clip-bounds are actually inset — pills disappear at
+    // the padded edge on the right, not at the screen edge. Result: the
+    // scrollable strip visually spans the same column as any content
+    // rendered below it, symmetric on both sides.
+    paddingHorizontal: Spacing.four,
   },
   inner: {
-    paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two + 2,
     gap: Spacing.two,
   },
@@ -67,7 +72,9 @@ const styles = StyleSheet.create({
     borderColor: Colors.light.text,
   },
   pillInactive: {
-    backgroundColor: 'transparent',
+    // White fill so pills read as tap-targets on the grey page background
+    // (#F5F5F7). Transparent would let the pill blur into the page.
+    backgroundColor: '#FFFFFF',
     borderColor: '#D1D5DB',
   },
   pillLabel: {

@@ -1,0 +1,674 @@
+[
+  {
+    "id": "eng-coach-1",
+    "team_id": "eng",
+    "name": "Bruno Kingsford",
+    "role": "head-coach"
+  },
+  {
+    "id": "eng-coach-2",
+    "team_id": "eng",
+    "name": "Ben Kilbride",
+    "role": "attack-coach"
+  },
+  {
+    "id": "eng-coach-3",
+    "team_id": "eng",
+    "name": "Oliver Elsworth",
+    "role": "defence-coach"
+  },
+  {
+    "id": "eng-coach-4",
+    "team_id": "eng",
+    "name": "Ivan Ravenscroft",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "fra-coach-1",
+    "team_id": "fra",
+    "name": "Damian Norwood",
+    "role": "head-coach"
+  },
+  {
+    "id": "fra-coach-2",
+    "team_id": "fra",
+    "name": "Ethan Underhill",
+    "role": "attack-coach"
+  },
+  {
+    "id": "fra-coach-3",
+    "team_id": "fra",
+    "name": "Cameron Thornton",
+    "role": "defence-coach"
+  },
+  {
+    "id": "fra-coach-4",
+    "team_id": "fra",
+    "name": "Julian Merrick",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "ire-coach-1",
+    "team_id": "ire",
+    "name": "Ryan Oakden",
+    "role": "head-coach"
+  },
+  {
+    "id": "ire-coach-2",
+    "team_id": "ire",
+    "name": "Alex Cartwright",
+    "role": "attack-coach"
+  },
+  {
+    "id": "ire-coach-3",
+    "team_id": "ire",
+    "name": "Vincent Milburn",
+    "role": "defence-coach"
+  },
+  {
+    "id": "ire-coach-4",
+    "team_id": "ire",
+    "name": "Felix Grayling",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "ita-coach-1",
+    "team_id": "ita",
+    "name": "Alex Elsworth",
+    "role": "head-coach"
+  },
+  {
+    "id": "ita-coach-2",
+    "team_id": "ita",
+    "name": "Zac Ormsby",
+    "role": "attack-coach"
+  },
+  {
+    "id": "ita-coach-3",
+    "team_id": "ita",
+    "name": "Samuel Ingleby",
+    "role": "defence-coach"
+  },
+  {
+    "id": "ita-coach-4",
+    "team_id": "ita",
+    "name": "Xavier Danforth",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "sco-coach-1",
+    "team_id": "sco",
+    "name": "Callum Grayling",
+    "role": "head-coach"
+  },
+  {
+    "id": "sco-coach-2",
+    "team_id": "sco",
+    "name": "Xavier Elsworth",
+    "role": "attack-coach"
+  },
+  {
+    "id": "sco-coach-3",
+    "team_id": "sco",
+    "name": "Jack Blackmore",
+    "role": "defence-coach"
+  },
+  {
+    "id": "sco-coach-4",
+    "team_id": "sco",
+    "name": "Ivan Oakden",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "wal-coach-1",
+    "team_id": "wal",
+    "name": "Cameron Ashford",
+    "role": "head-coach"
+  },
+  {
+    "id": "wal-coach-2",
+    "team_id": "wal",
+    "name": "Zac Oakden",
+    "role": "attack-coach"
+  },
+  {
+    "id": "wal-coach-3",
+    "team_id": "wal",
+    "name": "Ulrich Kingsford",
+    "role": "defence-coach"
+  },
+  {
+    "id": "wal-coach-4",
+    "team_id": "wal",
+    "name": "Jack Oakden",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "arg-coach-1",
+    "team_id": "arg",
+    "name": "Daniel Crestwood",
+    "role": "head-coach"
+  },
+  {
+    "id": "arg-coach-2",
+    "team_id": "arg",
+    "name": "Lucas Ashford",
+    "role": "attack-coach"
+  },
+  {
+    "id": "arg-coach-3",
+    "team_id": "arg",
+    "name": "Julian Crestwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "arg-coach-4",
+    "team_id": "arg",
+    "name": "Gareth Yardley",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "aus-coach-1",
+    "team_id": "aus",
+    "name": "Elliot Thornton",
+    "role": "head-coach"
+  },
+  {
+    "id": "aus-coach-2",
+    "team_id": "aus",
+    "name": "Adrian Kilbride",
+    "role": "attack-coach"
+  },
+  {
+    "id": "aus-coach-3",
+    "team_id": "aus",
+    "name": "Jack Harwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "aus-coach-4",
+    "team_id": "aus",
+    "name": "William Ormsby",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "nzl-coach-1",
+    "team_id": "nzl",
+    "name": "Finn Leighton",
+    "role": "head-coach"
+  },
+  {
+    "id": "nzl-coach-2",
+    "team_id": "nzl",
+    "name": "Lucas Crestwood",
+    "role": "attack-coach"
+  },
+  {
+    "id": "nzl-coach-3",
+    "team_id": "nzl",
+    "name": "Cameron Northwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "nzl-coach-4",
+    "team_id": "nzl",
+    "name": "Harry Everley",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "rsa-coach-1",
+    "team_id": "rsa",
+    "name": "Julian Denholm",
+    "role": "head-coach"
+  },
+  {
+    "id": "rsa-coach-2",
+    "team_id": "rsa",
+    "name": "Noah Milburn",
+    "role": "attack-coach"
+  },
+  {
+    "id": "rsa-coach-3",
+    "team_id": "rsa",
+    "name": "William Northwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "rsa-coach-4",
+    "team_id": "rsa",
+    "name": "Nathan Crestwood",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "fij-coach-1",
+    "team_id": "fij",
+    "name": "Zac Farraday",
+    "role": "head-coach"
+  },
+  {
+    "id": "fij-coach-2",
+    "team_id": "fij",
+    "name": "Bruno Yardley",
+    "role": "attack-coach"
+  },
+  {
+    "id": "fij-coach-3",
+    "team_id": "fij",
+    "name": "Vincent Bramley",
+    "role": "defence-coach"
+  },
+  {
+    "id": "fij-coach-4",
+    "team_id": "fij",
+    "name": "Ethan Denholm",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "geo-coach-1",
+    "team_id": "geo",
+    "name": "Ulrich Ashford",
+    "role": "head-coach"
+  },
+  {
+    "id": "geo-coach-2",
+    "team_id": "geo",
+    "name": "George Sinclair",
+    "role": "attack-coach"
+  },
+  {
+    "id": "geo-coach-3",
+    "team_id": "geo",
+    "name": "Thomas Jennings",
+    "role": "defence-coach"
+  },
+  {
+    "id": "geo-coach-4",
+    "team_id": "geo",
+    "name": "Elliot Oakden",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "jpn-coach-1",
+    "team_id": "jpn",
+    "name": "Finn Jarrow",
+    "role": "head-coach"
+  },
+  {
+    "id": "jpn-coach-2",
+    "team_id": "jpn",
+    "name": "Marcus Jennings",
+    "role": "attack-coach"
+  },
+  {
+    "id": "jpn-coach-3",
+    "team_id": "jpn",
+    "name": "Ivan Gainsborough",
+    "role": "defence-coach"
+  },
+  {
+    "id": "jpn-coach-4",
+    "team_id": "jpn",
+    "name": "Callum Harwood",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "sam-coach-1",
+    "team_id": "sam",
+    "name": "Samuel Ormsby",
+    "role": "head-coach"
+  },
+  {
+    "id": "sam-coach-2",
+    "team_id": "sam",
+    "name": "Ivan Elsworth",
+    "role": "attack-coach"
+  },
+  {
+    "id": "sam-coach-3",
+    "team_id": "sam",
+    "name": "Daniel Northwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "sam-coach-4",
+    "team_id": "sam",
+    "name": "George Leighton",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "tga-coach-1",
+    "team_id": "tga",
+    "name": "Jack Merrick",
+    "role": "head-coach"
+  },
+  {
+    "id": "tga-coach-2",
+    "team_id": "tga",
+    "name": "Harry Norwood",
+    "role": "attack-coach"
+  },
+  {
+    "id": "tga-coach-3",
+    "team_id": "tga",
+    "name": "Samuel Underhill",
+    "role": "defence-coach"
+  },
+  {
+    "id": "tga-coach-4",
+    "team_id": "tga",
+    "name": "Bruno Everley",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "usa-coach-1",
+    "team_id": "usa",
+    "name": "Oliver Farraday",
+    "role": "head-coach"
+  },
+  {
+    "id": "usa-coach-2",
+    "team_id": "usa",
+    "name": "Kyle Kingsford",
+    "role": "attack-coach"
+  },
+  {
+    "id": "usa-coach-3",
+    "team_id": "usa",
+    "name": "Oliver Sinclair",
+    "role": "defence-coach"
+  },
+  {
+    "id": "usa-coach-4",
+    "team_id": "usa",
+    "name": "William Harwood",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "uru-coach-1",
+    "team_id": "uru",
+    "name": "Ben Harwood",
+    "role": "head-coach"
+  },
+  {
+    "id": "uru-coach-2",
+    "team_id": "uru",
+    "name": "Oliver Winford",
+    "role": "attack-coach"
+  },
+  {
+    "id": "uru-coach-3",
+    "team_id": "uru",
+    "name": "Bruno Vance",
+    "role": "defence-coach"
+  },
+  {
+    "id": "uru-coach-4",
+    "team_id": "uru",
+    "name": "Nathan Merrick",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "chi-coach-1",
+    "team_id": "chi",
+    "name": "Elliot Grayling",
+    "role": "head-coach"
+  },
+  {
+    "id": "chi-coach-2",
+    "team_id": "chi",
+    "name": "Patrick Merrick",
+    "role": "attack-coach"
+  },
+  {
+    "id": "chi-coach-3",
+    "team_id": "chi",
+    "name": "George Everley",
+    "role": "defence-coach"
+  },
+  {
+    "id": "chi-coach-4",
+    "team_id": "chi",
+    "name": "Julian Halliwell",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "nam-coach-1",
+    "team_id": "nam",
+    "name": "Xavier Pemberton",
+    "role": "head-coach"
+  },
+  {
+    "id": "nam-coach-2",
+    "team_id": "nam",
+    "name": "Kieran Pemberton",
+    "role": "attack-coach"
+  },
+  {
+    "id": "nam-coach-3",
+    "team_id": "nam",
+    "name": "Henri Ashcombe",
+    "role": "defence-coach"
+  },
+  {
+    "id": "nam-coach-4",
+    "team_id": "nam",
+    "name": "Yannick Gainsborough",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "por-coach-1",
+    "team_id": "por",
+    "name": "William Ashcombe",
+    "role": "head-coach"
+  },
+  {
+    "id": "por-coach-2",
+    "team_id": "por",
+    "name": "Patrick Quenton",
+    "role": "attack-coach"
+  },
+  {
+    "id": "por-coach-3",
+    "team_id": "por",
+    "name": "Finn Bramley",
+    "role": "defence-coach"
+  },
+  {
+    "id": "por-coach-4",
+    "team_id": "por",
+    "name": "Oliver Elsworth",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "rou-coach-1",
+    "team_id": "rou",
+    "name": "Patrick Ashcombe",
+    "role": "head-coach"
+  },
+  {
+    "id": "rou-coach-2",
+    "team_id": "rou",
+    "name": "Kieran Denholm",
+    "role": "attack-coach"
+  },
+  {
+    "id": "rou-coach-3",
+    "team_id": "rou",
+    "name": "Xavier Northwood",
+    "role": "defence-coach"
+  },
+  {
+    "id": "rou-coach-4",
+    "team_id": "rou",
+    "name": "Zac Halliwell",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "esp-coach-1",
+    "team_id": "esp",
+    "name": "Ivan Cartwright",
+    "role": "head-coach"
+  },
+  {
+    "id": "esp-coach-2",
+    "team_id": "esp",
+    "name": "Cameron Fairhurst",
+    "role": "attack-coach"
+  },
+  {
+    "id": "esp-coach-3",
+    "team_id": "esp",
+    "name": "Liam Everley",
+    "role": "defence-coach"
+  },
+  {
+    "id": "esp-coach-4",
+    "team_id": "esp",
+    "name": "Isaac Ivory",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "zim-coach-1",
+    "team_id": "zim",
+    "name": "Ryan Merrick",
+    "role": "head-coach"
+  },
+  {
+    "id": "zim-coach-2",
+    "team_id": "zim",
+    "name": "Bruno Ashford",
+    "role": "attack-coach"
+  },
+  {
+    "id": "zim-coach-3",
+    "team_id": "zim",
+    "name": "Jack Fairhurst",
+    "role": "defence-coach"
+  },
+  {
+    "id": "zim-coach-4",
+    "team_id": "zim",
+    "name": "Adrian Bramley",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "hkg-coach-1",
+    "team_id": "hkg",
+    "name": "Gareth Jennings",
+    "role": "head-coach"
+  },
+  {
+    "id": "hkg-coach-2",
+    "team_id": "hkg",
+    "name": "Yannick Milburn",
+    "role": "attack-coach"
+  },
+  {
+    "id": "hkg-coach-3",
+    "team_id": "hkg",
+    "name": "Liam Portway",
+    "role": "defence-coach"
+  },
+  {
+    "id": "hkg-coach-4",
+    "team_id": "hkg",
+    "name": "Kieran Kingsford",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "can-coach-1",
+    "team_id": "can",
+    "name": "Thomas Jarrow",
+    "role": "head-coach"
+  },
+  {
+    "id": "can-coach-2",
+    "team_id": "can",
+    "name": "Harry Underhill",
+    "role": "attack-coach"
+  },
+  {
+    "id": "can-coach-3",
+    "team_id": "can",
+    "name": "William Jarrow",
+    "role": "defence-coach"
+  },
+  {
+    "id": "can-coach-4",
+    "team_id": "can",
+    "name": "Zac Ivory",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "bra-coach-1",
+    "team_id": "bra",
+    "name": "Damian Fairhurst",
+    "role": "head-coach"
+  },
+  {
+    "id": "bra-coach-2",
+    "team_id": "bra",
+    "name": "Felix Ingleby",
+    "role": "attack-coach"
+  },
+  {
+    "id": "bra-coach-3",
+    "team_id": "bra",
+    "name": "Callum Merrick",
+    "role": "defence-coach"
+  },
+  {
+    "id": "bra-coach-4",
+    "team_id": "bra",
+    "name": "Henri Sinclair",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "ned-coach-1",
+    "team_id": "ned",
+    "name": "Ben Danforth",
+    "role": "head-coach"
+  },
+  {
+    "id": "ned-coach-2",
+    "team_id": "ned",
+    "name": "Lucas Crestwood",
+    "role": "attack-coach"
+  },
+  {
+    "id": "ned-coach-3",
+    "team_id": "ned",
+    "name": "Ulrich Danforth",
+    "role": "defence-coach"
+  },
+  {
+    "id": "ned-coach-4",
+    "team_id": "ned",
+    "name": "Bruno Denholm",
+    "role": "forwards-coach"
+  },
+  {
+    "id": "ken-coach-1",
+    "team_id": "ken",
+    "name": "Bruno Jarrow",
+    "role": "head-coach"
+  },
+  {
+    "id": "ken-coach-2",
+    "team_id": "ken",
+    "name": "Henri Ingleby",
+    "role": "attack-coach"
+  },
+  {
+    "id": "ken-coach-3",
+    "team_id": "ken",
+    "name": "Kieran Merrick",
+    "role": "defence-coach"
+  },
+  {
+    "id": "ken-coach-4",
+    "team_id": "ken",
+    "name": "Daniel Ingleby",
+    "role": "forwards-coach"
+  }
+]

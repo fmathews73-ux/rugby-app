@@ -236,3 +236,52 @@ The little label between the two score boxes ("FT" for completed, "LIVE" or a mi
 Both intentionally muted and small — the annotation is *informational*, not decorative. It should never compete visually with the scores it sits between.
 
 **Live / HT variants** carry the same size/weight but swap the colour token: `StatusColor.live` for a red live indicator, `StatusColor.warning` for HT amber. **KO / kickoff-time variants** use the same font size but `Colors.light.text` (primary) + `fontVariant: ['tabular-nums']` — treated as data, not annotation.
+
+---
+
+## 7. Utility icons
+
+Small tap-target icons that annotate or reset a section — the info-icon that opens an explainer modal, the reset icon that clears a filter state, and any peer affordance that fits the same role. Every icon in this class is an **Ionicons outline** glyph rendered at a single canonical size and colour so multiple utility icons on one screen read as siblings, not as a stack of different weights.
+
+**Canonical spec — do not deviate:**
+
+| Attribute | Value |
+|---|---|
+| Icon family | `@expo/vector-icons` → `Ionicons` |
+| Variant | `-outline` (never solid — utility icons stay quiet) |
+| Size | `14` pt |
+| Colour | `Colors.light.textSecondary` |
+| Tap target | `Pressable` with `hitSlop={10}` |
+| Chrome | None (no background, border, or shadow) |
+| Placement | Inline next to the label they annotate, OR absolute-positioned inside the top-right corner of the component (~6pt inset) |
+
+**Canonical roster (extend by adding to this table, not by inventing sizes):**
+
+| Icon | Role |
+|---|---|
+| `information-circle-outline` | Open explainer modal for the surface the icon sits next to |
+| `refresh-circle-outline` | Reset the surface to its default state (clear a compare team, undo a filter). **Use the `-circle-outline` sibling, not `refresh-outline`**, so the glyph's intrinsic circle matches the info icon's visual weight when the two sit on the same surface |
+| `close` | Dismiss a modal — used only inside modal headers, still 14pt / textSecondary |
+| `chevron-down` | Dropdown affordance next to a tappable value (e.g. team selector chip) |
+
+**Glyph-shape consistency:** when two utility icons appear on the same surface, prefer the `-circle-outline` sibling on both sides so their intrinsic circles match. Mixing a circled glyph (`information-circle-outline`) with an uncircled sibling (`refresh-outline`) makes the uncircled one look noticeably lighter — visual weight goes with the glyph, not the CSS, so match at the glyph level.
+
+**Usage:**
+
+```tsx
+// Good — canonical utility icon.
+<Pressable
+  onPress={() => setInfoOpen(true)}
+  hitSlop={10}
+  accessibilityRole="button"
+  accessibilityLabel="Explain form metrics">
+  <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+</Pressable>
+
+// Bad — off-token size or a solid variant.
+<Ionicons name="information-circle" size={16} color="#666" /> // ← wrong variant, size, colour
+```
+
+**Do not add a second size.** If a call site "needs" 12pt or 18pt, the layout is wrong, not the token. Icons at 14pt already read as small; anything smaller crosses into "invisible affordance" territory.
+
+**Do not add a background, border, or fill** to make the icon "pop". Utility icons are quiet by design — this holds even for corner-mounted variants (a lone reset icon in the top-right of a card is still just the icon, not a bordered chip). If a call site needs an emphasised action affordance, that's a *button*, not a utility icon, and should use the primary button pattern instead.
