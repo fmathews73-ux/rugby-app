@@ -1,27 +1,45 @@
+import { useNavigation } from 'expo-router';
+import { useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FixtureCarousel } from '@/components/fixture-carousel';
-import { HomeRankingsCarousel } from '@/components/home-rankings-carousel';
 import { MyTeamCard } from '@/components/my-team-card';
 import { Spacing } from '@/constants/theme';
 
 /**
- * Home. Three vertical sections:
+ * Home. Two vertical sections:
  *   1. Timeline carousel of 7 fixtures around the "current" match.
- *   2. Rankings carousel — 2 pages, Men's + Women's.
- *   3. My Team card — user-selected favourite with Next / Last / Form.
+ *   2. My Team card — user-selected favourite with Next / Last / Form.
+ *
+ * (Rankings carousel lives on the Rankings tab, not here.)
+ *
+ * Tapping the Home tab icon (whether already focused or navigating in)
+ * scrolls back to the top so the hero fixture card is always the
+ * resolve-to landmark for a Home click.
  */
 export default function HomeScreen() {
+  const navigation = useNavigation();
+  const scrollRef = useRef<ScrollView>(null);
+
+  useEffect(() => {
+    const unsub = navigation.addListener('tabPress' as never, () => {
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
+    });
+    return unsub;
+  }, [navigation]);
+
   return (
     // No 'bottom' edge on the SafeAreaView — the tab bar draws its own safe
     // area inset, so removing it here lets the ScrollView extend to the very
     // bottom of the screen and content scroll cleanly under the tab bar
     // (mirroring how content scrolls under the header at the top).
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
-      <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+      <ScrollView
+        ref={scrollRef}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}>
         <FixtureCarousel />
-        <HomeRankingsCarousel />
         <MyTeamCard />
       </ScrollView>
     </SafeAreaView>

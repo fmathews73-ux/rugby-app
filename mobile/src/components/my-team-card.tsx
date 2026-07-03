@@ -511,13 +511,13 @@ function MomentumSparkline({ points }: { points: readonly FormPoint[] }) {
           <Polyline
             points={polyline}
             stroke={Colors.light.text}
-            strokeWidth={1.5}
+            strokeWidth={1}
             fill="none"
           />
         ) : null}
         {/* Outcome dots on each data point. */}
         {svgPoints.map((p, i) => (
-          <Circle key={i} cx={p.x} cy={p.y} r={3.2} fill={outcomeColor(p.outcome)} />
+          <Circle key={i} cx={p.x} cy={p.y} r={2} fill={outcomeColor(p.outcome)} />
         ))}
       </Svg>
     </View>

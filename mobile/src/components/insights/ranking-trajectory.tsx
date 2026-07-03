@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -165,6 +165,15 @@ function TrajectoryChart({
   }));
   const smoothPath = smoothLinePath(svgPoints).path;
 
+  // Closed area path directly beneath the trajectory. Drops to the bottom
+  // pad edge at the last point, traces back to the first, closes. Filled
+  // with a gradient that fades to zero by mid-height so the tint reads as
+  // a soft halo below the line rather than a full area-under-the-curve.
+  const areaPath =
+    svgPoints.length > 1 && svgPoints[0] && svgPoints[svgPoints.length - 1]
+      ? `${smoothPath} L ${svgPoints[svgPoints.length - 1]!.x.toFixed(1)} ${(height - padBottom).toFixed(1)} L ${svgPoints[0]!.x.toFixed(1)} ${(height - padBottom).toFixed(1)} Z`
+      : '';
+
   // First + last data-point labels only — every-point labels get noisy on
   // a 13-point series inside a phone width.
   const first = svgPoints[0];
@@ -172,12 +181,19 @@ function TrajectoryChart({
 
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <Defs>
+        <LinearGradient id="trajectory-area-gradient" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
+          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+        </LinearGradient>
+      </Defs>
+      {areaPath ? <Path d={areaPath} fill="url(#trajectory-area-gradient)" stroke="none" /> : null}
       {/* Trajectory line — Catmull-Rom → Bezier smoothed so segment
           junctions curve instead of cornering. */}
       <Path
         d={smoothPath}
         stroke={CHART_LINE_COLOR}
-        strokeWidth={1.5}
+        strokeWidth={1}
         fill="none"
         strokeLinecap="round"
       />
@@ -193,7 +209,7 @@ function TrajectoryChart({
             key={i}
             cx={p.x}
             cy={p.y}
-            r={2.8}
+            r={2}
             fill={isBetter ? BETTER_COLOR : WORSE_COLOR}
           />
         );
@@ -325,7 +341,7 @@ const styles = StyleSheet.create({
   subHeaderMeta: { flexDirection: 'row', alignItems: 'baseline' },
   headerMetaText: {
     fontSize: TextSize.sm,
-    color: Colors.light.text,
+    color: Colors.light.textSecondary,
     fontWeight: TextWeight.bold,
     fontVariant: ['tabular-nums'],
   },

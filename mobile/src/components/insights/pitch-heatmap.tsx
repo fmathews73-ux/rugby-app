@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 
-import type { MatchEvent } from '@rugby-app/shared';
+import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -33,10 +33,12 @@ export function PitchHeatmap({
   fixtureId,
   homeTeamId,
   awayTeamId,
+  fixtureStatus,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
+  fixtureStatus?: Fixture['status'];
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
@@ -45,7 +47,7 @@ export function PitchHeatmap({
     setActiveSide('primary');
   }, [awayTeamId]);
 
-  const events = useFixtureEvents(fixtureId);
+  const events = useFixtureEvents(fixtureId, fixtureStatus);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
 
@@ -132,7 +134,7 @@ export function PitchHeatmap({
             height={PITCH_H}
             fill="none"
             stroke="#94A3B8"
-            strokeWidth={1.5}
+            strokeWidth={1}
           />
           {/* 22m lines (22% and 78% of pitch length). */}
           <Line

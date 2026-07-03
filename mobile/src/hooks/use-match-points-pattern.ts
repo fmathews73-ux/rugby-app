@@ -29,8 +29,8 @@ export function useMatchPointsPattern(
   teamId: string,
   mode: PointsPatternMode = 'scored',
 ): Result {
-  const events = useFixtureEvents(fixtureId);
   const fixture = useFixture(fixtureId);
+  const events = useFixtureEvents(fixtureId, fixture.data?.status);
 
   const data = useMemo<TeamPointsPattern | undefined>(() => {
     if (!fixture.data || !events.data) return undefined;

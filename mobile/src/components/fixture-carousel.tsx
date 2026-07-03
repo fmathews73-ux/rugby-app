@@ -37,7 +37,11 @@ const CARD_GAP = 12;
 const CARDS_EITHER_SIDE = 3;
 export function FixtureCarousel() {
   const { width: screenWidth } = useWindowDimensions();
-  const CARD_WIDTH = Math.round(screenWidth - 80);
+  // Card width leaves ~30pt outer margin on each side of the screen (was
+  // 40pt) — the extra 20pt lets a completed fixture's `[score][FT][score]`
+  // cluster + both flag+code clusters + card padding all fit without
+  // clipping the away-team flag on smaller phones.
+  const CARD_WIDTH = Math.round(screenWidth - 60);
   const SNAP = CARD_WIDTH + CARD_GAP;
   const SIDE_PAD = Math.round((screenWidth - CARD_WIDTH) / 2);
 
@@ -96,7 +100,9 @@ export function FixtureCarousel() {
     return currentIdx - Math.max(0, currentIdx - CARDS_EITHER_SIDE);
   }, [currentIdx]);
 
-  // Fetch results only for fixtures that might have one.
+  // Fetch results only for fixtures that might have one. Live / half-time
+  // fixtures poll every 30 s so the visible carousel score stays fresh
+  // without the user having to leave the Home tab.
   const resultQueries = useQueries({
     queries: windowFixtures
       .filter(
@@ -105,6 +111,8 @@ export function FixtureCarousel() {
       .map((f) => ({
         queryKey: ['fixtureResult', f.id],
         queryFn: () => fetchJson<Result>(`/fixtures/${f.id}/result`),
+        refetchInterval:
+          f.status === 'live' || f.status === 'half-time' ? 30_000 : false,
       })),
   });
 
@@ -227,7 +235,7 @@ function formatDayLabel(iso: string): string {
   return d.toLocaleDateString('en-GB', {
     weekday: 'short',
     day: 'numeric',
-    month: 'short',
+    month: 'long',
   });
 }
 

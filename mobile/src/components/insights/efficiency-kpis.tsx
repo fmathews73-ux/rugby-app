@@ -112,12 +112,6 @@ export function EfficiencyKpis({
         ) : null}
       </View>
 
-      {/* "Avg per game" scope note sits on its own row below the title,
-          consistent with the Form / Trajectory placement. */}
-      {data ? (
-        <Text style={styles.subHeaderMeta}>Avg per game</Text>
-      ) : null}
-
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
       ) : data && data.gamesPlayed > 0 ? (
@@ -292,10 +286,6 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
-  subHeaderMeta: {
-    fontSize: TextSize.xs,
-    color: Colors.light.textSecondary,
-  },
   empty: {
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
@@ -312,12 +302,13 @@ const styles = StyleSheet.create({
   },
   kpiLabel: {
     fontSize: TextSize.sm,
-    color: Colors.light.text,
+    fontWeight: TextWeight.regular,
+    color: Colors.light.textSecondary,
   },
   kpiValue: {
-    fontSize: TextSize.md,
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
-    color: Colors.light.text,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   kpiSuffix: {

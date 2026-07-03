@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { Circle, Line, Path } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -183,8 +183,30 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
   // no motion graphics.
   const smoothPath = useMemo(() => smoothLinePath(svgPoints).path, [svgPoints]);
 
+  // Closed area path directly beneath the smooth line: same curve along
+  // the top, drop straight down to the bottom pad edge at the last point,
+  // trace along the bottom back to the first point, close. Filled with a
+  // gradient that fades to zero well before the bottom so the tint sits
+  // as a soft halo below the line rather than a full "area under the curve".
+  const areaPath = useMemo(() => {
+    if (svgPoints.length < 2) return '';
+    const first = svgPoints[0]!;
+    const last = svgPoints[svgPoints.length - 1]!;
+    const baseY = height - padY;
+    return `${smoothPath} L ${last.x.toFixed(1)} ${baseY.toFixed(1)} L ${first.x.toFixed(1)} ${baseY.toFixed(1)} Z`;
+  }, [smoothPath, svgPoints, height, padY]);
+
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <Defs>
+        {/* Vertical fade — coloured at the line, transparent by mid-way.
+            The second stop at offset 0.55 flattens to 0 opacity so the
+            bottom half of each area shape stays fully see-through. */}
+        <LinearGradient id="form-area-gradient" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
+          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+        </LinearGradient>
+      </Defs>
       <Line
         x1={padX}
         y1={zeroY}
@@ -195,16 +217,19 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
         strokeDasharray="3 3"
       />
       {svgPoints.length > 1 ? (
+        <Path d={areaPath} fill="url(#form-area-gradient)" stroke="none" />
+      ) : null}
+      {svgPoints.length > 1 ? (
         <Path
           d={smoothPath}
           stroke={CHART_LINE_COLOR}
-          strokeWidth={1.5}
+          strokeWidth={1}
           fill="none"
           strokeLinecap="round"
         />
       ) : null}
       {svgPoints.map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={3.2} fill={outcomeColor(p.outcome)} />
+        <Circle key={i} cx={p.x} cy={p.y} r={2} fill={outcomeColor(p.outcome)} />
       ))}
     </Svg>
   );

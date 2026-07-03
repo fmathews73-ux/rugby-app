@@ -7,6 +7,7 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackButton } from '@/components/back-button';
 import { DevModeBanner } from '@/components/dev-mode-banner';
+import { SimLiveProvider } from '@/dev/sim-live';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -35,29 +36,31 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <SafeAreaProvider>
-          <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
-            <DevModeBanner />
-          </SafeAreaView>
-          <View style={styles.appBody}>
-            <Stack
-              // Detail-screen defaults: custom BackButton in place of the
-              // system iOS-blue chevron + back title. Empty screen title so
-              // the header carries no wordmark — content owns the top of
-              // the screen.
-              screenOptions={{
-                headerLeft: () => <BackButton />,
-                headerBackVisible: false, // hide the default back button
-                title: '',
-              }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="team/[id]" />
-              <Stack.Screen name="fixture/[id]" />
-            </Stack>
-          </View>
-        </SafeAreaProvider>
-      </ThemeProvider>
+      <SimLiveProvider>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <SafeAreaProvider>
+            <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
+              <DevModeBanner />
+            </SafeAreaView>
+            <View style={styles.appBody}>
+              <Stack
+                // Detail-screen defaults: custom BackButton in place of the
+                // system iOS-blue chevron + back title. Empty screen title so
+                // the header carries no wordmark — content owns the top of
+                // the screen.
+                screenOptions={{
+                  headerLeft: () => <BackButton />,
+                  headerBackVisible: false, // hide the default back button
+                  title: '',
+                }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="team/[id]" />
+                <Stack.Screen name="fixture/[id]" />
+              </Stack>
+            </View>
+          </SafeAreaProvider>
+        </ThemeProvider>
+      </SimLiveProvider>
     </QueryClientProvider>
   );
 }

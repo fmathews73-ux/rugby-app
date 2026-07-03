@@ -1,23 +1,22 @@
-import { Ionicons } from '@expo/vector-icons';
 import { StyleSheet, Text, View } from 'react-native';
 
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
+import { LivePulseDot } from '@/components/live-pulse-dot';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
- * One card in the Home timeline carousel. Layout:
+ * One card in the Home timeline carousel. Layout mirrors the fixture-drill
+ * hero header exactly — date centred at the top, `[flag][CODE]` — score —
+ * `[CODE][flag]` on the matchup row, competition + round + venue collapsed
+ * to a single centred meta line at the bottom. Same typographic tokens as
+ * the drill hero so the two surfaces read as one visual system when a
+ * user taps from carousel into detail.
  *
- *   Sat 4 Jul                                              (top-left)
- *                       Round 1                            (centred)
- *   [flag]              [X] [FT] [Y]              [flag]   (matchup row)
- *   HOME                                          AWAY
- *   ─────────────────────────────────────────────────────  (divider)
- *   📍 Stade de France                                     (venue)
- *
- * Winning team's score is accent-boxed; the other is a flat grey box.
- * Scheduled fixtures show just the kickoff time centred, no score boxes.
+ * The outer card chrome (rounded corners, shadow, hairline border) is the
+ * only thing that differs from the drill hero — it's what makes this a
+ * carousel card vs. a full-bleed header.
  */
 export function FixtureCarouselCard({
   fixture,
@@ -38,65 +37,52 @@ export function FixtureCarouselCard({
 }) {
   const isCompleted = fixture.status === 'completed';
   const isLive = fixture.status === 'live' || fixture.status === 'half-time';
-  const roundText = fixture.round ?? competition?.short_name ?? '';
+
+  const competitionShort = competition?.short_name ?? fixture.competition_id;
+  const metaParts = [competitionShort];
+  if (fixture.round) metaParts.push(fixture.round);
+  metaParts.push(fixture.venue);
+  const metaLine = metaParts.join(' · ');
 
   return (
     <View style={[styles.card, { width }]}>
-      <View style={styles.topRow}>
-        {isLive ? (
-          <View style={styles.liveIndicator}>
-            <View style={styles.liveDot} />
-            <Text style={styles.liveLabel}>Live</Text>
-          </View>
-        ) : (
-          <Text style={styles.dayLabel}>{dayLabel}</Text>
-        )}
-      </View>
+      {/* Date row — centred. Live-state is signalled inside the score slot
+          (matches drill hero), so no top-level live indicator here. */}
+      <Text style={styles.headerLine}>{dayLabel}</Text>
 
-      <Text style={styles.roundText}>{roundText}</Text>
-
-      {/* Top row — flag + score + flag on the same horizontal centre line.
-          All three columns flex-1 so slots are equally wide, guaranteeing
-          the team labels below sit exactly under their flag. */}
-      <View style={styles.matchupTopRow}>
-        <View style={styles.flagSlot}>
-          {homeTeam ? <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} /> : null}
-        </View>
-
-        <View style={styles.scoreSlot}>
-          <ScoreBlock
-            fixture={fixture}
-            result={result}
-            isCompleted={isCompleted}
-            isLive={isLive}
-          />
-        </View>
-
-        <View style={styles.flagSlot}>
-          {awayTeam ? <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} /> : null}
-        </View>
-      </View>
-
-      {/* Bottom row — team codes under each flag, invisible middle slot
-          matching scoreSlot width so codes stay symmetric under the flags. */}
-      <View style={styles.matchupLabelsRow}>
-        <View style={styles.labelCol}>
-          <Text style={styles.teamCode}>{homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}</Text>
-        </View>
-        <View style={styles.scoreSlot} />
-        <View style={styles.labelCol}>
-          <Text style={styles.teamCode}>{awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}</Text>
-        </View>
-      </View>
-
-      <View style={styles.divider} />
-
-      <View style={styles.venueRow}>
-        <Ionicons name="location" size={14} color={Colors.light.text} />
-        <Text style={styles.venueText} numberOfLines={1}>
-          {fixture.venue}
+      {/* Matchup row — every item is a direct sibling of the row with
+          `justifyContent: 'space-around'`, so distribution is even across
+          the full card width. Completed / live variants render 7 items
+          (flag · code · score · FT · score · code · flag); scheduled
+          renders 5 (flag · code · time · code · flag). Both variants read
+          as symmetrically centred. */}
+      <View style={styles.matchupRow}>
+        {homeTeam ? (
+          <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} />
+        ) : null}
+        <Text style={styles.teamShort}>
+          {homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}
         </Text>
+        <ScoreBlock
+          fixture={fixture}
+          result={result}
+          isCompleted={isCompleted}
+          isLive={isLive}
+        />
+        <Text style={styles.teamShort}>
+          {awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}
+        </Text>
+        {awayTeam ? (
+          <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} />
+        ) : null}
       </View>
+
+      {/* Bottom meta: competition · round · venue collapsed to one line.
+          Extra `marginTop` gives it a line-height of breathing room above
+          so the matchup hero and the meta feel like distinct blocks. */}
+      <Text style={[styles.headerLine, styles.metaLineSpacing]} numberOfLines={1}>
+        {metaLine}
+      </Text>
     </View>
   );
 }
@@ -115,57 +101,58 @@ function ScoreBlock({
   const kickoffTime = fixture.kickoff_utc.slice(11, 16);
 
   if (isLive && result) {
-    // Live: both scores in plain grey boxes; middle status shows the current
-    // minute (e.g. "41'") in red. Half-time shows "HT" in the same red slot.
-    // No accent on either score — the play is still going.
+    // Live with in-progress score: pulsing red dot + minute clock replaces
+    // the FT annotation between the two scores. Returns three siblings so
+    // the parent row can distribute them via space-around.
     const statusText =
       fixture.status === 'half-time' ? 'HT' : `${computeLiveMinute(fixture)}'`;
     return (
-      <View style={styles.scoreRow}>
+      <>
         <View style={styles.scoreBox}>
           <Text style={styles.scoreText}>{result.home_score}</Text>
         </View>
-        <Text style={styles.statusLive}>{statusText}</Text>
+        <View style={styles.liveMiddle}>
+          <LivePulseDot size={5} />
+          <Text style={styles.statusLive}>{statusText}</Text>
+        </View>
         <View style={styles.scoreBox}>
           <Text style={styles.scoreText}>{result.away_score}</Text>
         </View>
-      </View>
+      </>
     );
   }
 
   if (isCompleted && result) {
-    // Completed: winning team's score gets the indigo accent box.
+    // Completed: winning team's score gets the dark accent box. Three
+    // siblings (score / FT / score) so the parent row distributes them.
     const homeWins = result.home_score > result.away_score;
     const awayWins = result.away_score > result.home_score;
     return (
-      <View style={styles.scoreRow}>
+      <>
         <View style={[styles.scoreBox, homeWins && styles.scoreBoxWinner]}>
           <Text style={[styles.scoreText, homeWins && styles.scoreTextWinner]}>
             {result.home_score}
           </Text>
         </View>
-        <Text style={styles.statusText}>FT</Text>
+        <Text style={styles.ftLabel}>FT</Text>
         <View style={[styles.scoreBox, awayWins && styles.scoreBoxWinner]}>
           <Text style={[styles.scoreText, awayWins && styles.scoreTextWinner]}>
             {result.away_score}
           </Text>
         </View>
-      </View>
+      </>
     );
   }
 
-  // Scheduled or no result: show kickoff time centred
+  // Scheduled or no result: kickoff time as a single centred sibling.
   return (
-    <View style={styles.scoreRowScheduled}>
-      <Text style={styles.kickoffLabel}>KO</Text>
-      <Text
-        style={styles.kickoffTime}
-        numberOfLines={1}
-        adjustsFontSizeToFit
-        minimumFontScale={0.7}>
-        {kickoffTime}
-      </Text>
-    </View>
+    <Text
+      style={styles.kickoffTime}
+      numberOfLines={1}
+      adjustsFontSizeToFit
+      minimumFontScale={0.7}>
+      {kickoffTime}
+    </Text>
   );
 }
 
@@ -185,8 +172,18 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    minHeight: 200,
+    // Horizontal Spacing.three (16pt), vertical Spacing.four (24pt) —
+    // adds a line-height of breathing room compared to Spacing.three
+    // (8pt more top + 8pt more bottom) while keeping the tighter
+    // horizontal padding that lets the flags sit closer to the card
+    // edges for even `space-evenly` distribution across the row.
+    paddingVertical: Spacing.four,
+    paddingHorizontal: Spacing.three,
+    // Same vertical rhythm as the drill hero — 8pt gap between the date,
+    // matchup row, and meta line; matchup row supplies its own extra
+    // marginTop for the "who's playing" hero breathing room.
+    gap: Spacing.two,
+    alignItems: 'center',
     shadowColor: '#000',
     shadowOpacity: 0.05,
     shadowRadius: 8,
@@ -194,71 +191,39 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
 
-  topRow: { flexDirection: 'row', justifyContent: 'flex-start', minHeight: 18 },
-  dayLabel: {
-    fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-    fontWeight: TextWeight.regular,
-  },
-  liveIndicator: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  liveDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 999,
-    backgroundColor: StatusColor.live,
-  },
-  liveLabel: {
-    fontSize: TextSize.sm,
-    color: StatusColor.live,
-    fontWeight: TextWeight.bold,
-  },
-
-  roundText: {
+  // Muted centred single-line style used for the date at the top and the
+  // meta (competition · round · venue) at the bottom. Same token as the
+  // drill hero's `headerLine`.
+  headerLine: {
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
-    marginTop: 4,
-    marginBottom: Spacing.three,
+  },
+  // One line-height of extra breathing room above the bottom meta so it
+  // reads as its own block rather than sitting flush against the flags.
+  metaLineSpacing: {
+    marginTop: Spacing.three,
   },
 
-  matchupTopRow: {
+  // Matchup row — every item (flag, code, score, FT/minute, score, code,
+  // flag) is a direct sibling. `justifyContent: 'space-around'` gives each
+  // item equal breathing room on either side, so distribution stays even
+  // even when the middle content changes between kickoff-time / score-FT-
+  // score / score-LIVE-score. Zero horizontal padding lets the outer
+  // flags sit closer to the card edge — the outer whitespace is the
+  // card's `paddingHorizontal` only.
+  matchupRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: Spacing.two,
-    // Generous outer breathing gap (60) intentionally 10× the internal
-    // ScoreBlock cluster gap (6). Reads as: flag / [score-FT-score cluster] /
-    // flag — three distinct visual groups instead of five equally-spaced items.
-    // Not on the Spacing scale because this is a per-context aesthetic
-    // decision for the paired-element pattern, not a general spacing token.
-    gap: 60,
+    justifyContent: 'space-evenly',
+    width: '100%',
+    marginTop: Spacing.three,
   },
-  flagSlot: { flex: 1, alignItems: 'center' },
-  // Same style is used twice in the card: once wrapping ScoreBlock (top row)
-  // and once as an invisible spacer under it (labels row) — guarantees the
-  // team codes sit exactly under their flag.
-  scoreSlot: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  matchupLabelsRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    // Padding AND gap MUST match matchupTopRow so the three flex-1 columns are
-    // the same width in both rows — otherwise the label centres drift outward
-    // relative to the flag centres above.
-    paddingHorizontal: Spacing.two,
-    gap: 60,
-    marginTop: 6,
-  },
-  labelCol: { flex: 1, alignItems: 'center' },
-  teamCode: {
-    fontSize: TextSize.lg,
+  teamShort: {
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-
-  scoreRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
   },
   scoreBox: {
     ...ScoreBoxSize.card,
@@ -276,57 +241,34 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   scoreTextWinner: { color: Colors.light.textInverse },
-  // FT annotation for completed fixtures in the card. Uses the canonical
-  // card-scale FT spec — 12pt bold wide textSecondary — matching the
-  // fixture-detail hero and mirroring the row-scale FT at 10pt used in the
-  // list contexts. See design-system.md §6 for the two-tier FT scale.
-  statusText: {
+  // Card-scale FT annotation between the two completed scores. Same 12pt
+  // bold wide textSecondary spec used in the drill hero.
+  ftLabel: {
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     marginHorizontal: 2,
   },
-  statusLive: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: StatusColor.live,
+  // Live-state middle slot: pulsing red dot + minute clock. Sits in the
+  // same middle position as the FT annotation for completed matches.
+  liveMiddle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
     marginHorizontal: 2,
   },
-
-  scoreRowScheduled: {
-    alignItems: 'center',
-  },
-  kickoffLabel: {
-    fontSize: TextSize.xs,
+  statusLive: {
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    letterSpacing: TextTracking.wide,
+    color: StatusColor.live,
   },
+
   kickoffTime: {
     fontSize: TextSize.xl,
     fontWeight: TextWeight.bold,
     color: Colors.light.text,
     marginTop: 2,
     fontVariant: ['tabular-nums'],
-  },
-
-  divider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginTop: Spacing.three,
-    marginBottom: Spacing.two + 2,
-  },
-  venueRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-  },
-  venueText: {
-    fontSize: TextSize.md,
-    color: Colors.light.text,
-    fontWeight: TextWeight.semibold,
-    flexShrink: 1,
   },
 });

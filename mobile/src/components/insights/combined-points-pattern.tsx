@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop, Text as SvgText } from 'react-native-svg';
 
 import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
 
@@ -175,10 +175,31 @@ function MomentumArc({
   });
   const smoothPath = smoothLinePath(svgPoints).path;
 
+  // Closed area path beneath the momentum curve — clipped to the zero
+  // baseline (midY) so the halo tint never crosses into the opposite
+  // half of the diverging chart. Where the curve is above midY, the
+  // shape is bounded by (curve above, midY below). Where the curve is
+  // below midY the shape reverses (midY above, curve below). Nonzero
+  // fill rule handles the crossing at the zero line cleanly.
+  const first = svgPoints[0];
+  const last = svgPoints[svgPoints.length - 1];
+  const areaPath =
+    svgPoints.length > 1 && first && last
+      ? `${smoothPath} L ${last.x.toFixed(1)} ${midY.toFixed(1)} L ${first.x.toFixed(1)} ${midY.toFixed(1)} Z`
+      : '';
+
   const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
 
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+      <Defs>
+        <LinearGradient id="momentum-area-gradient" x1="0" y1="0" x2="0" y2="1">
+          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
+          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+        </LinearGradient>
+      </Defs>
+      {areaPath ? <Path d={areaPath} fill="url(#momentum-area-gradient)" stroke="none" /> : null}
+
       {/* Zero baseline (dashed) — the "even quarter" reference. */}
       <Line
         x1={padX}
@@ -194,7 +215,7 @@ function MomentumArc({
       <Path
         d={smoothPath}
         stroke={CHART_LINE_COLOR}
-        strokeWidth={1.5}
+        strokeWidth={1}
         fill="none"
         strokeLinecap="round"
       />
@@ -205,7 +226,7 @@ function MomentumArc({
           key={`dot-${i}`}
           cx={p.x}
           cy={p.y}
-          r={3.6}
+          r={2}
           fill={p.net >= 0 ? SCORED_COLOR : CONCEDED_COLOR}
         />
       ))}
@@ -221,8 +242,8 @@ function MomentumArc({
             key={`nl-${i}`}
             x={p.x}
             y={labelY}
-            fill={Colors.light.text}
-            fontSize={11}
+            fill={Colors.light.textSecondary}
+            fontSize={10}
             fontWeight="700"
             textAnchor="middle">
             {`${sign}${Math.round(p.net)}%`}

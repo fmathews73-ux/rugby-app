@@ -22,6 +22,13 @@ import type {
   Team,
 } from '@rugby-app/shared';
 
+import {
+  transformEventsForSim,
+  transformFixtureForSim,
+  transformResultForSim,
+  useSimLive,
+} from '@/dev/sim-live';
+
 import { fetchJson } from './client';
 
 interface HealthResponse {
@@ -86,38 +93,90 @@ export function useSeasonBracket(seasonId: string): UseQueryResult<Bracket> {
   });
 }
 
+// Live-refresh cadence. Scoring / result / event polling at 30 s tracks
+// rugby's ~1-event-per-5-min peak comfortably; lineups poll on a longer
+// 60 s since sub events are rare and lineups only shift on subs. Callers
+// pass the fixture status they already have (usually from useFixture);
+// polling is skipped for scheduled / completed / postponed / cancelled
+// fixtures since those endpoints won't change. Per PRD register #17 the
+// real-time (WebSocket / Redis) tier is deferred — poll-refresh is the
+// MVP approach.
+const LIVE_POLL_MS = 30_000;
+const LIVE_LINEUP_POLL_MS = 60_000;
+
+export function isFixtureLive(status?: Fixture['status']): boolean {
+  return status === 'live' || status === 'half-time';
+}
+
 export function useFixture(fixtureId: string): UseQueryResult<Fixture> {
+  const sim = useSimLive();
   return useQuery({
     queryKey: ['fixture', fixtureId],
     queryFn: () => fetchJson<Fixture>(`/fixtures/${fixtureId}`),
     enabled: Boolean(fixtureId),
+    // Self-driven — inspects its own last-known data to decide polling.
+    refetchInterval: (query) =>
+      isFixtureLive(query.state.data?.status) ? LIVE_POLL_MS : false,
+    // Sim override: overrides `status` to 'live' when this fixture is the
+    // one being simulated. Otherwise pass-through.
+    select: (data) => transformFixtureForSim(sim, data) as Fixture,
   });
 }
 
-export function useFixtureResult(fixtureId: string): UseQueryResult<Result> {
+export function useFixtureResult(
+  fixtureId: string,
+  fixtureStatus?: Fixture['status'],
+): UseQueryResult<Result> {
+  const sim = useSimLive();
+  // Also grab the fixture + events queries so the sim transformer can
+  // derive score fields from the actual event stream (accurate) rather
+  // than proportionally scaling raw counts (misleading). TanStack Query
+  // dedupes these subscriptions — no extra network round-trips even
+  // though multiple hooks read the same query.
+  const fixtureQuery = useFixture(fixtureId);
+  const eventsQuery = useFixtureEvents(fixtureId, fixtureStatus);
   return useQuery({
     queryKey: ['fixtureResult', fixtureId],
     queryFn: () => fetchJson<Result>(`/fixtures/${fixtureId}/result`),
     enabled: Boolean(fixtureId),
+    refetchInterval: isFixtureLive(fixtureStatus) ? LIVE_POLL_MS : false,
+    // Sim override: derives scores + try/con/pen/drop/card counts + H/T
+    // snapshot from the sim-filtered event stream; proportionally scales
+    // the remainder (metres, tackles, kicks, etc.). Pass-through when
+    // this fixture isn't the one being simulated.
+    select: (data) =>
+      transformResultForSim(sim, fixtureId, data, eventsQuery.data, fixtureQuery.data) as Result,
   });
 }
 
-export function useFixtureLineups(fixtureId: string): UseQueryResult<LineUp[]> {
+export function useFixtureLineups(
+  fixtureId: string,
+  fixtureStatus?: Fixture['status'],
+): UseQueryResult<LineUp[]> {
   return useQuery({
     queryKey: ['fixtureLineups', fixtureId],
     queryFn: () => fetchJson<LineUp[]>(`/fixtures/${fixtureId}/lineups`),
     enabled: Boolean(fixtureId),
+    refetchInterval: isFixtureLive(fixtureStatus) ? LIVE_LINEUP_POLL_MS : false,
   });
 }
 
 /** Chronological match-event timeline for a fixture. Returns an empty
  *  array (not an error) for fixtures that have no events yet — the
  *  Overview timeline UI can treat empty as "not yet available". */
-export function useFixtureEvents(fixtureId: string): UseQueryResult<MatchEvent[]> {
+export function useFixtureEvents(
+  fixtureId: string,
+  fixtureStatus?: Fixture['status'],
+): UseQueryResult<MatchEvent[]> {
+  const sim = useSimLive();
   return useQuery({
     queryKey: ['fixtureEvents', fixtureId],
     queryFn: () => fetchJson<MatchEvent[]>(`/fixtures/${fixtureId}/events`),
     enabled: Boolean(fixtureId),
+    refetchInterval: isFixtureLive(fixtureStatus) ? LIVE_POLL_MS : false,
+    // Sim override: filters events to those with `minute <= vMin` (with
+    // sensible gating on the kick-off / half-time / full-time milestones).
+    select: (data) => transformEventsForSim(sim, fixtureId, data) as MatchEvent[],
   });
 }
 

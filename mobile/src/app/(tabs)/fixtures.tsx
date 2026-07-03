@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useNavigation, useRouter } from 'expo-router';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -9,6 +9,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
+import { LivePulseDot } from '@/components/live-pulse-dot';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -44,6 +45,7 @@ const FILTER_OPTIONS = [
  */
 export default function FixturesScreen() {
   const router = useRouter();
+  const navigation = useNavigation();
   const [competitionFilter, setCompetitionFilter] = useState<string>(ALL_COMPETITIONS);
 
   const competitions = useCompetitions();
@@ -62,21 +64,26 @@ export default function FixturesScreen() {
   const isLoading = competitions.isLoading || seasons.isLoading || fixtureQueries.some((q) => q.isLoading);
   const error = competitions.error ?? seasons.error ?? fixtureQueries.find((q) => q.error)?.error;
 
-  // Collect the ids of completed fixtures visible in the current view so we
-  // can batch-fetch their results and show the score inline.
-  const completedIds = useMemo(() => {
+  // Collect the ids of fixtures that have (or might soon have) a result —
+  // completed OR currently live/half-time. Live fixtures poll every 30 s
+  // so the score shown inline stays fresh; completed fetch once and cache.
+  const scoreFixtures = useMemo(() => {
     const all: Fixture[] = fixtureQueries.flatMap((q) => q.data ?? []);
     const filtered =
       competitionFilter === ALL_COMPETITIONS
         ? all
         : all.filter((f) => f.competition_id === competitionFilter);
-    return filtered.filter((f) => f.status === 'completed').map((f) => f.id);
+    return filtered.filter(
+      (f) => f.status === 'completed' || f.status === 'live' || f.status === 'half-time',
+    );
   }, [fixtureQueries, competitionFilter]);
 
   const resultQueries = useQueries({
-    queries: completedIds.map((id) => ({
-      queryKey: ['fixtureResult', id],
-      queryFn: () => fetchJson<Result>(`/fixtures/${id}/result`),
+    queries: scoreFixtures.map((f) => ({
+      queryKey: ['fixtureResult', f.id],
+      queryFn: () => fetchJson<Result>(`/fixtures/${f.id}/result`),
+      refetchInterval:
+        f.status === 'live' || f.status === 'half-time' ? 30_000 : false,
     })),
   });
 
@@ -133,6 +140,25 @@ export default function FixturesScreen() {
   const listRef = useRef<FlatList<DayGroup>>(null);
   const didInitialScroll = useRef(false);
 
+  /** Jump the list so the most-recent-completed day-card sits at the top of
+   * the viewport. Called on first layout and on every Fixtures tab press. */
+  const scrollToMostRecentCompleted = useCallback(
+    (animated: boolean) => {
+      if (mostRecentCompletedDayIndex === null) return;
+      try {
+        listRef.current?.scrollToIndex({
+          index: mostRecentCompletedDayIndex,
+          viewPosition: 0,
+          animated,
+        });
+      } catch {
+        // FlatList throws if layout isn't ready — retry logic in
+        // onScrollToIndexFailed below.
+      }
+    },
+    [mostRecentCompletedDayIndex],
+  );
+
   useEffect(() => {
     if (
       !didInitialScroll.current &&
@@ -141,22 +167,23 @@ export default function FixturesScreen() {
     ) {
       // Delay lets the FlatList finish its first layout before we scroll.
       const t = setTimeout(() => {
-        try {
-          listRef.current?.scrollToIndex({
-            index: mostRecentCompletedDayIndex,
-            viewPosition: 0, // top of viewport
-            animated: false,
-          });
-          didInitialScroll.current = true;
-        } catch {
-          // FlatList throws if layout isn't ready — retry logic in
-          // onScrollToIndexFailed below.
-        }
+        scrollToMostRecentCompleted(false);
+        didInitialScroll.current = true;
       }, 80);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [mostRecentCompletedDayIndex, sections.length]);
+  }, [mostRecentCompletedDayIndex, sections.length, scrollToMostRecentCompleted]);
+
+  // Every tap of the Fixtures tab icon — including when the tab is already
+  // focused — snaps back to the most-recent-completed day-card. Consistent
+  // resolve-to landmark for Fixtures matching Home's scroll-to-top.
+  useEffect(() => {
+    const unsub = navigation.addListener('tabPress' as never, () => {
+      scrollToMostRecentCompleted(true);
+    });
+    return unsub;
+  }, [navigation, scrollToMostRecentCompleted]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
@@ -179,15 +206,7 @@ export default function FixturesScreen() {
         contentContainerStyle={styles.listContent}
         onScrollToIndexFailed={() => {
           // Retry once when getItemLayout isn't cheap enough at first paint.
-          setTimeout(() => {
-            if (mostRecentCompletedDayIndex !== null) {
-              listRef.current?.scrollToIndex({
-                index: mostRecentCompletedDayIndex,
-                viewPosition: 0,
-                animated: false,
-              });
-            }
-          }, 100);
+          setTimeout(() => scrollToMostRecentCompleted(false), 100);
         }}
         renderItem={({ item: dayGroup }) => (
           <View style={styles.card}>
@@ -258,9 +277,19 @@ export default function FixturesScreen() {
                       // Upcoming: show the kickoff time in the middle slot
                       // (replaces the previous "Upcoming" badge).
                       <Text style={styles.timeMid}>{fx.kickoff_utc.slice(11, 16)}</Text>
+                    ) : fx.status === 'live' || fx.status === 'half-time' ? (
+                      // Live / half-time — pulsing dot next to the label so
+                      // the row reads as actively refreshing at a glance.
+                      <View style={styles.statusMidLiveWrap}>
+                        <LivePulseDot size={6} />
+                        <Text
+                          style={[styles.statusMid, statusMidExtraStyle(fx.status)]}
+                          numberOfLines={1}>
+                          {statusMidLabel(fx.status)}
+                        </Text>
+                      </View>
                     ) : (
-                      // Live / half-time / postponed / cancelled: keep the
-                      // status label.
+                      // Postponed / cancelled: static status label only.
                       <Text
                         style={[styles.statusMid, statusMidExtraStyle(fx.status)]}
                         numberOfLines={1}>
@@ -423,6 +452,15 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
+  },
+  // Wrapper for LIVE/HT rows so the pulse dot sits inline with the
+  // status label while the 96pt slot width still matches every other row.
+  statusMidLiveWrap: {
+    width: 96,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 5,
   },
   statusMidLive: { color: StatusColor.live, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   statusMidHalfTime: { color: StatusColor.warning, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },

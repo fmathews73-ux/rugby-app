@@ -228,7 +228,7 @@ export function RadarChart({
           d={comparePath}
           fill="none"
           stroke={REFERENCE_COLOR}
-          strokeWidth={1.5}
+          strokeWidth={1}
           strokeDasharray="3 3"
         />
       ) : null}
@@ -237,15 +237,15 @@ export function RadarChart({
         fill={RADAR_COLOR}
         fillOpacity={0.12}
         stroke={RADAR_COLOR}
-        strokeWidth={1.5}
+        strokeWidth={1}
       />
       {compareAxes?.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.8} fill={REFERENCE_COLOR} />;
+        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={2} fill={REFERENCE_COLOR} />;
       })}
       {axes.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={i} cx={p.x} cy={p.y} r={2.2} fill={RADAR_COLOR} />;
+        return <Circle key={i} cx={p.x} cy={p.y} r={2} fill={RADAR_COLOR} />;
       })}
       {axes.map((ax, i) => {
         const labelP = pointOn(i, r + 16);
@@ -254,9 +254,9 @@ export function RadarChart({
             key={i}
             x={labelP.x}
             y={labelP.y + 3}
-            fill={Colors.light.text}
-            fontSize={11}
-            fontWeight="600"
+            fill={Colors.light.textSecondary}
+            fontSize={12}
+            fontWeight="400"
             textAnchor="middle">
             {ax.label}
           </SvgText>

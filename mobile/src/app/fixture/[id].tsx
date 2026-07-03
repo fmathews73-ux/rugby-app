@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Easing, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Coach, CoachRole, Fixture, LineUp, MatchEvent, MatchOfficial, MatchOfficialRole, Player, Result, Team } from '@rugby-app/shared';
@@ -23,10 +23,13 @@ import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
 import { ExtendedMomentum } from '@/components/insights/extended-momentum';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
-import { PlayerLeaders } from '@/components/insights/player-leaders';
+import { ScoringProgression } from '@/components/insights/scoring-progression';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
+import { LivePulseDot } from '@/components/live-pulse-dot';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { useSimLive } from '@/dev/sim-live';
+import { SimLiveToggle } from '@/dev/sim-live-toggle';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
@@ -56,10 +59,22 @@ const SUB_TABS: readonly { id: SubTab; label: string }[] = [
 export default function FixtureDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const [tab, setTab] = useState<SubTab>('preview');
+  const scrollRef = useRef<ScrollView>(null);
+
+  // Every sub-tab pill tap resolves to the topmost card of that pane —
+  // Preview → Form, Line-Up → Starting XV, Timeline → FT, Stats → first
+  // KPI, Insights → Profile. Applies even when tapping the already-active
+  // pill: a deterministic "reset to top" gesture matches the same
+  // resolve-to-landmark behaviour we give the footer tab icons.
+  const handleSubTabSelect = (next: SubTab) => {
+    setTab(next);
+    scrollRef.current?.scrollTo({ y: 0, animated: true });
+  };
 
   const fixture = useFixture(id ?? '');
-  const result = useFixtureResult(id ?? '');
-  const lineups = useFixtureLineups(id ?? '');
+  const fixtureStatus = fixture.data?.status;
+  const result = useFixtureResult(id ?? '', fixtureStatus);
+  const lineups = useFixtureLineups(id ?? '', fixtureStatus);
   const players = useFixturePlayers(id ?? '');
   const teams = useTeams();
   const competitions = useCompetitions();
@@ -102,8 +117,8 @@ export default function FixtureDetailScreen() {
             awayTeam={teamById.get(fixture.data.away_team_id)}
             competitionName={compById.get(fixture.data.competition_id)?.short_name}
           />
-          <SubTabBar tab={tab} onSelect={setTab} />
-          <ScrollView contentContainerStyle={styles.scroll}>
+          <SubTabBar tab={tab} onSelect={handleSubTabSelect} />
+          <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
             <View style={styles.pane}>
               {tab === 'preview' && (
                 <PreviewPane
@@ -140,8 +155,14 @@ export default function FixtureDetailScreen() {
                   fixtureId={fixture.data.id}
                   homeTeamId={fixture.data.home_team_id}
                   awayTeamId={fixture.data.away_team_id}
+                  fixtureStatus={fixture.data.status}
                 />
               )}
+              {/* Dev-only synthetic-live toggle — visible only in __DEV__
+                  and only for completed fixtures. Rewinds the match to
+                  minute 0 and plays it out at ~8× speed so the polling
+                  cadence + chart updates can be smoke-tested visually. */}
+              <SimLiveToggle fixture={fixture.data} />
             </View>
           </ScrollView>
         </>
@@ -166,95 +187,110 @@ function MatchupHeader({
   competitionName: string | undefined;
 }) {
   const isCompleted = fixture.status === 'completed';
+  const isLive = fixture.status === 'live' || fixture.status === 'half-time';
+  const sim = useSimLive();
+
+  // Match minute for the LIVE chip: sim mode sources from the sim's
+  // virtual clock (kickoff is in the past — real elapsed would be huge).
+  // Real live mode: elapsed real minutes since kickoff, clamped 0–80.
+  const liveMinute = (() => {
+    if (sim.active && sim.fixtureId === fixture.id) {
+      return Math.floor(sim.virtualMinute);
+    }
+    const elapsed = Math.floor((Date.now() - new Date(fixture.kickoff_utc).getTime()) / 60000);
+    return Math.min(80, Math.max(0, elapsed));
+  })();
+
   return (
     <View style={styles.header}>
-      {/* Header meta stack: date first (the "when"), competition + round
-          second (the "what tournament"), venue third (the "where"). Puts
-          the strongest temporal orient-me anchor at the very top. */}
+      {/* Date sits at the top as the temporal orient-me anchor.
+          Competition + venue drop to below the flags/score row so the
+          hero mirrors the Fixtures list layout: matchup first, then
+          the "what tournament / where" meta line beneath. */}
       <Text style={styles.headerLine}>{formatKickoff(fixture.kickoff_utc)}</Text>
-      <Text style={styles.headerMeta}>
-        {competitionName ?? fixture.competition_id}
-        {fixture.round ? ` · ${fixture.round}` : ''}
-      </Text>
-      <Text style={styles.headerLine}>{fixture.venue}</Text>
       {/* Row 1 — flags + score. Flags locked to `FlagSize.medium` (40 pt)
           to match the Home page fixture-carousel hero card — same "who's
-          playing" visual weight across the two surfaces. */}
+          playing" visual weight across the two surfaces. The 3-letter
+          team code sits inline next to each flag (home code on the RIGHT
+          of the home flag, away code on the LEFT of the away flag) so the
+          codes hug the score slot in the middle. */}
       <View style={styles.matchupTopRow}>
-        <View style={styles.flagSlot}>
+        <View style={styles.flagSlotHome}>
           {homeTeam ? (
             <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} />
           ) : null}
+          <Text style={styles.teamShort}>
+            {homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}
+          </Text>
         </View>
         <View style={styles.scoreSlot}>
-          {isCompleted && result ? (
+          {(isCompleted || (isLive && result)) && result ? (
+            // Any fixture with a result — completed OR live — shows the
+            // score cluster. Middle annotation flips: 'FT' when completed,
+            // pulsing dot + current minute when live. Winner accent only
+            // applies once the match is final.
             <View style={styles.detailScoreRow}>
               <View
                 style={[
                   styles.detailScoreBox,
-                  result.home_score > result.away_score && styles.detailScoreBoxWinner,
+                  isCompleted && result.home_score > result.away_score && styles.detailScoreBoxWinner,
                 ]}>
                 <Text
                   style={[
                     styles.detailScoreText,
-                    result.home_score > result.away_score && styles.detailScoreTextWinner,
+                    isCompleted && result.home_score > result.away_score && styles.detailScoreTextWinner,
                   ]}>
                   {result.home_score}
                 </Text>
               </View>
-              <Text style={styles.ftLabel}>FT</Text>
+              {isLive ? (
+                <View style={styles.liveMiddle}>
+                  <LivePulseDot size={5} />
+                  <Text style={styles.liveMinute}>
+                    {fixture.status === 'half-time' ? 'HT' : `${liveMinute}'`}
+                  </Text>
+                </View>
+              ) : (
+                <Text style={styles.ftLabel}>FT</Text>
+              )}
               <View
                 style={[
                   styles.detailScoreBox,
-                  result.away_score > result.home_score && styles.detailScoreBoxWinner,
+                  isCompleted && result.away_score > result.home_score && styles.detailScoreBoxWinner,
                 ]}>
                 <Text
                   style={[
                     styles.detailScoreText,
-                    result.away_score > result.home_score && styles.detailScoreTextWinner,
+                    isCompleted && result.away_score > result.home_score && styles.detailScoreTextWinner,
                   ]}>
                   {result.away_score}
                 </Text>
               </View>
             </View>
           ) : (
-            // Non-completed: the status pill (Upcoming / LIVE / HT /
-            // Postponed / Cancelled) sits in the score slot, replacing the
-            // old muted "vs" text. Anchors the match state where the score
-            // would eventually appear once the match completes.
+            // No result yet (scheduled / postponed / cancelled): status
+            // pill anchors the match state where the score would go.
             <StatusPill status={fixture.status} />
           )}
         </View>
-        <View style={styles.flagSlot}>
+        <View style={styles.flagSlotAway}>
+          <Text style={styles.teamShort}>
+            {awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}
+          </Text>
           {awayTeam ? (
             <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} />
           ) : null}
         </View>
       </View>
-      {/* Row 2 — team codes + names below. Empty middle slot preserves symmetry
-          around the score, so home / away labels line up under their flag. */}
-      <View style={styles.matchupLabelsRow}>
-        <View style={styles.labelCol}>
-          <Text style={styles.teamShort}>
-            {homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}
-          </Text>
-          <Text style={styles.teamName} numberOfLines={1}>
-            {homeTeam?.name ?? fixture.home_team_id}
-          </Text>
-        </View>
-        <View style={styles.scoreSlot} />
-        <View style={styles.labelCol}>
-          <Text style={styles.teamShort}>
-            {awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}
-          </Text>
-          <Text style={styles.teamName} numberOfLines={1}>
-            {awayTeam?.name ?? fixture.away_team_id}
-          </Text>
-        </View>
-      </View>
-      {/* Status pill for non-completed matches lives in the score slot
-          above; for completed matches, "Final" appears as the Overview
-          card title. Nothing else to render here. */}
+      {/* Meta line below the flags/score row — competition · round · venue
+          on a single centred line, mirroring the Fixtures list row's
+          "COMP · Venue" meta placement. */}
+      <Text style={styles.headerLine}>
+        {competitionName ?? fixture.competition_id}
+        {fixture.round ? ` · ${fixture.round}` : ''}
+        {' · '}
+        {fixture.venue}
+      </Text>
     </View>
   );
 }
@@ -269,8 +305,14 @@ function StatusPill({ status }: { status: Fixture['status'] }) {
     cancelled: { bg: '#9CA3AF', fg: '#FFFFFF', label: 'Cancelled' },
   };
   const c = config[status];
+  const showPulse = status === 'live' || status === 'half-time';
   return (
     <View style={[styles.pill, { backgroundColor: c.bg }]}>
+      {showPulse ? (
+        <View style={styles.pillDotSlot}>
+          <LivePulseDot size={6} color={Colors.light.background} />
+        </View>
+      ) : null}
       <Text style={[styles.pillText, { color: c.fg }]}>{c.label}</Text>
     </View>
   );
@@ -327,7 +369,7 @@ function OverviewPane({
   awayTeam: Team | undefined;
   playerById: Map<string, Player>;
 }) {
-  const events = useFixtureEvents(fixture.id);
+  const events = useFixtureEvents(fixture.id, fixture.status);
   const [collapsed, setCollapsed] = useState(false);
 
   if (fixture.status === 'scheduled') {
@@ -436,47 +478,10 @@ function MilestoneBar({ type }: { type: MatchEvent['type'] }) {
   };
   return (
     <View style={styles.milestoneRow}>
-      <View style={styles.milestoneBar}>
-        <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textSecondary} />
-        <Text style={styles.milestoneText}>{labels[type] ?? type}</Text>
-      </View>
+      <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textSecondary} />
+      <Text style={styles.categoryLabel}>{labels[type] ?? type}</Text>
     </View>
   );
-}
-
-/**
- * Match-state bar for the top of the Stats pane. Same pill silhouette as
- * MilestoneBar so the shape stays constant across states; the fill /
- * colour / content flip per fixture status:
- *   - completed  → grey pill + stopwatch + "FULL TIME"
- *   - live       → red pill + red dot + white "LIVE {n}'"
- *   - half-time  → amber pill + stopwatch + white "HALF TIME"
- *   - scheduled  → not rendered (StatsPane returns an empty state instead)
- */
-function StateBar({ fixture }: { fixture: Fixture }) {
-  if (fixture.status === 'completed') return <MilestoneBar type="full-time" />;
-  if (fixture.status === 'half-time') {
-    return (
-      <View style={styles.milestoneRow}>
-        <View style={[styles.milestoneBar, styles.stateBarHalfTime]}>
-          <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textInverse} />
-          <Text style={[styles.milestoneText, styles.stateBarInverseText]}>Half Time</Text>
-        </View>
-      </View>
-    );
-  }
-  if (fixture.status === 'live') {
-    const minute = Math.min(80, Math.max(0, Math.floor((Date.now() - new Date(fixture.kickoff_utc).getTime()) / 60000)));
-    return (
-      <View style={styles.milestoneRow}>
-        <View style={[styles.milestoneBar, styles.stateBarLive]}>
-          <View style={styles.stateBarLiveDot} />
-          <Text style={[styles.milestoneText, styles.stateBarInverseText]}>Live · {minute}'</Text>
-        </View>
-      </View>
-    );
-  }
-  return null;
 }
 
 function EventRow({
@@ -613,7 +618,9 @@ function StatsPane({
   result: Result | null;
   resultLoading: boolean;
 }) {
-  const events = useFixtureEvents(fixture.id);
+  // Track which category's info modal is open; null when nothing is open.
+  const [openInfoTitle, setOpenInfoTitle] = useState<string | null>(null);
+  const events = useFixtureEvents(fixture.id, fixture.status);
   if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
@@ -646,10 +653,13 @@ function StatsPane({
   const quarterScores = computeQuarterScores(events.data ?? [], fixture);
   const sections: {
     title: string;
+    description: string;
     stats: { label: string; home: number; away: number; premium: boolean }[];
   }[] = [
     {
       title: 'Match Overview',
+      description:
+        'The big-picture read on the match: how much of the ball each side had, how much of the game was played in the opponent\'s half, and where the score sat at half-time. A team can dominate possession + territory and still lose — this section is where those tensions show first.',
       stats: [
         { label: 'Possession %', home: result.home_possession_percent, away: result.away_possession_percent, premium: false },
         { label: 'Territory %', home: result.home_territory_percent, away: result.away_territory_percent, premium: false },
@@ -658,6 +668,8 @@ function StatsPane({
     },
     {
       title: 'Scoring',
+      description:
+        'Breakdown of how each team\'s points were scored. Try = 5, conversion = 2, penalty goal = 3, drop goal = 3. A team leaning on penalties usually means they held territory but couldn\'t break the defensive line; a team with lots of unconverted tries left points behind.',
       stats: [
         { label: 'Tries', home: result.home_tries, away: result.away_tries, premium: false },
         { label: 'Conversions', home: result.home_conversions, away: result.away_conversions, premium: false },
@@ -667,6 +679,8 @@ function StatsPane({
     },
     {
       title: 'Scoring by Quarter',
+      description:
+        'Points scored in each 20-minute block (Q1 = 0–20, Q2 = 20–40, Q3 = 40–60, Q4 = 60+). Rugby has no formal quarters, but analysts use these blocks to spot game-management patterns — teams that come out fast in Q1, teams that dominate after the half-time reset, teams that hold their nerve in the closing 20.',
       stats: [
         { label: 'Q1 (0–20 min)', home: quarterScores.home[0]!, away: quarterScores.away[0]!, premium: false },
         { label: 'Q2 (20–40 min)', home: quarterScores.home[1]!, away: quarterScores.away[1]!, premium: false },
@@ -676,6 +690,8 @@ function StatsPane({
     },
     {
       title: 'Attack',
+      description:
+        'The "how did they move forward" numbers. Metres = total ground gained ball-in-hand. Line breaks = clean breaches of the defensive line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
       stats: [
         { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
         { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
@@ -686,6 +702,8 @@ function StatsPane({
     },
     {
       title: 'Kicking',
+      description:
+        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
       stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
         { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
@@ -694,6 +712,8 @@ function StatsPane({
     },
     {
       title: 'Set Piece',
+      description:
+        'How each team fared at the set-piece phases — scrums and lineouts. Winning your own scrum or lineout is expected; losing it is a turnover in prime attacking territory. Winning the OPPONENT\'S is worth its weight in gold — steals disrupt phase play and momentum.',
       stats: [
         { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won, premium: true },
         { label: 'Scrums lost', home: result.home_scrums_lost, away: result.away_scrums_lost, premium: true },
@@ -703,6 +723,8 @@ function StatsPane({
     },
     {
       title: 'Defence',
+      description:
+        'The defensive read. Tackles made = total completed tackles. Tackle success % = the share of attempted tackles that stuck (85% is a solid Tier-1 baseline; below 80% usually means a leaky defensive shape). Turnovers won = ball reclaimed at the breakdown or via steals. Turnovers conceded = ball lost in contact — the flip side of the same coin.',
       stats: [
         { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made, premium: true },
         { label: 'Tackle success %', home: result.home_tackle_success_percent, away: result.away_tackle_success_percent, premium: true },
@@ -712,6 +734,8 @@ function StatsPane({
     },
     {
       title: 'Discipline',
+      description:
+        'How well each team stayed inside the laws. Penalties conceded = referee whistles against. Handling errors = knock-ons and forward passes. Yellow cards = 10-minute sin-bin. Red cards = permanent dismissal. A well-drilled team tends to sit below 8 penalties a game; anything over 12 hands the opponent easy territory and shots at goal.',
       stats: [
         { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true },
         { label: 'Handling errors', home: result.home_handling_errors, away: result.away_handling_errors, premium: true },
@@ -721,16 +745,26 @@ function StatsPane({
     },
   ];
 
+  const activeSection = sections.find((s) => s.title === openInfoTitle) ?? null;
+
   return (
-    <View style={styles.statsCard}>
-      {/* Match-state bar — same pill silhouette across states, colour
-          swaps per fixture status: full-time (grey), live (red + minute),
-          half-time (amber). Reuses the Overview timeline's MilestoneBar
-          treatment for consistency between the two panes. */}
-      <StateBar fixture={fixture} />
+    <View style={styles.statsPaneStack}>
       {sections.map((section) => (
-        <View key={section.title} style={styles.statSection}>
-          <Text style={styles.sectionTitle}>{section.title}</Text>
+        <View key={section.title} style={styles.statsCard}>
+          <View style={styles.categoryHeaderRow}>
+            <Text style={styles.categoryLabel}>{section.title}</Text>
+            <Pressable
+              onPress={() => setOpenInfoTitle(section.title)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel={`Explain ${section.title}`}>
+              <Ionicons
+                name="information-circle-outline"
+                size={14}
+                color={Colors.light.textSecondary}
+              />
+            </Pressable>
+          </View>
           {section.stats.map((s) => (
             <StatBar
               key={s.label}
@@ -742,14 +776,48 @@ function StatsPane({
           ))}
         </View>
       ))}
+      <CategoryInfoModal
+        title={activeSection?.title ?? ''}
+        description={activeSection?.description ?? ''}
+        visible={activeSection !== null}
+        onClose={() => setOpenInfoTitle(null)}
+      />
     </View>
   );
 }
 
-// Stat-bar colour tokens — leader = green (matches win-outcome / rankings-up
-// green used across the app), lagger = red (matches StatusColor.live), tie
-// = secondary text (grey). Kept as module-level constants so all StatBar
-// instances share the same three values.
+function CategoryInfoModal({
+  title,
+  description,
+  visible,
+  onClose,
+}: {
+  title: string;
+  description: string;
+  visible: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <Pressable style={styles.categoryModalBackdrop} onPress={onClose}>
+        <Pressable style={styles.categoryModalCard} onPress={() => {}}>
+          <View style={styles.categoryModalHeader}>
+            <Text style={styles.categoryModalTitle}>{title}</Text>
+            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
+              <Ionicons name="close" size={20} color={Colors.light.text} />
+            </Pressable>
+          </View>
+          <Text style={styles.categoryModalBody}>{description}</Text>
+        </Pressable>
+      </Pressable>
+    </Modal>
+  );
+}
+
+// Stat-bar colour tokens — same solid pair the Efficiency KPI card uses so
+// the two adjacent surfaces read as one visual system. Leader green =
+// GOOD_COLOR from that card; lagger red = BAD_COLOR (StatusColor.live);
+// tie renders in secondary text grey.
 const LEADING_COLOR = '#059669';
 const LAGGING_COLOR = StatusColor.live;
 const TIE_COLOR = Colors.light.textSecondary;
@@ -930,21 +998,17 @@ function LineUpPane({
       {/* Section pills carry an inline people-icon inside — same treatment
           as the Overview timeline's MilestoneBar so the two panes share
           one section-header pattern across the app. */}
-      <View style={styles.lineupSectionPillWrap}>
-        <View style={styles.lineupSectionPill}>
-          <Ionicons name="people-circle-outline" size={14} color={Colors.light.textSecondary} />
-          <Text style={styles.lineupSectionPillLabel}>Starting XV</Text>
-        </View>
+      <View style={styles.lineupSectionHeader}>
+        <Ionicons name="american-football-outline" size={14} color={Colors.light.textSecondary} />
+        <Text style={styles.categoryLabel}>Starting XV</Text>
       </View>
       {startingRows.map(({ home, away }, i) => (
         <LineUpCompareRow key={`start-${i}`} home={home} away={away} playerById={playerById} />
       ))}
 
-      <View style={styles.lineupSectionPillWrap}>
-        <View style={styles.lineupSectionPill}>
-          <Ionicons name="people-circle-outline" size={14} color={Colors.light.textSecondary} />
-          <Text style={styles.lineupSectionPillLabel}>Bench</Text>
-        </View>
+      <View style={styles.lineupSectionHeader}>
+        <Ionicons name="american-football-outline" size={14} color={Colors.light.textSecondary} />
+        <Text style={styles.categoryLabel}>Bench</Text>
       </View>
       {benchRows.map(({ home, away }, i) => (
         <LineUpCompareRow key={`bench-${i}`} home={home} away={away} playerById={playerById} />
@@ -955,11 +1019,9 @@ function LineUpPane({
           gives every team 4 roles: head, attack, defence, forwards. */}
       {(homeCoaches.data?.length ?? 0) + (awayCoaches.data?.length ?? 0) > 0 ? (
         <>
-          <View style={styles.lineupSectionPillWrap}>
-            <View style={styles.lineupSectionPill}>
-              <Ionicons name="people-circle-outline" size={14} color={Colors.light.textSecondary} />
-              <Text style={styles.lineupSectionPillLabel}>Coaching Staff</Text>
-            </View>
+          <View style={styles.lineupSectionHeader}>
+            <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
+            <Text style={styles.categoryLabel}>Coaching Staff</Text>
           </View>
           {pairCoachesByRole(homeCoaches.data ?? [], awayCoaches.data ?? []).map(
             ({ role, home, away }) => (
@@ -973,11 +1035,9 @@ function LineUpPane({
           scheduled fixtures too. Hidden if the feed returns nothing. */}
       {(officials.data?.length ?? 0) > 0 ? (
         <>
-          <View style={styles.lineupSectionPillWrap}>
-            <View style={styles.lineupSectionPill}>
-              <Ionicons name="people-circle-outline" size={14} color={Colors.light.textSecondary} />
-              <Text style={styles.lineupSectionPillLabel}>Match Officials</Text>
-            </View>
+          <View style={styles.lineupSectionHeader}>
+            <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
+            <Text style={styles.categoryLabel}>Match Officials</Text>
           </View>
           {sortOfficialsByRole(officials.data ?? []).map((o) => (
             <OfficialRow key={o.id} official={o} />
@@ -1137,7 +1197,9 @@ function LineUpCompareRow({
   return (
     <View style={styles.lineupCompareRow}>
       <View style={styles.lineupSideLeft}>
-        <Text style={styles.lineupNumberLeft}>{home?.shirt_number ?? '·'}</Text>
+        <View style={styles.lineupNumberBadge}>
+          <Text style={styles.lineupNumberText}>{home?.shirt_number ?? '·'}</Text>
+        </View>
         <Text style={styles.lineupPosPlayer} numberOfLines={1}>
           {homeLabel}
         </Text>
@@ -1146,7 +1208,9 @@ function LineUpCompareRow({
         <Text style={[styles.lineupPosPlayer, styles.lineupPosPlayerRight]} numberOfLines={1}>
           {awayLabel}
         </Text>
-        <Text style={styles.lineupNumberRight}>{away?.shirt_number ?? '·'}</Text>
+        <View style={styles.lineupNumberBadge}>
+          <Text style={styles.lineupNumberText}>{away?.shirt_number ?? '·'}</Text>
+        </View>
       </View>
     </View>
   );
@@ -1210,10 +1274,12 @@ function InsightsPane({
   fixtureId,
   homeTeamId,
   awayTeamId,
+  fixtureStatus,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
+  fixtureStatus: Fixture['status'];
 }) {
   return (
     <View style={styles.insightsPaneStack}>
@@ -1232,14 +1298,16 @@ function InsightsPane({
         fixtureId={fixtureId}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}
+        fixtureStatus={fixtureStatus}
       />
-      {/* Player leaders — broadcast-style "who led each category" grid.
-          Category array in the component is designed to grow when Opta's
-          full per-player metric set lands at Phase 6 cutover. */}
-      <PlayerLeaders
+      {/* Scoring progression — broadcast-worm cumulative-points chart.
+          Both team lines overlaid so the story (leads, comebacks, lead
+          changes) reads directly from where the worms cross. */}
+      <ScoringProgression
         fixtureId={fixtureId}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}
+        fixtureStatus={fixtureStatus}
       />
     </View>
   );
@@ -1271,18 +1339,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
-    paddingBottom: Spacing.four,
+    // Bottom padding mirrors the matchupTopRow marginTop above the flags
+    // + score row, so the hero has symmetric breathing room on both
+    // sides of the "who's playing" row.
+    paddingBottom: Spacing.three,
     gap: Spacing.two,
     alignItems: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
-  },
-  headerMeta: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   matchupTopRow: {
     flexDirection: 'row',
@@ -1290,19 +1354,29 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     width: '100%',
     paddingHorizontal: Spacing.two,
+    // Extra breathing room above the flags/score cluster — separates the
+    // "who's playing" hero from the "when / where" meta stack above.
+    marginTop: Spacing.three,
   },
-  matchupLabelsRow: {
+  // Home + away flag-with-code columns. Each column is a flex-1 slot that
+  // matches the width of the middle score slot's flex sibling, so codes
+  // hug the score rather than the outer edges of the screen. Home
+  // renders [flag][code] left-to-right; away mirrors as [code][flag].
+  flagSlotHome: {
+    flex: 1,
     flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.three,
-    width: '100%',
-    paddingHorizontal: Spacing.two,
-    marginTop: Spacing.two,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
   },
-  flagSlot: { flex: 1, alignItems: 'center' },
-  labelCol: { flex: 1, alignItems: 'center', gap: 4 },
+  flagSlotAway: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+  },
   teamShort: { fontSize: TextSize.sm, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary },
-  teamName: { fontSize: TextSize.md, fontWeight: TextWeight.semibold, color: Colors.light.text, textAlign: 'center' },
   // scoreSlot is used twice: once wrapping the score row (top) and once as an
   // invisible spacer beneath it — same width both times so the labels sit
   // symmetric around the score column.
@@ -1321,6 +1395,20 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },
+  // Live-state middle chip in the hero: pulsing red dot + live minute
+  // (or 'HT' during half-time break). Sits in the same middle position
+  // as the 'FT' annotation for completed matches.
+  liveMiddle: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  liveMinute: {
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    color: StatusColor.live,
+    fontVariant: ['tabular-nums'],
+  },
   detailScoreBox: {
     ...ScoreBoxSize.card,
     backgroundColor: '#F3F4F6',
@@ -1330,8 +1418,16 @@ const styles = StyleSheet.create({
   detailScoreBoxWinner: { backgroundColor: Colors.light.text },
   detailScoreText: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   detailScoreTextWinner: { color: Colors.light.textInverse },
-  pill: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: 999 },
+  pill: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 999,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
   pillText: { fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
+  pillDotSlot: { justifyContent: 'center' },
   headerLine: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 
   subTabBarWrap: {
@@ -1381,7 +1477,22 @@ const styles = StyleSheet.create({
   paneEmptyText: { color: Colors.light.textSecondary, fontSize: TextSize.sm, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 
   // ─── Overview timeline ────────────────────────────────────────────────────
-  timelineContainer: { gap: 0 },
+  // Same white-card chrome as `statsCard` / `lineupContainer` so all three
+  // panes render inside an identical container silhouette. Gap kept at 0
+  // — the event rows already own their own vertical padding.
+  timelineContainer: {
+    gap: 0,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    padding: Spacing.four,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
   eventRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -1417,8 +1528,8 @@ const styles = StyleSheet.create({
   eventLabel: {
     flexShrink: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
+    fontWeight: TextWeight.regular,
+    color: Colors.light.textSecondary,
   },
   eventLabelRight: { textAlign: 'right' },
   cardGlyph: { width: 10, height: 14, borderRadius: 2 },
@@ -1427,51 +1538,31 @@ const styles = StyleSheet.create({
   subLabelWrapRight: { alignItems: 'flex-end' },
   subLabelLine: {
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
+    fontWeight: TextWeight.regular,
+    color: Colors.light.textSecondary,
   },
 
-  // Milestone bar — full-width pill with icon + label. Anchors the
-  // timeline at kick-off / half-time / etc.
+  // Timeline milestone row — centred icon + uppercase label pair anchoring
+  // the timeline at kick-off / half-time / etc. Same treatment as the
+  // Line-Up section headers so the two panes share one visual pattern.
   milestoneRow: {
-    paddingVertical: Spacing.two,
-    alignItems: 'center',
-  },
-  // Milestone pill — matches the inactive sub-tab pill treatment (white fill,
-  // hairline border, pill radius) so the milestone bars in the Overview
-  // timeline share visual language with the sub-tabs and Line-Up section
-  // pills above them.
-  milestoneBar: {
-    // Borderless — fill alone reads as the pill against the pane's grey
-    // background, matching the sub-tab / TeamToggle treatment. State
-    // variants (live / half-time) just swap the backgroundColor.
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 6,
-    backgroundColor: '#FFFFFF',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    paddingVertical: Spacing.two,
   },
-  milestoneText: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    letterSpacing: 0.4,
+  // Line-Up section header — icon + uppercase label centred. Same
+  // treatment as milestoneRow so the two panes share one section-header
+  // pattern.
+  lineupSectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingTop: Spacing.two,
+    paddingBottom: 2,
   },
-  // State-bar variants — same pill silhouette, coloured fills that swap in
-  // for live and half-time fixtures. Border is matched to the fill so the
-  // hairline outline reads as continuous with the coloured surface.
-  stateBarLive: { backgroundColor: StatusColor.live },
-  stateBarHalfTime: { backgroundColor: StatusColor.warning },
-  stateBarInverseText: { color: Colors.light.textInverse },
-  stateBarLiveDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 999,
-    backgroundColor: Colors.light.textInverse,
-  },
-
   // Show More / Show Less toggle at the bottom of the timeline.
   timelineToggle: {
     marginTop: Spacing.three,
@@ -1489,6 +1580,60 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
 
+  // Stats pane stacks one card per category. `statsPaneStack` gives the
+  // outer vertical rhythm; each `statsCard` is a self-contained white
+  // card with a small `categoryLabel` header (matching the Form / Momentum
+  // / KPI card title convention) and the stat rows below.
+  statsPaneStack: { gap: Spacing.three },
+  categoryLabel: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
+  // Header row of each Stats category card: the label sits at the top-left
+  // with a small info icon immediately next to it. Same pattern as the
+  // Form / Momentum / KPI card headers on the Preview and Insights panes.
+  categoryHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  categoryModalBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    justifyContent: 'center',
+    paddingHorizontal: Spacing.four,
+  },
+  categoryModalCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    padding: Spacing.four,
+    gap: Spacing.two,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 16,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 4,
+  },
+  categoryModalHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  categoryModalTitle: {
+    fontSize: TextSize.lg,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.text,
+  },
+  categoryModalBody: {
+    fontSize: TextSize.sm,
+    color: Colors.light.text,
+    lineHeight: 20,
+  },
   statsCard: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -1501,16 +1646,6 @@ const styles = StyleSheet.create({
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
-  },
-  statSection: { gap: Spacing.three, paddingTop: 4 },
-  sectionTitle: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-    textAlign: 'center',
-    paddingTop: Spacing.one,
   },
   statBlock: { gap: 6 },
   statLabel: {
@@ -1533,51 +1668,55 @@ const styles = StyleSheet.create({
   statValueLeft: {
     width: 32,
     textAlign: 'left',
-    fontSize: TextSize.lg,
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
-    color: Colors.light.text,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   statValueRight: {
     width: 32,
     textAlign: 'right',
-    fontSize: TextSize.lg,
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
+  // Track matches the Efficiency KPI row: 4pt-tall grey slab, small
+  // corner radius (not pill), tight breathing room from the flanking
+  // values. Diverging halves are preserved so each side still grows out
+  // from the centre — the shared thinness ties the two cards visually.
   barTrack: {
     flex: 1,
-    height: 8,
-    borderRadius: 999,
+    height: 4,
+    borderRadius: 2,
     backgroundColor: '#F3F4F6',
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 30,
+    paddingHorizontal: 6,
   },
   /** Both halves are equal flex so the CENTRE of the track is the meeting
-   * point regardless of the values. Home pill anchors to the right edge of
-   * the left half (i.e. adjacent to the centre); away anchors to the left
-   * edge of the right half. `row-reverse` on the left half places the home
-   * segment on the right — same visual effect. */
+   * point regardless of the values. Home segment anchors to the right edge
+   * of the left half (i.e. adjacent to the centre); away anchors to the
+   * left edge of the right half. `row-reverse` on the left half places the
+   * home segment on the right — same visual effect. */
   barHalfLeft: {
     flex: 1,
     flexDirection: 'row-reverse',
     alignItems: 'center',
-    height: 6,
+    height: 4,
   },
   barHalfRight: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    height: 6,
+    height: 4,
   },
-  barCentreGap: { width: 3, height: 6 },
-  // Home / away comparative bars — on-token per design-system §5 (home =
-  // primary text, away = secondary text). No brand accent yet; brand
-  // identity (register #23) is still open.
-  barSegHome: { backgroundColor: Colors.light.text, borderRadius: 999, height: 6 },
-  barSegAway: { backgroundColor: Colors.light.textSecondary, borderRadius: 999, height: 6 },
+  barCentreGap: { width: 2, height: 4 },
+  // Segments own the small-radius shape + fixed height; each fills with a
+  // solid backgroundColor set inline (LEADING / LAGGING / TIE) so the two
+  // KPI-adjacent bars carry identical fill treatment.
+  barSegHome: { borderRadius: 2, height: 4 },
+  barSegAway: { borderRadius: 2, height: 4 },
 
   statBarRowWrap: {
     position: 'relative',
@@ -1596,7 +1735,21 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
 
-  lineupContainer: { gap: Spacing.two },
+  // Matches the `statsCard` / `timelineContainer` white card so Line-Up,
+  // Timeline and Stats panes share one container silhouette.
+  lineupContainer: {
+    gap: Spacing.two,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    padding: Spacing.four,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+  },
 
   // Coaching-staff compare row — two-line stack. Row 1: role label centred.
   // Row 2: home name (left) / away name (right). Frees up full row-width
@@ -1626,8 +1779,8 @@ const styles = StyleSheet.create({
   coachingName: {
     flex: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
+    fontWeight: TextWeight.regular,
+    color: Colors.light.textSecondary,
   },
   coachingNameRight: { textAlign: 'right' },
 
@@ -1651,8 +1804,8 @@ const styles = StyleSheet.create({
   },
   officialName: {
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
+    fontWeight: TextWeight.regular,
+    color: Colors.light.textSecondary,
     flexShrink: 1,
     textAlign: 'right',
   },
@@ -1667,33 +1820,6 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
     textAlign: 'center',
   },
-  // "Starting XV" / "Bench" section headers styled as pills matching the
-  // inactive sub-tab pills above the pane — white fill, hairline border,
-  // pill radius. Centred in a wrap row so the pill sizes to the label.
-  lineupSectionPillWrap: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingTop: Spacing.three,
-    paddingBottom: 4,
-  },
-  lineupSectionPill: {
-    // Borderless — matches the milestone / sub-tab pill treatment. Row
-    // layout so an icon can sit inside the pill next to the label.
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
-    backgroundColor: '#FFFFFF',
-  },
-  lineupSectionPillLabel: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-  },
-
   // Compare row: [home #] [home player-label]   [away player-label] [away #]
   // Numbers pinned to the outer edges; each team's player-label
   // (currently the position, will become the player name when the feed
@@ -1718,30 +1844,32 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
     gap: Spacing.two,
   },
-  lineupNumberLeft: {
-    width: 24,
-    textAlign: 'left',
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+  // Shirt-number badge — small grey circle wrapping the tabular-nums
+  // number. Same grey (#F3F4F6) used by the Stats bar tracks + KPI bar
+  // tracks so all "muted-fill" surfaces in the fixture drill share one
+  // token. Fixed 22 × 22 keeps a clean 11pt radius regardless of digit
+  // count (single-digit numbers still centre inside a full circle).
+  lineupNumberBadge: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  lineupNumberRight: {
-    width: 24,
-    textAlign: 'right',
-    fontSize: TextSize.md,
+  lineupNumberText: {
+    fontSize: TextSize.xs,
     fontWeight: TextWeight.bold,
-    color: Colors.light.text,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   lineupPosPlayer: {
-    // Placeholder for the eventual player-name — currently rendering the
-    // canonical position label as a Title-Case stand-in. Matches the
-    // sub-tab label spec (12pt semibold, textSecondary) so the row's
-    // typographic register aligns with the tab strip above.
+    // Row text matches the Stats card label pattern: sm regular
+    // textSecondary. Bold weight is reserved for the numeric read (shirt
+    // number) so numbers pop and names sit as legible context around them.
     flexShrink: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
+    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   lineupPosPlayerRight: {

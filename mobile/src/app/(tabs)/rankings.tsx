@@ -3,6 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useLatestRanking, useTeams } from '@/api/hooks';
+import { HomeRankingsCarousel } from '@/components/home-rankings-carousel';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -28,6 +29,11 @@ export default function RankingsScreen() {
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
       <ScrollView contentContainerStyle={styles.scroll}>
+        {/* Paged summary carousel — Men's + Women's top-5 view. Sits above
+            the full men's detail list; provides a two-gender at-a-glance
+            surface before scrolling into the numbered table below. */}
+        <HomeRankingsCarousel />
+
         <View style={styles.headerBlock}>
           <Text style={styles.title}>Power Rankings</Text>
           <Text style={styles.subtitle}>
