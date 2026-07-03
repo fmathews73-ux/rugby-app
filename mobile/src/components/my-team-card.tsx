@@ -231,7 +231,7 @@ function PopulatedBody({ teamId }: { teamId: string }) {
       <NavSection
         label="Next Match"
         rightHeader={nextMatch ? formatDateDMY(nextMatch.kickoff_utc) : undefined}
-        onPress={nextMatch ? () => router.push(`/fixture/${nextMatch.id}`) : undefined}>
+        onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`) : undefined}>
         {nextMatch && myTeamInfo ? (
           <FixtureLine
             fixture={nextMatch}
@@ -250,7 +250,7 @@ function PopulatedBody({ teamId }: { teamId: string }) {
       <NavSection
         label="Last Match"
         rightHeader={lastMatch ? formatDateDMY(lastMatch.kickoff_utc) : undefined}
-        onPress={lastMatch ? () => router.push(`/fixture/${lastMatch.id}`) : undefined}>
+        onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`) : undefined}>
         {lastMatch && myTeamInfo ? (
           <FixtureLine
             fixture={lastMatch}

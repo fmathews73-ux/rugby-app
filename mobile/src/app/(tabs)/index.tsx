@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FixtureCarousel } from '@/components/fixture-carousel';
 import { MyTeamCard } from '@/components/my-team-card';
+import { PageGradient } from '@/components/page-gradient';
 import { Spacing } from '@/constants/theme';
 
 /**
@@ -13,6 +14,12 @@ import { Spacing } from '@/constants/theme';
  *   2. My Team card — user-selected favourite with Next / Last / Form.
  *
  * (Rankings carousel lives on the Rankings tab, not here.)
+ *
+ * Background is a vertical pastel gradient (sky → mint) applied via
+ * `expo-linear-gradient`. `react-native-svg`'s gradient rect can jump
+ * above sibling RN views on iOS due to native-layer stacking, which
+ * hid the cards; expo-linear-gradient is a plain RN view + native
+ * gradient with no such quirk.
  *
  * Tapping the Home tab icon (whether already focused or navigating in)
  * scrolls back to the top so the hero fixture card is always the
@@ -30,11 +37,15 @@ export default function HomeScreen() {
   }, [navigation]);
 
   return (
-    // No 'bottom' edge on the SafeAreaView — the tab bar draws its own safe
-    // area inset, so removing it here lets the ScrollView extend to the very
-    // bottom of the screen and content scroll cleanly under the tab bar
-    // (mirroring how content scrolls under the header at the top).
+    // No 'bottom' edge on the SafeAreaView — the tab bar draws its own
+    // safe area inset, so removing it here lets the ScrollView extend to
+    // the very bottom of the screen and content scroll cleanly under the
+    // tab bar (mirroring how content scrolls under the header at the top).
+    // The LinearGradient serves as the background fill — the SafeAreaView
+    // is transparent so the gradient shows through.
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
+      <PageGradient />
+
       <ScrollView
         ref={scrollRef}
         contentContainerStyle={styles.scrollContent}
@@ -47,7 +58,10 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  // Transparent so the LinearGradient behind shows through — cards keep
+  // their own solid-white fill so the gradient reads as the *page*
+  // background, not a card background.
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scrollContent: {
     paddingTop: Spacing.four,
     // No paddingBottom — cards scroll flush against the tab bar's opaque

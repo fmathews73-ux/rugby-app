@@ -4,6 +4,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useSeasonStandings, useTeams } from '@/api/hooks';
 import { CompetitionPicker } from '@/components/competition-picker';
+import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -43,6 +44,7 @@ export default function StandingsScreen() {
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+      <PageGradient />
       <CompetitionPicker
         options={STANDINGS_OPTIONS}
         selected={seasonId}
@@ -124,7 +126,7 @@ function StandingsTable({
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
 
   headerBlock: { gap: 4 },

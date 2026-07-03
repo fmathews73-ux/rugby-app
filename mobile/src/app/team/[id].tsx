@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useTeam, useTeams } from '@/api/hooks';
+import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -29,6 +30,7 @@ export default function TeamDetailScreen() {
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <PageGradient />
       <Stack.Screen options={{ title: team.data?.name ?? '' }} />
       <ScrollView contentContainerStyle={styles.scroll}>
         {team.isLoading ? (
@@ -77,7 +79,7 @@ export default function TeamDetailScreen() {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: Colors.light.background },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { padding: Spacing.four, gap: Spacing.four, paddingBottom: 40 },
   hero: { alignItems: 'center', gap: Spacing.two, paddingVertical: Spacing.four },
   heroName: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, textAlign: 'center' },

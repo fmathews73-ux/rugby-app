@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Team } from '@rugby-app/shared';
 
 import { useTeams } from '@/api/hooks';
+import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -32,6 +33,7 @@ export default function TeamsScreen() {
 
   return (
     <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+      <PageGradient />
       {query.isLoading ? (
         <LoadingState />
       ) : query.isError ? (
@@ -107,7 +109,7 @@ function buildListData(tier1: Team[], tier2: Team[]): ListItem[] {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   listContent: { padding: Spacing.four, paddingBottom: 40, gap: Spacing.one + 2 },
 
   groupHeader: {

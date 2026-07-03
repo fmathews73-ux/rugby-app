@@ -26,6 +26,7 @@ import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
 import { LivePulseDot } from '@/components/live-pulse-dot';
+import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { useSimLive } from '@/dev/sim-live';
@@ -99,6 +100,7 @@ export default function FixtureDetailScreen() {
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <PageGradient />
       <Stack.Screen options={{ title: '' }} />
       {fixture.isLoading ? (
         <LoadingState />
@@ -1330,7 +1332,7 @@ function formatKickoff(iso: string): string {
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingBottom: 60 },
 
   header: {

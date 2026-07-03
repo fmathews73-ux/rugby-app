@@ -1,28 +1,48 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useRouter, useSegments } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors, TextSize, TextWeight } from '@/constants/theme';
 
 /**
- * Persistent header (PRD §4.1). Left: user profile avatar / entry point.
+ * Persistent header (PRD §4.1). Left: user profile avatar / entry point on
+ * top-level tab screens; back arrow on nested detail screens (fixture[id],
+ * team[id], etc.) so the user can pop back to the list without losing the
+ * shared header + tab bar.
  * Centre: reserved for logo/brand (register #23 — undefined; leave blank).
  * Right: reserved for Fantasy entry point (register #25 — deferred).
  *
- * Only the profile icon is wired for now. Tap is a no-op stub until the
- * profile screen contents are specified (register #15, INPUT NEEDED Phase 4).
+ * "Nested" is detected via `useSegments()` — anything deeper than
+ * `['(tabs)', <tabName>]` is a nested screen. Top-level tab paths are
+ * exactly two segments long (the group + the tab name).
  */
 export function AppHeader() {
+  const router = useRouter();
+  const segments = useSegments();
+  const isNested = segments.length > 2;
+
   return (
     <View style={styles.container}>
-      <Pressable
-        onPress={() => {
-          // TODO: navigate to /profile once the screen is defined
-          // (register #15, Phase 4).
-        }}
-        hitSlop={8}
-        style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-        <Ionicons name="person-circle-outline" size={32} color={Colors.light.text} />
-      </Pressable>
+      {isNested ? (
+        <Pressable
+          onPress={() => router.back()}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Back"
+          style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
+          <Ionicons name="chevron-back" size={28} color={Colors.light.text} />
+        </Pressable>
+      ) : (
+        <Pressable
+          onPress={() => {
+            // TODO: navigate to /profile once the screen is defined
+            // (register #15, Phase 4).
+          }}
+          hitSlop={8}
+          style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
+          <Ionicons name="person-circle-outline" size={32} color={Colors.light.text} />
+        </Pressable>
+      )}
 
       <View style={styles.centreSlot}>
         {/* Brand mark: "RUGBY" + superscripted "IQ". `alignItems: 'flex-start'`
@@ -47,6 +67,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     height: 44,
     paddingHorizontal: 12,
+    // Flat pure-white header on a slightly darker page bg — Stripe /
+    // Linear / Grafana pattern. Hairline divider carries the visual
+    // separation instead of a colour contrast.
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
@@ -83,10 +106,14 @@ const styles = StyleSheet.create({
   },
   appNameSuperscript: {
     fontSize: 12, // ~55% of appName size, standard superscript ratio
-    // Normal weight — lets the "RUGBY" mark carry the visual heft while the
-    // IQ superscript reads as a lighter tagline / descriptor.
+    // Normal weight — lets the "RUGBY" mark carry the visual heft while
+    // the IQ superscript reads as a lighter tagline / descriptor.
     fontWeight: TextWeight.regular,
-    color: Colors.light.text,
+    // Brand accent green. Matches the app's positive-outcome / leader
+    // token (`#059669`, emerald-600) already used across charts + Stats
+    // bars, so the wordmark accent is not a new colour introduction —
+    // it locks the existing accent into the brand mark.
+    color: '#059669',
     // Small nudge down so IQ's cap-line aligns near the cap-line of
     // RUGBY rather than sitting flush at the very top of the row.
     marginTop: 1,

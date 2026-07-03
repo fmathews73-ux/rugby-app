@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
@@ -21,6 +21,16 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  // Splash-screen hide. `preventAutoHideAsync()` above holds the splash
+  // until React has mounted; without a matching `hideAsync()` the app
+  // shows the launch screen forever. `AnimatedSplashOverlay` was
+  // intended to own this handoff but isn't rendered anywhere in the
+  // tree, so we hide directly here after the first render.
+  useEffect(() => {
+    SplashScreen.hideAsync().catch(() => {});
+  }, []);
+
   const queryClient = useMemo(
     () =>
       new QueryClient({
@@ -55,7 +65,6 @@ export default function RootLayout() {
                 }}>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen name="team/[id]" />
-                <Stack.Screen name="fixture/[id]" />
               </Stack>
             </View>
           </SafeAreaProvider>

@@ -10,6 +10,7 @@ import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { LivePulseDot } from '@/components/live-pulse-dot';
+import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -191,7 +192,11 @@ export default function FixturesScreen() {
   return (
     // No 'bottom' edge on SafeAreaView — the tab bar handles its own inset;
     // matches Home page pattern so cards scroll cleanly under the tab bar.
+    // Same vertical pastel gradient as Home (sky → mint, top → bottom) sits
+    // behind the picker + fixtures list; SafeAreaView is transparent so it
+    // shows through.
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
+      <PageGradient />
       <View style={styles.pickerWrap}>
         <CompetitionPicker
           options={FILTER_OPTIONS}
@@ -228,7 +233,7 @@ export default function FixturesScreen() {
               return (
                 <Pressable
                   key={fx.id}
-                  onPress={() => router.push(`/fixture/${fx.id}`)}
+                  onPress={() => router.push(`/fixtures/${fx.id}`)}
                   style={({ pressed }) => [
                     styles.row,
                     !isLast && styles.rowDivider,
@@ -344,7 +349,7 @@ function statusMidExtraStyle(status: Fixture['status']) {
 }
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: '#F5F5F7' },
+  safe: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
   pickerWrap: {
     // 16pt wrap + CompetitionPicker's 24pt inner = 40pt total, matching

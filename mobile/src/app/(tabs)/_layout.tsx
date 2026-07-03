@@ -18,10 +18,15 @@ export default function TabsLayout() {
       screenOptions={{
         headerShown: true,
         header: () => <AppHeader />,
+        // Flat pure-white tab bar matching the AppHeader. Hairline
+        // divider (`borderTopColor`) provides the visual separation from
+        // the page bg instead of a colour contrast — same technical /
+        // restrained pattern used in Stripe, Linear, Grafana.
         tabBarActiveTintColor: Colors.light.text,
         tabBarInactiveTintColor: Colors.light.textSecondary,
         tabBarStyle: {
-          backgroundColor: Colors.light.background,
+          backgroundColor: '#FFFFFF',
+          borderTopColor: '#E5E7EB',
         },
       }}>
       <Tabs.Screen
