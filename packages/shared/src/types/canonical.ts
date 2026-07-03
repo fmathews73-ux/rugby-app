@@ -31,6 +31,7 @@ export type BracketId = string;
 export type RankingSnapshotId = string;
 export type MatchEventId = string;
 export type CoachId = string;
+export type MatchOfficialId = string;
 
 // ─── Time ────────────────────────────────────────────────────────────────────
 // ISO 8601 strings, kept as aliases for documentation. Storage and API JSON
@@ -168,6 +169,31 @@ export interface Coach {
   team_id: TeamId;
   name: string;
   role: CoachRole;
+}
+
+/**
+ * Match-official role — the four canonical officiating positions in a
+ * modern rugby test: on-field referee, two assistant referees ("sideline"
+ * officials in broadcast parlance), and the TMO (Television Match
+ * Official). Announced pre-match per WR competition rules, so officials
+ * data is available even for scheduled fixtures.
+ */
+export type MatchOfficialRole =
+  | 'referee'
+  | 'assistant-referee-1'
+  | 'assistant-referee-2'
+  | 'tmo';
+
+/**
+ * A single match official assigned to a fixture. Fixture-scoped (not
+ * team-scoped) since officials are neutral. Names in dev are plausibly
+ * fake per PRD §5.5.
+ */
+export interface MatchOfficial {
+  id: MatchOfficialId;
+  fixture_id: FixtureId;
+  name: string;
+  role: MatchOfficialRole;
 }
 
 /**
@@ -394,6 +420,21 @@ export type MatchEventType =
   | 'conversion'
   | 'penalty-goal'
   | 'drop-goal'
+  // Positional play sample — synthesized in dev to power the pitch
+  // heatmap. A "carry" represents ball-in-hand play at (x, y). Real feeds
+  // ship per-phase / per-tackle events with coords; carries are our
+  // stand-in until cutover.
+  | 'carry'
+  // Per-player stat events. Each fires once per corresponding stat unit
+  // (one 'tackle' event per tackle made, one 'line-break' per line break,
+  // etc.) so downstream aggregations just count matching events by
+  // player_id. Real feeds (Opta / Stats Perform) ship stat sheets rather
+  // than per-unit events, but this event-shaped stand-in keeps the same
+  // consumer API — `topByAggregation(events, teamId, matcher)`.
+  | 'tackle'
+  | 'turnover-won'
+  | 'line-break'
+  | 'try-assist'
   // Discipline.
   | 'yellow-card'
   | 'red-card'
@@ -429,4 +470,13 @@ export interface MatchEvent {
    *  Conversion = 2, Penalty goal = 3, Drop goal = 3. Explicit rather
    *  than derived so consumers don't have to hard-code the scoring table. */
   points: number;
+  /** Normalised pitch x-coordinate (0..1). Origin is the LEFT try line as
+   *  viewed from a broadcast camera behind the home team; 1 is the RIGHT
+   *  try line. Null when the event isn't tied to a specific point on the
+   *  pitch (milestones, cards, substitutions). */
+  x: number | null;
+  /** Normalised pitch y-coordinate (0..1). 0 = one touchline, 1 = the
+   *  other; the two are interchangeable and depend on camera orientation.
+   *  Null under the same conditions as `x`. */
+  y: number | null;
 }

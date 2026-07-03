@@ -12,6 +12,8 @@ import type {
   LineUpEntry,
   MatchEvent,
   MatchEventType,
+  MatchOfficial,
+  MatchOfficialRole,
   Player,
   PlayerId,
   Position,
@@ -452,6 +454,8 @@ export function generateMatchEvents(
     related_player_id: null,
     type,
     points: 0,
+    x: null,
+    y: null,
   });
   events.push(milestone('kick-off', 0));
   events.push(milestone('half-time', 40));
@@ -522,6 +526,46 @@ export function generateMatchEvents(
     });
   }
 
+  // 5. Positional play samples ("carries") — 30 per team per match,
+  //    biased by each team's territorial share so the density on the
+  //    pitch heatmap reflects the match narrative.
+  addCarriesForSide(rng, events, fixture, {
+    team_id: fixture.home_team_id,
+    isHome: true,
+    territoryPercent: result.home_territory_percent,
+    starters: homeStarters,
+  });
+  addCarriesForSide(rng, events, fixture, {
+    team_id: fixture.away_team_id,
+    isHome: false,
+    territoryPercent: result.away_territory_percent,
+    starters: awayStarters,
+  });
+
+  // 6. Per-player stat events — tackles / turnovers / line breaks / try
+  //    assists. Counts anchored on Result totals; distribution across the
+  //    starting XV weighted by forward-vs-back role. Previews what the
+  //    Player Leaders card will look like once Opta's per-player stat
+  //    sheets stream in at Phase 6 cutover.
+  addStatEventsForSide(rng, events, fixture, {
+    team_id: fixture.home_team_id,
+    isHome: true,
+    starters: homeStarters,
+    tackles: result.home_tackles_made,
+    lineBreaks: result.home_line_breaks,
+    turnoversWon: result.home_turnovers_won,
+    tries: result.home_tries,
+  });
+  addStatEventsForSide(rng, events, fixture, {
+    team_id: fixture.away_team_id,
+    isHome: false,
+    starters: awayStarters,
+    tackles: result.away_tackles_made,
+    lineBreaks: result.away_line_breaks,
+    turnoversWon: result.away_turnovers_won,
+    tries: result.away_tries,
+  });
+
   // Sort ascending by (minute, stoppage). Ties resolve stably by the order
   // events were appended above — kick-off before first try, etc.
   events.sort((a, b) => {
@@ -581,6 +625,31 @@ function addScoringForSide(
   side: SideScoring,
 ): void {
   const idSuffix = side.isHome ? 'h' : 'a';
+  // Pitch convention: x=0 is the left try line (which the HOME team
+  // defends), x=1 is the right try line (which the HOME team attacks).
+  // Score-position samplers below flip based on which side is scoring.
+  const tryLineX = side.isHome ? 1 : 0;
+  const inGoalX = () => {
+    // Try landings cluster within 5m of the try line — normalised to
+    // 0.05 of pitch length.
+    const offset = rng.next() * 0.05;
+    return side.isHome ? 1 - offset : offset;
+  };
+  const penaltyKickX = () => {
+    // Penalty goals are attempted from the attacking half, typically
+    // 30–70m out from the posts (0.30–0.70 of pitch length from the
+    // attacking try line).
+    const distFromTryLine = 0.3 + rng.next() * 0.4;
+    return side.isHome ? 1 - distFromTryLine : distFromTryLine;
+  };
+  const dropGoalX = () => {
+    // Drops are usually 20–40m out from the posts.
+    const distFromTryLine = 0.2 + rng.next() * 0.2;
+    return side.isHome ? 1 - distFromTryLine : distFromTryLine;
+  };
+  const laneY = () => 0.15 + rng.next() * 0.7;   // Broad lateral spread.
+  const centreY = () => 0.4 + rng.next() * 0.2;  // Tighter for kicks at goal.
+
   // Tries: spread across 1..79. Each try may be followed by a conversion
   // attempt at the same minute; we allocate conversions up to the try
   // count sequentially so conversions never exceed tries.
@@ -588,6 +657,7 @@ function addScoringForSide(
   const convertsRemaining = Math.min(side.conversions, side.tries);
   for (let i = 0; i < tryMinutes.length; i++) {
     const minute = tryMinutes[i]!;
+    const tryY = laneY();
     out.push({
       id: `${fixture.id}-try-${idSuffix}-${i}`,
       fixture_id: fixture.id,
@@ -598,6 +668,8 @@ function addScoringForSide(
       related_player_id: null,
       type: 'try',
       points: 5,
+      x: inGoalX(),
+      y: tryY,
     });
     if (i < convertsRemaining) {
       out.push({
@@ -610,6 +682,10 @@ function addScoringForSide(
         related_player_id: null,
         type: 'conversion',
         points: 2,
+        // Conversion is taken from ~10m out at an angle depending on
+        // where the try was scored — mirror the try's y for realism.
+        x: side.isHome ? 0.9 : 0.1,
+        y: tryY,
       });
     }
   }
@@ -626,6 +702,8 @@ function addScoringForSide(
       related_player_id: null,
       type: 'penalty-goal',
       points: 3,
+      x: penaltyKickX(),
+      y: centreY(),
     });
   }
   // Drop goals: rare, spread across whole match.
@@ -641,6 +719,8 @@ function addScoringForSide(
       related_player_id: null,
       type: 'drop-goal',
       points: 3,
+      x: dropGoalX(),
+      y: centreY(),
     });
   }
 }
@@ -673,6 +753,8 @@ function addCardsForSide(
       related_player_id: null,
       type: 'yellow-card',
       points: 0,
+      x: null,
+      y: null,
     });
   }
   // Red cards — rare, second-half heavy.
@@ -688,8 +770,148 @@ function addCardsForSide(
       related_player_id: null,
       type: 'red-card',
       points: 0,
+      x: null,
+      y: null,
     });
   }
+}
+
+interface SideCarries {
+  team_id: TeamId;
+  isHome: boolean;
+  territoryPercent: number;
+  starters: readonly LineUpEntry[];
+}
+
+/** Rugby convention: 30 sampled "carry" events per team per match — enough
+ *  density for a kernel-smoothed heatmap without exploding the events
+ *  table. Real feeds ship phase / tackle / carry events with coordinates;
+ *  this stand-in mirrors that density and its distribution reflects the
+ *  team's territorial share so the heatmap tells the match story. */
+const CARRIES_PER_TEAM = 30;
+
+function addCarriesForSide(
+  rng: Rng,
+  out: MatchEvent[],
+  fixture: Fixture,
+  side: SideCarries,
+): void {
+  const idSuffix = side.isHome ? 'h' : 'a';
+  // X-centre biased by territorial share: a team with 60% territory has
+  // a distribution centred deeper in the opposition half. Home attacks
+  // right → centre shifts right when territory is high; away mirrors.
+  const attackDir = side.isHome ? 1 : -1;
+  const territoryOffset = ((side.territoryPercent - 50) / 100) * 0.4;
+  const xCentre = 0.5 + attackDir * territoryOffset;
+  // Standard deviations tuned empirically — wide enough to spread across
+  // the pitch, narrow enough that the centre remains legible.
+  const xSpread = 0.28;
+  const ySpread = 0.32;
+
+  for (let i = 0; i < CARRIES_PER_TEAM; i++) {
+    // Two uniform samples averaged → rough triangular distribution around
+    // the centre. Cheaper than Box-Muller and adequate for viz density.
+    const xJitter = ((rng.next() + rng.next()) / 2 - 0.5) * xSpread * 2;
+    const yJitter = ((rng.next() + rng.next()) / 2 - 0.5) * ySpread * 2;
+    const x = Math.max(0.02, Math.min(0.98, xCentre + xJitter));
+    const y = Math.max(0.05, Math.min(0.95, 0.5 + yJitter));
+    const minute = rng.int(1, 79);
+    out.push({
+      id: `${fixture.id}-carry-${idSuffix}-${i}`,
+      fixture_id: fixture.id,
+      minute,
+      stoppage: 0,
+      team_id: side.team_id,
+      player_id: pickRandomStarter(rng, side.starters),
+      related_player_id: null,
+      type: 'carry',
+      points: 0,
+      x,
+      y,
+    });
+  }
+}
+
+interface SideStats {
+  team_id: TeamId;
+  isHome: boolean;
+  starters: readonly LineUpEntry[];
+  tackles: number;
+  lineBreaks: number;
+  turnoversWon: number;
+  tries: number;
+}
+
+/** Approximation of Opta per-player stat sheets. Each stat unit becomes a
+ *  MatchEvent tagged with the player_id, so the same event-based
+ *  `topByAggregation` used for scoring / carrying / cards keeps working
+ *  for tackles / turnovers / line breaks / try assists at zero extra API
+ *  surface. Distribution across the starting XV is weighted by role. */
+function addStatEventsForSide(
+  rng: Rng,
+  out: MatchEvent[],
+  fixture: Fixture,
+  side: SideStats,
+): void {
+  const idSuffix = side.isHome ? 'h' : 'a';
+
+  // Split the starting XV by role. Shirts 1–8 are forwards; 9–15 backs.
+  const forwards = side.starters.filter((s) => s.shirt_number <= 8);
+  const backs = side.starters.filter((s) => s.shirt_number >= 9);
+
+  // Position-weighted distributions. Weights are per-metric because
+  // tackles cluster on forwards and line breaks cluster on backs.
+  const distribute = (
+    count: number,
+    forwardShare: number,
+    type: MatchEventType,
+    seq = 0,
+  ): void => {
+    // How many go to forwards vs backs given the split.
+    let forwardCount = 0;
+    let backCount = 0;
+    for (let i = 0; i < count; i++) {
+      const roll = rng.next();
+      if (roll < forwardShare) forwardCount++;
+      else backCount++;
+    }
+    const distributeInto = (players: readonly LineUpEntry[], units: number, group: string) => {
+      if (players.length === 0) return;
+      for (let i = 0; i < units; i++) {
+        const player = players[Math.floor(rng.next() * players.length)]!;
+        out.push({
+          id: `${fixture.id}-${type}-${idSuffix}-${group}-${seq + i}`,
+          fixture_id: fixture.id,
+          // No specific minute — spread across the match uniformly.
+          minute: rng.int(1, 79),
+          stoppage: 0,
+          team_id: side.team_id,
+          player_id: player.player_id,
+          related_player_id: null,
+          type,
+          points: 0,
+          x: null,
+          y: null,
+        });
+      }
+    };
+    distributeInto(forwards, forwardCount, 'f');
+    distributeInto(backs, backCount, 'b');
+  };
+
+  // Position-weighted breakdown — mirrors typical rugby analytics splits.
+  //   Tackles       — forward-heavy (locks / flankers / #8 do most of it).
+  //   Turnovers won — forward-heavy (especially open-side flankers).
+  //   Line breaks   — back-heavy (centres, wings, fullback break the line).
+  //   Try assists   — back-heavy (fly-half, scrum-half, centres set up tries).
+  distribute(side.tackles, 0.75, 'tackle');
+  distribute(side.turnoversWon, 0.65, 'turnover-won');
+  distribute(side.lineBreaks, 0.15, 'line-break');
+  // Try assists — one assist per try scored, with the caveat that the
+  // occasional try comes off a solo break (no assist). Approx 80% of
+  // tries carry an assist.
+  const tryAssists = Math.round(side.tries * 0.8);
+  distribute(tryAssists, 0.15, 'try-assist');
 }
 
 interface SideSubs {
@@ -726,6 +948,8 @@ function addSubstitutions(
       related_player_id: benchPlayer.player_id, // coming ON
       type: 'substitution',
       points: 0,
+      x: null,
+      y: null,
     });
   }
 }
@@ -757,6 +981,33 @@ export function generateCoachingStaff(rng: Rng, teamId: TeamId): Coach[] {
     return {
       id: `${teamId}-coach-${i + 1}`,
       team_id: teamId,
+      name: `${first} ${last}`,
+      role,
+    };
+  });
+}
+
+// ─── Match officials ─────────────────────────────────────────────────────────
+
+/**
+ * Standard 4-slot match-official assignment: referee, two assistant
+ * referees (sideline), and the TMO. Announced pre-match, so every fixture
+ * (scheduled or completed) gets a full slate.
+ */
+const OFFICIAL_ROLES: readonly MatchOfficialRole[] = [
+  'referee',
+  'assistant-referee-1',
+  'assistant-referee-2',
+  'tmo',
+];
+
+export function generateMatchOfficials(rng: Rng, fixture: Fixture): MatchOfficial[] {
+  return OFFICIAL_ROLES.map((role, i) => {
+    const first = FIRST_NAMES[Math.floor(rng.next() * FIRST_NAMES.length)] ?? 'Alex';
+    const last = LAST_NAMES[Math.floor(rng.next() * LAST_NAMES.length)] ?? 'Referee';
+    return {
+      id: `${fixture.id}-official-${i + 1}`,
+      fixture_id: fixture.id,
       name: `${first} ${last}`,
       role,
     };

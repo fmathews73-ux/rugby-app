@@ -1,30 +1,29 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Rect, Text as SvgText } from 'react-native-svg';
 
+import { useTeam } from '@/api/hooks';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useMatchPointsPattern } from '@/hooks/use-match-points-pattern';
 import {
   useTeamPointsPattern,
   type PointsPatternMode,
 } from '@/hooks/use-team-points-pattern';
-
-const HORIZONTAL_MARGIN = 40;
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 const LABELS: Record<
   PointsPatternMode,
-  { title: string; meta: string; empty: string; a11y: string; color: string }
+  { title: string; empty: string; a11y: string; color: string }
 > = {
   scored: {
     title: 'Scoring Pattern',
-    meta: 'When this team scores',
     empty: 'No scoring events yet to profile.',
     a11y: 'Explain the Scoring Pattern chart',
     color: '#059669',
   },
   conceded: {
     title: 'Concession Pattern',
-    meta: 'When this team leaks points',
     empty: 'No conceded events yet to profile.',
     a11y: 'Explain the Concession Pattern chart',
     color: StatusColor.live,
@@ -44,14 +43,51 @@ const LABELS: Record<
  */
 export function PointsPattern({
   teamId,
+  compareTeamId,
   mode = 'scored',
+  fixtureId,
 }: {
   teamId: string;
+  compareTeamId?: string | null;
   mode?: PointsPatternMode;
+  /**
+   * When supplied, the card renders the pattern for that single fixture
+   * (Q1–Q4 for this match only) instead of averaging across the team's
+   * completed matches. Toggle pill still switches primary ↔ compare.
+   */
+  fixtureId?: string;
 }) {
-  const { data, isLoading } = useTeamPointsPattern(teamId, mode);
   const [infoOpen, setInfoOpen] = useState(false);
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   const labels = LABELS[mode];
+  const isMatchMode = Boolean(fixtureId);
+
+  // Reset toggle back to the primary side whenever the compare team
+  // changes — avoids the pill sitting on a stale selection.
+  useEffect(() => {
+    setActiveSide('primary');
+  }, [compareTeamId]);
+
+  const primaryTeam = useTeam(teamId);
+  const compareTeam = useTeam(compareTeamId ?? '');
+
+  // Both hooks always called (rules-of-hooks); the one that matches the
+  // current mode is used, the other no-ops when its inputs are empty.
+  const primaryAggregate = useTeamPointsPattern(isMatchMode ? '' : teamId, mode);
+  const compareAggregate = useTeamPointsPattern(
+    isMatchMode ? '' : (compareTeamId ?? ''),
+    mode,
+  );
+  const primaryMatch = useMatchPointsPattern(fixtureId ?? '', teamId, mode);
+  const compareMatch = useMatchPointsPattern(fixtureId ?? '', compareTeamId ?? '', mode);
+
+  const primaryPattern = isMatchMode ? primaryMatch : primaryAggregate;
+  const comparePattern = isMatchMode ? compareMatch : compareAggregate;
+
+  const hasCompare = Boolean(compareTeamId);
+  const activePattern = activeSide === 'primary' ? primaryPattern : comparePattern;
+  const activeData = activePattern.data;
+  const activeLoading = activePattern.isLoading;
 
   return (
     <View style={styles.card}>
@@ -66,23 +102,38 @@ export function PointsPattern({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {data && data.gamesUsed > 0 ? (
-          <Text style={styles.headerMeta}>
-            avg across {data.gamesUsed} game{data.gamesUsed === 1 ? '' : 's'}
-          </Text>
+        {hasCompare ? (
+          <TeamToggle
+            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
         ) : null}
       </View>
-      <Text style={styles.tagline}>{labels.meta}</Text>
+      {/* Sample-size meta on its own row below the title, aggregate mode
+          only. Match mode doesn't need this — the sub-tab context makes
+          "this match" obvious. */}
+      {!isMatchMode && activeData && activeData.gamesUsed > 0 ? (
+        <Text style={styles.subHeaderMeta}>
+          avg across {activeData.gamesUsed} game{activeData.gamesUsed === 1 ? '' : 's'}
+        </Text>
+      ) : null}
 
-      {isLoading && !data ? (
+      {activeLoading && !activeData ? (
         <Text style={styles.empty}>Loading…</Text>
-      ) : data && data.gamesUsed > 0 ? (
-        <QuarterBars percents={data.avgPercentByQuarter} barColor={labels.color} />
+      ) : activeData && activeData.gamesUsed > 0 ? (
+        <QuarterBars percents={activeData.avgPercentByQuarter} barColor={labels.color} />
       ) : (
         <Text style={styles.empty}>{labels.empty}</Text>
       )}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} mode={mode} />
+      <InfoModal
+        visible={infoOpen}
+        onClose={() => setInfoOpen(false)}
+        mode={mode}
+        isMatchMode={isMatchMode}
+      />
     </View>
   );
 }
@@ -175,10 +226,12 @@ function InfoModal({
   visible,
   onClose,
   mode,
+  isMatchMode,
 }: {
   visible: boolean;
   onClose: () => void;
   mode: PointsPatternMode;
+  isMatchMode: boolean;
 }) {
   const isScored = mode === 'scored';
   return (
@@ -195,13 +248,28 @@ function InfoModal({
             Rugby doesn't have formal quarters, but coaches and analysts widely
             use <Text style={styles.modalStrong}>20-minute blocks</Text> (Q1
             0–20, Q2 20–40, Q3 40–60, Q4 60+) to spot game-management patterns.
-            Each bar shows the average{' '}
-            <Text style={styles.modalStrong}>
-              {isScored
-                ? "share of this team's own points scored"
-                : "share of points conceded by this team"}
-            </Text>{' '}
-            in that block, across all their completed matches.
+            {isMatchMode ? (
+              <>
+                {' '}Each bar shows the{' '}
+                <Text style={styles.modalStrong}>
+                  {isScored
+                    ? "share of this team's points scored in this match"
+                    : "share of points conceded by this team in this match"}
+                </Text>{' '}
+                in that block. Totals across the four bars sum to 100% of the
+                team's match points.
+              </>
+            ) : (
+              <>
+                {' '}Each bar shows the average{' '}
+                <Text style={styles.modalStrong}>
+                  {isScored
+                    ? "share of this team's own points scored"
+                    : "share of points conceded by this team"}
+                </Text>{' '}
+                in that block, across all their completed matches.
+              </>
+            )}
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
@@ -217,10 +285,14 @@ function InfoModal({
                 and leaks points at the death; a front-loaded one flags slow
                 defensive starts.
               </>
-            )}{' '}
-            Averaging <Text style={styles.modalStrong}>percentages</Text> (not
-            absolute points) gives every match equal weight — a 3-point-margin
-            game counts the same as a 40-point blowout.
+            )}
+            {isMatchMode ? null : (
+              <>
+                {' '}Averaging <Text style={styles.modalStrong}>percentages</Text>{' '}
+                (not absolute points) gives every match equal weight — a
+                3-point-margin game counts the same as a 40-point blowout.
+              </>
+            )}
           </Text>
         </Pressable>
       </Pressable>
@@ -230,7 +302,6 @@ function InfoModal({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: HORIZONTAL_MARGIN,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -265,10 +336,10 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
-  tagline: {
-    fontSize: TextSize.sm,
+  subHeaderMeta: {
+    fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
-    marginTop: -Spacing.one,
+    fontVariant: ['tabular-nums'],
   },
   empty: {
     fontSize: TextSize.sm,

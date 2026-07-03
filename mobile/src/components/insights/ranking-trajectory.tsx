@@ -1,12 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Line, Polyline, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Path, Text as SvgText } from 'react-native-svg';
 
-import { useRankingHistory } from '@/api/hooks';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useRankingHistory, useTeam } from '@/api/hooks';
+import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
-const HORIZONTAL_MARGIN = 40;
+const BETTER_COLOR = '#059669';
+const WORSE_COLOR = StatusColor.live;
 
 /**
  * 12-month line chart of a team's World Rugby ranking position. Y-axis is
@@ -16,21 +19,47 @@ const HORIZONTAL_MARGIN = 40;
  * data point so the reader gets both the ordinal (rank) and the underlying
  * points behind it.
  */
-export function RankingTrajectory({ teamId }: { teamId: string }) {
+export function RankingTrajectory({
+  teamId,
+  compareTeamId,
+  asOfDate,
+}: {
+  teamId: string;
+  compareTeamId?: string | null;
+  /** When set, drop every snapshot dated at or after this ISO date —
+   *  freezes the trajectory to what the reader would have seen walking
+   *  into a specific match. */
+  asOfDate?: string;
+}) {
   const history = useRankingHistory();
   const [infoOpen, setInfoOpen] = useState(false);
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+
+  // Reset toggle back to primary whenever the compare team changes.
+  useEffect(() => {
+    setActiveSide('primary');
+  }, [compareTeamId]);
+
+  const primaryTeam = useTeam(teamId);
+  const compareTeam = useTeam(compareTeamId ?? '');
+  const hasCompare = Boolean(compareTeamId);
+  const activeTeamId = activeSide === 'primary' ? teamId : (compareTeamId ?? teamId);
 
   const series = useMemo(() => {
     const points: { date: string; rank: number; points: number }[] = [];
     for (const snap of history.data ?? []) {
-      const row = snap.rows.find((r) => r.team_id === teamId);
+      // Freeze the series to snapshots dated strictly before `asOfDate`
+      // when supplied — makes the trajectory a true pre-match view even
+      // when the fixture is being reviewed years later.
+      if (asOfDate && snap.snapshot_date >= asOfDate) continue;
+      const row = snap.rows.find((r) => r.team_id === activeTeamId);
       if (!row) continue;
       points.push({ date: snap.snapshot_date, rank: row.rank, points: row.points });
     }
     // Ensure chronological order for the sparkline.
     points.sort((a, b) => a.date.localeCompare(b.date));
     return points;
-  }, [history.data, teamId]);
+  }, [history.data, activeTeamId, asOfDate]);
 
   const summary = useMemo(() => {
     if (series.length < 2) return null;
@@ -57,24 +86,36 @@ export function RankingTrajectory({ teamId }: { teamId: string }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {summary ? (
-          <View style={styles.headerMeta}>
-            <Text style={styles.headerMetaText}>
-              #{summary.from} → #{summary.to}
-            </Text>
-            {summary.delta !== 0 ? (
-              <Text
-                style={[
-                  styles.headerMetaDelta,
-                  { color: summary.delta > 0 ? '#059669' : '#DC2626' },
-                ]}>
-                {'  '}
-                {summary.delta > 0 ? '▲' : '▼'} {Math.abs(summary.delta)}
-              </Text>
-            ) : null}
-          </View>
+        {hasCompare ? (
+          <TeamToggle
+            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
         ) : null}
       </View>
+
+      {/* Rank delta meta sits on its own row below the title — consistent
+          placement with Form (streak/momentum), regardless of whether the
+          toggle pill occupies the top-right slot. */}
+      {summary ? (
+        <View style={styles.subHeaderMeta}>
+          <Text style={styles.headerMetaText}>
+            #{summary.from} → #{summary.to}
+          </Text>
+          {summary.delta !== 0 ? (
+            <Text
+              style={[
+                styles.headerMetaDelta,
+                { color: summary.delta > 0 ? '#059669' : '#DC2626' },
+              ]}>
+              {'  '}
+              {summary.delta > 0 ? '▲' : '▼'} {Math.abs(summary.delta)}
+            </Text>
+          ) : null}
+        </View>
+      ) : null}
 
       {history.isLoading && series.length === 0 ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -94,10 +135,13 @@ function TrajectoryChart({
 }: {
   series: { date: string; rank: number; points: number }[];
 }) {
-  const width = 300;
+  // Width matches the Form sparkline; height bumped so the y-axis has
+  // enough vertical room per rank unit for the trajectory to read as a
+  // meaningful line rather than a compressed wiggle.
+  const width = 280;
   const height = 130;
   const padX = 8;
-  const padTop = 12;
+  const padTop = 10;
   const padBottom = 22;
 
   // Y-domain: rank 1 at top, worst-visible rank at bottom. Use max rank across
@@ -119,7 +163,7 @@ function TrajectoryChart({
     rank: s.rank,
     date: s.date,
   }));
-  const polyline = svgPoints.map((p) => `${p.x},${p.y}`).join(' ');
+  const smoothPath = smoothLinePath(svgPoints).path;
 
   // First + last data-point labels only — every-point labels get noisy on
   // a 13-point series inside a phone width.
@@ -128,36 +172,45 @@ function TrajectoryChart({
 
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
-      {/* Horizontal grid at rank 1 (implied by top edge) and mid-series. */}
-      <Line
-        x1={padX}
-        y1={rankToY(Math.round(maxRank / 2))}
-        x2={width - padX}
-        y2={rankToY(Math.round(maxRank / 2))}
-        stroke="#F3F4F6"
-        strokeWidth={0.8}
-      />
-      {/* Trajectory line. */}
-      <Polyline
-        points={polyline}
-        stroke={Colors.light.text}
+      {/* Trajectory line — Catmull-Rom → Bezier smoothed so segment
+          junctions curve instead of cornering. */}
+      <Path
+        d={smoothPath}
+        stroke={CHART_LINE_COLOR}
         strokeWidth={1.5}
         fill="none"
+        strokeLinecap="round"
       />
-      {/* Data dots. */}
-      {svgPoints.map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={2.4} fill={Colors.light.text} />
-      ))}
-      {/* First / last rank annotations. */}
+      {/* Data dots — coloured by rank change vs the PREVIOUS snapshot.
+          Lower rank number = better, so an equal or improved rank reads
+          as green; a worse (higher) rank reads as red. The first point
+          has no predecessor and defaults to the "better" colour. */}
+      {svgPoints.map((p, i) => {
+        const prev = i > 0 ? svgPoints[i - 1]! : null;
+        const isBetter = !prev || p.rank <= prev.rank;
+        return (
+          <Circle
+            key={i}
+            cx={p.x}
+            cy={p.y}
+            r={2.8}
+            fill={isBetter ? BETTER_COLOR : WORSE_COLOR}
+          />
+        );
+      })}
+      {/* Rank annotations at each endpoint — same weight / fill / size so
+          start and end read as one style, differing only in anchor. No
+          '#' prefix: it visually clashes with the digits in SVG text and
+          the chart context already reads as ranks. */}
       {first ? (
         <SvgText
           x={first.x}
           y={first.y - 6}
-          fill={Colors.light.textSecondary}
-          fontSize={9}
-          fontWeight="600"
+          fill={Colors.light.text}
+          fontSize={10}
+          fontWeight="700"
           textAnchor="start">
-          #{first.rank}
+          {first.rank}
         </SvgText>
       ) : null}
       {last ? (
@@ -168,7 +221,7 @@ function TrajectoryChart({
           fontSize={10}
           fontWeight="700"
           textAnchor="end">
-          #{last.rank}
+          {last.rank}
         </SvgText>
       ) : null}
       {/* X-axis endpoints: month labels. */}
@@ -239,7 +292,6 @@ function TrajectoryInfoModal({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: HORIZONTAL_MARGIN,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -270,6 +322,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   headerMeta: { flexDirection: 'row', alignItems: 'baseline' },
+  subHeaderMeta: { flexDirection: 'row', alignItems: 'baseline' },
   headerMetaText: {
     fontSize: TextSize.sm,
     color: Colors.light.text,

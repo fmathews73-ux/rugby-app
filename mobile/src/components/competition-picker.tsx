@@ -61,21 +61,19 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two + 2,
     gap: Spacing.two,
   },
+  // Borderless — fills alone carry the active/inactive contrast (dark for
+  // active, white for inactive against the grey page bg). Matches the
+  // sub-tab + TeamToggle pill treatment across the app.
   pill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
   },
   pillActive: {
     backgroundColor: Colors.light.text,
-    borderColor: Colors.light.text,
   },
   pillInactive: {
-    // White fill so pills read as tap-targets on the grey page background
-    // (#F5F5F7). Transparent would let the pill blur into the page.
     backgroundColor: '#FFFFFF',
-    borderColor: '#D1D5DB',
   },
   pillLabel: {
     fontSize: 12,

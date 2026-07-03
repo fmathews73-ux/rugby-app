@@ -35,6 +35,8 @@ export interface TeamAggregate {
     scrumSuccessPercent: number;
     lineoutSuccessPercent: number;
     tackleSuccessPercent: number;
+    turnoversWon: number;
+    turnoversConceded: number;
     penaltiesConceded: number;
     handlingErrors: number;
     yellowCards: number;
@@ -48,12 +50,21 @@ interface UseTeamAggregateResult {
   isError: boolean;
 }
 
-export function useTeamAggregate(teamId: string): UseTeamAggregateResult {
+export function useTeamAggregate(
+  teamId: string,
+  /** When set, drop every fixture with kickoff at or after this ISO
+   *  timestamp — used by the fixture-drill Preview cards to render the
+   *  season-to-date snapshot AS OF THAT MATCH rather than as of today. */
+  asOfDate?: string,
+): UseTeamAggregateResult {
   const team = useTeam(teamId);
 
   const completedFixtures: Fixture[] = useMemo(
-    () => (team.data?.fixtures ?? []).filter((f) => f.status === 'completed'),
-    [team.data],
+    () =>
+      (team.data?.fixtures ?? []).filter(
+        (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
+      ),
+    [team.data, asOfDate],
   );
 
   const resultQueries = useQueries({
@@ -89,6 +100,7 @@ export function useTeamAggregate(teamId: string): UseTeamAggregateResult {
     let kicksInPlay = 0, kickMeters = 0;
     let scrumWon = 0, scrumLost = 0, lineoutWon = 0, lineoutLost = 0;
     let tackleSuccess = 0;
+    let turnoversWon = 0, turnoversConceded = 0;
     let pensConceded = 0, handlingErrors = 0, yellows = 0, reds = 0;
 
     for (const { result, fixture } of results) {
@@ -110,6 +122,10 @@ export function useTeamAggregate(teamId: string): UseTeamAggregateResult {
       tackleSuccess += isHome
         ? result.home_tackle_success_percent
         : result.away_tackle_success_percent;
+      turnoversWon += isHome ? result.home_turnovers_won : result.away_turnovers_won;
+      turnoversConceded += isHome
+        ? result.home_turnovers_conceded
+        : result.away_turnovers_conceded;
       pensConceded += isHome
         ? result.home_penalties_conceded
         : result.away_penalties_conceded;
@@ -139,6 +155,8 @@ export function useTeamAggregate(teamId: string): UseTeamAggregateResult {
         scrumSuccessPercent: scrumTotal > 0 ? (scrumWon / scrumTotal) * 100 : 0,
         lineoutSuccessPercent: lineoutTotal > 0 ? (lineoutWon / lineoutTotal) * 100 : 0,
         tackleSuccessPercent: tackleSuccess / n,
+        turnoversWon: turnoversWon / n,
+        turnoversConceded: turnoversConceded / n,
         penaltiesConceded: pensConceded / n,
         handlingErrors: handlingErrors / n,
         yellowCards: yellows / n,
@@ -164,6 +182,8 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   scrumSuccessPercent: 0,
   lineoutSuccessPercent: 0,
   tackleSuccessPercent: 0,
+  turnoversWon: 0,
+  turnoversConceded: 0,
   penaltiesConceded: 0,
   handlingErrors: 0,
   yellowCards: 0,

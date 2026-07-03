@@ -21,6 +21,7 @@ import type {
   Coach,
   LineUp,
   MatchEvent,
+  MatchOfficial,
   Player,
   Position,
   RankingSnapshot,
@@ -36,6 +37,7 @@ import {
   generateCoachingStaff,
   generateLineUp,
   generateMatchEvents,
+  generateMatchOfficials,
   generateRanking,
   generateResult,
   generateSquad,
@@ -59,6 +61,7 @@ const rankingRng = root.fork();
 const womensRankingRng = root.fork();
 const eventsRng = root.fork();
 const coachRng = root.fork();
+const officialRng = root.fork();
 
 // ─── Squads and players ─────────────────────────────────────────────────────
 // One squad per team per season that team participates in.
@@ -233,6 +236,14 @@ const brackets: Bracket[] = ALL_COMPETITIONS
 
 const coaches: Coach[] = ALL_TEAMS.flatMap((team) => generateCoachingStaff(coachRng, team.id));
 
+// ─── Match officials ─────────────────────────────────────────────────────────
+// Standard 4-slot slate per fixture. Announced pre-match in real life, so
+// every fixture (scheduled or completed) gets a full assignment.
+
+const officials: MatchOfficial[] = ALL_COMPETITIONS.flatMap((bundle) =>
+  bundle.fixtures.flatMap((fx) => generateMatchOfficials(officialRng, fx)),
+);
+
 // ─── Write JSON ──────────────────────────────────────────────────────────────
 
 interface OutputFile { file: string; data: unknown }
@@ -250,6 +261,7 @@ const outputs: OutputFile[] = [
   { file: 'rankings.json', data: rankings },
   { file: 'events.json', data: events },
   { file: 'coaches.json', data: coaches },
+  { file: 'officials.json', data: officials },
 ];
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -273,6 +285,7 @@ const totals = {
   rankings: rankings.length,
   events: events.length,
   coaches: coaches.length,
+  officials: officials.length,
 };
 // eslint-disable-next-line no-console -- CLI tool output
 console.log('Wrote synthetic dataset:', totals);

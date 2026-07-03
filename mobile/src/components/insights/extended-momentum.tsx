@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { Circle, Line, Polyline } from 'react-native-svg';
+import Svg, { Circle, Line, Path } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -16,8 +16,9 @@ import {
   type FormOutcome,
   type FormPoint,
 } from '@/lib/form-momentum';
+import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
-const HORIZONTAL_MARGIN = 40;
 const LOOKBACK = 10;
 const WIN_COLOR = '#059669';
 const LOSS_COLOR = StatusColor.live;
@@ -26,17 +27,44 @@ const DRAW_COLOR = Colors.light.textSecondary;
 /**
  * Extended Momentum sparkline — same weighted-momentum + streak treatment as
  * the Home My-Team card, but with a 10-match window and a larger canvas.
- * Note that the weighted-momentum score itself still uses the standard 5-match
- * weights (that's the "current momentum" reading) — the extra history is
- * shown for context so users can eyeball the longer-range trend.
+ * When a compare team is supplied, a two-segment toggle pill in the header
+ * lets the user switch which team's sparkline is showing — one at a time,
+ * matching the Team Profile radar's toggle pattern.
  */
-export function ExtendedMomentum({ teamId }: { teamId: string }) {
-  const team = useTeam(teamId);
+export function ExtendedMomentum({
+  teamId,
+  compareTeamId,
+  asOfDate,
+}: {
+  teamId: string;
+  compareTeamId?: string | null;
+  /** When set, drop every fixture with kickoff at or after this ISO
+   *  timestamp — freezes the Form window to the state it held walking
+   *  into a specific match. */
+  asOfDate?: string;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+
+  // Reset toggle back to the primary team whenever the compare team
+  // changes or is cleared — avoids the pill sitting on a stale selection.
+  useEffect(() => {
+    setActiveSide('primary');
+  }, [compareTeamId]);
+
+  const primaryTeam = useTeam(teamId);
+  const compareTeam = useTeam(compareTeamId ?? '');
+
+  const hasCompare = Boolean(compareTeamId);
+  const activeTeamId = activeSide === 'primary' ? teamId : (compareTeamId ?? teamId);
+  const activeTeam = activeSide === 'primary' ? primaryTeam : compareTeam;
 
   const completedFixtures = useMemo(
-    () => (team.data?.fixtures ?? []).filter((f) => f.status === 'completed'),
-    [team.data],
+    () =>
+      (activeTeam.data?.fixtures ?? []).filter(
+        (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
+      ),
+    [activeTeam.data, asOfDate],
   );
 
   // Only fetch results for the last-N fixtures we actually render.
@@ -62,16 +90,16 @@ export function ExtendedMomentum({ teamId }: { teamId: string }) {
   }, [resultQueries]);
 
   const points = useMemo(
-    () => formPointsFor(teamId, completedFixtures, resultByFixture, LOOKBACK),
-    [teamId, completedFixtures, resultByFixture],
+    () => formPointsFor(activeTeamId, completedFixtures, resultByFixture, LOOKBACK),
+    [activeTeamId, completedFixtures, resultByFixture],
   );
   const momentum = useMemo(
-    () => momentumFor(teamId, completedFixtures, resultByFixture),
-    [teamId, completedFixtures, resultByFixture],
+    () => momentumFor(activeTeamId, completedFixtures, resultByFixture),
+    [activeTeamId, completedFixtures, resultByFixture],
   );
   const streak = useMemo(
-    () => streakFor(teamId, completedFixtures, resultByFixture),
-    [teamId, completedFixtures, resultByFixture],
+    () => streakFor(activeTeamId, completedFixtures, resultByFixture),
+    [activeTeamId, completedFixtures, resultByFixture],
   );
 
   return (
@@ -87,21 +115,34 @@ export function ExtendedMomentum({ teamId }: { teamId: string }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {streak && points.length > 0 ? (
-          <View style={styles.headerMeta}>
-            <Text style={[styles.streakText, { color: outcomeColor(streak.letter) }]}>
-              {streak.count}
-              {streak.letter}
-            </Text>
-            <Text style={styles.separator}> · </Text>
-            <Text style={[styles.momentumText, { color: momentumColor(momentum) }]}>
-              {momentum > 0 ? '+' : ''}
-              {momentum}
-              {momentum > 0 ? ' ▲' : momentum < 0 ? ' ▼' : ''}
-            </Text>
-          </View>
+        {hasCompare ? (
+          <TeamToggle
+            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
         ) : null}
       </View>
+
+      {/* Streak + momentum meta always sits on its own row below the header
+          title, whether or not the toggle pill is present. Keeps the meta
+          in a consistent location and gives it visual breathing room from
+          the title. */}
+      {streak && points.length > 0 ? (
+        <View style={styles.subHeaderMeta}>
+          <Text style={[styles.streakText, { color: outcomeColor(streak.letter) }]}>
+            {streak.count}
+            {streak.letter}
+          </Text>
+          <Text style={styles.separator}> · </Text>
+          <Text style={[styles.momentumText, { color: momentumColor(momentum) }]}>
+            {momentum > 0 ? '+' : ''}
+            {momentum}
+            {momentum > 0 ? ' ▲' : momentum < 0 ? ' ▼' : ''}
+          </Text>
+        </View>
+      ) : null}
 
       {points.length === 0 ? (
         <Text style={styles.empty}>Not enough matches yet.</Text>
@@ -125,15 +166,22 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
   const padY = 12;
   const maxAbs = Math.max(20, ...points.map((p) => Math.abs(p.diff)));
 
-  const svgPoints = points.map((p, i) => {
-    const t = points.length === 1 ? 0.5 : i / (points.length - 1);
-    const x = padX + t * (width - 2 * padX);
-    const yNorm = (p.diff + maxAbs) / (2 * maxAbs);
-    const y = height - padY - yNorm * (height - 2 * padY);
-    return { x, y, outcome: p.outcome, diff: p.diff };
-  });
+  const svgPoints = useMemo(
+    () =>
+      points.map((p, i) => {
+        const t = points.length === 1 ? 0.5 : i / (points.length - 1);
+        const x = padX + t * (width - 2 * padX);
+        const yNorm = (p.diff + maxAbs) / (2 * maxAbs);
+        const y = height - padY - yNorm * (height - 2 * padY);
+        return { x, y, outcome: p.outcome, diff: p.diff };
+      }),
+    [points, maxAbs],
+  );
   const zeroY = height / 2;
-  const polyline = svgPoints.map((p) => `${p.x},${p.y}`).join(' ');
+
+  // Smoothed Bézier path through the points — the curve stays static;
+  // no motion graphics.
+  const smoothPath = useMemo(() => smoothLinePath(svgPoints).path, [svgPoints]);
 
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
@@ -147,11 +195,12 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
         strokeDasharray="3 3"
       />
       {svgPoints.length > 1 ? (
-        <Polyline
-          points={polyline}
-          stroke={Colors.light.text}
+        <Path
+          d={smoothPath}
+          stroke={CHART_LINE_COLOR}
           strokeWidth={1.5}
           fill="none"
+          strokeLinecap="round"
         />
       ) : null}
       {svgPoints.map((p, i) => (
@@ -160,6 +209,7 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
     </Svg>
   );
 }
+
 
 function outcomeColor(o: FormOutcome): string {
   return o === 'W' ? WIN_COLOR : o === 'L' ? LOSS_COLOR : DRAW_COLOR;
@@ -188,10 +238,10 @@ function MomentumInfoModal({
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Extended form chart showing this team's last {lookback} completed
-            matches, oldest (left) to most recent (right). Each dot's height is
-            the points-differential (final margin) for that game. Green = win,
-            red = loss, grey = draw.
+            Extended form chart showing the selected team's last {lookback}
+            completed matches, oldest (left) to most recent (right). Each dot's
+            height is the points-differential (final margin) for that game.
+            Green = win, red = loss, grey = draw.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
@@ -210,7 +260,6 @@ function MomentumInfoModal({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: HORIZONTAL_MARGIN,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -241,6 +290,12 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   headerMeta: { flexDirection: 'row', alignItems: 'baseline' },
+  // Streak + momentum sits on its own row directly below the title, left-
+  // aligned so it reads as an annotation of "Form (last 10)".
+  subHeaderMeta: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
   streakText: {
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,

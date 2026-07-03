@@ -4,12 +4,15 @@
  * card can compose the same SVG chart + axis math without duplicating them.
  */
 
-import Svg, { Circle, Line, Polygon, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Polygon, Text as SvgText } from 'react-native-svg';
 
 import { Colors } from '@/constants/theme';
 import type { TeamAggregate } from '@/hooks/use-team-aggregate';
 
-export const RADAR_COLOR = Colors.light.text;
+// Team polygon rendered in a light blue for a distinct BI treatment on the
+// Team Profile card — visually separates the "shape of the team" from the
+// dark text-token used for numeric readouts elsewhere in the app.
+export const RADAR_COLOR = '#3B82F6';
 export const REFERENCE_COLOR = Colors.light.textSecondary;
 
 export interface RadarAxis {
@@ -33,6 +36,8 @@ export const AXIS_CEILINGS = {
   discipline: 12,  // avg penalties conceded per game (inverted)
   kicking: 45,     // avg kick meters per kick in play
   territory: 60,   // avg territory %
+  possession: 60,  // avg possession %
+  turnovers: 15,   // avg turnovers WON per game (higher = better)
 };
 
 export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
@@ -44,6 +49,8 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       { key: 'discipline', label: 'Discipline', value: 0, raw: '—' },
       { key: 'kicking', label: 'Kicking', value: 0, raw: '—' },
       { key: 'territory', label: 'Territory', value: 0, raw: '—' },
+      { key: 'possession', label: 'Possession', value: 0, raw: '—' },
+      { key: 'turnovers', label: 'Turnovers', value: 0, raw: '—' },
     ];
   }
   const g = data.perGame;
@@ -87,11 +94,49 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       value: clip01(g.territoryPercent / AXIS_CEILINGS.territory),
       raw: `${g.territoryPercent.toFixed(0)}% territory`,
     },
+    {
+      key: 'possession',
+      label: 'Possession',
+      value: clip01(g.possessionPercent / AXIS_CEILINGS.possession),
+      raw: `${g.possessionPercent.toFixed(0)}% possession`,
+    },
+    {
+      key: 'turnovers',
+      label: 'Turnovers',
+      value: clip01(g.turnoversWon / AXIS_CEILINGS.turnovers),
+      raw: `${g.turnoversWon.toFixed(1)} won/g`,
+    },
   ];
 }
 
 function clip01(x: number): number {
   return Math.max(0, Math.min(1, x));
+}
+
+/**
+ * Cubic-Bezier smoothed closed path through an array of points. Each
+ * segment's control points are derived from the two neighbouring points
+ * on either side (Catmull-Rom → Bezier conversion at tension 1), so the
+ * curve passes exactly through each data point but has no sharp corners.
+ */
+function smoothClosedPath(points: readonly { x: number; y: number }[]): string {
+  const n = points.length;
+  if (n < 2) return '';
+  const at = (i: number) => points[((i % n) + n) % n]!;
+  const start = at(0);
+  let d = `M ${start.x.toFixed(1)} ${start.y.toFixed(1)}`;
+  for (let i = 0; i < n; i++) {
+    const p0 = at(i - 1);
+    const p1 = at(i);
+    const p2 = at(i + 1);
+    const p3 = at(i + 2);
+    const c1x = p1.x + (p2.x - p0.x) / 6;
+    const c1y = p1.y + (p2.y - p0.y) / 6;
+    const c2x = p2.x - (p3.x - p1.x) / 6;
+    const c2y = p2.y - (p3.y - p1.y) / 6;
+    d += ` C ${c1x.toFixed(1)} ${c1y.toFixed(1)}, ${c2x.toFixed(1)} ${c2y.toFixed(1)}, ${p2.x.toFixed(1)} ${p2.y.toFixed(1)}`;
+  }
+  return `${d} Z`;
 }
 
 /**
@@ -107,10 +152,16 @@ export function RadarChart({
   axes: readonly RadarAxis[];
   compareAxes?: readonly RadarAxis[] | null;
 }) {
-  const size = 260;
+  // Radar geometry — grown 30% from the original 260×240 / r=82 layout so
+  // the hexagon dominates the Team Profile card rather than sitting in the
+  // middle with a lot of white space around it. Axis labels sit at r + 16
+  // outside the polygon, so the viewBox y-center is nudged down to keep
+  // the top "Attack" label inside the canvas.
+  const size = 320;
+  const height = 300;
   const cx = size / 2;
-  const cy = 120;
-  const r = 82;
+  const cy = 150;
+  const r = 108;
 
   const angleFor = (i: number) => -Math.PI / 2 + (2 * Math.PI * i) / axes.length;
   const pointOn = (i: number, radius: number) => {
@@ -118,23 +169,22 @@ export function RadarChart({
     return { x: cx + Math.cos(a) * radius, y: cy + Math.sin(a) * radius };
   };
 
-  const teamPoints = axes
-    .map((ax, i) => pointOn(i, r * ax.value))
-    .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-    .join(' ');
+  // Team + compare data-line vertices → smoothed Bézier paths so the curves
+  // pass through each axis without sharp corners. Reference hexagon +
+  // gridlines stay sharp (they're benchmarks / grid, not data).
+  const teamVerts = axes.map((ax, i) => pointOn(i, r * ax.value));
+  const teamPath = smoothClosedPath(teamVerts);
+  const compareVerts = compareAxes
+    ? compareAxes.map((ax, i) => pointOn(i, r * ax.value))
+    : null;
+  const comparePath = compareVerts ? smoothClosedPath(compareVerts) : null;
   const referencePoints = axes
     .map((_, i) => pointOn(i, r * 0.5))
     .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
     .join(' ');
-  const comparePoints = compareAxes
-    ? compareAxes
-        .map((ax, i) => pointOn(i, r * ax.value))
-        .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-        .join(' ')
-    : null;
 
   return (
-    <Svg width="100%" height={240} viewBox={`0 0 ${size} 240`}>
+    <Svg width="100%" height={height} viewBox={`0 0 ${size} ${height}`}>
       {[0.25, 0.5, 0.75, 1].map((frac) => {
         const pts = axes
           .map((_, i) => pointOn(i, r * frac))
@@ -164,7 +214,7 @@ export function RadarChart({
           />
         );
       })}
-      {!comparePoints ? (
+      {!comparePath ? (
         <Polygon
           points={referencePoints}
           fill="none"
@@ -173,17 +223,17 @@ export function RadarChart({
           strokeDasharray="3 3"
         />
       ) : null}
-      {comparePoints ? (
-        <Polygon
-          points={comparePoints}
+      {comparePath ? (
+        <Path
+          d={comparePath}
           fill="none"
           stroke={REFERENCE_COLOR}
           strokeWidth={1.5}
           strokeDasharray="3 3"
         />
       ) : null}
-      <Polygon
-        points={teamPoints}
+      <Path
+        d={teamPath}
         fill={RADAR_COLOR}
         fillOpacity={0.12}
         stroke={RADAR_COLOR}
@@ -205,7 +255,7 @@ export function RadarChart({
             x={labelP.x}
             y={labelP.y + 3}
             fill={Colors.light.text}
-            fontSize={10}
+            fontSize={11}
             fontWeight="600"
             textAnchor="middle">
             {ax.label}

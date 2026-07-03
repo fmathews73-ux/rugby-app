@@ -13,6 +13,7 @@ import type {
   LineUp,
   Player,
   MatchEvent,
+  MatchOfficial,
   RankingSnapshot,
   Result,
   Season,
@@ -116,6 +117,17 @@ export function useFixtureEvents(fixtureId: string): UseQueryResult<MatchEvent[]
   return useQuery({
     queryKey: ['fixtureEvents', fixtureId],
     queryFn: () => fetchJson<MatchEvent[]>(`/fixtures/${fixtureId}/events`),
+    enabled: Boolean(fixtureId),
+  });
+}
+
+/** Match officials for a fixture — referee, two assistant referees, TMO.
+ *  Announced pre-match so scheduled fixtures already carry a full slate.
+ *  Returns an empty array (not an error) if the assignment isn't recorded. */
+export function useFixtureOfficials(fixtureId: string): UseQueryResult<MatchOfficial[]> {
+  return useQuery({
+    queryKey: ['fixtureOfficials', fixtureId],
+    queryFn: () => fetchJson<MatchOfficial[]>(`/fixtures/${fixtureId}/officials`),
     enabled: Boolean(fixtureId),
   });
 }

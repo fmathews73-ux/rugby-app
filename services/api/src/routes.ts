@@ -101,6 +101,17 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     return store.eventsByFixture.get(req.params.id) ?? [];
   });
 
+  // Match officials for a fixture — referee, two assistant referees
+  // (sideline), and the TMO. Announced pre-match so this endpoint returns
+  // a full slate even for scheduled fixtures. Empty array (not 404) when
+  // the assignment isn't recorded, so the UI can hide the section cleanly.
+  app.get<{ Params: { id: string } }>('/fixtures/:id/officials', async (req, reply) => {
+    if (!store.fixtureById.has(req.params.id)) {
+      return notFound(reply, `fixture ${req.params.id} not found`);
+    }
+    return store.officialsByFixture.get(req.params.id) ?? [];
+  });
+
   // Players relevant to a fixture — the union of both teams' lineup entries
   // (starting XV + bench) and every player_id / related_player_id referenced
   // by any of that fixture's events. Lets the client resolve player names

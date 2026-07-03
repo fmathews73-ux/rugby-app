@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeam } from '@/api/hooks';
+import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
-
-const HORIZONTAL_MARGIN = 40;
+import { CHART_LINE_COLOR } from '@/lib/smooth-path';
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 /**
  * Compact KPI strip below the Radar. Numbers-first surface for viewers who
@@ -13,20 +14,78 @@ const HORIZONTAL_MARGIN = 40;
  * shows a per-game average with a one-line explanation and a subtle bar
  * indicating how the value compares to a typical Tier-1 range.
  */
-export function EfficiencyKpis({ teamId }: { teamId: string }) {
-  const { data, isLoading } = useTeamAggregate(teamId);
+export function EfficiencyKpis({
+  teamId,
+  compareTeamId,
+  asOfDate,
+}: {
+  teamId: string;
+  compareTeamId?: string | null;
+  /** When set, `useTeamAggregate` drops fixtures at or after this ISO
+   *  timestamp — freezes the season-to-date averages to the state as of
+   *  a specific match. */
+  asOfDate?: string;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+
+  // Reset toggle back to primary whenever the compare team changes.
+  useEffect(() => {
+    setActiveSide('primary');
+  }, [compareTeamId]);
+
+  const primaryTeam = useTeam(teamId);
+  const compareTeam = useTeam(compareTeamId ?? '');
+  const primaryAggregate = useTeamAggregate(teamId, asOfDate);
+  const compareAggregate = useTeamAggregate(compareTeamId ?? '', asOfDate);
+
+  const hasCompare = Boolean(compareTeamId);
+  const activeAggregate = activeSide === 'primary' ? primaryAggregate : compareAggregate;
+  const data = activeAggregate.data;
+  const isLoading = activeAggregate.isLoading;
 
   const kpis = useMemo(() => {
     if (!data) return [];
     const g = data.perGame;
     return [
-      { label: 'Points scored', value: g.pointsScored.toFixed(1), suffix: '/g', bar: clip(g.pointsScored / 40) },
-      { label: 'Points conceded', value: g.pointsConceded.toFixed(1), suffix: '/g', bar: clip(g.pointsConceded / 40), inverted: true },
-      { label: 'Tries scored', value: g.tries.toFixed(1), suffix: '/g', bar: clip(g.tries / 5) },
-      { label: 'Possession', value: g.possessionPercent.toFixed(0), suffix: '%', bar: clip(g.possessionPercent / 100) },
-      { label: 'Tackle success', value: g.tackleSuccessPercent.toFixed(0), suffix: '%', bar: clip(g.tackleSuccessPercent / 100) },
-      { label: 'Penalties conceded', value: g.penaltiesConceded.toFixed(1), suffix: '/g', bar: clip(g.penaltiesConceded / 15), inverted: true },
+      {
+        label: 'Points scored',
+        value: g.pointsScored.toFixed(1), suffix: '/g',
+        bar: clip(g.pointsScored / 40),
+        avg: clip(T1_AVERAGES.pointsScored / 40),
+      },
+      {
+        label: 'Points conceded',
+        value: g.pointsConceded.toFixed(1), suffix: '/g',
+        bar: clip(g.pointsConceded / 40),
+        avg: clip(T1_AVERAGES.pointsConceded / 40),
+        inverted: true,
+      },
+      {
+        label: 'Tries scored',
+        value: g.tries.toFixed(1), suffix: '/g',
+        bar: clip(g.tries / 5),
+        avg: clip(T1_AVERAGES.tries / 5),
+      },
+      {
+        label: 'Possession',
+        value: g.possessionPercent.toFixed(0), suffix: '%',
+        bar: clip(g.possessionPercent / 100),
+        avg: clip(T1_AVERAGES.possessionPercent / 100),
+      },
+      {
+        label: 'Tackle success',
+        value: g.tackleSuccessPercent.toFixed(0), suffix: '%',
+        bar: clip(g.tackleSuccessPercent / 100),
+        avg: clip(T1_AVERAGES.tackleSuccessPercent / 100),
+      },
+      {
+        label: 'Penalties conceded',
+        value: g.penaltiesConceded.toFixed(1), suffix: '/g',
+        bar: clip(g.penaltiesConceded / 15),
+        avg: clip(T1_AVERAGES.penaltiesConceded / 15),
+        inverted: true,
+      },
     ];
   }, [data]);
 
@@ -43,10 +102,21 @@ export function EfficiencyKpis({ teamId }: { teamId: string }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {data ? (
-          <Text style={styles.headerMeta}>Avg per game</Text>
+        {hasCompare ? (
+          <TeamToggle
+            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
         ) : null}
       </View>
+
+      {/* "Avg per game" scope note sits on its own row below the title,
+          consistent with the Form / Trajectory placement. */}
+      {data ? (
+        <Text style={styles.subHeaderMeta}>Avg per game</Text>
+      ) : null}
 
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -59,6 +129,7 @@ export function EfficiencyKpis({ teamId }: { teamId: string }) {
               value={k.value}
               suffix={k.suffix}
               bar={k.bar}
+              avg={k.avg}
               inverted={k.inverted}
             />
           ))}
@@ -77,12 +148,14 @@ function KpiRow({
   value,
   suffix,
   bar,
+  avg,
   inverted,
 }: {
   label: string;
   value: string;
   suffix: string;
   bar: number;
+  avg: number;
   inverted?: boolean;
 }) {
   return (
@@ -100,10 +173,14 @@ function KpiRow({
             styles.kpiFill,
             {
               width: `${bar * 100}%`,
-              backgroundColor: inverted ? Colors.light.textSecondary : Colors.light.text,
+              backgroundColor: kpiBarColor(bar, avg, inverted),
             },
           ]}
         />
+        {/* T1-average reference marker — small vertical black line sitting
+            slightly taller than the track, so it reads over the coloured
+            fill without competing with the value's dominant colour. */}
+        <View style={[styles.kpiAvgMarker, { left: `${avg * 100}%` }]} />
       </View>
     </View>
   );
@@ -111,6 +188,37 @@ function KpiRow({
 
 function clip(x: number): number {
   return Math.max(0, Math.min(1, x));
+}
+
+// Row-fill tokens — green for a "good" bar level, red for a "poor" one.
+// Matches the win/loss + rankings-movement palette used elsewhere in the app.
+const GOOD_COLOR = '#059669';
+const BAD_COLOR = StatusColor.live;
+
+// Tier-1 international per-game averages. Hard-coded for now (dev-data
+// mode); replace with a live-computed average across the T1 pool when we
+// cut over to real feeds. Positions the black reference marker on each
+// bar and thresholds the green/red colour of the fill.
+const T1_AVERAGES = {
+  pointsScored: 22,
+  pointsConceded: 22,
+  tries: 3,
+  possessionPercent: 50,
+  tackleSuccessPercent: 85,
+  penaltiesConceded: 9,
+};
+
+/**
+ * Colour a KPI bar based on how the team's actual value compares to the
+ * Tier-1 average. Non-inverted metrics (points scored, tackle success,
+ * etc.) go green when at or above the average, red when below. Inverted
+ * metrics (points conceded, penalties conceded — higher is worse) flip
+ * the comparison — at or below average is good.
+ */
+function kpiBarColor(bar: number, avg: number, inverted: boolean | undefined): string {
+  const atOrAbove = bar >= avg;
+  const isGood = inverted ? !atOrAbove : atOrAbove;
+  return isGood ? GOOD_COLOR : BAD_COLOR;
 }
 
 function KpiInfoModal({
@@ -151,7 +259,6 @@ function KpiInfoModal({
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: HORIZONTAL_MARGIN,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -182,6 +289,10 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   headerMeta: {
+    fontSize: TextSize.xs,
+    color: Colors.light.textSecondary,
+  },
+  subHeaderMeta: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
@@ -218,11 +329,23 @@ const styles = StyleSheet.create({
     height: 4,
     backgroundColor: '#F3F4F6',
     borderRadius: 2,
-    overflow: 'hidden',
+    position: 'relative',
+    // `overflow: visible` so the T1-average marker can extend a couple of
+    // pixels above and below the track edge — makes it read as a distinct
+    // reference tick, not part of the fill.
+    overflow: 'visible',
   },
   kpiFill: {
     height: '100%',
     borderRadius: 2,
+  },
+  kpiAvgMarker: {
+    position: 'absolute',
+    top: -3,
+    bottom: -3,
+    width: 1.5,
+    marginLeft: -0.75,
+    backgroundColor: CHART_LINE_COLOR,
   },
 
   // Modal

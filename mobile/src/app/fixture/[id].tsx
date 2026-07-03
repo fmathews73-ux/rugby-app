@@ -5,19 +5,26 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import type { Coach, CoachRole, Fixture, LineUp, MatchEvent, Player, Result, Team } from '@rugby-app/shared';
+import type { Coach, CoachRole, Fixture, LineUp, MatchEvent, MatchOfficial, MatchOfficialRole, Player, Result, Team } from '@rugby-app/shared';
 
 import {
   useCompetitions,
   useFixture,
   useFixtureEvents,
   useFixtureLineups,
+  useFixtureOfficials,
   useFixturePlayers,
   useFixtureResult,
-  useLatestRanking,
   useTeamCoachingStaff,
   useTeams,
 } from '@/api/hooks';
+import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
+import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
+import { ExtendedMomentum } from '@/components/insights/extended-momentum';
+import { InsightsCanvas } from '@/components/insights/insights-canvas';
+import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
+import { PlayerLeaders } from '@/components/insights/player-leaders';
+import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -30,22 +37,25 @@ import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTra
  * are still open).
  */
 
-type SubTab = 'overview' | 'lineup' | 'stats' | 'rankings' | 'news';
+type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'insights';
 
 const SUB_TABS: readonly { id: SubTab; label: string }[] = [
-  // Line-Up first — represents "who is playing", the primary "team about to
-  // play" data. Everything else (Overview scores, Stats, Rankings, News)
-  // orbits around the players who take the field.
+  // Preview leads — pre-match team context (form, ranking trajectory,
+  // season KPIs) that sets up "who are we comparing" before the match
+  // itself. Line-Up follows — "who is playing". Overview and Stats are
+  // the descriptive read of the match; Insights sits next to Stats so
+  // users flipping between "raw numbers" and "analytics" during live
+  // matches don't have to travel far.
+  { id: 'preview', label: 'Preview' },
   { id: 'lineup', label: 'Line-Up' },
-  { id: 'overview', label: 'Overview' },
+  { id: 'overview', label: 'Timeline' },
   { id: 'stats', label: 'Stats' },
-  { id: 'rankings', label: 'Rankings' },
-  { id: 'news', label: 'News' },
+  { id: 'insights', label: 'Insights' },
 ];
 
 export default function FixtureDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const [tab, setTab] = useState<SubTab>('lineup');
+  const [tab, setTab] = useState<SubTab>('preview');
 
   const fixture = useFixture(id ?? '');
   const result = useFixtureResult(id ?? '');
@@ -95,6 +105,13 @@ export default function FixtureDetailScreen() {
           <SubTabBar tab={tab} onSelect={setTab} />
           <ScrollView contentContainerStyle={styles.scroll}>
             <View style={styles.pane}>
+              {tab === 'preview' && (
+                <PreviewPane
+                  homeTeamId={fixture.data.home_team_id}
+                  awayTeamId={fixture.data.away_team_id}
+                  asOfDate={fixture.data.kickoff_utc}
+                />
+              )}
               {tab === 'overview' && (
                 <OverviewPane
                   fixture={fixture.data}
@@ -118,17 +135,11 @@ export default function FixtureDetailScreen() {
                   resultLoading={result.isLoading}
                 />
               )}
-              {tab === 'rankings' && (
-                <RankingsPane
+              {tab === 'insights' && (
+                <InsightsPane
+                  fixtureId={fixture.data.id}
                   homeTeamId={fixture.data.home_team_id}
                   awayTeamId={fixture.data.away_team_id}
-                  teamById={teamById}
-                />
-              )}
-              {tab === 'news' && (
-                <ComingSoonPlaceholder
-                  title="Match news"
-                  body="News source is still an open item (PRD register #8). Nothing to render until it's decided."
                 />
               )}
             </View>
@@ -166,12 +177,13 @@ function MatchupHeader({
         {fixture.round ? ` · ${fixture.round}` : ''}
       </Text>
       <Text style={styles.headerLine}>{fixture.venue}</Text>
-      {/* Row 1 — flags + score, every item locked at FlagSize.header (56 pt)
-          so alignItems: 'center' collapses to identical vertical centres. */}
+      {/* Row 1 — flags + score. Flags locked to `FlagSize.medium` (40 pt)
+          to match the Home page fixture-carousel hero card — same "who's
+          playing" visual weight across the two surfaces. */}
       <View style={styles.matchupTopRow}>
         <View style={styles.flagSlot}>
           {homeTeam ? (
-            <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.header} />
+            <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} />
           ) : null}
         </View>
         <View style={styles.scoreSlot}>
@@ -215,7 +227,7 @@ function MatchupHeader({
         </View>
         <View style={styles.flagSlot}>
           {awayTeam ? (
-            <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.header} />
+            <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} />
           ) : null}
         </View>
       </View>
@@ -606,7 +618,7 @@ function StatsPane({
     return (
       <View style={styles.paneEmpty}>
         <Text style={styles.paneEmptyText}>
-          Match hasn’t kicked off yet. Stats will populate once the fixture is complete.
+          Match hasn’t kicked off yet. Stats populate live once the game starts.
         </Text>
       </View>
     );
@@ -882,6 +894,7 @@ function LineUpPane({
 }) {
   const homeCoaches = useTeamCoachingStaff(fixture.home_team_id);
   const awayCoaches = useTeamCoachingStaff(fixture.away_team_id);
+  const officials = useFixtureOfficials(fixture.id);
   if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
@@ -955,6 +968,22 @@ function LineUpPane({
           )}
         </>
       ) : null}
+
+      {/* Match officials — announced pre-match, so this section renders for
+          scheduled fixtures too. Hidden if the feed returns nothing. */}
+      {(officials.data?.length ?? 0) > 0 ? (
+        <>
+          <View style={styles.lineupSectionPillWrap}>
+            <View style={styles.lineupSectionPill}>
+              <Ionicons name="people-circle-outline" size={14} color={Colors.light.textSecondary} />
+              <Text style={styles.lineupSectionPillLabel}>Match Officials</Text>
+            </View>
+          </View>
+          {sortOfficialsByRole(officials.data ?? []).map((o) => (
+            <OfficialRow key={o.id} official={o} />
+          ))}
+        </>
+      ) : null}
     </View>
   );
 }
@@ -992,6 +1021,45 @@ function pairCoachesByRole(
   return COACH_ROLE_ORDER
     .filter((r) => roles.has(r))
     .map((role) => ({ role, home: homeByRole.get(role) ?? null, away: awayByRole.get(role) ?? null }));
+}
+
+/** Match-official roles rendered top-to-bottom. Referee first (the on-field
+ *  authority), then the two sideline officials, then the TMO — matches
+ *  the standard broadcast intro. */
+const OFFICIAL_ROLE_ORDER: readonly MatchOfficialRole[] = [
+  'referee',
+  'assistant-referee-1',
+  'assistant-referee-2',
+  'tmo',
+];
+
+const OFFICIAL_ROLE_LABELS: Record<MatchOfficialRole, string> = {
+  'referee': 'Referee',
+  'assistant-referee-1': 'Sideline',
+  'assistant-referee-2': 'Sideline',
+  'tmo': 'TMO',
+};
+
+function sortOfficialsByRole(officials: readonly MatchOfficial[]): MatchOfficial[] {
+  return [...officials].sort(
+    (a, b) => OFFICIAL_ROLE_ORDER.indexOf(a.role) - OFFICIAL_ROLE_ORDER.indexOf(b.role),
+  );
+}
+
+/**
+ * Single-line row: role on the left (tracked xs textSecondary), official's
+ * name on the right (bold sm text). Officials are match-scoped (neutral),
+ * so there's no home / away split like the coaching row.
+ */
+function OfficialRow({ official }: { official: MatchOfficial }) {
+  return (
+    <View style={styles.officialRow}>
+      <Text style={styles.officialRole}>{OFFICIAL_ROLE_LABELS[official.role]}</Text>
+      <Text style={styles.officialName} numberOfLines={1}>
+        {official.name}
+      </Text>
+    </View>
+  );
 }
 
 function CoachingCompareRow({
@@ -1084,68 +1152,95 @@ function LineUpCompareRow({
   );
 }
 
-// ─── Rankings pane ───────────────────────────────────────────────────────────
+// ─── Preview pane ────────────────────────────────────────────────────────────
 
-function RankingsPane({
+/**
+ * Pre-match team context — recent form, WR ranking trajectory, and season
+ * KPI averages for both sides. Rendered as the leftmost sub-tab so viewers
+ * land on "who are we comparing" before the match itself. Each card uses a
+ * two-side toggle pill to switch between home and away.
+ */
+function PreviewPane({
   homeTeamId,
   awayTeamId,
-  teamById,
+  asOfDate,
 }: {
   homeTeamId: string;
   awayTeamId: string;
-  teamById: Map<string, Team>;
+  /** Freezes every card on this pane to the state it would have shown
+   *  the day of the fixture — Form / Trajectory / KPIs all drop data
+   *  timestamped at or after this ISO string. Makes a fixture opened
+   *  in 2027 still read as the *pre-match* view from 2025. */
+  asOfDate: string;
 }) {
-  const ranking = useLatestRanking();
-  if (ranking.isLoading) return <LoadingState />;
-  if (ranking.isError) return <ErrorState error={ranking.error} />;
-  if (!ranking.data) return null;
-
-  const home = ranking.data.rows.find((r) => r.team_id === homeTeamId);
-  const away = ranking.data.rows.find((r) => r.team_id === awayTeamId);
-
   return (
-    <View style={styles.rankingsPane}>
-      <Text style={styles.rankingsMeta}>
-        World Rugby men’s · snapshot {ranking.data.snapshot_date}
-      </Text>
-      <RankingCard team={teamById.get(homeTeamId)} row={home} />
-      <RankingCard team={teamById.get(awayTeamId)} row={away} />
+    <View style={styles.insightsPaneStack}>
+      {/* Form (last-10) leads — recent trend sets up the deeper season
+          context (ranking trajectory + KPIs) below. Toggle pill switches
+          home ↔ away. */}
+      <ExtendedMomentum
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        asOfDate={asOfDate}
+      />
+      <RankingTrajectory
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        asOfDate={asOfDate}
+      />
+      <EfficiencyKpis
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        asOfDate={asOfDate}
+      />
     </View>
   );
 }
 
-function RankingCard({
-  team,
-  row,
+// ─── Insights pane ───────────────────────────────────────────────────────────
+
+/**
+ * Per-fixture Insights — sits next to the Stats sub-tab so users flipping
+ * between the raw numbers and the analytics view during a live match don't
+ * travel far. Scoped to this fixture's two teams (home + away), so there's
+ * no team-picker chrome. Rendered inside the fixture-drill ScrollView, so
+ * no SafeAreaView / ScrollView of its own.
+ */
+function InsightsPane({
+  fixtureId,
+  homeTeamId,
+  awayTeamId,
 }: {
-  team: Team | undefined;
-  row: { rank: number; points: number; movement: number | null } | undefined;
+  fixtureId: string;
+  homeTeamId: string;
+  awayTeamId: string;
 }) {
-  if (!row) return null;
   return (
-    <View style={styles.rankingCard}>
-      <View style={styles.rankingLead}>
-        {team ? <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} /> : null}
-        <View>
-          <Text style={styles.rankingName}>{team?.name ?? '—'}</Text>
-          <Text style={styles.rankingSub}>Rank {row.rank}</Text>
-        </View>
-      </View>
-      <View style={styles.rankingTrail}>
-        <Text style={styles.rankingPoints}>{row.points}</Text>
-        <Text style={styles.rankingPointsLabel}>pts</Text>
-      </View>
-    </View>
-  );
-}
-
-// ─── Placeholders ────────────────────────────────────────────────────────────
-
-function ComingSoonPlaceholder({ title, body }: { title: string; body: string }) {
-  return (
-    <View style={styles.placeholder}>
-      <Text style={styles.placeholderTitle}>{title}</Text>
-      <Text style={styles.placeholderBody}>{body}</Text>
+    <View style={styles.insightsPaneStack}>
+      <InsightsCanvas primaryTeamId={homeTeamId} compareTeamId={awayTeamId} />
+      {/* Combined points pattern — scoring above the axis, concession
+          below. Match-scoped via `fixtureId`, so both series come from
+          this fixture's events only. Toggle pill switches home/away. */}
+      <CombinedPointsPattern
+        fixtureId={fixtureId}
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+      />
+      {/* Pitch heatmap — density of the active team's positional events
+          (carries + scoring) on a top-down pitch. Match-scoped. */}
+      <PitchHeatmap
+        fixtureId={fixtureId}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
+      />
+      {/* Player leaders — broadcast-style "who led each category" grid.
+          Category array in the component is designed to grow when Opta's
+          full per-player metric set lands at Phase 6 cutover. */}
+      <PlayerLeaders
+        fixtureId={fixtureId}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
+      />
     </View>
   );
 }
@@ -1260,21 +1355,18 @@ const styles = StyleSheet.create({
   // Pill treatment matching CompetitionPicker on the Fixtures + Standings
   // tabs — same shape language for "chip / segmented selector" across the
   // app. Dimensions / radius / colours mirror `competition-picker.tsx`.
+  // Borderless — fill alone carries the active/inactive contrast, matching
+  // the TeamToggle pill treatment elsewhere in the app.
   subTabPill: {
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
   },
   subTabPillActive: {
     backgroundColor: Colors.light.text,
-    borderColor: Colors.light.text,
   },
   subTabPillInactive: {
-    // Grey fill against the white sub-tab strip — flipped from the Fixtures
-    // page pattern because the surface underneath is now white, not grey.
     backgroundColor: '#F3F4F6',
-    borderColor: '#E5E7EB',
   },
   subTabPillLabel: {
     fontSize: TextSize.sm,
@@ -1350,12 +1442,13 @@ const styles = StyleSheet.create({
   // timeline share visual language with the sub-tabs and Line-Up section
   // pills above them.
   milestoneBar: {
+    // Borderless — fill alone reads as the pill against the pane's grey
+    // background, matching the sub-tab / TeamToggle treatment. State
+    // variants (live / half-time) just swap the backgroundColor.
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -1369,8 +1462,8 @@ const styles = StyleSheet.create({
   // State-bar variants — same pill silhouette, coloured fills that swap in
   // for live and half-time fixtures. Border is matched to the fill so the
   // hairline outline reads as continuous with the coloured surface.
-  stateBarLive: { backgroundColor: StatusColor.live, borderColor: StatusColor.live },
-  stateBarHalfTime: { backgroundColor: StatusColor.warning, borderColor: StatusColor.warning },
+  stateBarLive: { backgroundColor: StatusColor.live },
+  stateBarHalfTime: { backgroundColor: StatusColor.warning },
   stateBarInverseText: { color: Colors.light.textInverse },
   stateBarLiveDot: {
     width: 7,
@@ -1538,6 +1631,32 @@ const styles = StyleSheet.create({
   },
   coachingNameRight: { textAlign: 'right' },
 
+  // Official row — role (left, xs tracked textSecondary) + name (right,
+  // sm bold text). One line per official; four rows total (referee, two
+  // sideline, TMO). Officials are match-neutral so there's no home/away split.
+  officialRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.two,
+    paddingVertical: Spacing.one + 2,
+    gap: Spacing.two,
+  },
+  officialRole: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
+  officialName: {
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.text,
+    flexShrink: 1,
+    textAlign: 'right',
+  },
+
   lineupSectionLabel: {
     fontSize: TextSize.xs,
     fontWeight: TextWeight.bold,
@@ -1558,16 +1677,14 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   lineupSectionPill: {
-    // Row layout so an icon can sit inside the pill next to the label —
-    // matches the Overview timeline's MilestoneBar pattern.
+    // Borderless — matches the milestone / sub-tab pill treatment. Row
+    // layout so an icon can sit inside the pill next to the label.
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
-    borderWidth: 1,
-    borderColor: '#D1D5DB',
     backgroundColor: '#FFFFFF',
   },
   lineupSectionPillLabel: {
@@ -1631,33 +1748,8 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
 
-  rankingsPane: { gap: Spacing.three },
-  rankingsMeta: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  rankingCard: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    padding: Spacing.three,
-    backgroundColor: Colors.light.backgroundElement,
-    borderRadius: 12,
-  },
-  rankingLead: { flexDirection: 'row', alignItems: 'center', gap: Spacing.two + 2 },
-  rankingName: { fontSize: TextSize.lg, fontWeight: TextWeight.bold, color: Colors.light.text },
-  rankingSub: { fontSize: TextSize.xs, color: Colors.light.textSecondary, fontVariant: ['tabular-nums'] },
-  rankingTrail: { alignItems: 'flex-end' },
-  rankingPoints: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
-  rankingPointsLabel: { fontSize: TextSize.xs, color: Colors.light.textSecondary, letterSpacing: TextTracking.wide },
-
-  placeholder: {
-    padding: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  placeholderTitle: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, textAlign: 'center' },
-  placeholderBody: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
+  // Insights pane — vertical stack of the same BI cards used on the
+  // Insights tab, scoped to this fixture's two teams. Each card handles its
+  // own horizontal margin, so the stack just needs vertical breathing room.
+  insightsPaneStack: { gap: Spacing.three, paddingBottom: Spacing.four },
 });

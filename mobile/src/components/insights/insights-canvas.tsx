@@ -1,18 +1,19 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
-
-const HORIZONTAL_MARGIN = 40;
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 /**
- * Team Profile radar card. Purely a graphic panel — team selection lives
- * outside in the selector row above. When a compare team is set, its
- * polygon is overlaid on the primary team's polygon (dashed grey outline).
+ * Profile radar card. When only `primaryTeamId` is set, renders that
+ * team's polygon. When a compare team is also present, a two-segment toggle
+ * pill in the header (`[HOME | AWAY]`) lets the user pick which team's
+ * polygon shows — one at a time, no overlay. The 50%-reference hexagon
+ * shows in both modes since a single polygon needs the "vs what?" anchor.
  */
 export function InsightsCanvas({
   primaryTeamId,
@@ -22,58 +23,56 @@ export function InsightsCanvas({
   compareTeamId?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const { data: agg, isLoading } = useTeamAggregate(primaryTeamId ?? '');
-  const { data: compareAgg } = useTeamAggregate(compareTeamId ?? '');
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+
+  // Reset toggle back to the primary side whenever the compare team changes
+  // or is cleared — avoids the pill sitting on a stale "compare" selection
+  // after the user picks a different team.
+  useEffect(() => {
+    setActiveSide('primary');
+  }, [compareTeamId]);
+
   const primaryTeam = useTeam(primaryTeamId ?? '');
   const compareTeam = useTeam(compareTeamId ?? '');
+  const { data: primaryAgg, isLoading: primaryLoading } = useTeamAggregate(primaryTeamId ?? '');
+  const { data: compareAgg, isLoading: compareLoading } = useTeamAggregate(compareTeamId ?? '');
 
-  const axes = useMemo(() => buildRadarAxes(agg), [agg]);
-  const compareAxes = useMemo(
-    () => (compareTeamId ? buildRadarAxes(compareAgg) : null),
-    [compareTeamId, compareAgg],
-  );
+  const primaryAxes = useMemo(() => buildRadarAxes(primaryAgg), [primaryAgg]);
+  const compareAxes = useMemo(() => buildRadarAxes(compareAgg), [compareAgg]);
+
+  const hasCompare = compareTeamId !== null && compareTeamId !== undefined && compareTeamId !== '';
+  const activeAxes = activeSide === 'primary' ? primaryAxes : compareAxes;
+  const activeAgg = activeSide === 'primary' ? primaryAgg : compareAgg;
+  const activeLoading = activeSide === 'primary' ? primaryLoading : compareLoading;
 
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Team Profile</Text>
+          <Text style={styles.sectionLabel}>Profile</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Explain the Team Profile radar">
+            accessibilityLabel="Explain the Profile radar">
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
+        {hasCompare ? (
+          <TeamToggle
+            primaryLabel={primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—'}
+            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
+        ) : null}
       </View>
-      <Text style={styles.tagline}>Six-axis profile of the selected team</Text>
 
-      {agg && agg.gamesPlayed > 0 ? (
-        <>
-          <RadarChart axes={axes} compareAxes={compareAxes} />
-          {/* Legend — quiet xs strip identifying which polygon belongs to
-              which team. Deliberately muted so the radar reads first. */}
-          <View style={styles.legendRow}>
-            <View style={styles.legendItem}>
-              <View style={styles.legendSwatchPrimary} />
-              <Text style={styles.legendLabelPrimary}>
-                {primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—'}
-              </Text>
-            </View>
-            {compareTeamId ? (
-              <View style={styles.legendItem}>
-                <View style={styles.legendSwatchCompare} />
-                <Text style={styles.legendLabelCompare}>
-                  {compareTeam.data?.short_name ?? compareTeamId.toUpperCase()}
-                </Text>
-              </View>
-            ) : null}
-          </View>
-        </>
+      {activeAgg && activeAgg.gamesPlayed > 0 ? (
+        <RadarChart axes={activeAxes} />
       ) : (
         <Text style={styles.empty}>
-          {isLoading ? 'Loading…' : 'No completed matches to profile yet.'}
+          {activeLoading ? 'Loading…' : 'No completed matches to profile yet.'}
         </Text>
       )}
 
@@ -88,24 +87,28 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Team Profile</Text>
+            <Text style={styles.modalTitle}>Profile</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Six-axis rugby analytics radar for the selected team. Axes cover
+            Eight-axis rugby analytics radar for the selected team. Axes cover
             {' '}<Text style={styles.modalStrong}>Attack</Text>,
             {' '}<Text style={styles.modalStrong}>Defence</Text>,
             {' '}<Text style={styles.modalStrong}>Set-piece</Text>,
             {' '}<Text style={styles.modalStrong}>Discipline</Text>,
-            {' '}<Text style={styles.modalStrong}>Kicking</Text>, and
-            {' '}<Text style={styles.modalStrong}>Territory</Text>. The dashed
-            hexagon at 50% radius is the notional international average.
+            {' '}<Text style={styles.modalStrong}>Kicking</Text>,
+            {' '}<Text style={styles.modalStrong}>Territory</Text>,
+            {' '}<Text style={styles.modalStrong}>Possession</Text>, and
+            {' '}<Text style={styles.modalStrong}>Turnovers</Text>. The dashed
+            octagon at 50% radius is the notional international average.
           </Text>
           <Text style={styles.modalBody}>
-            Add a compare team from the selector above the card — its polygon
-            overlays as a dashed grey outline for head-to-head reading.
+            When two teams are on the page, the header carries a
+            {' '}<Text style={styles.modalStrong}>toggle pill</Text> with each
+            team's three-letter code. Tap either side to switch which polygon
+            the radar shows — one team at a time, no overlay.
           </Text>
         </Pressable>
       </Pressable>
@@ -115,7 +118,6 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
 
 const styles = StyleSheet.create({
   card: {
-    marginHorizontal: HORIZONTAL_MARGIN,
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
@@ -145,59 +147,12 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
-  tagline: {
-    fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-    marginTop: -Spacing.one,
-  },
   empty: {
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
-  },
-
-  // ─── Legend ────────────────────────────────────────────────────────────
-  // Row of tiny series indicators under the radar. xs text + slim swatches
-  // so the whole strip reads as annotation, not chart.
-  legendRow: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: Spacing.three,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendSwatchPrimary: {
-    width: 14,
-    height: 6,
-    backgroundColor: Colors.light.text,
-    borderRadius: 2,
-  },
-  // Compare swatch mirrors the compare polygon: dashed grey outline, no fill.
-  legendSwatchCompare: {
-    width: 14,
-    height: 6,
-    borderWidth: 1.5,
-    borderColor: Colors.light.textSecondary,
-    borderStyle: 'dashed',
-    borderRadius: 2,
-    backgroundColor: 'transparent',
-  },
-  legendLabelPrimary: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.text,
-  },
-  legendLabelCompare: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
   },
 
   modalBackdrop: {

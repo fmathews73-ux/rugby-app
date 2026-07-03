@@ -19,6 +19,7 @@ import type {
   Player,
   PlayerId,
   MatchEvent,
+  MatchOfficial,
   RankingSnapshot,
   Result,
   Season,
@@ -73,6 +74,9 @@ export interface Store {
 
   coaches: readonly Coach[];
   coachesByTeam: ReadonlyMap<TeamId, Coach[]>;
+
+  officials: readonly MatchOfficial[];
+  officialsByFixture: ReadonlyMap<FixtureId, MatchOfficial[]>;
 }
 
 function readJson<T>(dir: string, file: string): T {
@@ -110,6 +114,7 @@ export function loadStore(dataDir: string): Store {
   const rankings = readJson<RankingSnapshot[]>(dataDir, 'rankings.json');
   const events = readJson<MatchEvent[]>(dataDir, 'events.json');
   const coaches = readJson<Coach[]>(dataDir, 'coaches.json');
+  const officials = readJson<MatchOfficial[]>(dataDir, 'officials.json');
 
   const fixturesByTeam = new Map<TeamId, Fixture[]>();
   for (const fx of fixtures) {
@@ -167,5 +172,8 @@ export function loadStore(dataDir: string): Store {
 
     coaches,
     coachesByTeam: groupBy(coaches, (c) => c.team_id),
+
+    officials,
+    officialsByFixture: groupBy(officials, (o) => o.fixture_id),
   };
 }
