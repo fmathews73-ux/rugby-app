@@ -45,13 +45,14 @@ import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTra
 type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'insights' | 'analysis';
 
 const SUB_TABS: readonly { id: SubTab; label: string }[] = [
-  // Preview leads — pre-match team context (form, ranking trajectory,
-  // season KPIs) that sets up "who are we comparing" before the match
-  // itself. Line-Up follows — "who is playing". Overview and Stats are
-  // the descriptive read of the match; Insights sits next to Stats so
-  // users flipping between "raw numbers" and "analytics" during live
-  // matches don't have to travel far. Analysis is last — the AI
-  // commentary read is the story pass over everything that came before.
+  // Temporal flow, synthesis at the end. Preview leads with pre-match
+  // context (form, ranking trajectory, season baselines) — the backdrop
+  // the match plays out against. Line-Up follows with the cast on the
+  // day. Timeline is the running event log ("what happens / happened").
+  // Stats is the numeric record; Insights the visual analytical read.
+  // Analysis closes — the AI narrative synthesis that pulls everything
+  // before it together into a written story. Reader flows left-to-right
+  // through: expectation → cast → events → data → visual → narrative.
   { id: 'preview', label: 'Preview' },
   { id: 'lineup', label: 'Line-Up' },
   { id: 'overview', label: 'Timeline' },
