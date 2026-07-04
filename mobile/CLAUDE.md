@@ -43,6 +43,7 @@ Reference pattern is a **data app, not a media app** (PRD §1) — no live video
 - **Home content blocks are undefined** (`[INPUT NEEDED #19]`) — placeholder until confirmed.
 - **Consume our own APIs only.** The client never calls a data feed directly and never holds a feed key. Same rule extends to any LLM key — see the analysis-narrative spec below.
 - **Match analysis narrative is a client-side template pending Phase 6 LLM cutover.** The Analysis sub-tab on fixture-drill (`mobile/src/hooks/use-match-analysis.ts` + `mobile/src/components/match-analysis-card.tsx`) reads structured, BI-style prose from a template that implements `docs/analysis-narrative-spec.md`. That spec doc IS the LLM's future system prompt — do not let structure, tone, or style rules drift between the template and the spec. When the real LLM path lands at Phase 6, follow the cutover checklist in the spec §7 (server-side inference in personal GCP project, key in Secret Manager, delete the client-side template helpers).
+- **Predictor tab is a Phase 0 stub pending Phase 6 ML cutover.** The Predictor tab (`mobile/src/app/(tabs)/predictor.tsx`) is deliberately a placeholder — real match / tournament win-probability predictions require a trained ML model, feature pipeline, and server-side inference route, all deferred to Phase 6. Full brief pinned at `docs/predictor-phase-spec.md`. Same guardrails as the analysis path: client never holds model weights or an inference key. Do not attempt to build the real feature in earlier phases.
 
 ---
 

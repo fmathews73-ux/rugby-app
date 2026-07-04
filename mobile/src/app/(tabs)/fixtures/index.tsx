@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useNavigation, useRouter } from 'expo-router';
+import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -121,34 +121,49 @@ export default function FixturesScreen() {
     }));
   }, [isLoading, error, competitions.data, teams.data, fixtureQueries, competitionFilter]);
 
-  /** Day-group index of the day that contains the most recent completed
-   * fixture. Used to jump-scroll on mount so that day-card sits at the top
-   * of the viewport. Iterates from the end backwards to grab the LAST
-   * completed fixture (i.e., the most recent) and returns its day. */
-  const mostRecentCompletedDayIndex = useMemo((): number | null => {
-    for (let s = sections.length - 1; s >= 0; s--) {
+  /** Day-group index of the day whose date is closest to today, whether
+   *  that day sits in the past (most-recent completed) or in the future
+   *  (next upcoming). Ties break toward the earlier day. Used to
+   *  jump-scroll on mount and on every Fixtures tab press so the
+   *  "closest to now" day-card is always the top-of-viewport landmark. */
+  const closestToTodayDayIndex = useMemo((): number | null => {
+    if (sections.length === 0) return null;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const todayTs = today.getTime();
+
+    let bestIndex: number | null = null;
+    let bestDelta = Infinity;
+    for (let s = 0; s < sections.length; s++) {
       const section = sections[s];
-      if (!section) continue;
-      for (let i = section.data.length - 1; i >= 0; i--) {
-        const fx = section.data[i];
-        if (fx && fx.status === 'completed') return s;
+      if (!section || section.data.length === 0) continue;
+      // All fixtures in a section share a day. Use midnight of that day
+      // so evening kick-offs don't pull the comparison across a date
+      // boundary.
+      const dayStr = section.data[0]!.kickoff_utc.slice(0, 10);
+      const dayTs = new Date(`${dayStr}T00:00:00`).getTime();
+      const delta = Math.abs(dayTs - todayTs);
+      if (delta < bestDelta) {
+        bestDelta = delta;
+        bestIndex = s;
       }
     }
-    return null;
+    return bestIndex;
   }, [sections]);
 
   type DayGroup = (typeof sections)[number];
   const listRef = useRef<FlatList<DayGroup>>(null);
   const didInitialScroll = useRef(false);
 
-  /** Jump the list so the most-recent-completed day-card sits at the top of
-   * the viewport. Called on first layout and on every Fixtures tab press. */
-  const scrollToMostRecentCompleted = useCallback(
+  /** Jump the list so the day-card closest to today sits at the top of
+   *  the viewport. Called on first layout and on every Fixtures tab
+   *  press so the same landmark rules for both entry paths. */
+  const scrollToClosestToToday = useCallback(
     (animated: boolean) => {
-      if (mostRecentCompletedDayIndex === null) return;
+      if (closestToTodayDayIndex === null) return;
       try {
         listRef.current?.scrollToIndex({
-          index: mostRecentCompletedDayIndex,
+          index: closestToTodayDayIndex,
           viewPosition: 0,
           animated,
         });
@@ -157,28 +172,44 @@ export default function FixturesScreen() {
         // onScrollToIndexFailed below.
       }
     },
-    [mostRecentCompletedDayIndex],
+    [closestToTodayDayIndex],
   );
 
   useEffect(() => {
     if (
       !didInitialScroll.current &&
-      mostRecentCompletedDayIndex !== null &&
+      closestToTodayDayIndex !== null &&
       sections.length > 0
     ) {
       // Delay lets the FlatList finish its first layout before we scroll.
       const t = setTimeout(() => {
-        scrollToMostRecentCompleted(false);
+        scrollToClosestToToday(false);
         didInitialScroll.current = true;
       }, 80);
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [mostRecentCompletedDayIndex, sections.length, scrollToMostRecentCompleted]);
+  }, [closestToTodayDayIndex, sections.length, scrollToClosestToToday]);
 
-  // Every tap of the Fixtures tab icon — including when the tab is already
-  // focused — snaps back to the most-recent-completed day-card. Consistent
-  // resolve-to landmark for Fixtures matching Home's scroll-to-top.
+  // Re-snap to the closest-to-today landmark whenever this screen
+  // regains focus AFTER the initial mount — i.e. when the user has
+  // drilled into a fixture and returned via the back arrow. Guarded on
+  // `didInitialScroll` so we don't fight the first-paint scroll above.
+  // Same landmark rule applies here as for the Fixtures tab press, so
+  // the list always shows the "closest to now" day-card up top
+  // regardless of how the user arrived.
+  useFocusEffect(
+    useCallback(() => {
+      if (didInitialScroll.current && closestToTodayDayIndex !== null) {
+        scrollToClosestToToday(false);
+      }
+    }, [closestToTodayDayIndex, scrollToClosestToToday]),
+  );
+
+  // Every tap of the Fixtures tab icon — including when the tab is
+  // already focused — snaps back to the day-card whose date is closest
+  // to today. Consistent resolve-to landmark for Fixtures matching
+  // Home's scroll-to-top.
   //
   // Since Fixtures now lives inside its own nested `<Stack>` (so fixture
   // detail can push while keeping the AppHeader + tab bar), the local
@@ -188,10 +219,10 @@ export default function FixturesScreen() {
     const parent = navigation.getParent();
     if (!parent) return;
     const unsub = parent.addListener('tabPress' as never, () => {
-      scrollToMostRecentCompleted(true);
+      scrollToClosestToToday(true);
     });
     return unsub;
-  }, [navigation, scrollToMostRecentCompleted]);
+  }, [navigation, scrollToClosestToToday]);
 
   if (isLoading) return <View style={styles.center}><LoadingState /></View>;
   if (error) return <View style={styles.center}><ErrorState error={error} /></View>;
@@ -218,7 +249,7 @@ export default function FixturesScreen() {
         contentContainerStyle={styles.listContent}
         onScrollToIndexFailed={() => {
           // Retry once when getItemLayout isn't cheap enough at first paint.
-          setTimeout(() => scrollToMostRecentCompleted(false), 100);
+          setTimeout(() => scrollToClosestToToday(false), 100);
         }}
         renderItem={({ item: dayGroup }) => (
           <View style={styles.card}>

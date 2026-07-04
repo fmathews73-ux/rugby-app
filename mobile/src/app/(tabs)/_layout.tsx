@@ -48,15 +48,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="standings"
-        options={{
-          title: 'Standings',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'list' : 'list-outline'} size={size} color={color} />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="teams"
         options={{
           title: 'Teams',
@@ -66,11 +57,29 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
+        name="standings"
+        options={{
+          title: 'Standings',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'list' : 'list-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
         name="rankings"
         options={{
           title: 'Rankings',
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={size} color={color} />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="predictor"
+        options={{
+          title: 'Predictor',
+          tabBarIcon: ({ color, size, focused }) => (
+            <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={size} color={color} />
           ),
         }}
       />

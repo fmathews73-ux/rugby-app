@@ -41,7 +41,7 @@ function Populated({ teamId }: { teamId: string }) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Profile (last {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>Profile (prev. {LOOKBACK})</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -74,7 +74,7 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Profile (last {LOOKBACK})</Text>
+            <Text style={styles.modalTitle}>Profile (prev. {LOOKBACK})</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>
@@ -94,7 +94,7 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             average.
           </Text>
           <Text style={styles.modalBody}>
-            The window mirrors the Form (last {LOOKBACK}) sparkline
+            The window mirrors the Form (prev. {LOOKBACK}) sparkline
             immediately below — Form shows the sequence of results,
             Profile shows the shape of those results across the eight
             playing dimensions.

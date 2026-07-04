@@ -107,7 +107,7 @@ export function ExtendedMomentum({
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Form (last {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>Form (prev. {LOOKBACK})</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -264,7 +264,7 @@ function MomentumInfoModal({
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Form (last {lookback})</Text>
+            <Text style={styles.modalTitle}>Form (prev. {lookback})</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>
