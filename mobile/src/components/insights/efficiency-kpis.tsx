@@ -4,7 +4,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -111,7 +111,7 @@ export function EfficiencyKpis({
             onSelect={setActiveSide}
           />
         ) : primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
 

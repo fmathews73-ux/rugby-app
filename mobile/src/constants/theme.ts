@@ -89,6 +89,7 @@ export const FlagSize = {
   header: 56, // fixture detail header, home fixture carousel cards
   medium: 40, // teams tab rows, fixture line-up
   row: 24, // standings, fixtures list, rankings tables, mini-carousels
+  xs: 16, // card-header corner flags (Form / Trajectory / KPIs / Profile)
 } as const;
 
 /**

@@ -9,7 +9,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import {
   formPointsFor,
   momentumFor,
@@ -126,9 +126,8 @@ export function ExtendedMomentum({
         ) : primaryTeam.data ? (
           // Single-team mode (Home page) — anchor the header with the
           // team's flag on the right corner so the card identifies its
-          // subject at a glance. FlagSize.row (24pt) is our smallest
-          // defined size — passing 16pt inline for an "xs" mini flag.
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
+          // subject at a glance.
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
 

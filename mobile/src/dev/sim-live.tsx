@@ -212,18 +212,21 @@ function scaleResultProportionally(result: Result, virtualMinute: number): Resul
   const isHalfTime = (k: string) => k.startsWith('half_time');
   const preserved = new Set(['fixture_id']);
 
-  const out: Record<string, unknown> = { ...result };
+  // `out` IS a Result (spread copy); the record view exists only so the
+  // loop can write numeric fields by dynamic key without per-field casts.
+  const out: Result = { ...result };
+  const writable = out as unknown as Record<string, number>;
   for (const [key, value] of Object.entries(result)) {
     if (preserved.has(key)) continue;
     if (typeof value !== 'number') continue;
     if (isPercent(key)) continue;
     if (isHalfTime(key)) {
-      out[key] = virtualMinute >= 40 ? value : 0;
+      writable[key] = virtualMinute >= 40 ? value : 0;
       continue;
     }
-    out[key] = Math.round(value * scale);
+    writable[key] = Math.round(value * scale);
   }
-  return out as Result;
+  return out;
 }
 
 /** Filters events to those that would have happened by the current

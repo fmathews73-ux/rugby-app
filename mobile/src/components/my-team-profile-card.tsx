@@ -5,7 +5,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTeam } from '@/api/hooks';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 
@@ -51,7 +51,7 @@ function Populated({ teamId }: { teamId: string }) {
           </Pressable>
         </View>
         {primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
 

@@ -1,6 +1,6 @@
 import { useNavigation } from 'expo-router';
 import { useEffect, useRef } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import { RefreshControl, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FixtureCarousel } from '@/components/fixture-carousel';
@@ -8,7 +8,8 @@ import { MyTeamMatchesCard } from '@/components/my-team-matches-card';
 import { MyTeamPreviewCards } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamSelectorCard } from '@/components/team-selector-card';
-import { Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 /**
  * Home. Two vertical sections:
@@ -30,6 +31,7 @@ import { Spacing } from '@/constants/theme';
 export default function HomeScreen() {
   const navigation = useNavigation();
   const scrollRef = useRef<ScrollView>(null);
+  const { refreshing, onRefresh } = usePullToRefresh();
 
   useEffect(() => {
     const unsub = navigation.addListener('tabPress' as never, () => {
@@ -52,7 +54,14 @@ export default function HomeScreen() {
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.light.textSecondary}
+          />
+        }>
         <FixtureCarousel />
         <TeamSelectorCard />
         <MyTeamMatchesCard />

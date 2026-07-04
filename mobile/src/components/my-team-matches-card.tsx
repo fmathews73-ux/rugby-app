@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { useQueries } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -77,17 +77,15 @@ function Populated({ teamId }: { teamId: string }) {
   }, [team.data]);
 
   // Fetch the last match's Result so the FT score can render inline.
-  const resultQueries = useQueries({
-    queries: lastMatch
-      ? [
-          {
-            queryKey: ['fixtureResult', lastMatch.id],
-            queryFn: () => fetchJson<Result>(`/fixtures/${lastMatch.id}/result`),
-          },
-        ]
-      : [],
+  // Single query gated on `enabled` — the key matches the app-wide
+  // ['fixtureResult', id] convention so TanStack Query dedupes with the
+  // other consumers (Fixtures list, picker form, team aggregates).
+  const lastResultQuery = useQuery({
+    queryKey: ['fixtureResult', lastMatch?.id ?? ''],
+    queryFn: () => fetchJson<Result>(`/fixtures/${lastMatch!.id}/result`),
+    enabled: Boolean(lastMatch),
   });
-  const lastResult = resultQueries[0]?.data;
+  const lastResult = lastResultQuery.data;
 
   if (!team.data) return null;
 
@@ -143,12 +141,10 @@ function Populated({ teamId }: { teamId: string }) {
 
 function NavSection({
   label,
-  rightHeader,
   onPress,
   children,
 }: {
   label: string;
-  rightHeader?: string;
   onPress?: () => void;
   children: React.ReactNode;
 }) {
@@ -160,7 +156,6 @@ function NavSection({
       style={({ pressed }) => [styles.section, pressed && !inert && { opacity: 0.75 }]}>
       <View style={styles.navSectionHeader}>
         <Text style={styles.sectionLabel}>{label}</Text>
-        {rightHeader ? <Text style={styles.navSectionDate}>{rightHeader}</Text> : null}
       </View>
       {children}
       {!inert ? (

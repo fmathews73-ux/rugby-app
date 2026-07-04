@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Fixture, Result } from '@rugby-app/shared';
@@ -15,6 +15,8 @@ import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
+
+import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 const ALL_COMPETITIONS = 'all';
 
@@ -48,6 +50,7 @@ export default function FixturesScreen() {
   const router = useRouter();
   const navigation = useNavigation();
   const [competitionFilter, setCompetitionFilter] = useState<string>(ALL_COMPETITIONS);
+  const { refreshing, onRefresh } = usePullToRefresh();
 
   const competitions = useCompetitions();
   const seasons = useSeasons();
@@ -247,9 +250,26 @@ export default function FixturesScreen() {
         data={sections}
         keyExtractor={(item) => item.title}
         contentContainerStyle={styles.listContent}
-        onScrollToIndexFailed={() => {
-          // Retry once when getItemLayout isn't cheap enough at first paint.
-          setTimeout(() => scrollToClosestToToday(false), 100);
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={onRefresh}
+            tintColor={Colors.light.textSecondary}
+          />
+        }
+        onScrollToIndexFailed={(info) => {
+          // Day cards are variable-height (n fixtures per day), so a
+          // hand-computed getItemLayout would silently drift the first
+          // time a style constant changes. Instead: converge in two
+          // steps. Jump to the average-based offset (forces the target
+          // region to render), then re-run the precise index scroll on
+          // the next frame batch. Lands exactly, regardless of card
+          // heights.
+          listRef.current?.scrollToOffset({
+            offset: info.averageItemLength * info.index,
+            animated: false,
+          });
+          setTimeout(() => scrollToClosestToToday(false), 50);
         }}
         renderItem={({ item: dayGroup }) => (
           <View style={styles.card}>

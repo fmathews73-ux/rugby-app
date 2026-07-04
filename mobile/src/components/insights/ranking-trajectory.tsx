@@ -5,7 +5,7 @@ import Svg, { Circle, Defs, LinearGradient, Path, Stop, Text as SvgText } from '
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
@@ -95,7 +95,7 @@ export function RankingTrajectory({
             onSelect={setActiveSide}
           />
         ) : primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
 
