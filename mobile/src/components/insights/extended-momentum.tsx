@@ -205,12 +205,20 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <Defs>
-        {/* Vertical fade — coloured at the line, transparent by mid-way.
-            The second stop at offset 0.55 flattens to 0 opacity so the
-            bottom half of each area shape stays fully see-through. */}
-        <LinearGradient id="form-area-gradient" x1="0" y1="0" x2="0" y2="1">
+        {/* Vertical fade anchored to the PLOT AREA in user space (not the
+            area shape's own bounding box). Coloured at the plot top,
+            fully transparent exactly at the plot bottom — so the fill
+            under the line always spreads the whole way down, never
+            "chopping off" halfway when the line rides high. */}
+        <LinearGradient
+          id="form-area-gradient"
+          x1="0"
+          y1={padY}
+          x2="0"
+          y2={height - padY}
+          gradientUnits="userSpaceOnUse">
           <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
-          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+          <Stop offset="1" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
         </LinearGradient>
       </Defs>
       <Line

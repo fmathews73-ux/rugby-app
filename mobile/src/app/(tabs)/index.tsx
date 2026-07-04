@@ -8,7 +8,7 @@ import { MyTeamMatchesCard } from '@/components/my-team-matches-card';
 import { MyTeamPreviewCards } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamSelectorCard } from '@/components/team-selector-card';
-import { Colors, Spacing } from '@/constants/theme';
+import { Spacing } from '@/constants/theme';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 /**
@@ -59,7 +59,7 @@ export default function HomeScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.light.textSecondary}
+            tintColor="#9CA3AF"
           />
         }>
         <FixtureCarousel />

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
-import { useEffect, useRef, useState } from 'react';
-import { Animated, Easing, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 
@@ -265,42 +265,16 @@ function StatBar({
   locked?: boolean;
 }) {
   const maxValue = Math.max(home, away, 1);
-  const homeShare = home / maxValue;
-  const awayShare = away / maxValue;
-
-  // 0 → 1 progress ramps the fill in on mount and re-plays whenever the
-  // underlying values change (e.g. a live-updating result). Interpolators
-  // below map progress onto the flex values so each half grows out from
-  // the centre gap towards its flag. useNativeDriver is `false` because
-  // we're animating a layout prop (flex) — the animation still runs
-  // smoothly for the ~30 bars on the Stats tab.
-  const progress = useRef(new Animated.Value(0)).current;
-  useEffect(() => {
-    progress.setValue(0);
-    Animated.timing(progress, {
-      toValue: 1,
-      duration: 700,
-      easing: Easing.out(Easing.cubic),
-      useNativeDriver: false,
-    }).start();
-  }, [home, away, progress]);
-
-  const homeSegFlex = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.001, Math.max(0.001, homeShare)],
-  });
-  const homeSpacerFlex = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, Math.max(0.001, 1 - homeShare)],
-  });
-  const awaySegFlex = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [0.001, Math.max(0.001, awayShare)],
-  });
-  const awaySpacerFlex = progress.interpolate({
-    inputRange: [0, 1],
-    outputRange: [1, Math.max(0.001, 1 - awayShare)],
-  });
+  // Static fills — each half's flex share against its spacer IS the bar
+  // length, growing out from the centre gap towards its flag. Motion
+  // graphics were tried here (JS-driven flex ramp on mount, then
+  // scroll-triggered reveal) and rejected as jittery; if fill animation
+  // ever returns, it needs a UI-thread driver (reanimated), not
+  // Animated-with-JS-driver on a layout prop.
+  const homeSegFlex = Math.max(0.001, home / maxValue);
+  const homeSpacerFlex = Math.max(0.001, 1 - home / maxValue);
+  const awaySegFlex = Math.max(0.001, away / maxValue);
+  const awaySpacerFlex = Math.max(0.001, 1 - away / maxValue);
 
   // Leading / lagging colouring: the higher value wins the green bar, the
   // lower gets the red. Ties render both bars in the neutral secondary text
@@ -320,17 +294,17 @@ function StatBar({
           <Text style={styles.statValueLeft}>{home}</Text>
           <View style={styles.barTrack}>
             <View style={styles.barHalfLeft}>
-              <Animated.View
+              <View
                 style={[styles.barSegHome, { flex: homeSegFlex, backgroundColor: homeColor }]}
               />
-              <Animated.View style={{ flex: homeSpacerFlex }} />
+              <View style={{ flex: homeSpacerFlex }} />
             </View>
             <View style={styles.barCentreGap} />
             <View style={styles.barHalfRight}>
-              <Animated.View
+              <View
                 style={[styles.barSegAway, { flex: awaySegFlex, backgroundColor: awayColor }]}
               />
-              <Animated.View style={{ flex: awaySpacerFlex }} />
+              <View style={{ flex: awaySpacerFlex }} />
             </View>
           </View>
           <Text style={styles.statValueRight}>{away}</Text>

@@ -146,14 +146,21 @@ function TrajectoryChart({
   const padX = 8;
   const padTop = 10;
   const padBottom = 22;
+  // Domain headroom BELOW the worst rank — the line's band compresses
+  // upward by this much so even a bottom-riding trajectory always has
+  // fill space beneath it (the area still closes at the true plot
+  // bottom). Mirrors how GA-style charts floor their y-axis below the
+  // data minimum instead of pinning the line to the axis.
+  const bottomHeadroom = 20;
 
-  // Y-domain: rank 1 at top, worst-visible rank at bottom. Use max rank across
-  // the series + 1 headroom, floored at 8 so a top-tier team's chart doesn't
+  // Y-domain: rank 1 at top, worst-visible rank at the bottom of the
+  // COMPRESSED band (plot bottom minus headroom). Use max rank across
+  // the series, floored at 8 so a top-tier team's chart doesn't
   // collapse to a flat line.
   const maxRank = Math.max(8, ...series.map((s) => s.rank));
   const rankToY = (rank: number) => {
     const t = (rank - 1) / (maxRank - 1);
-    return padTop + t * (height - padTop - padBottom);
+    return padTop + t * (height - padTop - padBottom - bottomHeadroom);
   };
   const idxToX = (i: number) => {
     if (series.length === 1) return width / 2;
@@ -185,9 +192,22 @@ function TrajectoryChart({
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <Defs>
-        <LinearGradient id="trajectory-area-gradient" x1="0" y1="0" x2="0" y2="1">
+        {/* Fade anchored to the plot area in user space — colour at plot
+            top, transparent exactly at plot bottom, so the fill spreads
+            the full way beneath the line regardless of where it sits. */}
+        <LinearGradient
+          id="trajectory-area-gradient"
+          x1="0"
+          y1={padTop}
+          x2="0"
+          y2={height - padBottom}
+          gradientUnits="userSpaceOnUse">
           <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
-          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+          {/* Mid stop keeps the fade visibly present three-quarters of
+              the way down — without it, the fill under a low-riding
+              trajectory sits in the near-zero tail and reads as absent. */}
+          <Stop offset="0.7" stopColor={CHART_LINE_COLOR} stopOpacity="0.1" />
+          <Stop offset="1" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
         </LinearGradient>
       </Defs>
       {areaPath ? <Path d={areaPath} fill="url(#trajectory-area-gradient)" stroke="none" /> : null}

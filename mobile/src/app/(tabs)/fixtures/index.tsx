@@ -254,7 +254,7 @@ export default function FixturesScreen() {
           <RefreshControl
             refreshing={refreshing}
             onRefresh={onRefresh}
-            tintColor={Colors.light.textSecondary}
+            tintColor="#9CA3AF"
           />
         }
         onScrollToIndexFailed={(info) => {

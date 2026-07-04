@@ -172,10 +172,12 @@ export function PitchHeatmap({
             }),
           )}
 
-          {/* Pitch markings — outer border, 22m lines, halfway (dashed).
-              Same medium grey used for structural axis lines on the
-              Momentum / Progression charts so all Insights viz share
-              one line-weight and colour system. */}
+          {/* Pitch markings, regulation hierarchy (World Rugby Law 1):
+              SOLID = border, try lines, 22m lines, halfway.
+              DASHED = 10m lines, 5m + 15m touchline lines, 5m try-line
+              verticals. Same medium grey used for structural axis lines
+              on the Momentum / Progression charts so all Insights viz
+              share one line-weight and colour system. */}
           <Rect
             x={0}
             y={0}
@@ -201,6 +203,8 @@ export function PitchHeatmap({
             stroke="#9CA3AF"
             strokeWidth={1}
           />
+          {/* Halfway — solid, like the 22s. On a real pitch it's the 10m
+              lines that are dashed, not halfway. */}
           <Line
             x1={PITCH_W * 0.5}
             y1={0}
@@ -208,7 +212,88 @@ export function PitchHeatmap({
             y2={PITCH_H}
             stroke="#9CA3AF"
             strokeWidth={1}
-            strokeDasharray="4 4"
+          />
+          {/* 5m try-line verticals — broken lines 5m in front of each
+              try line (scrums can be set no closer than these). */}
+          <Line
+            x1={PITCH_W * 0.05}
+            y1={0}
+            x2={PITCH_W * 0.05}
+            y2={PITCH_H}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          <Line
+            x1={PITCH_W * 0.95}
+            y1={0}
+            x2={PITCH_W * 0.95}
+            y2={PITCH_H}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          {/* 10m lines — dotted verticals 10m either side of halfway
+              (40m and 60m of the 100m pitch length). */}
+          <Line
+            x1={PITCH_W * 0.4}
+            y1={0}
+            x2={PITCH_W * 0.4}
+            y2={PITCH_H}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          <Line
+            x1={PITCH_W * 0.6}
+            y1={0}
+            x2={PITCH_W * 0.6}
+            y2={PITCH_H}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          {/* 5m lines — dotted, 5m in from each touchline, running the
+              length of the pitch. Pitch is 70m touchline-to-touchline,
+              so 5m maps to 5/70 of PITCH_H from the top and bottom
+              edges. */}
+          <Line
+            x1={0}
+            y1={PITCH_H * (5 / 70)}
+            x2={PITCH_W}
+            y2={PITCH_H * (5 / 70)}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          <Line
+            x1={0}
+            y1={PITCH_H * (65 / 70)}
+            x2={PITCH_W}
+            y2={PITCH_H * (65 / 70)}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          {/* 15m lines — dotted, 15m in from each touchline (the
+              lineout back line). */}
+          <Line
+            x1={0}
+            y1={PITCH_H * (15 / 70)}
+            x2={PITCH_W}
+            y2={PITCH_H * (15 / 70)}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
+          />
+          <Line
+            x1={0}
+            y1={PITCH_H * (55 / 70)}
+            x2={PITCH_W}
+            y2={PITCH_H * (55 / 70)}
+            stroke="#9CA3AF"
+            strokeWidth={1}
+            strokeDasharray="2 4"
           />
         </Svg>
       )}

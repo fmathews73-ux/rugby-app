@@ -132,18 +132,32 @@ export function ScoringProgression({
         <Text style={styles.empty}>No scoring events yet.</Text>
       ) : (
         <Svg width="100%" height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`} preserveAspectRatio="none">
-          {/* Vertical fade gradients per team — strong at the worm, zero
-              at the baseline. Gradient uses objectBoundingBox coords so
-              each area's fade spans its own height regardless of how
-              high the worm rose. Same visual language as the reference. */}
+          {/* Vertical fade gradients per team, anchored to the PLOT AREA
+              in user space — colour at the plot top, fully transparent
+              exactly at the baseline (plot bottom). Anchoring in user
+              space (not each area shape's own bounding box) means the
+              fill under either worm spreads the whole way down to the
+              axis, never chopping off mid-shape when a worm rides high. */}
           <Defs>
-            <LinearGradient id="home-area-gradient" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient
+              id="home-area-gradient"
+              x1="0"
+              y1={PAD_TOP}
+              x2="0"
+              y2={PAD_TOP + PLOT_H}
+              gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={HOME_LINE} stopOpacity="0.22" />
-              <Stop offset="0.55" stopColor={HOME_LINE} stopOpacity="0" />
+              <Stop offset="1" stopColor={HOME_LINE} stopOpacity="0" />
             </LinearGradient>
-            <LinearGradient id="away-area-gradient" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient
+              id="away-area-gradient"
+              x1="0"
+              y1={PAD_TOP}
+              x2="0"
+              y2={PAD_TOP + PLOT_H}
+              gradientUnits="userSpaceOnUse">
               <Stop offset="0" stopColor={AWAY_LINE} stopOpacity="0.22" />
-              <Stop offset="0.55" stopColor={AWAY_LINE} stopOpacity="0" />
+              <Stop offset="1" stopColor={AWAY_LINE} stopOpacity="0" />
             </LinearGradient>
           </Defs>
 
