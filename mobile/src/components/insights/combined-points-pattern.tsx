@@ -147,7 +147,10 @@ function MomentumArc({
 }) {
   const width = 300;
   const height = 180;
-  const padX = 24;
+  // 8pt horizontal padding — matches Preview line charts (Form / Ranking
+  // Trajectory) so all four line charts across the fixture drill share
+  // one plot-area rhythm.
+  const padX = 8;
   const padTop = 18;
   const padBottom = 30;
   const midY = padTop + (height - padTop - padBottom) / 2;
@@ -321,10 +324,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

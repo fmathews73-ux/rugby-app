@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
@@ -109,6 +110,8 @@ export function EfficiencyKpis({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
+        ) : primaryTeam.data ? (
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
         ) : null}
       </View>
 
@@ -257,10 +260,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
@@ -293,7 +296,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     textAlign: 'center',
   },
-  kpiList: { gap: Spacing.two },
+  // Extra `marginTop` on top of the card's own `gap: Spacing.two` so
+  // there's a full Spacing.three (16pt) of breathing room between the
+  // header row and the first KPI bar, matching the rhythm of the other
+  // Preview cards.
+  kpiList: { gap: Spacing.two, marginTop: Spacing.two },
   kpiRow: { gap: 4 },
   kpiRowHead: {
     flexDirection: 'row',

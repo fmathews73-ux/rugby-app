@@ -26,6 +26,7 @@ import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
 import { LivePulseDot } from '@/components/live-pulse-dot';
+import { MatchAnalysisCard } from '@/components/match-analysis-card';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
@@ -41,7 +42,7 @@ import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTra
  * are still open).
  */
 
-type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'insights';
+type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'insights' | 'analysis';
 
 const SUB_TABS: readonly { id: SubTab; label: string }[] = [
   // Preview leads — pre-match team context (form, ranking trajectory,
@@ -49,12 +50,14 @@ const SUB_TABS: readonly { id: SubTab; label: string }[] = [
   // itself. Line-Up follows — "who is playing". Overview and Stats are
   // the descriptive read of the match; Insights sits next to Stats so
   // users flipping between "raw numbers" and "analytics" during live
-  // matches don't have to travel far.
+  // matches don't have to travel far. Analysis is last — the AI
+  // commentary read is the story pass over everything that came before.
   { id: 'preview', label: 'Preview' },
   { id: 'lineup', label: 'Line-Up' },
   { id: 'overview', label: 'Timeline' },
   { id: 'stats', label: 'Stats' },
   { id: 'insights', label: 'Insights' },
+  { id: 'analysis', label: 'Analysis' },
 ];
 
 export default function FixtureDetailScreen() {
@@ -159,6 +162,9 @@ export default function FixtureDetailScreen() {
                   awayTeamId={fixture.data.away_team_id}
                   fixtureStatus={fixture.data.status}
                 />
+              )}
+              {tab === 'analysis' && (
+                <AnalysisPane fixture={fixture.data} />
               )}
               {/* Dev-only synthetic-live toggle — visible only in __DEV__
                   and only for completed fixtures. Rewinds the match to
@@ -1285,7 +1291,11 @@ function InsightsPane({
 }) {
   return (
     <View style={styles.insightsPaneStack}>
-      <InsightsCanvas primaryTeamId={homeTeamId} compareTeamId={awayTeamId} />
+      <InsightsCanvas
+        primaryTeamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        fixtureStatus={fixtureStatus}
+      />
       {/* Combined points pattern — scoring above the axis, concession
           below. Match-scoped via `fixtureId`, so both series come from
           this fixture's events only. Toggle pill switches home/away. */}
@@ -1315,12 +1325,30 @@ function InsightsPane({
   );
 }
 
+// ─── Analysis pane ───────────────────────────────────────────────────────────
+
+/**
+ * AI-generated broadcast-style commentary on the fixture. Reads the same
+ * data all other panes read (result totals, event timeline) via the
+ * `useMatchAnalysis` hook. Renders inside the shared stack so vertical
+ * chrome (padding, gap) matches the Insights and Stats panes.
+ *
+ * Scheduled fixtures render an empty-state message inside the card —
+ * there's no history to analyse yet.
+ */
+function AnalysisPane({ fixture }: { fixture: Fixture }) {
+  return (
+    <View style={styles.insightsPaneStack}>
+      <MatchAnalysisCard fixture={fixture} />
+    </View>
+  );
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatKickoff(iso: string): string {
   const date = new Date(iso);
   const dayStr = date.toLocaleDateString('en-GB', {
-    weekday: 'short',
     day: 'numeric',
     month: 'short',
     year: 'numeric',
@@ -1356,9 +1384,11 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
     width: '100%',
     paddingHorizontal: Spacing.two,
-    // Extra breathing room above the flags/score cluster — separates the
-    // "who's playing" hero from the "when / where" meta stack above.
+    // Symmetric breathing room above AND below the flags/score cluster —
+    // separates the "who's playing" hero from both the date/time meta
+    // above and the competition/venue meta below by the same amount.
     marginTop: Spacing.three,
+    marginBottom: Spacing.three,
   },
   // Home + away flag-with-code columns. Each column is a flex-1 slot that
   // matches the width of the middle score slot's flex sibling, so codes
@@ -1488,9 +1518,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
@@ -1641,10 +1671,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.three,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
@@ -1745,9 +1775,9 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

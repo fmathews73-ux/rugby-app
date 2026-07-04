@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
     alignItems: 'center',
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,
@@ -215,7 +215,13 @@ const styles = StyleSheet.create({
   matchupRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-evenly',
+    // `space-between` anchors the home flag flush with the card's
+    // paddingHorizontal (Spacing.three) — no extra `space-evenly` slot
+    // to its left. That lines its x-position up with the Team Selector /
+    // My-Team-Matches / My-Team-Preview cards' left-edge content on
+    // the Home page, so every card on that surface shares one vertical
+    // gridline.
+    justifyContent: 'space-between',
     width: '100%',
     marginTop: Spacing.three,
   },

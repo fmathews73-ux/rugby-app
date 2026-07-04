@@ -56,16 +56,25 @@ export function useTeamAggregate(
    *  timestamp — used by the fixture-drill Preview cards to render the
    *  season-to-date snapshot AS OF THAT MATCH rather than as of today. */
   asOfDate?: string,
+  /** When set, aggregate only over the most-recent `lookback` completed
+   *  fixtures (after any `asOfDate` filter). Useful for "team's last N
+   *  games" surfaces like the Home-page Profile radar. */
+  lookback?: number,
 ): UseTeamAggregateResult {
   const team = useTeam(teamId);
 
-  const completedFixtures: Fixture[] = useMemo(
-    () =>
-      (team.data?.fixtures ?? []).filter(
-        (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
-      ),
-    [team.data, asOfDate],
-  );
+  const completedFixtures: Fixture[] = useMemo(() => {
+    const all = (team.data?.fixtures ?? []).filter(
+      (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
+    );
+    if (lookback === undefined) return all;
+    // Sort newest-first, take N, then return. Order after this doesn't
+    // matter to the aggregator, which just sums metrics across the set.
+    return all
+      .slice()
+      .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
+      .slice(0, lookback);
+  }, [team.data, asOfDate, lookback]);
 
   const resultQueries = useQueries({
     queries: completedFixtures.map((f) => ({

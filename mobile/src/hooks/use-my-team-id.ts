@@ -2,20 +2,24 @@ import { File, Paths } from 'expo-file-system';
 import { useEffect, useState } from 'react';
 
 /**
- * Persists the user's selected "My Team" across app launches.
+ * Persists the user's selected "My Team" across app launches AND keeps
+ * every mounted consumer in sync within a session.
  *
- * Storage: a small JSON file in the app's document directory. This uses
- * `expo-file-system` which ships as part of every Expo dev client — no
- * native rebuild required to add persistence.
+ * Storage: a small JSON file in the app's document directory via
+ * `expo-file-system` (bundled with every Expo dev client — no native
+ * rebuild required).
  *
- * Storage layer is deliberately synchronous+best-effort:
- * - reads on mount, writes on every change
- * - swallows I/O errors (persistence is a nice-to-have, not a correctness
- *   requirement — worst case the user re-picks their team next launch)
+ * State model: a module-level singleton (`currentId`) with a set of
+ * subscribers. Every `useMyTeamId` call subscribes on mount and re-
+ * renders when the singleton updates, so all consumers (the team
+ * selector card, the my-team matches card, the my-team preview cards)
+ * observe the same value at the same time. Without this, each hook
+ * kept its own local `useState` copy — clearing or changing the team
+ * in one component left the others stuck on the previous value.
  *
  * When Firebase Auth lands (Phase 4), this becomes an authenticated
- * server-side preference. Interface (`[teamId, setTeamId]`) stays the same
- * so call sites don't churn.
+ * server-side preference. The `[teamId, setTeamId]` interface stays
+ * the same so call sites don't churn.
  */
 const PREF_FILE = new File(Paths.document, 'preferences.json');
 
@@ -42,27 +46,47 @@ function writePrefs(prefs: Preferences): void {
   }
 }
 
+// ─── Singleton store ────────────────────────────────────────────────────────
+//
+// One shared source of truth. Every `useMyTeamId` hook subscribes here
+// and re-renders when the value changes.
+
+type Listener = (id: string | null) => void;
+let currentId: string | null = null;
+const listeners = new Set<Listener>();
+let hydrated = false;
+
+/** Notify every subscriber of the current value. */
+function emit(): void {
+  for (const fn of listeners) fn(currentId);
+}
+
+/** Hydrate the singleton from disk on first import. Fires once — after
+ *  that, the value is source-of-truth in-memory. */
+void readPrefs().then((prefs) => {
+  currentId = prefs.myTeamId ?? null;
+  hydrated = true;
+  emit();
+});
+
 export function useMyTeamId(): [string | null, (id: string | null) => void] {
-  const [teamId, setTeamIdState] = useState<string | null>(null);
+  const [teamId, setLocal] = useState<string | null>(currentId);
 
   useEffect(() => {
-    let cancelled = false;
-    readPrefs().then((prefs) => {
-      if (!cancelled) setTeamIdState(prefs.myTeamId ?? null);
-    });
+    // Subscribe and (in case hydration finished between render + effect)
+    // re-sync to the latest singleton value.
+    listeners.add(setLocal);
+    if (hydrated) setLocal(currentId);
     return () => {
-      cancelled = true;
+      listeners.delete(setLocal);
     };
   }, []);
 
   const setTeamId = (id: string | null): void => {
-    // Optimistic UI update — write is fire-and-forget.
-    setTeamIdState(id);
-    readPrefs().then((prefs) => {
-      if (id === null) delete prefs.myTeamId;
-      else prefs.myTeamId = id;
-      writePrefs(prefs);
-    });
+    currentId = id;
+    // Persist (fire-and-forget) and notify every mounted consumer.
+    writePrefs({ myTeamId: id ?? undefined });
+    emit();
   };
 
   return [teamId, setTeamId];

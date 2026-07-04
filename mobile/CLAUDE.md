@@ -41,7 +41,8 @@ Reference pattern is a **data app, not a media app** (PRD §1) — no live video
 - **Render only what the feed supplies.** For Fixtures sub-tabs (Line-Up, per-match Stats, News) and Teams (coaching staff), render only sections the chosen feed actually provides (Phase 1 research, register #7). If a section isn't supplied, hide or gate it; **never fabricate data**.
 - **Stats screen is premium-gated** (PRD §8). The client enforces UI gating but always trusts the server's entitlement decision — never assume access.
 - **Home content blocks are undefined** (`[INPUT NEEDED #19]`) — placeholder until confirmed.
-- **Consume our own APIs only.** The client never calls a data feed directly and never holds a feed key.
+- **Consume our own APIs only.** The client never calls a data feed directly and never holds a feed key. Same rule extends to any LLM key — see the analysis-narrative spec below.
+- **Match analysis narrative is a client-side template pending Phase 6 LLM cutover.** The Analysis sub-tab on fixture-drill (`mobile/src/hooks/use-match-analysis.ts` + `mobile/src/components/match-analysis-card.tsx`) reads structured, BI-style prose from a template that implements `docs/analysis-narrative-spec.md`. That spec doc IS the LLM's future system prompt — do not let structure, tone, or style rules drift between the template and the spec. When the real LLM path lands at Phase 6, follow the cutover checklist in the spec §7 (server-side inference in personal GCP project, key in Secret Manager, delete the client-side template helpers).
 
 ---
 

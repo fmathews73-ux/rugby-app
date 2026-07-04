@@ -5,8 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Team } from '@rugby-app/shared';
 
+import { useLatestRanking } from '@/api/hooks';
+import { FormCircles } from '@/components/form-circles';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
+import { worldCupTitles } from '@/lib/world-cup-titles';
+
+const PICKER_FORM_LOOKBACK = 5;
 
 /**
  * Full-screen modal for picking a team. Default use case is picking a
@@ -49,6 +55,16 @@ export function TeamPickerModal({
     [teams],
   );
 
+  // Latest men's World Rugby snapshot — used to annotate each row with the
+  // team's current rank (`#3`). Falls back to `null` when the team isn't
+  // in the snapshot (e.g. an unranked side).
+  const rankings = useLatestRanking();
+  const rankByTeam = useMemo(() => {
+    const m = new Map<string, number>();
+    for (const row of rankings.data?.rows ?? []) m.set(row.team_id, row.rank);
+    return m;
+  }, [rankings.data]);
+
   return (
     <Modal
       visible={visible}
@@ -57,15 +73,31 @@ export function TeamPickerModal({
       onRequestClose={onCancel}>
       <SafeAreaView edges={['top', 'bottom']} style={styles.root}>
         <View style={styles.header}>
-          <Pressable onPress={onCancel} hitSlop={12}>
-            <Text style={styles.headerAction}>Cancel</Text>
+          <Pressable
+            onPress={onCancel}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Cancel">
+            <Ionicons
+              name="chevron-back"
+              size={26}
+              color={Colors.light.text}
+            />
           </Pressable>
           <Text style={styles.headerTitle}>{title}</Text>
           {/* Right slot: Clear reset button when a team is already set,
               otherwise an invisible spacer to keep the title centred. */}
           {onClear && currentTeamId ? (
-            <Pressable onPress={onClear} hitSlop={12}>
-              <Text style={styles.headerActionDestructive}>Clear</Text>
+            <Pressable
+              onPress={onClear}
+              hitSlop={12}
+              accessibilityRole="button"
+              accessibilityLabel="Clear selection">
+              <Ionicons
+                name="refresh"
+                size={26}
+                color={Colors.light.text}
+              />
             </Pressable>
           ) : (
             <View style={styles.headerActionSpacer} />
@@ -76,32 +108,16 @@ export function TeamPickerModal({
           data={sortedTeams}
           keyExtractor={(t) => t.id}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item, index }) => {
-            const isSelected = selected === item.id;
-            const isFirst = index === 0;
-            const isLast = index === sortedTeams.length - 1;
-            return (
-              <Pressable
-                onPress={() => setSelected(item.id)}
-                style={({ pressed }) => [
-                  styles.row,
-                  isFirst && styles.rowFirst,
-                  isLast && styles.rowLast,
-                  pressed && styles.rowPressed,
-                ]}>
-                <TeamFlagBall2D flagCode={item.flag_code} size={FlagSize.medium} />
-                <View style={styles.rowText}>
-                  <Text style={styles.rowName}>{item.name}</Text>
-                  <Text style={styles.rowShort}>{item.short_name}</Text>
-                </View>
-                {isSelected ? (
-                  <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
-                ) : (
-                  <View style={styles.tickPlaceholder} />
-                )}
-              </Pressable>
-            );
-          }}
+          renderItem={({ item, index }) => (
+            <TeamRow
+              team={item}
+              rank={rankByTeam.get(item.id)}
+              selected={selected === item.id}
+              onSelect={() => setSelected(item.id)}
+              isFirst={index === 0}
+              isLast={index === sortedTeams.length - 1}
+            />
+          )}
         />
 
         <View style={styles.footer}>
@@ -109,15 +125,80 @@ export function TeamPickerModal({
             onPress={() => selected && onConfirm(selected)}
             disabled={selected === null}
             style={({ pressed }) => [
-              styles.confirmButton,
-              selected === null && styles.confirmButtonDisabled,
-              pressed && styles.confirmButtonPressed,
+              styles.confirmPill,
+              selected === null && styles.confirmPillDisabled,
+              pressed && styles.confirmPillPressed,
             ]}>
-            <Text style={styles.confirmButtonText}>{confirmLabel}</Text>
+            <Text style={styles.confirmPillText}>{confirmLabel}</Text>
           </Pressable>
         </View>
       </SafeAreaView>
     </Modal>
+  );
+}
+
+/**
+ * One row in the picker list. Layout mirrors the Team Selector card on
+ * the Home page:
+ *   [flag]  CODE            [W L W W L]            [check]
+ *           #3 🏆🏆🏆
+ *
+ * `useTeamRecentForm` is called per row so each row streams its own
+ * last-5 form independently. TanStack Query dedupes the underlying
+ * fixture-result fetches with other consumers (Home selector card,
+ * per-team analytics), so overhead is minimal.
+ */
+function TeamRow({
+  team,
+  rank,
+  selected,
+  onSelect,
+  isFirst,
+  isLast,
+}: {
+  team: Team;
+  rank: number | undefined;
+  selected: boolean;
+  onSelect: () => void;
+  isFirst: boolean;
+  isLast: boolean;
+}) {
+  const { outcomes } = useTeamRecentForm(team.id, PICKER_FORM_LOOKBACK);
+  return (
+    <Pressable
+      onPress={onSelect}
+      style={({ pressed }) => [
+        styles.row,
+        isFirst && styles.rowFirst,
+        isLast && styles.rowLast,
+        pressed && styles.rowPressed,
+      ]}>
+      <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
+      <View style={styles.rowText}>
+        <Text style={styles.rowShort}>{team.short_name}</Text>
+        {rank !== undefined ? <Text style={styles.rowRank}>#{rank}</Text> : null}
+      </View>
+      <View style={styles.rowFormSlot}>
+        <FormCircles outcomes={outcomes} lookback={PICKER_FORM_LOOKBACK} />
+      </View>
+      {/* Fixed-width trophy slot renders empty for teams with no World
+          Cup titles — reserving the space keeps every row's `rowFormSlot`
+          the same flex-1 width, so the form circles land on the same
+          vertical column across every row in the list. */}
+      <View style={styles.rowTrophySlot}>
+        {worldCupTitles(team.id) > 0 ? (
+          <View style={styles.rowTrophyBadge}>
+            <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
+            <Text style={styles.rowTrophyCount}>X{worldCupTitles(team.id)}</Text>
+          </View>
+        ) : null}
+      </View>
+      {selected ? (
+        <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
+      ) : (
+        <View style={styles.tickPlaceholder} />
+      )}
+    </Pressable>
   );
 }
 
@@ -172,29 +253,77 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 12,
   },
   rowPressed: { backgroundColor: '#F3F4F6' },
-  rowText: { flex: 1, gap: 2 },
-  rowName: { fontSize: TextSize.md, fontWeight: TextWeight.semibold, color: Colors.light.text },
+  rowText: {
+    // Column stack: code on top, rank + trophy row beneath.
+    gap: 2,
+    flexShrink: 1,
+  },
+  // 3-letter team code — matches the `teamCode` treatment used in the
+  // Team Selector card and the FixtureCarouselCard hero row.
   rowShort: {
-    fontSize: TextSize.xs,
-    letterSpacing: 1,
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    fontWeight: TextWeight.semibold,
+  },
+  // Rank sits directly below the code in the text stack. No trophies
+  // here anymore — they live above the form circles in the centre.
+  rowRank: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
+  },
+  // Centre slot: form circles centred inside a flex-1 wrapper so they
+  // land at the visual midpoint of the row regardless of how wide the
+  // team-code text column is on the left.
+  rowFormSlot: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  // Fixed 40pt slot reserved on every row so the flex-1 `rowFormSlot`
+  // has a consistent width — form circles then land on the same vertical
+  // column across every row regardless of whether that row's team has
+  // any World Cup titles.
+  rowTrophySlot: {
+    width: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowTrophyBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  rowTrophyCount: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
   },
   tickPlaceholder: { width: 26, height: 26 },
 
   footer: {
-    padding: Spacing.four,
+    paddingHorizontal: Spacing.four,
+    paddingVertical: Spacing.three,
     backgroundColor: '#FFFFFF',
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E7EB',
-  },
-  confirmButton: {
-    backgroundColor: Colors.light.text,
-    paddingVertical: Spacing.three,
-    borderRadius: 12,
     alignItems: 'center',
   },
-  confirmButtonPressed: { opacity: 0.85 },
-  confirmButtonDisabled: { backgroundColor: '#9CA3AF' },
-  confirmButtonText: { color: Colors.light.textInverse, fontSize: TextSize.md, fontWeight: TextWeight.bold },
+  // Compact pill centred in the footer — the picker is primarily a
+  // tap-a-row surface, so Confirm just seals the choice. Wide
+  // "primary CTA" bar visually overweighted a secondary action.
+  confirmPill: {
+    backgroundColor: Colors.light.text,
+    paddingVertical: Spacing.two,
+    paddingHorizontal: Spacing.four,
+    borderRadius: 999,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  confirmPillPressed: { opacity: 0.85 },
+  confirmPillDisabled: { backgroundColor: '#9CA3AF' },
+  confirmPillText: { color: Colors.light.textInverse, fontSize: TextSize.sm, fontWeight: TextWeight.bold },
 });

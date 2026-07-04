@@ -16,6 +16,7 @@ import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { FixtureCarouselCard } from '@/components/fixture-carousel-card';
 import { EmptyState, LoadingState } from '@/components/state-views';
 import { Colors, Spacing } from '@/constants/theme';
+import { formatFixtureDate } from '@/lib/format-fixture-date';
 
 const CARD_GAP = 12;
 
@@ -203,7 +204,7 @@ export function FixtureCarousel() {
                 homeTeam={home}
                 awayTeam={away}
                 competition={comp}
-                dayLabel={formatDayLabel(fx.kickoff_utc)}
+                dayLabel={formatFixtureDate(fx)}
                 width={CARD_WIDTH}
               />
             </View>
@@ -223,21 +224,6 @@ export function FixtureCarousel() {
   );
 }
 
-function formatDayLabel(iso: string): string {
-  const d = new Date(iso);
-  const now = new Date();
-  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  const dDay = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const diffDays = Math.round((dDay.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
-  if (diffDays === 0) return 'Today';
-  if (diffDays === -1) return 'Yesterday';
-  if (diffDays === 1) return 'Tomorrow';
-  return d.toLocaleDateString('en-GB', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'long',
-  });
-}
 
 const styles = StyleSheet.create({
   dotsRow: {

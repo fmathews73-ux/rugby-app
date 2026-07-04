@@ -4,6 +4,7 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Defs, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -93,6 +94,8 @@ export function RankingTrajectory({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
+        ) : primaryTeam.data ? (
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
         ) : null}
       </View>
 
@@ -312,10 +315,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

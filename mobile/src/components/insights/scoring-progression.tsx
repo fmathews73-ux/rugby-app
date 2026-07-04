@@ -33,8 +33,12 @@ const CHART_W = 320;
 const CHART_H = 200;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 26;
-const PAD_LEFT = 30;
-const PAD_RIGHT = 16;
+// Symmetric 8pt horizontal padding — matches Preview's Form / Ranking
+// Trajectory `padX` so all four line charts on the fixture drill share
+// one plot-area rhythm. Y-axis point labels have been dropped to fit;
+// the header legend (`ENG 36 · FRA 28`) carries the scale context.
+const PAD_LEFT = 8;
+const PAD_RIGHT = 8;
 const PLOT_W = CHART_W - PAD_LEFT - PAD_RIGHT;
 const PLOT_H = CHART_H - PAD_TOP - PAD_BOTTOM;
 
@@ -125,7 +129,7 @@ export function ScoringProgression({
       ) : !hasScoring ? (
         <Text style={styles.empty}>No scoring events yet.</Text>
       ) : (
-        <Svg width="100%" height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
+        <Svg width="100%" height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`} preserveAspectRatio="none">
           {/* Vertical fade gradients per team — strong at the worm, zero
               at the baseline. Gradient uses objectBoundingBox coords so
               each area's fade spans its own height regardless of how
@@ -147,7 +151,9 @@ export function ScoringProgression({
           <Path d={awayAreaPathD} fill="url(#away-area-gradient)" stroke="none" />
           <Path d={homeArea} fill="url(#home-area-gradient)" stroke="none" />
 
-          {/* Y-axis gridlines + labels. */}
+          {/* Y-axis gridlines. Numeric labels dropped so the chart matches
+              the minimal-chrome Preview line charts; scale is implicit
+              via the header legend + evenly-spaced 10-pt gridlines. */}
           {yTicks.map((t) => (
             <Line
               key={`yg-${t}`}
@@ -158,18 +164,6 @@ export function ScoringProgression({
               stroke="#F3F4F6"
               strokeWidth={1}
             />
-          ))}
-          {yTicks.map((t) => (
-            <SvgText
-              key={`yl-${t}`}
-              x={PAD_LEFT - 6}
-              y={scaleY(t) + 3}
-              fontSize={9}
-              fontWeight="600"
-              fill={Colors.light.textSecondary}
-              textAnchor="end">
-              {t}
-            </SvgText>
           ))}
 
           {/* Dashed half-time vertical. */}
@@ -381,10 +375,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.three,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

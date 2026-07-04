@@ -309,7 +309,7 @@ const styles = StyleSheet.create({
     padding: Spacing.four,
     gap: Spacing.two,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

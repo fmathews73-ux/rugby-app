@@ -1,66 +1,47 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import type { Fixture } from '@rugby-app/shared';
-
 import { useTeam } from '@/api/hooks';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
-import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useMyTeamId } from '@/hooks/use-my-team-id';
+import { useTeamAggregate } from '@/hooks/use-team-aggregate';
+
+const LOOKBACK = 10;
 
 /**
- * Profile radar card. When only `primaryTeamId` is set, renders that
- * team's polygon. When a compare team is also present, a two-segment toggle
- * pill in the header (`[HOME | AWAY]`) lets the user pick which team's
- * polygon shows — one at a time, no overlay. The 50%-reference hexagon
- * shows in both modes since a single polygon needs the "vs what?" anchor.
+ * Home-page Profile radar for the user's team, aggregated over their most-
+ * recent `LOOKBACK` completed fixtures. Same 8-axis polygon (Attack /
+ * Defence / Set-piece / Discipline / Kicking / Territory / Possession /
+ * Turnovers) as the fixture-drill Insights Profile card, but scoped to
+ * the team's recent form window rather than a single 80-minute match.
  *
- * On the fixture-drill Insights tab the profile is *match-scoped* — the
- * polygon reads as the story of *this* fixture. For scheduled matches
- * there is no such story yet, so `fixtureStatus === 'scheduled'` renders
- * an empty state instead of the team's historical aggregate. Pass no
- * `fixtureStatus` (My Team on Home page) to always render the polygon
- * from whatever aggregate the caller supplies.
+ * Sits directly above the Form (last 10) sparkline so the two cards
+ * share the same lookback window — Form tells the story of the last 10
+ * results; Profile tells the story of the *shape* of those results.
+ *
+ * Returns nothing until a team is selected — [[team-selector-card]]
+ * handles the empty state.
  */
-export function InsightsCanvas({
-  primaryTeamId,
-  compareTeamId,
-  fixtureStatus,
-}: {
-  primaryTeamId: string | null;
-  compareTeamId?: string | null;
-  fixtureStatus?: Fixture['status'];
-}) {
+export function MyTeamProfileCard() {
+  const [myTeamId] = useMyTeamId();
+  if (!myTeamId) return null;
+  return <Populated teamId={myTeamId} />;
+}
+
+function Populated({ teamId }: { teamId: string }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
-
-  // Reset toggle back to the primary side whenever the compare team changes
-  // or is cleared — avoids the pill sitting on a stale "compare" selection
-  // after the user picks a different team.
-  useEffect(() => {
-    setActiveSide('primary');
-  }, [compareTeamId]);
-
-  const primaryTeam = useTeam(primaryTeamId ?? '');
-  const compareTeam = useTeam(compareTeamId ?? '');
-  const { data: primaryAgg, isLoading: primaryLoading } = useTeamAggregate(primaryTeamId ?? '');
-  const { data: compareAgg, isLoading: compareLoading } = useTeamAggregate(compareTeamId ?? '');
-
-  const primaryAxes = useMemo(() => buildRadarAxes(primaryAgg), [primaryAgg]);
-  const compareAxes = useMemo(() => buildRadarAxes(compareAgg), [compareAgg]);
-
-  const hasCompare = compareTeamId !== null && compareTeamId !== undefined && compareTeamId !== '';
-  const activeAxes = activeSide === 'primary' ? primaryAxes : compareAxes;
-  const activeAgg = activeSide === 'primary' ? primaryAgg : compareAgg;
-  const activeLoading = activeSide === 'primary' ? primaryLoading : compareLoading;
+  const primaryTeam = useTeam(teamId);
+  const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
+  const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
 
   return (
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Profile</Text>
+          <Text style={styles.sectionLabel}>Profile (last {LOOKBACK})</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -69,25 +50,16 @@ export function InsightsCanvas({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—'}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
+        {primaryTeam.data ? (
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
         ) : null}
       </View>
 
-      {fixtureStatus === 'scheduled' ? (
-        <Text style={styles.empty}>
-          Profile populates once the match is under way.
-        </Text>
-      ) : activeAgg && activeAgg.gamesPlayed > 0 ? (
-        <RadarChart axes={activeAxes} />
+      {aggregate && aggregate.gamesPlayed > 0 ? (
+        <RadarChart axes={axes} />
       ) : (
         <Text style={styles.empty}>
-          {activeLoading ? 'Loading…' : 'No completed matches to profile yet.'}
+          {isLoading ? 'Loading…' : 'Not enough completed matches yet.'}
         </Text>
       )}
 
@@ -102,13 +74,14 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Profile</Text>
+            <Text style={styles.modalTitle}>Profile (last {LOOKBACK})</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Eight-axis rugby analytics radar for the selected team. Axes cover
+            Eight-axis rugby analytics radar aggregating the team's most
+            recent {LOOKBACK} completed matches. Axes cover
             {' '}<Text style={styles.modalStrong}>Attack</Text>,
             {' '}<Text style={styles.modalStrong}>Defence</Text>,
             {' '}<Text style={styles.modalStrong}>Set-piece</Text>,
@@ -116,14 +89,15 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             {' '}<Text style={styles.modalStrong}>Kicking</Text>,
             {' '}<Text style={styles.modalStrong}>Territory</Text>,
             {' '}<Text style={styles.modalStrong}>Possession</Text>, and
-            {' '}<Text style={styles.modalStrong}>Turnovers</Text>. The dashed
-            octagon at 50% radius is the notional international average.
+            {' '}<Text style={styles.modalStrong}>Turnovers</Text>. The
+            dashed octagon at 50% radius is the notional international
+            average.
           </Text>
           <Text style={styles.modalBody}>
-            When two teams are on the page, the header carries a
-            {' '}<Text style={styles.modalStrong}>toggle pill</Text> with each
-            team's three-letter code. Tap either side to switch which polygon
-            the radar shows — one team at a time, no overlay.
+            The window mirrors the Form (last {LOOKBACK}) sparkline
+            immediately below — Form shows the sequence of results,
+            Profile shows the shape of those results across the eight
+            playing dimensions.
           </Text>
         </Pressable>
       </Pressable>

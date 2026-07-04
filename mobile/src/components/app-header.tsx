@@ -109,11 +109,7 @@ const styles = StyleSheet.create({
     // Normal weight — lets the "RUGBY" mark carry the visual heft while
     // the IQ superscript reads as a lighter tagline / descriptor.
     fontWeight: TextWeight.regular,
-    // Brand accent green. Matches the app's positive-outcome / leader
-    // token (`#059669`, emerald-600) already used across charts + Stats
-    // bars, so the wordmark accent is not a new colour introduction —
-    // it locks the existing accent into the brand mark.
-    color: '#059669',
+    color: Colors.light.text,
     // Small nudge down so IQ's cap-line aligns near the cap-line of
     // RUGBY rather than sitting flush at the very top of the row.
     marginTop: 1,

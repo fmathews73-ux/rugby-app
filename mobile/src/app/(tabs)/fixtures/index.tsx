@@ -179,8 +179,15 @@ export default function FixturesScreen() {
   // Every tap of the Fixtures tab icon — including when the tab is already
   // focused — snaps back to the most-recent-completed day-card. Consistent
   // resolve-to landmark for Fixtures matching Home's scroll-to-top.
+  //
+  // Since Fixtures now lives inside its own nested `<Stack>` (so fixture
+  // detail can push while keeping the AppHeader + tab bar), the local
+  // `useNavigation()` returns that Stack — which doesn't emit `tabPress`.
+  // Walk up to the parent Tabs navigator to receive the event.
   useEffect(() => {
-    const unsub = navigation.addListener('tabPress' as never, () => {
+    const parent = navigation.getParent();
+    if (!parent) return;
+    const unsub = parent.addListener('tabPress' as never, () => {
       scrollToMostRecentCompleted(true);
     });
     return unsub;
@@ -354,10 +361,11 @@ const styles = StyleSheet.create({
   pickerWrap: {
     // 16pt wrap + CompetitionPicker's 24pt inner = 40pt total, matching
     // the card column's `HORIZONTAL_MARGIN` so the first pill sits flush
-    // with the card left edge below.
+    // with the card left edge below. Vertical padding halved so the
+    // pills sit tight to the AppHeader's bottom edge.
     paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.four,
-    paddingBottom: Spacing.three,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.two,
   },
   listContent: {
     paddingHorizontal: HORIZONTAL_MARGIN,
@@ -373,7 +381,7 @@ const styles = StyleSheet.create({
     // No inner padding on the card itself — the header + rows own their own
     // padding so the row divider hairlines can span the full card width.
     shadowColor: '#000',
-    shadowOpacity: 0.05,
+    shadowOpacity: 0.06,
     shadowRadius: 8,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

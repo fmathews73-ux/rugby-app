@@ -8,6 +8,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import {
   formPointsFor,
@@ -122,6 +123,12 @@ export function ExtendedMomentum({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
+        ) : primaryTeam.data ? (
+          // Single-team mode (Home page) — anchor the header with the
+          // team's flag on the right corner so the card identifies its
+          // subject at a glance. FlagSize.row (24pt) is our smallest
+          // defined size — passing 16pt inline for an "xs" mini flag.
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={16} />
         ) : null}
       </View>
 
@@ -289,10 +296,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
-    padding: Spacing.four,
+    padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
-    shadowOpacity: 0.04,
+    shadowOpacity: 0.05,
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 2 },
     elevation: 1,

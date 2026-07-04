@@ -4,8 +4,10 @@ import { ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { FixtureCarousel } from '@/components/fixture-carousel';
-import { MyTeamCard } from '@/components/my-team-card';
+import { MyTeamMatchesCard } from '@/components/my-team-matches-card';
+import { MyTeamPreviewCards } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
+import { TeamSelectorCard } from '@/components/team-selector-card';
 import { Spacing } from '@/constants/theme';
 
 /**
@@ -48,10 +50,13 @@ export default function HomeScreen() {
 
       <ScrollView
         ref={scrollRef}
+        style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}>
         <FixtureCarousel />
-        <MyTeamCard />
+        <TeamSelectorCard />
+        <MyTeamMatchesCard />
+        <MyTeamPreviewCards />
       </ScrollView>
     </SafeAreaView>
   );
@@ -62,12 +67,14 @@ const styles = StyleSheet.create({
   // their own solid-white fill so the gradient reads as the *page*
   // background, not a card background.
   safe: { flex: 1, backgroundColor: 'transparent' },
+  scrollView: { backgroundColor: 'transparent' },
   scrollContent: {
-    paddingTop: Spacing.four,
-    // No paddingBottom — cards scroll flush against the tab bar's opaque
-    // white background, disappearing behind it the same way they disappear
-    // behind the header at the top.
-    paddingBottom: 0,
+    // Matches the tightened Fixtures pickerWrap top-padding — hero card
+    // sits close to the AppHeader's bottom hairline.
+    paddingTop: Spacing.two,
+    // Breathing room between the last card and the tab bar when the
+    // ScrollView is scrolled to the very bottom.
+    paddingBottom: Spacing.four,
     // Inter-card gap matches the `paddingTop` inside each carousel's dotsRow
     // (Spacing.three = 16pt) so dots feel equally padded above and below.
     // Changing this in one place keeps that symmetry consistent for all cards.
