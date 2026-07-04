@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 
@@ -7,7 +7,6 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 // Rugby playing field is 100m × 70m; using a 10:7 viewBox so measurements
 // map linearly. Try lines sit on the left/right edges (x=0 and x=PITCH_W);
@@ -21,13 +20,23 @@ const PITCH_H = 350;
 const GRID_COLS = 20;
 const GRID_ROWS = 14;
 
-const HEAT_COLOR = '#DC2626';
+// Team-colour convention shared with the Momentum, Profile and Scoring
+// Progression cards: home = blue family, away = purple family. Heat
+// uses the FILL tokens (light shades) so overlap regions blend into a
+// deeper contested colour rather than clashing at full saturation.
+const HOME_HEAT = '#93C5FD';
+const AWAY_HEAT = '#C4B5FD';
 
 /**
- * Pitch heatmap card. Renders a top-down rugby field with a kernel-
- * smoothed density overlay of one team's positional events (carries +
- * scoring). Match-scoped: reads from this fixture's events only. Toggle
- * pill in the header switches between home and away.
+ * Pitch heatmap card. Renders a top-down rugby field with kernel-smoothed
+ * density overlays of both teams' positional events (carries + scoring)
+ * on the same canvas. Home heat lifts in light blue, away heat lifts in
+ * light purple; where both teams contested the same zone the two heats
+ * naturally blend into a darker mixed colour.
+ *
+ * Match-scoped: reads from this fixture's events only. Both teams' heats
+ * are normalised against a shared max so density scales stay directly
+ * comparable.
  */
 export function PitchHeatmap({
   fixtureId,
@@ -41,35 +50,44 @@ export function PitchHeatmap({
   fixtureStatus?: Fixture['status'];
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
-
-  useEffect(() => {
-    setActiveSide('primary');
-  }, [awayTeamId]);
-
   const events = useFixtureEvents(fixtureId, fixtureStatus);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
 
-  const activeTeamId = activeSide === 'primary' ? homeTeamId : awayTeamId;
-
-  // Events that carry positional data and belong to the active team.
-  const heatEvents = useMemo(() => {
+  // Both teams' positional events extracted in one pass, split by side.
+  const { homeEvents, awayEvents } = useMemo(() => {
     const src = events.data ?? [];
-    return src.filter(
-      (e) => e.team_id === activeTeamId && typeof e.x === 'number' && typeof e.y === 'number',
-    );
-  }, [events.data, activeTeamId]);
+    const home: MatchEvent[] = [];
+    const away: MatchEvent[] = [];
+    for (const e of src) {
+      if (typeof e.x !== 'number' || typeof e.y !== 'number') continue;
+      if (e.team_id === homeTeamId) home.push(e);
+      else if (e.team_id === awayTeamId) away.push(e);
+    }
+    return { homeEvents: home, awayEvents: away };
+  }, [events.data, homeTeamId, awayTeamId]);
 
-  const smoothed = useMemo(() => buildSmoothedGrid(heatEvents), [heatEvents]);
+  const homeGrid = useMemo(() => buildSmoothedGrid(homeEvents), [homeEvents]);
+  const awayGrid = useMemo(() => buildSmoothedGrid(awayEvents), [awayEvents]);
+
+  // Single max across both grids so heat intensity reads consistently
+  // between the two sides — a team with genuinely denser attacking play
+  // shows genuinely brighter heat.
   const maxDensity = useMemo(() => {
     let m = 0;
-    for (const row of smoothed) for (const v of row) if (v > m) m = v;
+    for (const row of homeGrid) for (const v of row) if (v > m) m = v;
+    for (const row of awayGrid) for (const v of row) if (v > m) m = v;
     return m;
-  }, [smoothed]);
+  }, [homeGrid, awayGrid]);
 
   const cellW = PITCH_W / GRID_COLS;
   const cellH = PITCH_H / GRID_ROWS;
+
+  const homeShort = homeTeam.data?.short_name ?? homeTeamId.toUpperCase();
+  const awayShort = awayTeam.data?.short_name ?? awayTeamId.toUpperCase();
+
+  const isLoading = events.isLoading && homeEvents.length === 0 && awayEvents.length === 0;
+  const hasData = homeEvents.length > 0 || awayEvents.length > 0;
 
   return (
     <View style={styles.card}>
@@ -84,17 +102,24 @@ export function PitchHeatmap({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        <TeamToggle
-          primaryLabel={homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
-          compareLabel={awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
-          activeSide={activeSide}
-          onSelect={setActiveSide}
-        />
+        {/* Colour-swatch legend matches the Momentum / Progression /
+            Profile cards. Both teams shown simultaneously so there's no
+            toggle to drive. */}
+        <View style={styles.legend}>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendSwatch, { backgroundColor: HOME_HEAT }]} />
+            <Text style={styles.legendText}>{homeShort}</Text>
+          </View>
+          <View style={styles.legendItem}>
+            <View style={[styles.legendSwatch, { backgroundColor: AWAY_HEAT }]} />
+            <Text style={styles.legendText}>{awayShort}</Text>
+          </View>
+        </View>
       </View>
 
-      {events.isLoading && heatEvents.length === 0 ? (
+      {isLoading ? (
         <Text style={styles.empty}>Loading…</Text>
-      ) : heatEvents.length === 0 ? (
+      ) : !hasData ? (
         <Text style={styles.empty}>No positional data yet.</Text>
       ) : (
         <Svg
@@ -102,15 +127,18 @@ export function PitchHeatmap({
           height={PITCH_H * 0.55}
           viewBox={`0 0 ${PITCH_W} ${PITCH_H}`}
           preserveAspectRatio="xMidYMid meet">
-          {/* Pitch canvas — subtle green wash. */}
-          <Rect x={0} y={0} width={PITCH_W} height={PITCH_H} fill="#F0F7EF" />
+          {/* Neutral pitch canvas — matches the flat page-background
+              tone used across the Insights tab rather than the
+              broadcast-green wash. Heat colours pop cleanly against it. */}
+          <Rect x={0} y={0} width={PITCH_W} height={PITCH_H} fill="#FAFAFA" />
 
-          {/* Heatmap cells first so the pitch markings sit on top and
-              stay readable. */}
-          {smoothed.flatMap((row, r) =>
+          {/* Home team heat — rendered first so away heat blends over
+              the top of it. Overlap regions where both teams contested
+              the same zone naturally mix into a deeper composite colour. */}
+          {homeGrid.flatMap((row, r) =>
             row.map((v, c) => {
               if (v <= 0.01) return null;
-              const alpha = Math.min(0.75, (v / (maxDensity || 1)) * 0.75);
+              const alpha = Math.min(0.7, (v / (maxDensity || 1)) * 0.7);
               return (
                 <Rect
                   key={`h-${r}-${c}`}
@@ -118,31 +146,51 @@ export function PitchHeatmap({
                   y={r * cellH}
                   width={cellW}
                   height={cellH}
-                  fill={HEAT_COLOR}
+                  fill={HOME_HEAT}
                   opacity={alpha}
                 />
               );
             }),
           )}
 
-          {/* Pitch markings — outer border, try lines, halfway (dashed),
-              two 22m lines. Kept subtle so the heat reads first. */}
+          {/* Away team heat overlaid on top of home. */}
+          {awayGrid.flatMap((row, r) =>
+            row.map((v, c) => {
+              if (v <= 0.01) return null;
+              const alpha = Math.min(0.7, (v / (maxDensity || 1)) * 0.7);
+              return (
+                <Rect
+                  key={`a-${r}-${c}`}
+                  x={c * cellW}
+                  y={r * cellH}
+                  width={cellW}
+                  height={cellH}
+                  fill={AWAY_HEAT}
+                  opacity={alpha}
+                />
+              );
+            }),
+          )}
+
+          {/* Pitch markings — outer border, 22m lines, halfway (dashed).
+              Same medium grey used for structural axis lines on the
+              Momentum / Progression charts so all Insights viz share
+              one line-weight and colour system. */}
           <Rect
             x={0}
             y={0}
             width={PITCH_W}
             height={PITCH_H}
             fill="none"
-            stroke="#94A3B8"
+            stroke="#9CA3AF"
             strokeWidth={1}
           />
-          {/* 22m lines (22% and 78% of pitch length). */}
           <Line
             x1={PITCH_W * 0.22}
             y1={0}
             x2={PITCH_W * 0.22}
             y2={PITCH_H}
-            stroke="#94A3B8"
+            stroke="#9CA3AF"
             strokeWidth={1}
           />
           <Line
@@ -150,28 +198,20 @@ export function PitchHeatmap({
             y1={0}
             x2={PITCH_W * 0.78}
             y2={PITCH_H}
-            stroke="#94A3B8"
+            stroke="#9CA3AF"
             strokeWidth={1}
           />
-          {/* Halfway line — dashed. */}
           <Line
             x1={PITCH_W * 0.5}
             y1={0}
             x2={PITCH_W * 0.5}
             y2={PITCH_H}
-            stroke="#94A3B8"
+            stroke="#9CA3AF"
             strokeWidth={1}
             strokeDasharray="4 4"
           />
         </Svg>
       )}
-
-      {/* Direction annotation — the team's attacking direction. */}
-      {heatEvents.length > 0 ? (
-        <Text style={styles.directionMeta}>
-          {activeSide === 'primary' ? 'Attacks →' : '← Attacks'}
-        </Text>
-      ) : null}
 
       <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
     </View>
@@ -232,19 +272,20 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Top-down view of the pitch showing where the selected team's
-            positional events landed — carries and scoring events with
-            recorded coordinates. Denser blue = more of that team's play
-            happened there.
+            Top-down view of the pitch showing where each team's positional
+            events landed (carries and scoring events with recorded
+            coordinates). Home heat lifts in light blue, away heat lifts in
+            light purple; where the two contested the same zone the
+            colours blend into a deeper composite.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
             Home attacks left-to-right by convention, away right-to-left.
-            Heat concentrated in the opposition 22 (near the far try line)
-            signals a team that spent the match camped in attacking
-            territory; heat clustered in the team's own half reads as
-            defensive absorption. The two 22-metre lines and the halfway
-            line are marked as reference stripes on the pitch.
+            Heat concentrated in a team's attacking 22 (the far try-line
+            end) signals a match spent camped in opposition territory;
+            heat clustered in the team's own half reads as defensive
+            absorption. The two 22-metre lines and the halfway (dashed)
+            are marked as reference stripes on the pitch.
           </Text>
         </Pressable>
       </Pressable>
@@ -283,11 +324,28 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
-  directionMeta: {
+  // Legend styling matches Momentum, Progression and Profile — one
+  // grammar across every Insights card.
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendSwatch: {
+    width: 10,
+    height: 3,
+    borderRadius: 1,
+  },
+  legendText: {
     fontSize: TextSize.xs,
-    color: Colors.light.textSecondary,
-    letterSpacing: TextTracking.wide,
-    textAlign: 'center',
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.text,
+    fontVariant: ['tabular-nums'],
   },
   empty: {
     fontSize: TextSize.sm,

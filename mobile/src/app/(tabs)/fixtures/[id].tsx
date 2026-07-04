@@ -1296,26 +1296,33 @@ function InsightsPane({
         compareTeamId={awayTeamId}
         fixtureStatus={fixtureStatus}
       />
-      {/* Combined points pattern — scoring above the axis, concession
-          below. Match-scoped via `fixtureId`, so both series come from
-          this fixture's events only. Toggle pill switches home/away. */}
+      {/* Momentum — mirrored area chart. Home team lifts above the zero
+          baseline in light blue, away drops below in light purple.
+          Rolling 10-minute scoring density per side across the 80'
+          match canvas, with KO / HT / FT milestone verticals. Paired
+          adjacent to Scoring Progression below so the reader can compare
+          in-match INITIATIVE (this card) with in-match RESULT (below). */}
       <CombinedPointsPattern
         fixtureId={fixtureId}
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
       />
-      {/* Pitch heatmap — density of the active team's positional events
-          (carries + scoring) on a top-down pitch. Match-scoped. */}
-      <PitchHeatmap
+      {/* Scoring progression — broadcast-worm cumulative-points chart.
+          Both team lines overlaid so the story (leads, comebacks, lead
+          changes) reads directly from where the worms cross. Sits
+          directly after Momentum since both are temporal match-flow
+          cards on the same 0..80' axis. */}
+      <ScoringProgression
         fixtureId={fixtureId}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}
         fixtureStatus={fixtureStatus}
       />
-      {/* Scoring progression — broadcast-worm cumulative-points chart.
-          Both team lines overlaid so the story (leads, comebacks, lead
-          changes) reads directly from where the worms cross. */}
-      <ScoringProgression
+      {/* Pitch heatmap — density of the active team's positional events
+          (carries + scoring) on a top-down pitch. Match-scoped. Closes
+          the Insights pane as the spatial detail card — the "where"
+          after the "who / when / result" story above. */}
+      <PitchHeatmap
         fixtureId={fixtureId}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}

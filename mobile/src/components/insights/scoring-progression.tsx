@@ -15,14 +15,16 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 
-// Two-team overlay colours. Home keeps the canonical dark-grey chart line
-// used by every single-line chart in the app (Form, Trajectory, Momentum);
-// away picks up the same blue as the Profile radar polygon so the second
-// team is always the same colour anywhere two teams share a chart.
-const HOME_LINE = CHART_LINE_COLOR;
-const AWAY_LINE = '#3B82F6';
+// Match-scoped team-colour convention shared with the Momentum card and
+// the Profile radar: home = blue family, away = purple family. Strokes
+// use the strong LINE tokens; the header legend swatches and the area
+// fill gradients use the softer FILL tokens so the chip and halo
+// colours read as the polygon body rather than the darker outline.
+const HOME_LINE = '#3B82F6';
+const HOME_FILL = '#93C5FD';
+const AWAY_LINE = '#8B5CF6';
+const AWAY_FILL = '#C4B5FD';
 
 const FULL_TIME_MIN = 80;
 const HALF_TIME_MIN = 40;
@@ -110,15 +112,15 @@ export function ScoringProgression({
         </View>
         <View style={styles.legend}>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: HOME_LINE }]} />
+            <View style={[styles.legendSwatch, { backgroundColor: HOME_FILL }]} />
             <Text style={styles.legendText}>
-              {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()} {homeFinal}
+              {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
             </Text>
           </View>
           <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: AWAY_LINE }]} />
+            <View style={[styles.legendSwatch, { backgroundColor: AWAY_FILL }]} />
             <Text style={styles.legendText}>
-              {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()} {awayFinal}
+              {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
             </Text>
           </View>
         </View>
@@ -166,16 +168,17 @@ export function ScoringProgression({
             />
           ))}
 
-          {/* Dashed half-time vertical. */}
+          {/* Dashed half-time vertical. Lightened to match the Momentum
+              chart's baseline treatment so structural axis lines carry
+              the same visual weight across both charts. */}
           <Line
             x1={scaleX(HALF_TIME_MIN)}
             x2={scaleX(HALF_TIME_MIN)}
             y1={PAD_TOP}
             y2={PAD_TOP + PLOT_H}
-            stroke={Colors.light.textSecondary}
+            stroke="#9CA3AF"
             strokeWidth={1}
             strokeDasharray="3,3"
-            opacity={0.5}
           />
           <SvgText
             x={scaleX(HALF_TIME_MIN)}
@@ -187,15 +190,17 @@ export function ScoringProgression({
             HT
           </SvgText>
 
-          {/* X-axis labels. */}
+          {/* X-axis labels. Lighter tint and weight so the axis reads
+              as a quiet baseline rather than a heavy strip along the
+              bottom of the chart. */}
           {xTicks.map((t) => (
             <SvgText
               key={`xl-${t}`}
               x={scaleX(t)}
               y={CHART_H - PAD_BOTTOM + 14}
               fontSize={9}
-              fontWeight="600"
-              fill={Colors.light.textSecondary}
+              fontWeight="500"
+              fill="#9CA3AF"
               textAnchor="middle">
               {t === FULL_TIME_MIN ? "80'" : `${t}'`}
             </SvgText>

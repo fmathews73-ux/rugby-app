@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
@@ -7,20 +7,24 @@ import type { Fixture } from '@rugby-app/shared';
 import { useTeam } from '@/api/hooks';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
-import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
-import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import {
+  RADAR_AWAY_FILL,
+  RADAR_FILL,
+  RadarChart,
+  buildRadarAxes,
+} from '@/components/insights/radar-chart';
 
 /**
  * Profile radar card. When only `primaryTeamId` is set, renders that
- * team's polygon. When a compare team is also present, a two-segment toggle
- * pill in the header (`[HOME | AWAY]`) lets the user pick which team's
- * polygon shows — one at a time, no overlay. The 50%-reference hexagon
- * shows in both modes since a single polygon needs the "vs what?" anchor.
+ * team's polygon over the 50%-reference hexagon. When a compare team is
+ * also present, BOTH polygons are overlaid on the same axes — primary
+ * (home) in blue, compare (away) in purple. The two team polygons act
+ * as each other's reference, so the 50%-hexagon is dropped in that mode.
  *
  * On the fixture-drill Insights tab the profile is *match-scoped* — the
- * polygon reads as the story of *this* fixture. For scheduled matches
+ * polygons read as the story of *this* fixture. For scheduled matches
  * there is no such story yet, so `fixtureStatus === 'scheduled'` renders
- * an empty state instead of the team's historical aggregate. Pass no
+ * an empty state instead of the teams' historical aggregate. Pass no
  * `fixtureStatus` (My Team on Home page) to always render the polygon
  * from whatever aggregate the caller supplies.
  */
@@ -34,14 +38,6 @@ export function InsightsCanvas({
   fixtureStatus?: Fixture['status'];
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
-
-  // Reset toggle back to the primary side whenever the compare team changes
-  // or is cleared — avoids the pill sitting on a stale "compare" selection
-  // after the user picks a different team.
-  useEffect(() => {
-    setActiveSide('primary');
-  }, [compareTeamId]);
 
   const primaryTeam = useTeam(primaryTeamId ?? '');
   const compareTeam = useTeam(compareTeamId ?? '');
@@ -52,9 +48,13 @@ export function InsightsCanvas({
   const compareAxes = useMemo(() => buildRadarAxes(compareAgg), [compareAgg]);
 
   const hasCompare = compareTeamId !== null && compareTeamId !== undefined && compareTeamId !== '';
-  const activeAxes = activeSide === 'primary' ? primaryAxes : compareAxes;
-  const activeAgg = activeSide === 'primary' ? primaryAgg : compareAgg;
-  const activeLoading = activeSide === 'primary' ? primaryLoading : compareLoading;
+  const primaryReady = Boolean(primaryAgg && primaryAgg.gamesPlayed > 0);
+  const compareReady = Boolean(compareAgg && compareAgg.gamesPlayed > 0);
+  const canRender = hasCompare ? primaryReady || compareReady : primaryReady;
+  const isLoading = primaryLoading || (hasCompare && compareLoading);
+
+  const primaryShort = primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—';
+  const compareShort = compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase();
 
   return (
     <View style={styles.card}>
@@ -69,13 +69,19 @@ export function InsightsCanvas({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
+        {/* Legend replaces the old team toggle. Two colour-swatch chips
+            identify which polygon belongs to which side, matching the
+            treatment used on the Momentum card so the team-colour
+            convention is consistent across the Insights tab. */}
+        {/* Legend swatches use the polygon FILL tokens (light shades)
+            so the chip colour reads as the polygon body colour rather
+            than the darker stroke — matches what the eye actually sees
+            in the chart. */}
         {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—'}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
+          <View style={styles.legend}>
+            <LegendChip label={primaryShort} color={RADAR_FILL} />
+            <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
+          </View>
         ) : null}
       </View>
 
@@ -83,20 +89,44 @@ export function InsightsCanvas({
         <Text style={styles.empty}>
           Profile populates once the match is under way.
         </Text>
-      ) : activeAgg && activeAgg.gamesPlayed > 0 ? (
-        <RadarChart axes={activeAxes} />
+      ) : canRender ? (
+        // Both team polygons overlaid when a compare team is set — no
+        // toggle needed. Home page single-team mode (no compareTeamId)
+        // renders the primary polygon only against the 50%-reference
+        // hexagon.
+        <RadarChart
+          axes={primaryReady ? primaryAxes : compareAxes}
+          compareAxes={hasCompare && primaryReady && compareReady ? compareAxes : null}
+        />
       ) : (
         <Text style={styles.empty}>
-          {activeLoading ? 'Loading…' : 'No completed matches to profile yet.'}
+          {isLoading ? 'Loading…' : 'No completed matches to profile yet.'}
         </Text>
       )}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
+      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} hasCompare={hasCompare} />
     </View>
   );
 }
 
-function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+function LegendChip({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={styles.legendChip}>
+      <View style={[styles.legendSwatch, { backgroundColor: color }]} />
+      <Text style={styles.legendLabel}>{label}</Text>
+    </View>
+  );
+}
+
+function InfoModal({
+  visible,
+  onClose,
+  hasCompare,
+}: {
+  visible: boolean;
+  onClose: () => void;
+  hasCompare: boolean;
+}) {
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
@@ -108,7 +138,7 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Eight-axis rugby analytics radar for the selected team. Axes cover
+            Eight-axis rugby analytics radar. Axes cover
             {' '}<Text style={styles.modalStrong}>Attack</Text>,
             {' '}<Text style={styles.modalStrong}>Defence</Text>,
             {' '}<Text style={styles.modalStrong}>Set-piece</Text>,
@@ -116,15 +146,25 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             {' '}<Text style={styles.modalStrong}>Kicking</Text>,
             {' '}<Text style={styles.modalStrong}>Territory</Text>,
             {' '}<Text style={styles.modalStrong}>Possession</Text>, and
-            {' '}<Text style={styles.modalStrong}>Turnovers</Text>. The dashed
-            octagon at 50% radius is the notional international average.
+            {' '}<Text style={styles.modalStrong}>Turnovers</Text>.
           </Text>
-          <Text style={styles.modalBody}>
-            When two teams are on the page, the header carries a
-            {' '}<Text style={styles.modalStrong}>toggle pill</Text> with each
-            team's three-letter code. Tap either side to switch which polygon
-            the radar shows — one team at a time, no overlay.
-          </Text>
+          {hasCompare ? (
+            <Text style={styles.modalBody}>
+              Both team polygons are drawn on the same axes:
+              {' '}<Text style={styles.modalStrong}>home</Text> in blue,
+              {' '}<Text style={styles.modalStrong}>away</Text> in purple.
+              Overlap regions naturally darken through blending, so the
+              shape gaps between the two sides (the axes where one team's
+              polygon reaches further than the other's) tell the profile
+              story at a glance.
+            </Text>
+          ) : (
+            <Text style={styles.modalBody}>
+              The dashed octagon at 50% radius is the notional
+              international average — the team's polygon reaching outside
+              means above average on that axis, inside means below.
+            </Text>
+          )}
         </Pressable>
       </Pressable>
     </Modal>
@@ -161,6 +201,27 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
+  },
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  legendChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  legendSwatch: {
+    width: 10,
+    height: 10,
+    borderRadius: 2,
+  },
+  legendLabel: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
   },
   empty: {
     fontSize: TextSize.sm,

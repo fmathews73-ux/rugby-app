@@ -12,7 +12,15 @@ import type { TeamAggregate } from '@/hooks/use-team-aggregate';
 // Team polygon rendered in a light blue for a distinct BI treatment on the
 // Team Profile card — visually separates the "shape of the team" from the
 // dark text-token used for numeric readouts elsewhere in the app.
+//
+// When the compare (away) team is active on the Profile card, callers
+// pass the `RADAR_AWAY_*` tokens instead to keep the away-team colour
+// convention consistent with the Momentum card (home = blue family,
+// away = purple family across every match-scoped BI chart).
 export const RADAR_COLOR = '#3B82F6';
+export const RADAR_FILL = '#93C5FD';
+export const RADAR_AWAY_COLOR = '#8B5CF6';
+export const RADAR_AWAY_FILL = '#C4B5FD';
 export const REFERENCE_COLOR = Colors.light.textSecondary;
 
 export interface RadarAxis {
@@ -148,9 +156,24 @@ function smoothClosedPath(points: readonly { x: number; y: number }[]): string {
 export function RadarChart({
   axes,
   compareAxes,
+  strokeColor = RADAR_COLOR,
+  fillColor = RADAR_FILL,
+  compareStrokeColor = RADAR_AWAY_COLOR,
+  compareFillColor = RADAR_AWAY_FILL,
 }: {
   axes: readonly RadarAxis[];
   compareAxes?: readonly RadarAxis[] | null;
+  /** Primary polygon stroke + dot colour. Defaults to home-blue. */
+  strokeColor?: string;
+  /** Primary polygon fill colour. Defaults to the home-blue fill token. */
+  fillColor?: string;
+  /** Compare-team polygon stroke + dot colour. Defaults to away-purple.
+   *  Only used when `compareAxes` is supplied. */
+  compareStrokeColor?: string;
+  /** Compare-team polygon fill colour. Defaults to the away-purple
+   *  fill token. Rendered with the same opacity as the primary fill so
+   *  overlap regions naturally darken via blending. */
+  compareFillColor?: string;
 }) {
   // Radar geometry — grown 30% from the original 260×240 / r=82 layout so
   // the hexagon dominates the Team Profile card rather than sitting in the
@@ -196,7 +219,7 @@ export function RadarChart({
             points={pts}
             fill="none"
             stroke="#F3F4F6"
-            strokeWidth={0.8}
+            strokeWidth={1}
           />
         );
       })}
@@ -210,10 +233,12 @@ export function RadarChart({
             x2={end.x}
             y2={end.y}
             stroke="#F3F4F6"
-            strokeWidth={0.8}
+            strokeWidth={1}
           />
         );
       })}
+      {/* 50%-reference hexagon only shows in single-team mode. In
+          two-team overlay mode the second polygon IS the reference. */}
       {!comparePath ? (
         <Polygon
           points={referencePoints}
@@ -223,29 +248,33 @@ export function RadarChart({
           strokeDasharray="3 3"
         />
       ) : null}
+      {/* Compare-team polygon (away, purple). Drawn BEFORE the primary
+          polygon so that where the two overlap, the primary sits on top
+          and the fill blend darkens naturally rather than one team's
+          fill masking the other. */}
       {comparePath ? (
         <Path
           d={comparePath}
-          fill="none"
-          stroke={REFERENCE_COLOR}
+          fill={compareFillColor}
+          fillOpacity={0.35}
+          stroke={compareStrokeColor}
           strokeWidth={1}
-          strokeDasharray="3 3"
         />
       ) : null}
       <Path
         d={teamPath}
-        fill={RADAR_COLOR}
-        fillOpacity={0.12}
-        stroke={RADAR_COLOR}
+        fill={fillColor}
+        fillOpacity={0.35}
+        stroke={strokeColor}
         strokeWidth={1}
       />
       {compareAxes?.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={2} fill={REFERENCE_COLOR} />;
+        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={2} fill={compareStrokeColor} />;
       })}
       {axes.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={i} cx={p.x} cy={p.y} r={2} fill={RADAR_COLOR} />;
+        return <Circle key={i} cx={p.x} cy={p.y} r={2} fill={strokeColor} />;
       })}
       {axes.map((ax, i) => {
         const labelP = pointOn(i, r + 16);

@@ -1,86 +1,59 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useEffect, useMemo, useState } from 'react';
+import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop, Text as SvgText } from 'react-native-svg';
+import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
-import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { useFixture, useTeam } from '@/api/hooks';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import {
+  fixtureHasMomentum,
+  momentumTotalMinutes,
+  momentumWindowMinutes,
+  useMatchMomentumTimeline,
+  type MomentumSample,
+} from '@/hooks/use-match-momentum-timeline';
+import { smoothLinePath } from '@/lib/smooth-path';
 
-import { useTeam } from '@/api/hooks';
-import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useMatchPointsPattern } from '@/hooks/use-match-points-pattern';
-import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
-import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-
-const SCORED_COLOR = '#059669';
-const CONCEDED_COLOR = StatusColor.live;
+// Team colour tokens for the momentum mirror. Home = light blue family,
+// Away = light purple family. The line uses the strong hue, the fill
+// uses the light hue with a vertical fade toward the zero baseline.
+const HOME_LINE = '#3B82F6';
+const HOME_FILL = '#93C5FD';
+const AWAY_LINE = '#8B5CF6';
+const AWAY_FILL = '#C4B5FD';
 
 /**
- * Combined Momentum — one chart with scoring bars above the x-axis
- * (green, positive %) and conceded bars below (red, negative %) for each
- * 20-minute block. Replaces the two separate scoring/concession cards
- * with a single symmetric read: net momentum per quarter at a glance.
+ * Momentum — mirrored area chart showing the rolling scoring density
+ * for each side across the full 80-minute match. Home team's line lifts
+ * above the zero baseline in light blue; away team's line drops below
+ * in light purple. Vertical dashed lines mark KO / HT / FT.
  *
- * When `fixtureId` is supplied, both series are computed from just that
- * fixture's events. Otherwise, both are averaged across the team's
- * completed matches.
+ * The metric per minute t is the sum of points scored in the trailing
+ * `momentumWindowMinutes()` window — a stable "how much scoring is
+ * happening now" read that responds to bursts without flapping on
+ * single events. See `use-match-momentum-timeline.ts`.
+ *
+ * Match-scoped only. Scheduled fixtures render an empty state.
  */
 export function CombinedPointsPattern({
-  teamId,
-  compareTeamId,
   fixtureId,
+  homeTeamId,
+  awayTeamId,
 }: {
-  teamId: string;
-  compareTeamId?: string | null;
-  fixtureId?: string;
+  fixtureId: string;
+  homeTeamId: string;
+  awayTeamId: string;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
-  const isMatchMode = Boolean(fixtureId);
+  const fixture = useFixture(fixtureId);
+  const homeTeam = useTeam(homeTeamId);
+  const awayTeam = useTeam(awayTeamId);
+  const { samples, maxAbs, effectiveMinute, isLoading, hasData } =
+    useMatchMomentumTimeline(fixtureId, homeTeamId, awayTeamId);
 
-  useEffect(() => {
-    setActiveSide('primary');
-  }, [compareTeamId]);
-
-  const primaryTeam = useTeam(teamId);
-  const compareTeam = useTeam(compareTeamId ?? '');
-
-  // Both hooks always called (rules-of-hooks). Empty ids no-op safely so
-  // only the active mode fetches real data.
-  const primaryScoredAgg = useTeamPointsPattern(isMatchMode ? '' : teamId, 'scored');
-  const primaryConcededAgg = useTeamPointsPattern(isMatchMode ? '' : teamId, 'conceded');
-  const compareScoredAgg = useTeamPointsPattern(
-    isMatchMode ? '' : (compareTeamId ?? ''),
-    'scored',
-  );
-  const compareConcededAgg = useTeamPointsPattern(
-    isMatchMode ? '' : (compareTeamId ?? ''),
-    'conceded',
-  );
-  const primaryScoredMatch = useMatchPointsPattern(fixtureId ?? '', teamId, 'scored');
-  const primaryConcededMatch = useMatchPointsPattern(fixtureId ?? '', teamId, 'conceded');
-  const compareScoredMatch = useMatchPointsPattern(fixtureId ?? '', compareTeamId ?? '', 'scored');
-  const compareConcededMatch = useMatchPointsPattern(
-    fixtureId ?? '',
-    compareTeamId ?? '',
-    'conceded',
-  );
-
-  const scored = activeSide === 'primary'
-    ? (isMatchMode ? primaryScoredMatch : primaryScoredAgg)
-    : (isMatchMode ? compareScoredMatch : compareScoredAgg);
-  const conceded = activeSide === 'primary'
-    ? (isMatchMode ? primaryConcededMatch : primaryConcededAgg)
-    : (isMatchMode ? compareConcededMatch : compareConcededAgg);
-
-  const hasCompare = Boolean(compareTeamId);
-  const scoredData = scored.data;
-  const concededData = conceded.data;
-  const isLoading = scored.isLoading || conceded.isLoading;
-  const hasContent =
-    (scoredData?.gamesUsed ?? 0) > 0 || (concededData?.gamesUsed ?? 0) > 0;
-
-  // Use whichever series has a games count for the "avg across N" meta.
-  const gamesUsed = scoredData?.gamesUsed ?? concededData?.gamesUsed ?? 0;
+  const homeShort = homeTeam.data?.short_name ?? homeTeamId.toUpperCase();
+  const awayShort = awayTeam.data?.short_name ?? awayTeamId.toUpperCase();
+  const canRender = fixtureHasMomentum(fixture.data?.status);
 
   return (
     <View style={styles.card}>
@@ -95,195 +68,273 @@ export function CombinedPointsPattern({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
-        ) : null}
+        {/* Colour-swatch legend takes the place of the old toggle pill.
+            Swatches use the light FILL tokens so the chip colour reads
+            as the polygon body — matches what the eye sees on the
+            chart, not the darker stroke. */}
+        <View style={styles.legend}>
+          <LegendChip label={homeShort} color={HOME_FILL} />
+          <LegendChip label={awayShort} color={AWAY_FILL} />
+        </View>
       </View>
 
-      {!isMatchMode && gamesUsed > 0 ? (
-        <Text style={styles.subHeaderMeta}>
-          avg across {gamesUsed} game{gamesUsed === 1 ? '' : 's'}
-        </Text>
-      ) : null}
-
-      {isLoading && !hasContent ? (
+      {!canRender ? (
+        <Text style={styles.empty}>Momentum populates once the match is under way.</Text>
+      ) : isLoading && !hasData ? (
         <Text style={styles.empty}>Loading…</Text>
-      ) : hasContent ? (
-        <MomentumArc
-          scoredPercents={scoredData?.avgPercentByQuarter ?? [0, 0, 0, 0]}
-          concededPercents={concededData?.avgPercentByQuarter ?? [0, 0, 0, 0]}
-        />
       ) : (
-        <Text style={styles.empty}>No scoring events yet to profile.</Text>
+        <MomentumMirror
+          samples={samples}
+          maxAbs={maxAbs}
+          effectiveMinute={effectiveMinute}
+        />
       )}
 
-      <InfoModal
-        visible={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        isMatchMode={isMatchMode}
-      />
+      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
     </View>
   );
 }
 
+function LegendChip({ label, color }: { label: string; color: string }) {
+  return (
+    <View style={styles.legendItem}>
+      <View style={[styles.legendSwatch, { backgroundColor: color }]} />
+      <Text style={styles.legendText}>{label}</Text>
+    </View>
+  );
+}
+
+// ─── Chart ──────────────────────────────────────────────────────────────────
+
 /**
- * Momentum arc — a single smoothed line showing net % (scored − conceded)
- * per quarter. Positive values (line above the dashed baseline) mean the
- * quarter was owned; negative values mean the opposition owned it. Each
- * quarter's data point is a coloured dot: green when positive, red when
- * negative, so the sign is readable even without axis labels.
+ * Zero-sum momentum chart. A SINGLE signed curve — home minus away —
+ * that swings above the baseline when home has the initiative and below
+ * when away does. The curve never shows both teams simultaneously
+ * dominant, which reflects how momentum actually works in a match.
+ *
+ * The curve is filled in two halves via SVG clip paths: the portion
+ * above the baseline uses the home-blue gradient, the portion below
+ * uses the away-purple gradient. Line strokes follow the same clip
+ * treatment so colour cleanly hands off at every zero-crossing.
+ *
+ * Curve drawn only up to `effectiveMinute` — live matches leave the
+ * post-live region of the canvas empty rather than stretching a stale
+ * curve across it.
  */
-function MomentumArc({
-  scoredPercents,
-  concededPercents,
+function MomentumMirror({
+  samples,
+  maxAbs,
+  effectiveMinute,
 }: {
-  scoredPercents: readonly [number, number, number, number];
-  concededPercents: readonly [number, number, number, number];
+  samples: readonly MomentumSample[];
+  maxAbs: number;
+  effectiveMinute: number;
 }) {
-  const width = 300;
-  const height = 180;
-  // 8pt horizontal padding — matches Preview line charts (Form / Ranking
-  // Trajectory) so all four line charts across the fixture drill share
+  const width = 320;
+  const height = 200;
+  // 8pt horizontal padding matches the other insights charts (Preview
+  // sparklines, Scoring Progression) so all match-scoped charts share
   // one plot-area rhythm.
   const padX = 8;
-  const padTop = 18;
-  const padBottom = 30;
-  const midY = padTop + (height - padTop - padBottom) / 2;
+  const padTop = 20;
+  const padBottom = 24;
+  const plotHeight = height - padTop - padBottom;
+  const midY = padTop + plotHeight / 2;
+  const halfChart = plotHeight / 2;
 
-  const nets = useMemo<[number, number, number, number]>(
-    () => [
-      scoredPercents[0] - concededPercents[0],
-      scoredPercents[1] - concededPercents[1],
-      scoredPercents[2] - concededPercents[2],
-      scoredPercents[3] - concededPercents[3],
-    ],
-    [scoredPercents, concededPercents],
-  );
+  const total = momentumTotalMinutes();
 
-  // Symmetric y-domain around 0 with a sensible floor so a flat series
-  // still reads as a line rather than four dots on the baseline.
-  const maxAbs = Math.max(20, ...nets.map((n) => Math.abs(n)));
+  const xForMinute = (m: number) =>
+    padX + (m / total) * (width - 2 * padX);
 
-  const svgPoints = nets.map((net, i) => {
-    const t = i / 3;
-    const x = padX + t * (width - 2 * padX);
-    const halfChart = (height - padTop - padBottom) / 2;
-    const y = midY - (net / maxAbs) * halfChart;
-    return { x, y, net };
-  });
-  const smoothPath = smoothLinePath(svgPoints).path;
+  const drawable = samples.filter((p) => p.minute <= effectiveMinute);
 
-  // Closed area path beneath the momentum curve — clipped to the zero
-  // baseline (midY) so the halo tint never crosses into the opposite
-  // half of the diverging chart. Where the curve is above midY, the
-  // shape is bounded by (curve above, midY below). Where the curve is
-  // below midY the shape reverses (midY above, curve below). Nonzero
-  // fill rule handles the crossing at the zero line cleanly.
-  const first = svgPoints[0];
-  const last = svgPoints[svgPoints.length - 1];
+  // Single signed curve: y is above midY when net > 0 (home ahead),
+  // below when net < 0 (away ahead).
+  const svgPoints = drawable.map((p) => ({
+    x: xForMinute(p.minute),
+    y: midY - (p.net / maxAbs) * halfChart,
+  }));
+
+  const smoothPath = svgPoints.length >= 2 ? smoothLinePath(svgPoints).path : '';
+
+  // Closed area path: trace the curve, drop back to the baseline at the
+  // end, run along the baseline to the start, close. The resulting
+  // shape covers the region between the curve and the baseline —
+  // clip paths then split it into the "home" (above) and "away" (below)
+  // halves at render time.
   const areaPath =
-    svgPoints.length > 1 && first && last
-      ? `${smoothPath} L ${last.x.toFixed(1)} ${midY.toFixed(1)} L ${first.x.toFixed(1)} ${midY.toFixed(1)} Z`
+    svgPoints.length >= 2
+      ? `${smoothPath} L ${svgPoints[svgPoints.length - 1]!.x.toFixed(1)} ${midY.toFixed(1)} L ${svgPoints[0]!.x.toFixed(1)} ${midY.toFixed(1)} Z`
       : '';
 
-  const labels = ['Q1', 'Q2', 'Q3', 'Q4'];
+  // Primary milestones (KO, HT, FT) get a label along the top; the two
+  // intermediate quarter markers (20', 60') are lighter dashed guides
+  // without labels so the eye can pace the timeline without clutter.
+  const primaryMilestones: readonly { minute: number; label: string }[] = [
+    { minute: 0, label: 'KO' },
+    { minute: 40, label: 'HT' },
+    { minute: 80, label: 'FT' },
+  ];
+  const intermediateMilestones: readonly number[] = [20, 60];
 
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <Defs>
-        <LinearGradient id="momentum-area-gradient" x1="0" y1="0" x2="0" y2="1">
-          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
-          <Stop offset="0.55" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
+        {/* Home fill (upper half) — strong colour at the peak, fading
+            to near-transparent at the zero baseline so the two halves
+            don't collide at the axis. */}
+        <LinearGradient id="momentum-home-fill" x1="0" y1={padTop} x2="0" y2={midY} gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor={HOME_FILL} stopOpacity="0.7" />
+          <Stop offset="1" stopColor={HOME_FILL} stopOpacity="0.1" />
         </LinearGradient>
+        {/* Away fill (lower half) — mirror gradient. Transparent at the
+            baseline, strong colour at the trough. */}
+        <LinearGradient id="momentum-away-fill" x1="0" y1={midY} x2="0" y2={height - padBottom} gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor={AWAY_FILL} stopOpacity="0.1" />
+          <Stop offset="1" stopColor={AWAY_FILL} stopOpacity="0.7" />
+        </LinearGradient>
+        {/* Clip rectangles that split the plot area at the baseline.
+            The same signed-curve path is drawn twice — once clipped
+            above the baseline (home colours) and once clipped below
+            (away colours). Every zero-crossing of the curve resolves
+            automatically as a colour hand-off. */}
+        <ClipPath id="momentum-clip-above">
+          <Rect x={0} y={padTop} width={width} height={midY - padTop} />
+        </ClipPath>
+        <ClipPath id="momentum-clip-below">
+          <Rect x={0} y={midY} width={width} height={height - padBottom - midY} />
+        </ClipPath>
       </Defs>
-      {areaPath ? <Path d={areaPath} fill="url(#momentum-area-gradient)" stroke="none" /> : null}
 
-      {/* Zero baseline (dashed) — the "even quarter" reference. */}
+      {/* Intermediate quarter guides (20', 60') — lightest dash so they
+          pace the timeline without competing with the primary
+          KO / HT / FT verticals. */}
+      {intermediateMilestones.map((m) => (
+        <Line
+          key={`imi-${m}`}
+          x1={xForMinute(m)}
+          y1={padTop}
+          x2={xForMinute(m)}
+          y2={height - padBottom}
+          stroke="#F3F4F6"
+          strokeWidth={1}
+        />
+      ))}
+
+      {/* Primary milestone verticals — KO, HT, FT. Slightly stronger
+          than the intermediates and dashed so they read as structural
+          anchors of the 80' timeline. */}
+      {primaryMilestones.map((m) => (
+        <Line
+          key={`ms-${m.minute}`}
+          x1={xForMinute(m.minute)}
+          y1={padTop}
+          x2={xForMinute(m.minute)}
+          y2={height - padBottom}
+          stroke="#E5E7EB"
+          strokeWidth={1}
+          strokeDasharray="3 3"
+        />
+      ))}
+
+      {/* Zero baseline — the mirror axis. Medium grey at 1px so it
+          reads as a quiet structural reference the two coloured halves
+          swing around, without competing for attention with the fills. */}
       <Line
         x1={padX}
         y1={midY}
         x2={width - padX}
         y2={midY}
-        stroke="#E5E7EB"
+        stroke="#9CA3AF"
         strokeWidth={1}
-        strokeDasharray="3 3"
       />
 
-      {/* Momentum line — smooth curve through all four nets. */}
-      <Path
-        d={smoothPath}
-        stroke={CHART_LINE_COLOR}
-        strokeWidth={1}
-        fill="none"
-        strokeLinecap="round"
-      />
-
-      {/* Per-quarter dots, coloured by sign of net. */}
-      {svgPoints.map((p, i) => (
-        <Circle
-          key={`dot-${i}`}
-          cx={p.x}
-          cy={p.y}
-          r={2}
-          fill={p.net >= 0 ? SCORED_COLOR : CONCEDED_COLOR}
+      {/* Fill — home half (above the baseline). Same closed area path
+          as the away fill; the clip rectangle keeps only the portion
+          above midY visible, so when the signed curve dips below the
+          baseline nothing renders here (no home momentum in that
+          window). */}
+      {areaPath ? (
+        <Path
+          d={areaPath}
+          fill="url(#momentum-home-fill)"
+          stroke="none"
+          clipPath="url(#momentum-clip-above)"
         />
+      ) : null}
+      {/* Fill — away half (below the baseline). Mirror of the above. */}
+      {areaPath ? (
+        <Path
+          d={areaPath}
+          fill="url(#momentum-away-fill)"
+          stroke="none"
+          clipPath="url(#momentum-clip-below)"
+        />
+      ) : null}
+
+      {/* Line stroke — same signed curve, split into home / away
+          colours by the same clip pair. Colour hands off exactly at
+          the zero baseline at every crossing. */}
+      {smoothPath ? (
+        <>
+          <Path
+            d={smoothPath}
+            stroke={HOME_LINE}
+            strokeWidth={1}
+            fill="none"
+            strokeLinecap="round"
+            clipPath="url(#momentum-clip-above)"
+          />
+          <Path
+            d={smoothPath}
+            stroke={AWAY_LINE}
+            strokeWidth={1}
+            fill="none"
+            strokeLinecap="round"
+            clipPath="url(#momentum-clip-below)"
+          />
+        </>
+      ) : null}
+
+      {/* Primary milestone labels along the top. */}
+      {primaryMilestones.map((m) => (
+        <SvgText
+          key={`msl-${m.minute}`}
+          x={xForMinute(m.minute)}
+          y={padTop - 6}
+          fill={Colors.light.textSecondary}
+          fontSize={10}
+          fontWeight="700"
+          textAnchor={
+            m.minute === 0 ? 'start' : m.minute === total ? 'end' : 'middle'
+          }>
+          {m.label}
+        </SvgText>
       ))}
 
-      {/* Net % label — sits above the dot when positive, below when
-          negative, so it always stays clear of the line. */}
-      {svgPoints.map((p, i) => {
-        const above = p.net >= 0;
-        const labelY = above ? p.y - 8 : p.y + 15;
-        const sign = p.net > 0 ? '+' : '';
-        return (
-          <SvgText
-            key={`nl-${i}`}
-            x={p.x}
-            y={labelY}
-            fill={Colors.light.textSecondary}
-            fontSize={10}
-            fontWeight="700"
-            textAnchor="middle">
-            {`${sign}${Math.round(p.net)}%`}
-          </SvgText>
-        );
-      })}
-
-      {/* Q labels along the very bottom of the canvas. */}
-      {labels.map((label, i) => {
-        const t = i / 3;
-        const cx = padX + t * (width - 2 * padX);
-        return (
-          <SvgText
-            key={`x-${i}`}
-            x={cx}
-            y={height - 4}
-            fill={Colors.light.textSecondary}
-            fontSize={10}
-            fontWeight="600"
-            textAnchor="middle">
-            {label}
-          </SvgText>
-        );
-      })}
+      {/* Minute ticks along the bottom — 20-minute intervals to anchor
+          the game flow without cluttering the axis. */}
+      {[0, 20, 40, 60, 80].map((m) => (
+        <SvgText
+          key={`x-${m}`}
+          x={xForMinute(m)}
+          y={height - 6}
+          fill={Colors.light.textSecondary}
+          fontSize={10}
+          fontWeight="600"
+          textAnchor={m === 0 ? 'start' : m === total ? 'end' : 'middle'}>
+          {`${m}'`}
+        </SvgText>
+      ))}
     </Svg>
   );
 }
 
-function InfoModal({
-  visible,
-  onClose,
-  isMatchMode,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  isMatchMode: boolean;
-}) {
+// ─── Info modal ─────────────────────────────────────────────────────────────
+
+function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const window = momentumWindowMinutes();
   return (
     <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
@@ -295,28 +346,30 @@ function InfoModal({
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            One line telling the "who owned each quarter" story. For every
-            20-minute block (Q1 0–20, Q2 20–40, Q3 40–60, Q4 60+), we take
-            the team's <Text style={styles.modalStrong}>share of points scored</Text>
-            {' '}and subtract their{' '}
-            <Text style={styles.modalStrong}>share of points conceded</Text>{' '}
-            to get a single "net momentum" percentage per quarter.
-            {isMatchMode
-              ? ' Values come from this fixture only.'
-              : ' Values are averaged across the team’s completed matches.'}
+            Momentum is a zero-sum read: at any moment one side has the
+            initiative and the other doesn't. For each match minute we
+            weight each team's attacking events in the trailing {window}
+            -minute window (carries, line breaks, turnovers won, try
+            assists, tries, conversions, penalty and drop goals) and
+            plot the signed difference (home minus away).
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
-            Above the dashed baseline (positive net, green dot) means the
-            team owned that block. Below (negative net, red dot) means the
-            opposition owned it. Q4 above the baseline is the classic
-            "strong finisher" signal.
+            When the curve lifts above the baseline in light blue, the{' '}
+            <Text style={styles.modalStrong}>home side</Text> is on top
+            in that window. When it dips below in light purple, the{' '}
+            <Text style={styles.modalStrong}>away side</Text> owns the
+            phase. Bigger swings mean bigger momentum shifts. Vertical
+            guides mark KO, HT and FT with quarter markers at 20' and
+            60'.
           </Text>
         </Pressable>
       </Pressable>
     </Modal>
   );
 }
+
+// ─── Styles ─────────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
   card: {
@@ -349,9 +402,27 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
-  subHeaderMeta: {
+  // Legend styling matches the Scoring Progression card so the two
+  // temporal cards on the Insights pane share one grammar.
+  legend: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  legendSwatch: {
+    width: 10,
+    height: 3,
+    borderRadius: 1,
+  },
+  legendText: {
     fontSize: TextSize.xs,
-    color: Colors.light.textSecondary,
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.text,
     fontVariant: ['tabular-nums'],
   },
   empty: {
