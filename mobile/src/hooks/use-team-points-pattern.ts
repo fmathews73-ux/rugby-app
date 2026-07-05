@@ -42,12 +42,19 @@ interface Result {
 export function useTeamPointsPattern(
   teamId: string,
   mode: PointsPatternMode = 'scored',
+  /** When set, only fixtures that kicked off BEFORE this ISO timestamp
+   *  count — freezes the pattern to the state walking into a specific
+   *  match (same semantic as useTeamAggregate). */
+  asOfDate?: string,
 ): Result {
   const team = useTeam(teamId);
 
   const completedFixtures: Fixture[] = useMemo(
-    () => (team.data?.fixtures ?? []).filter((f) => f.status === 'completed'),
-    [team.data],
+    () =>
+      (team.data?.fixtures ?? []).filter(
+        (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
+      ),
+    [team.data, asOfDate],
   );
 
   const eventQueries = useQueries({

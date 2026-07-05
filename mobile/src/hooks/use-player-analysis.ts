@@ -121,9 +121,9 @@ function buildSummary(
     : `${agg.starts} of them starts`;
   const scoring =
     agg.totals.points > 0
-      ? ` ${surname} has contributed ${agg.totals.points} points${agg.totals.tries > 0 ? `, including ${agg.totals.tries} ${agg.totals.tries === 1 ? 'try' : 'tries'}` : ''}.`
+      ? ` ${surname}'s scoreboard contribution stands at ${agg.totals.points} points${agg.totals.tries > 0 ? `, ${agg.totals.tries} ${agg.totals.tries === 1 ? 'try' : 'tries'} among them` : ''}.`
       : '';
-  return `${name} is a ${positionLabel.toLowerCase()} with ${caps} caps, logging ${agg.appearances} ${agg.appearances === 1 ? 'appearance' : 'appearances'} (${starts}) and ${agg.minutesTotal} minutes across the current window.${scoring}`;
+  return `${name} is a ${positionLabel.toLowerCase()} with ${caps} caps, and the current window shows ${agg.appearances} ${agg.appearances === 1 ? 'appearance' : 'appearances'} (${starts}) for ${agg.minutesTotal} minutes.${scoring}`;
 }
 
 function buildScouting(
@@ -138,24 +138,27 @@ function buildScouting(
   const parts: string[] = [];
   if (strengths.length > 0) {
     const lead = strengths[0];
-    let s = `Measured against ${peers} ${groupLabel} on per-80 rates, ${surname}'s ${lead.label.toLowerCase()} sit in the ${ordinal(lead.display)} percentile (${formatRate(lead.per80)} per 80)`;
+    parts.push(
+      `Set against ${peers} ${groupLabel} on per-80 rates, ${surname}'s clearest weapon is ${lead.label.toLowerCase()}.`,
+    );
+    parts.push(
+      `That line runs at ${formatRate(lead.per80)} per 80, ${ordinal(lead.display)}-percentile territory in this group.`,
+    );
     if (strengths.length > 1) {
       const second = strengths[1];
-      s += `, with ${second.label.toLowerCase()} not far behind at the ${ordinal(second.display)}`;
+      parts.push(`Behind it, ${second.label.toLowerCase()} holds the ${ordinal(second.display)} percentile.`);
     }
-    s += '.';
-    parts.push(s);
   } else {
     parts.push(
-      `Measured against ${peers} ${groupLabel} on per-80 rates, the profile is broadly balanced: no dimension strays far above the peer median.`,
+      `Set against ${peers} ${groupLabel} on per-80 rates, ${surname} profiles as balanced rather than spiky; no dimension pulls far enough clear of the peer median to call a weapon.`,
     );
   }
   if (softSpot) {
     parts.push(
-      `The soft spot is ${softSpot.label.toLowerCase()}, down in the ${ordinal(softSpot.display)} percentile of the peer group.`,
+      `The soft spot is ${softSpot.label.toLowerCase()}, down in the ${ordinal(softSpot.display)} percentile of the group: the one line on this sheet an opposition analyst would circle.`,
     );
   } else if (rated.length > 0 && strengths.length > 0) {
-    parts.push('There is no glaring weakness in the profile; the floor holds across every scouted dimension.');
+    parts.push('There is no genuine soft spot to report; the floor holds across every scouted dimension.');
   }
   // Card count — the Stats pane's discipline row surfaced whenever it
   // is non-zero. A sin-binned player's profile should say so.
@@ -166,7 +169,7 @@ function buildScouting(
     );
   } else if (yc > 0) {
     parts.push(
-      `The record also carries ${yc} yellow ${yc === 1 ? 'card' : 'cards'} in the window.`,
+      `The window's sheet also carries ${yc} yellow ${yc === 1 ? 'card' : 'cards'}.`,
     );
   }
   return parts.join(' ');
@@ -180,7 +183,7 @@ function buildForm(
   // Server order is kickoff DESC — newest first.
   const apps = sheets.filter((s) => s.minutes_played > 0).slice(0, PLAYER_LOOKBACK);
   if (apps.length < MIN_FORM_APPS) {
-    return `With only ${apps.length} ${apps.length === 1 ? 'appearance' : 'appearances'} in the sample, trend reads are thin; the profile above is the more reliable guide for now.`;
+    return `A trend read needs a deeper sample than ${apps.length} ${apps.length === 1 ? 'appearance' : 'appearances'}, so the halves comparison stays parked; the scouting profile above is the more reliable guide for now.`;
   }
 
   const half = Math.floor(apps.length / 2);
@@ -198,7 +201,7 @@ function buildForm(
     if (word === 'held') return `${label} holding steady`;
     return `${label} ${word === 'up' ? 'rising' : 'dipping'} (${formatRate(priorAvg)} to ${formatRate(recentAvg)} per game)`;
   });
-  const trendSentence = `Across the last ${apps.length} matches played, ${surname}'s numbers show ${listJoin(reads)}.`;
+  const trendSentence = `Split the last ${apps.length} matches played into recent and earlier halves and the trend lines are plain: ${listJoin(reads)}.`;
 
   const minRecent = avg(recent.map((s) => s.minutes_played));
   const minPrior = avg(prior.map((s) => s.minutes_played));
@@ -206,10 +209,10 @@ function buildForm(
 
   const minSentence =
     minRead === 'held'
-      ? `Minutes have stayed consistent at around ${Math.round(minRecent)} per outing.`
+      ? `Minutes have held steady at around ${Math.round(minRecent)} an outing.`
       : minRead === 'up'
-        ? `Minutes have climbed from ${Math.round(minPrior)} to ${Math.round(minRecent)} per outing, a read on growing selection trust.`
-        : `Minutes have slipped from ${Math.round(minPrior)} to ${Math.round(minRecent)} per outing, worth watching over the next squad naming.`;
+        ? `${surname}'s minutes have climbed from ${Math.round(minPrior)} to ${Math.round(minRecent)} an outing, and growing minutes are the plainest read there is on selection trust.`
+        : `${surname}'s minutes have slipped from ${Math.round(minPrior)} to ${Math.round(minRecent)} an outing; as a read on selection trust, that is the line to watch.`;
 
   return `${trendSentence} ${minSentence}`;
 }
@@ -225,12 +228,12 @@ function buildOutlook(
   softSpot: RatedMetric | undefined,
 ): string {
   if (softSpot && strengths.length > 0) {
-    return `Going forward, lifting the ${softSpot.label.toLowerCase()} numbers is the clearest route to a rounder profile; the ${strengths[0].label.toLowerCase()} platform is already in place.`;
+    return `The next gain is clearly signposted: with the ${strengths[0].label.toLowerCase()} platform already established, lifting the ${softSpot.label.toLowerCase()} numbers is where a rounder profile comes from.`;
   }
   if (softSpot) {
-    return `Going forward, the ${softSpot.label.toLowerCase()} numbers are the obvious place to start; a lift there changes the shape of the whole profile.`;
+    return `The ${softSpot.label.toLowerCase()} numbers are the place to start. Movement there changes the shape of the whole profile.`;
   }
-  return `Going forward, the task for ${surname} is consolidation rather than repair: holding this level across a longer run of matches is what turns a good window into a reputation.`;
+  return `Consolidation, not repair, is the brief for ${surname}: the level is set, and holding it across a longer run of matches is what turns a good window into a reputation.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

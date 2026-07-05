@@ -123,7 +123,7 @@ function buildSummary(
   const { w, l, d } = record(outcomes);
   const rankBit = rank !== undefined ? `, ranked ${ordinal(rank)} in the world,` : '';
   const drawBit = d > 0 ? ` and ${d} drawn` : '';
-  return `${name}${rankBit} have won ${w} and lost ${l}${drawBit} of their last ${agg.gamesPlayed} completed matches, scoring ${fmt(agg.perGame.pointsScored)} points per game and conceding ${fmt(agg.perGame.pointsConceded)}.`;
+  return `${name}${rankBit} have won ${w} and lost ${l}${drawBit} of their last ${agg.gamesPlayed} completed matches, scoring ${fmt(agg.perGame.pointsScored)} points a game and conceding ${fmt(agg.perGame.pointsConceded)}.`;
 }
 
 function buildForm(
@@ -141,23 +141,23 @@ function buildForm(
     if (run >= STREAK_MIN && head !== 'D') {
       parts.push(
         head === 'W'
-          ? `${name} arrive on a ${run}-match winning run.`
-          : `${name} are on a ${run}-match losing run.`,
+          ? `The streak is the headline: ${name} arrive on ${run} straight wins.`
+          : `The slide is the headline: ${run} defeats in a row, a run now long enough to be a pattern rather than a blip.`,
       );
     }
   }
   const margin = agg.perGame.pointsScored - agg.perGame.pointsConceded;
   if (margin >= MARGIN_STRONG) {
     parts.push(
-      `The underlying numbers back the results: an average winning margin of ${fmt(margin)} points across the window.`,
+      `The dominance is real rather than flattering: an average winning margin of ${fmt(margin)} points across the window.`,
     );
   } else if (margin <= -MARGIN_STRONG) {
     parts.push(
-      `The margins tell the harder story, with the side conceding ${fmt(Math.abs(margin))} more points per game than they score.`,
+      `Margins deepen the concern: on average the side concede ${fmt(Math.abs(margin))} more points than they score, a stretch of being outplayed rather than edged.`,
     );
   } else {
     parts.push(
-      `Margins have been tight either way (${margin >= 0 ? '+' : ''}${fmt(margin)} per game), so results have turned on fine details rather than dominance.`,
+      `Nothing in the stretch has been comfortable: at ${margin >= 0 ? '+' : ''}${fmt(margin)} a game the margins are tight, and results have turned on fine details rather than control.`,
     );
   }
 
@@ -169,20 +169,20 @@ function buildForm(
     const concededDelta = relativeDelta(agg.perGame.pointsConceded, season.perGame.pointsConceded);
     if (scoredDelta >= BASELINE_DELTA) {
       parts.push(
-        `Scoring is running above the season's established level (${fmt(agg.perGame.pointsScored)} per game in the window against ${fmt(season.perGame.pointsScored)} across the season).`,
+        `This window is running hotter than the season around it, ${fmt(agg.perGame.pointsScored)} points a game against a full-season line of ${fmt(season.perGame.pointsScored)}.`,
       );
     } else if (scoredDelta <= -BASELINE_DELTA) {
       parts.push(
-        `The attack has cooled relative to the season baseline (${fmt(agg.perGame.pointsScored)} per game in the window, ${fmt(season.perGame.pointsScored)} across the season).`,
+        `Scoring has cooled below the side's own season level, down to ${fmt(agg.perGame.pointsScored)} a game from ${fmt(season.perGame.pointsScored)} across the campaign.`,
       );
     }
     if (concededDelta >= BASELINE_DELTA) {
       parts.push(
-        `Defensively the window is leakier than the season norm (${fmt(agg.perGame.pointsConceded)} conceded per game against ${fmt(season.perGame.pointsConceded)}).`,
+        `The other end carries the warning: ${fmt(agg.perGame.pointsConceded)} conceded a game in this window, clear of the season norm of ${fmt(season.perGame.pointsConceded)}.`,
       );
     } else if (concededDelta <= -BASELINE_DELTA) {
       parts.push(
-        `The defence has tightened relative to the season norm (${fmt(agg.perGame.pointsConceded)} conceded per game against ${fmt(season.perGame.pointsConceded)}).`,
+        `Defensively the window marks a tightening, ${fmt(agg.perGame.pointsConceded)} conceded a game against ${fmt(season.perGame.pointsConceded)} across the season.`,
       );
     }
   }
@@ -196,18 +196,23 @@ function relativeDelta(recent: number, baseline: number): number {
 
 function buildRanking(name: string, series: readonly number[]): string {
   if (series.length < 2) {
-    return `There is not yet enough ranking history to read a trajectory for ${name}.`;
+    return `A trajectory read has to wait: ranking history for ${name} is not yet deep enough to call a direction.`;
   }
   const first = series[0]!;
   const last = series[series.length - 1]!;
   const delta = first - last; // positive = climbed (lower rank number)
   if (delta >= RANK_MOVE) {
-    return `The ranking curve points the right way: ${name} have climbed ${delta} places over the snapshot span, from ${ordinal(first)} to ${ordinal(last)}.`;
+    return `Across the snapshot span the world ranking has moved the right way, from ${ordinal(first)} to ${ordinal(last)}, and the wider table now reflects what the window has produced.`;
   }
   if (delta <= -RANK_MOVE) {
-    return `The world ranking has slipped ${Math.abs(delta)} places over the snapshot span, from ${ordinal(first)} to ${ordinal(last)}, a slide the recent fixture list will need to arrest.`;
+    return `The slide is unmistakable: ${ordinal(first)} to ${ordinal(last)} over the snapshot span, and only results will arrest it.`;
   }
-  return `The world ranking has held broadly steady across the snapshot span, moving between ${ordinal(Math.min(first, last))} and ${ordinal(Math.max(first, last))}.`;
+  const lo = Math.min(first, last);
+  const hi = Math.max(first, last);
+  if (lo === hi) {
+    return `The world ranking has barely breathed: ${ordinal(first)} at both ends of the snapshot span.`;
+  }
+  return `Steadiness is the ranking story: between ${ordinal(lo)} and ${ordinal(hi)} across the span, never enough movement either way to call a trend.`;
 }
 
 const QUARTER_LABELS = ['first quarter', 'second quarter', 'third quarter', 'final quarter'] as const;
@@ -221,25 +226,31 @@ function buildSeason(
   const g = agg.perGame;
   const parts: string[] = [];
   parts.push(
-    `In attack the side average ${fmt(g.tries)} tries and ${Math.round(g.metersMade)} carry metres per game on ${Math.round(g.possessionPercent)}% possession; defensively they concede ${fmt(g.triesConceded)} tries per game on a ${Math.round(g.tackleSuccessPercent)}% tackle completion.`,
+    `In attack the side turn ${Math.round(g.possessionPercent)}% possession into ${fmt(g.tries)} tries a game.`,
+  );
+  parts.push(`Ball in hand, the carry game covers ${Math.round(g.metersMade)} metres a match.`);
+  parts.push(
+    `The defensive ledger reads ${fmt(g.triesConceded)} tries conceded a game behind a ${Math.round(g.tackleSuccessPercent)}% tackle completion.`,
   );
   const scrum = g.scrumSuccessPercent;
   const lineout = g.lineoutSuccessPercent;
   if (scrum >= SET_PIECE_SOLID && lineout >= SET_PIECE_SOLID) {
     parts.push(
-      `The set piece is a platform, with the scrum at ${Math.round(scrum)}% and the lineout at ${Math.round(lineout)}%.`,
+      `The set piece is a platform rather than a worry: ${Math.round(scrum)}% at the scrum, ${Math.round(lineout)}% at the lineout.`,
     );
   } else if (scrum < SET_PIECE_CONCERN || lineout < SET_PIECE_CONCERN) {
-    const weaker = scrum <= lineout ? `scrum (${Math.round(scrum)}%)` : `lineout (${Math.round(lineout)}%)`;
-    parts.push(`The ${weaker} is leaking possession and will draw opposition attention.`);
+    const weakerIsScrum = scrum <= lineout;
+    parts.push(
+      `The ${weakerIsScrum ? 'scrum' : 'lineout'} is the leak: at ${Math.round(weakerIsScrum ? scrum : lineout)}%, it hands back possession that opponents will have circled.`,
+    );
   }
   if (g.penaltiesConceded >= PENS_HIGH) {
     parts.push(
-      `Discipline is the running sore: ${fmt(g.penaltiesConceded)} penalties conceded per game keeps opponents in the contest.`,
+      `Discipline bleeds into everything else, because ${fmt(g.penaltiesConceded)} penalties a game is a steady feed of territory and shots at goal for the opposition.`,
     );
   } else if (g.penaltiesConceded <= PENS_LOW) {
     parts.push(
-      `Discipline underpins it all, with just ${fmt(g.penaltiesConceded)} penalties conceded per game.`,
+      `Discipline underpins the whole operation: just ${fmt(g.penaltiesConceded)} penalties conceded a game, and with them almost nothing given away for free.`,
     );
   }
 
@@ -248,13 +259,13 @@ function buildSeason(
   const scoredSkew = timingSkew(scored);
   if (scoredSkew) {
     parts.push(
-      `The points arrive with a pattern: ${scoredSkew.pct}% of their scoring comes in the ${QUARTER_LABELS[scoredSkew.quarter]}.`,
+      `The scoring carries a clock, with ${scoredSkew.pct}% of the points arriving in the ${QUARTER_LABELS[scoredSkew.quarter]}.`,
     );
   }
   const concededSkew = timingSkew(conceded);
   if (concededSkew) {
     parts.push(
-      `The soft period is the ${QUARTER_LABELS[concededSkew.quarter]}, where ${concededSkew.pct}% of the points against them are conceded.`,
+      `The soft period sits in the ${QUARTER_LABELS[concededSkew.quarter]}, which absorbs ${concededSkew.pct}% of the points conceded.`,
     );
   }
   return parts.join(' ');
@@ -277,18 +288,18 @@ function buildOutlook(name: string, agg: Agg): string {
   // Name the single most pressing repair job, in priority order:
   // discipline, then the weaker set piece, then defensive leakage.
   if (g.penaltiesConceded >= PENS_HIGH) {
-    return `Going forward, the penalty count is the first fix for ${name}: cheap territory handed over at ${fmt(g.penaltiesConceded)} a game undoes good work everywhere else.`;
+    return `The repair job starts at the whistle. ${name} are conceding ${fmt(g.penaltiesConceded)} penalties a game, and no other improvement pays off while territory and easy points are handed over at that rate.`;
   }
   const scrum = g.scrumSuccessPercent;
   const lineout = g.lineoutSuccessPercent;
   if (scrum < SET_PIECE_CONCERN || lineout < SET_PIECE_CONCERN) {
     const weaker = scrum <= lineout ? 'scrum' : 'lineout';
-    return `Going forward, shoring up the ${weaker} is the priority; a reliable set-piece platform is what turns pressure into points at this level.`;
+    return `The priority is the ${weaker}. Until that platform steadies, good field position will keep dissolving at the moment it should pay off.`;
   }
   if (g.pointsConceded > g.pointsScored) {
-    return `Going forward, the balance needs to shift: ${name} are creating enough, but conceding ${fmt(g.pointsConceded)} points per game means the attack is chasing the game too often.`;
+    return `The balance has to shift first: ${name} concede more than they score (${fmt(g.pointsConceded)} points a game against them), and that arithmetic forces the attack to chase every contest.`;
   }
-  return `Going forward, the task for ${name} is to hold this standard: the profile is sound across the board, and consistency is what converts a good window into silverware.`;
+  return `No single repair job stands out for ${name}; the profile holds across every dimension measured here. The task now is repetition, holding this standard long enough for a good stretch to become an identity.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

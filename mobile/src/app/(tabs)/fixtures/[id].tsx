@@ -100,6 +100,7 @@ export default function FixtureDetailScreen() {
             <View style={styles.pane}>
               {tab === 'preview' && (
                 <PreviewPane
+                  fixture={fixture.data}
                   homeTeamId={fixture.data.home_team_id}
                   awayTeamId={fixture.data.away_team_id}
                   asOfDate={fixture.data.kickoff_utc}

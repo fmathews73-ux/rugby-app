@@ -13,12 +13,12 @@ import { ExtendedMomentum } from '@/components/insights/extended-momentum';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
 import { PointsPattern } from '@/components/insights/points-pattern';
 import { PageGradient } from '@/components/page-gradient';
+import { TeamAnalysisCard } from '@/components/team-analysis-card';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
-import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { initialsOf } from '@/lib/initials';
 import { worldCupTitles } from '@/lib/world-cup-titles';
@@ -452,105 +452,6 @@ function formatStat(v: number, percent?: boolean): string {
   return percent ? `${Math.round(v)}%` : s;
 }
 
-// ─── Analysis narrative ─────────────────────────────────────────────────────
-
-/**
- * Templated team narrative — same visual grammar as the match and player
- * analysis cards (small-caps mini-label + glyph above prose). Structure
- * and thresholds are defined by the "Team analysis" section of
- * `docs/analysis-narrative-spec.md`; `useTeamAnalysis` is the client-side
- * template implementation pending the Phase 6 LLM cutover.
- */
-function TeamAnalysisCard({ teamId }: { teamId: string }) {
-  const [infoOpen, setInfoOpen] = useState(false);
-  const { data, isLoading } = useTeamAnalysis(teamId);
-
-  return (
-    <View style={styles.card}>
-      <View style={styles.cardHeaderRow}>
-        <View style={styles.cardHeaderTitleGroup}>
-          <Text style={styles.sectionLabel}>Team Analysis</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the team analysis">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-      </View>
-
-      {isLoading && !data ? (
-        <Text style={styles.empty}>Loading…</Text>
-      ) : !data ? (
-        <Text style={styles.empty}>Analysis populates once the team has completed a match.</Text>
-      ) : (
-        <View style={styles.narrativeStack}>
-          {/* Cold-open summary — no label, mirroring the other cards. */}
-          <Text style={styles.narrativeBody}>{data.summary}</Text>
-
-          <TeamNarrativeSection label="Form read" icon="time-outline">
-            {data.form}
-          </TeamNarrativeSection>
-          <TeamNarrativeSection label="Ranking read" icon="podium-outline">
-            {data.ranking}
-          </TeamNarrativeSection>
-          <TeamNarrativeSection label="Season read" icon="analytics-outline">
-            {data.season}
-          </TeamNarrativeSection>
-          <TeamNarrativeSection label="Going forward" icon="compass-outline">
-            {data.outlook}
-          </TeamNarrativeSection>
-        </View>
-      )}
-
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Team Analysis</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              A written synthesis of the team&apos;s recent window: results and margins from the
-              last 10 completed matches, the world-ranking trajectory across the monthly
-              snapshots, and the per-game season profile behind the Insights charts.
-            </Text>
-            <Text style={styles.modalBody}>
-              Reads are threshold-gated so the card only makes claims the numbers support: a
-              streak needs 3 or more matches, dominance means a 7-point average margin, a
-              set piece below 85% is flagged, and 12 or more penalties conceded per game is
-              called out as a discipline problem.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
-  );
-}
-
-function TeamNarrativeSection({
-  label,
-  icon,
-  children,
-}: {
-  label: string;
-  icon: keyof typeof Ionicons.glyphMap;
-  children: string;
-}) {
-  return (
-    <View style={styles.narrativeSection}>
-      <View style={styles.narrativeMiniLabelRow}>
-        <Ionicons name={icon} size={12} color={Colors.light.textSecondary} />
-        <Text style={styles.narrativeMiniLabel}>{label}</Text>
-      </View>
-      <Text style={styles.narrativeBody}>{children}</Text>
-    </View>
-  );
-}
-
 function PlayerRow({ player, onPress }: { player: Player; onPress: () => void }) {
   const age = ageFrom(player.date_of_birth);
   return (
@@ -810,33 +711,6 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
 
-  // Analysis narrative — same grammar as the match / player analysis
-  // cards: fixed-gap stack, small-caps centred mini-labels, prose beneath.
-  narrativeStack: {
-    gap: Spacing.three,
-    marginTop: Spacing.one,
-  },
-  narrativeSection: {
-    gap: 4,
-  },
-  narrativeMiniLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  narrativeMiniLabel: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  narrativeBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 22,
-  },
 
   // Modal
   modalBackdrop: {

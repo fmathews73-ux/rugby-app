@@ -64,6 +64,15 @@ the card will render it as garbled prose.
   read, not a match-day tweet.
 - **Present-tense for live matches, past-tense for completed.** The
   section text should flip cleanly on the `status` field.
+- **Tense register per surface (canonical table — decided 2026-07-05):**
+
+  | Surface | Register | Rationale |
+  |---|---|---|
+  | Pre-match (§11) | Present + forward-looking modality ("arrive having won", "will look to play this in the air"). NEVER regenerated or re-tensed after kickoff — the frozen pre-match voice IS the artefact. | It's a preview; pure grammatical future throughout reads robotic. |
+  | Match analysis, live | Present / present-perfect ("lead at 42'", "has been the harder side to break"). | The story is unfolding. |
+  | Match analysis, full-time | Past ("controlled", "outperformed"). | The story is closed. |
+  | Team analysis (§10) | Present-perfect with present-state verdicts ("have won 7 of 10", "the set-piece is a platform"). NOT pure past. | The window is ongoing; past tense would close an era that isn't closed. |
+  | Player analysis (§9) | Present-perfect with present-state verdicts ("sits in the 74th percentile", "minutes have climbed"). NOT pure past. | Past tense on an active player reads like a retirement notice. |
 - **Metrics are woven into prose. NEVER tabulated.** The numeric detail
   lives in the Stats and Insights tabs; this tab tells the story.
 - **Journalistic sentence rhythm.** Aim for 1–3 sentences per axis
@@ -265,6 +274,15 @@ build without the following:
      they become dead weight. Retain this markdown file as the model
      brief.
 
+7. **Bundle the composition guide into the system prompt**
+   - The system prompt is TWO documents: this spec (what to write —
+     structure, thresholds, rules) + `analysis-composition-guide.md`
+     (how it must read — voice, cadence, insight patterns, forbidden
+     moves). Neither ships alone. PRECONDITION (register #29): the
+     client templates must have passed a full composition pass against
+     the guide BEFORE cutover, because the template outputs double as
+     few-shot reference material for prompt evaluation.
+
 ## 8. Non-goals
 
 - **No player-level commentary inside the MATCH analysis.** The match
@@ -402,6 +420,71 @@ narrative lives in §9.
 
 ---
 
+## 11. Pre-match analysis (fixture drill · Pre-Match tab)
+
+A card below the Pre-Match chart carousel: the broadcast-style read of
+what the match will most likely be about, setting a realistic
+expectation before kickoff. The preview is a FROZEN PRE-KICKOFF
+DOCUMENT — it renders for scheduled, live, and completed fixtures and
+persists unchanged after full-time, so readers can set it against the
+Analysis tab's post-match story ("did it play out the way the numbers
+said it would?"). Live / completed fixtures carry an "AS OF KICKOFF"
+chip; only postponed / cancelled fixtures get no preview. Template
+implementation: `mobile/src/hooks/use-match-preview.ts`; at Phase 6
+the same cutover model applies (this section as the system prompt,
+the `MatchPreview` interface as the response contract), with the
+completed-fixture render served from the cached pre-kickoff
+generation — never regenerated post-match.
+
+All tone rules (§3), style rules (§4), the avoid-list (§5.5),
+sentence-starter variation (§5.6), and grounding (§5.1) apply
+unchanged. Grounding is strictly AS OF KICKOFF on every input — both
+sides' prev-10 profiles, last-5 form, world rankings, and
+quarter-timing patterns all exclude the fixture itself and anything
+after it. The card keeps its pre-match voice (present/forward tense)
+even when read after full-time; that frozen voice is the point.
+
+**HARD RULE — no predictions.** The card must never name a likely
+winner, use probability language, or imply a result ("expected to
+win", "should be too strong", "favourites"). Root `CLAUDE.md` §9 bans
+betting/odds language app-wide; this card lives closest to that line
+and must stay on the right side of it. Conditions, not outcomes.
+
+### 11.1 Card structure (fixed, in order)
+
+| # | Section | Icon | Content |
+|---|---|---|---|
+| 0 | *(Summary)* | — | The billing: ranking framing (mismatch ≥8 places / edge ≥3 / meeting of equals) + both sides' last-5 win counts. |
+| 1 | The shape of it | `analytics-outline` | The 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds, values woven in. Balanced profiles are called balanced ("decided by execution"), never forced. |
+| 2–9 | Attack / Defence / Set-piece / Discipline / Kicking / Territory / Possession / Turnovers | same glyphs as §1's axes | Per-axis coming-in comparison — the SAME eight axes, order, and icons as the match analysis so the pre- and post-match reads line up section for section. Each axis compares one headline metric on fixed thresholds into three tiers: clear edge / shades it / even (see 11.2), with secondary metrics woven in for texture. "Edge" is a data statement about the coming-in numbers, never a result call. |
+| 10 | Danger periods | `time-outline` | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
+| 11 | Keys to the match | `key-outline` | One condition per side, ALWAYS derived from the signed axis gaps — the side ahead on the fixture's biggest gap gets the EXPLOIT framing (how to press it), the side behind gets the NEUTRALISE framing (the survival job), each with the numbers woven in. When the second-ranked gap is ≥70% of the top gap and favours the other side, that side keys off its own weapon instead — two battlegrounds beat two views of one. Dead-heat profiles (top gap < half threshold) still key off the largest gap, framed as the fine margin. NO generic filler, ever — if a key could be written without this fixture's data, it is wrong. |
+
+### 11.2 Thresholds (must match the template / future prompt)
+
+Per-axis headline metrics and CLEAR-edge thresholds (the "shades it"
+tier fires at half the threshold; inside that, the axis reads even):
+
+| Axis | Headline metric | Clear edge |
+|---|---|---|
+| Attack | points scored /game (tries as texture) | ± 6 |
+| Defence | points conceded /game (tackle % as texture) | ± 6 |
+| Set-piece | combined scrum+lineout success | ± 4pp |
+| Discipline | penalties conceded /game | ± 2.5 |
+| Kicking | kick metres /game (kicks-in-play as texture) | ± 15% relative |
+| Territory | average territory share | ± 6pp |
+| Possession | average possession share | ± 6pp |
+| Turnovers | net turnovers (won − conceded) /game | ± 2 |
+
+- **The shape of it** ranks the qualifying gaps by normalised size and
+  names at most three.
+- **Timing skew:** a quarter carrying ≥ 35% of the relevant points
+  (same threshold as §10.2).
+- **Sample:** either side with zero completed matches → no preview
+  (empty state), never a padded one.
+
+---
+
 ## Change log
 
 - **v1** — Initial spec extracted from the client-side template built
@@ -416,6 +499,13 @@ narrative lives in §9.
 - **v3** — Added §10 team analysis narrative (team overview Analysis
   tab): structure, thresholds, no-player-references rule. Template
   implementation: `use-team-analysis.ts`.
+- **v5** — Added §11 pre-match analysis (fixture Preview tab):
+  billing / shape / danger periods / keys structure, axis-gap and
+  timing thresholds, hard no-prediction rule. The preview persists
+  after full-time as a frozen pre-kickoff document (compare-read
+  against the match analysis); all inputs as-of-kickoff. Template
+  implementation: `use-match-preview.ts`. (§ numbering note: §11
+  slots between the team analysis §10 and this changelog.)
 - **v4** — Pane-coverage pass: every narrative now accounts for its
   drill's Preview / Stats / Insights data. Match: ranking framing in
   Coming in + match-flow paragraph closing Commentary (lead changes,

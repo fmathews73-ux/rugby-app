@@ -27,16 +27,20 @@ interface UseTeamRecentFormResult {
 export function useTeamRecentForm(
   teamId: string,
   lookback: number,
+  /** When set, only fixtures that kicked off BEFORE this ISO timestamp
+   *  count — freezes the form window to the state walking into a
+   *  specific match (same semantic as useTeamAggregate). */
+  asOfDate?: string,
 ): UseTeamRecentFormResult {
   const team = useTeam(teamId);
 
   const recentFixtures: Fixture[] = useMemo(() => {
     return (team.data?.fixtures ?? [])
-      .filter((f) => f.status === 'completed')
+      .filter((f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate))
       .slice()
       .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
       .slice(0, lookback);
-  }, [team.data, lookback]);
+  }, [team.data, lookback, asOfDate]);
 
   const resultQueries = useQueries({
     queries: recentFixtures.map((f) => ({

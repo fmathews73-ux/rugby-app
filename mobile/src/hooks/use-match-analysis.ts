@@ -117,8 +117,10 @@ export function useMatchAnalysis(fixtureId: string): {
   const asOfDate = fixture.data?.kickoff_utc;
   const homeAgg = useTeamAggregate(homeTeamId, asOfDate);
   const awayAgg = useTeamAggregate(awayTeamId, asOfDate);
-  const homeForm = useTeamRecentForm(homeTeamId, CONTEXT_FORM_LOOKBACK);
-  const awayForm = useTeamRecentForm(awayTeamId, CONTEXT_FORM_LOOKBACK);
+  // Form frozen as of kickoff — without this, re-reading an old
+  // fixture's "Coming in" would leak matches played AFTER it.
+  const homeForm = useTeamRecentForm(homeTeamId, CONTEXT_FORM_LOOKBACK, asOfDate);
+  const awayForm = useTeamRecentForm(awayTeamId, CONTEXT_FORM_LOOKBACK, asOfDate);
 
   // World ranking as of kickoff — the same trajectory data the Preview
   // pane charts, reduced to each side's position walking in.
@@ -286,8 +288,12 @@ function buildMatchFlow(
   if (h === a) {
     parts.push(
       isLive
-        ? `All square as it stands, with the lead having changed hands ${leadChanges === 0 ? 'not at all' : `${leadChanges} ${leadChanges === 1 ? 'time' : 'times'}`}.`
-        : `Neither side could make a lead stick: level at the end after ${leadChanges} ${leadChanges === 1 ? 'lead change' : 'lead changes'}.`,
+        ? leadChanges === 0
+          ? `All square as it stands, and the lead is yet to change hands.`
+          : `All square as it stands, the lead having already changed hands ${leadChanges} ${leadChanges === 1 ? 'time' : 'times'}.`
+        : leadChanges === 0
+          ? `Neither side could make a lead stick: level at the end, and the advantage never once swapped sides.`
+          : `Neither side could make a lead stick: level at the end after ${leadChanges} ${leadChanges === 1 ? 'lead change' : 'lead changes'}.`,
     );
   } else if (leaderTeam) {
     if (leadChanges === 0) {
@@ -337,8 +343,8 @@ function liveMinuteFromKickoff(fixture: Fixture): number {
  */
 function buildContext(home: Team, away: Team, ctx: PreMatchContext): string {
   const ranking = rankingSentence(home, away, ctx.homeRank, ctx.awayRank);
-  const homeSummary = teamContextSentence(home, ctx.homeAgg, ctx.homeForm);
-  const awaySummary = teamContextSentence(away, ctx.awayAgg, ctx.awayForm);
+  const homeSummary = teamContextSentence(home, ctx.homeAgg, ctx.homeForm, 0);
+  const awaySummary = teamContextSentence(away, ctx.awayAgg, ctx.awayForm, 1);
   const contrast = contrastSentence(home, away, ctx.homeAgg, ctx.awayAgg);
   return [ranking, homeSummary, awaySummary, contrast].filter(Boolean).join(' ');
 }
@@ -365,7 +371,7 @@ function rankingSentence(
   if (gap >= 3) {
     return `The rankings give ${higher.short_name} the edge, ${ordinalRank(hr)} in the world to ${lower.short_name}'s ${ordinalRank(lr)}.`;
   }
-  return `Little between them on the world rankings: ${higher.short_name} ${ordinalRank(hr)}, ${lower.short_name} ${ordinalRank(lr)}.`;
+  return `The world rankings barely separate them, ${higher.short_name} ${ordinalRank(hr)} to ${lower.short_name}'s ${ordinalRank(lr)}.`;
 }
 
 function ordinalRank(n: number): string {
@@ -379,33 +385,44 @@ function ordinalRank(n: number): string {
   }
 }
 
+/** One coming-in sentence per side. The `variant` flag only varies the
+ *  phrasing skeleton so the home and away sentences never read as the
+ *  same template run twice. */
 function teamContextSentence(
   team: Team,
   agg: TeamAggregate | undefined,
   form: readonly FormOutcome[],
+  variant: 0 | 1 = 0,
 ): string {
   const formBits: string[] = [];
   const wins = form.filter((f) => f === 'W').length;
   const losses = form.filter((f) => f === 'L').length;
   const draws = form.filter((f) => f === 'D').length;
   if (form.length > 0) {
-    if (wins >= 4) formBits.push(`riding a run of ${wins} wins in their last ${form.length}`);
-    else if (losses >= 4) formBits.push(`under pressure after ${losses} losses in their last ${form.length}`);
-    else if (wins > losses) formBits.push(`in decent shape (${wins}-${losses}${draws ? '-' + draws : ''} over their last ${form.length})`);
-    else if (losses > wins) formBits.push(`hunting form (${wins}-${losses}${draws ? '-' + draws : ''} over their last ${form.length})`);
-    else formBits.push(`splitting recent results ${wins}-${losses}${draws ? '-' + draws : ''}`);
+    const record = `${wins}-${losses}${draws ? '-' + draws : ''}`;
+    if (wins >= 4) formBits.push(`on a run of ${wins} wins from their last ${form.length}`);
+    else if (losses >= 4) formBits.push(`carrying the weight of ${losses} defeats in their last ${form.length}`);
+    else if (wins > losses) formBits.push(`in decent nick at ${record} over their last ${form.length}`);
+    else if (losses > wins) formBits.push(`still hunting form at ${record} over their last ${form.length}`);
+    else formBits.push(`having split their recent results ${record}`);
   }
   const aggBits: string[] = [];
   if (agg && agg.gamesPlayed > 0) {
-    const pts = agg.perGame.pointsScored;
-    const conc = agg.perGame.pointsConceded;
-    aggBits.push(`averaging ${pts.toFixed(0)} points scored and ${conc.toFixed(0)} conceded per game`);
+    const pts = agg.perGame.pointsScored.toFixed(0);
+    const conc = agg.perGame.pointsConceded.toFixed(0);
+    aggBits.push(
+      variant === 0
+        ? `scoring ${pts} a game and conceding ${conc}`
+        : `putting up ${pts} a game while shipping ${conc}`,
+    );
   }
   if (formBits.length === 0 && aggBits.length === 0) {
-    return `${team.short_name} arrive with no prior season data to lean on.`;
+    return `${team.short_name} arrive with no season record to measure this against.`;
   }
-  const trailing = [...formBits, ...aggBits].join(' and ');
-  return `${team.short_name} come in ${trailing}.`;
+  const trailing = [...formBits, ...aggBits].join(', ');
+  return variant === 0
+    ? `${team.short_name} arrive ${trailing}.`
+    : `${team.short_name}, for their part, come in ${trailing}.`;
 }
 
 function contrastSentence(
@@ -425,13 +442,15 @@ function contrastSentence(
   const defGap = homeDefPts - awayDefPts;
   if (Math.abs(gap) >= 8) {
     const better = gap > 0 ? home : away;
-    return `On season attacking output, that's a ${Math.abs(gap).toFixed(0)}-point-per-game edge to ${better.short_name}, and the pre-match variance points to which side owns the front foot.`;
+    const other = gap > 0 ? away : home;
+    return `On season scoring the gap is real: ${better.short_name} put up ${Math.abs(gap).toFixed(0)} more points a game, and the onus is on ${other.short_name} to make this the kind of match that number cannot win.`;
   }
   if (Math.abs(defGap) >= 8) {
     const better = defGap < 0 ? home : away;
-    return `Defensively, ${better.short_name} arrive with the tighter line (${Math.abs(defGap).toFixed(0)} fewer points shipped per game across the season).`;
+    const other = defGap < 0 ? away : home;
+    return `The defensive baselines are where they part: ${better.short_name} have shipped ${Math.abs(defGap).toFixed(0)} fewer points a game this season, and that line is the first problem ${other.short_name} have to solve.`;
   }
-  return `On season baselines the two sides read as evenly matched, so this fixture will turn on execution rather than form.`;
+  return `The season baselines separate nothing, so whatever decides this will be built inside the eighty minutes rather than carried in on form.`;
 }
 
 // ─── The 8 axes ─────────────────────────────────────────────────────────────
@@ -472,15 +491,15 @@ function buildSummary(
         ? away
         : null;
   if (isLive) {
-    if (!leader) return `Level at ${currentMinute}' (${scoreline}). Every axis of the profile is currently in the balance.`;
-    if (margin >= 14) return `${leader.short_name} pulling clear at ${currentMinute}', ${scoreline}. The profile is opening up in their favour across multiple axes.`;
-    if (margin >= 7) return `${leader.short_name} in front at ${currentMinute}', ${scoreline}. The two profiles are close but leaning ${leader.short_name}'s way.`;
-    return `Tight at ${currentMinute}', ${scoreline}. ${leader.short_name} lead by ${margin} but the two profiles are running near-identical.`;
+    if (!leader) return `Level at ${currentMinute}' (${scoreline}), and neither side has yet found the edge that breaks this open.`;
+    if (margin >= 14) return `${leader.short_name} are pulling clear at ${currentMinute}' (${scoreline}). This is a two-score match at minimum now, and the chase gets harder by the minute.`;
+    if (margin >= 7) return `${leader.short_name} lead at ${currentMinute}' (${scoreline}), and the chasing side need at least a converted score just to draw level.`;
+    return `Tight at ${currentMinute}' (${scoreline}). ${leader.short_name} hold the edge, but one score flips this.`;
   }
-  if (!leader) return `Full-time: ${scoreline}. The two profiles cancelled out, with no side finding a dimension it could exploit for long enough to decide it.`;
-  if (margin >= 20) return `Full-time: ${scoreline}. ${leader.short_name} outperformed on the majority of profile axes and the scoreboard reflected it.`;
-  if (margin >= 10) return `Full-time: ${scoreline}. ${leader.short_name} controlled the axes that matter most and took the win comfortably.`;
-  return `Full-time: ${scoreline}. A tight profile match-up decided by a small number of key axes.`;
+  if (!leader) return `Full-time: ${scoreline}. Two sides who cancelled each other out, neither finding an edge it could hold long enough to win the game.`;
+  if (margin >= 20) return `Full-time: ${scoreline}. ${leader.short_name} won this comprehensively, a ${margin}-point margin that settles any argument about who controlled it.`;
+  if (margin >= 10) return `Full-time: ${scoreline}. ${leader.short_name} took it with room to spare, clear where Test matches are decided.`;
+  return `Full-time: ${scoreline}. A tight contest settled by fine margins rather than any one-sided dimension.`;
 }
 
 // ─── Broadcast commentary ───────────────────────────────────────────────────
@@ -530,29 +549,29 @@ function shapeParagraph(
   if (preHalfTime) {
     const leader = currentHome > currentAway ? home : currentAway > currentHome ? away : null;
     const margin = Math.abs(currentHome - currentAway);
-    if (!leader) return `Inside the opening 40 and both sides are still feeling each other out, with nothing separating them on the scoreboard as we head towards half-time.`;
-    return `${leader.short_name} carrying the early momentum with a ${margin}-point cushion. The first quarter has belonged to them, and the challenge now is holding that shape as we approach the break.`;
+    if (!leader) return `Still inside the first forty and dead level, two game plans probing away without either finding the first crack.`;
+    return `${leader.short_name} have the early running and a ${margin}-point cushion. The test between now and the break is carrying that shape through the restarts intact.`;
   }
 
   if (isLive && inSecondHalf) {
     const halfWinner = secondHalfHome > secondHalfAway ? home : secondHalfAway > secondHalfHome ? away : null;
     if (halfWinner) {
       const halfMargin = Math.abs(secondHalfHome - secondHalfAway);
-      return `${home.short_name} took ${htHome} into the sheds against ${away.short_name}'s ${htAway}, and the second half has swung ${halfWinner.short_name}'s way by ${halfMargin}. The break clearly refined something in their game plan, and the coach's message evidently landed.`;
+      return `The half-time score read ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. Since the restart the match has belonged to ${halfWinner.short_name}, ${halfMargin} points the better of the second period. Whatever was said at the interval, it landed.`;
     }
-    return `Half-time read ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. The second half has stayed just as tight, with neither coaching box unlocking a decisive edge yet.`;
+    return `Half-time read ${home.short_name} ${htHome}, ${away.short_name} ${htAway}, and the second period has kept the same shape. Neither break nor bench has shifted the balance yet.`;
   }
 
   // Completed
   const secondHalfWinner = secondHalfHome > secondHalfAway ? home : secondHalfAway > secondHalfHome ? away : null;
   const finalLeader = currentHome > currentAway ? home : currentAway > currentHome ? away : null;
   if (!secondHalfWinner && !finalLeader) {
-    return `A draw at the whistle: ${home.short_name} ${currentHome}, ${away.short_name} ${currentAway}. Half-time ${htHome}-${htAway}, and the second forty carried on in exactly the same rhythm as the first. Two sides who mirrored each other for eighty.`;
+    return `A draw at the whistle: ${home.short_name} ${currentHome}, ${away.short_name} ${currentAway}. From ${htHome}-${htAway} at the break, the second forty simply repeated the first. Two sides who mirrored each other for eighty minutes.`;
   }
   if (secondHalfWinner && finalLeader && secondHalfWinner.id !== finalLeader.id) {
-    return `Half-time: ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. ${secondHalfWinner.short_name} came out the sharper side after the break (${secondHalfWinner.id === home.id ? secondHalfHome : secondHalfAway} points to ${secondHalfWinner.id === home.id ? secondHalfAway : secondHalfHome} in the second half), but ${finalLeader.short_name} had built a big enough cushion to hold on for the win.`;
+    return `Half-time: ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. ${secondHalfWinner.short_name} won the second half (${secondHalfWinner.id === home.id ? secondHalfHome : secondHalfAway} points to ${secondHalfWinner.id === home.id ? secondHalfAway : secondHalfHome}) and made the closing stretch uncomfortable, but the cushion ${finalLeader.short_name} built before the interval proved the match's real currency.`;
   }
-  return `Half-time: ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. ${finalLeader ? `${finalLeader.short_name} extended their lead in the second half, and the scoreboard tells you which side made the better use of the break.` : `The two sides continued to trade blows after the interval without a decisive turning point.`}`;
+  return `Half-time: ${home.short_name} ${htHome}, ${away.short_name} ${htAway}. ${finalLeader ? `${finalLeader.short_name} pushed on after the interval; the second forty is where this one was actually won.` : `The sides traded blows to the end without either landing the decisive one.`}`;
 }
 
 function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchContext): string {
@@ -573,23 +592,23 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
     const betterCount = Math.max(homeLB, awayLB);
     if (betterBase && betterCount > betterBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
       parts.push(
-        `${better.short_name} finding the softer edges (${betterCount} line breaks against ${Math.min(homeLB, awayLB)}), and that's noticeably above their ${betterBase.toFixed(1)}-per-game season average.`,
+        `${better.short_name} keep finding the softer edges, ${betterCount} line breaks to ${Math.min(homeLB, awayLB)}. That is comfortably above the ${betterBase.toFixed(1)} they average in a match: the cutting edge is sharper than usual today.`,
       );
     } else {
       parts.push(
-        `${better.short_name} finding the softer edges. A count of ${betterCount} line breaks against ${Math.min(homeLB, awayLB)} tells you which attacking system is asking the harder questions.`,
+        `${better.short_name} keep finding the softer edges. ${betterCount} line breaks to ${Math.min(homeLB, awayLB)} says one attacking system is asking questions the other cannot.`,
       );
     }
   } else if (homeLB + awayLB >= 6) {
     parts.push(
-      `Line breaks running high on both sides (${homeLB}-${awayLB}), suggesting an open, expansive game rather than an arm-wrestle.`,
+      `Line breaks are flowing at both ends (${homeLB}-${awayLB}). This is an open contest, not an arm-wrestle, and both defences know it.`,
     );
   }
 
   if (Math.abs(homeM - awayM) >= 100) {
     const better = homeM > awayM ? home : away;
     parts.push(
-      `${better.short_name} racking up the metres carried (${Math.round(Math.max(homeM, awayM))}m vs ${Math.round(Math.min(homeM, awayM))}m), with ball-in-hand dominance the story of their attacking shift.`,
+      `${better.short_name} have won the carrying contest emphatically, ${Math.round(Math.max(homeM, awayM))} metres to ${Math.round(Math.min(homeM, awayM))}, and every one of those metres is a defender going backwards.`,
     );
   }
 
@@ -599,7 +618,7 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
   if (Math.max(homeOff, awayOff) >= 8) {
     const better = homeOff > awayOff ? home : away;
     parts.push(
-      `${better.short_name}'s offloading game (${Math.max(homeOff, awayOff)} in the match) speaks to the pattern: high-tempo, hands-first attacking that refuses to let the collision end the phase.`,
+      `${better.short_name}'s ${Math.max(homeOff, awayOff)} offloads tell you the intent: keep the ball alive, refuse to let the collision end the phase.`,
     );
   }
 
@@ -609,7 +628,7 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
   const awayConv = result.away_conversions ?? 0;
   if (totalTries > 0) {
     parts.push(
-      `Tries came in at ${result.home_tries}-${result.away_tries}, conversions ${homeConv}-${awayConv}, and the fly-halves' boots have done their share of the finishing work.`,
+      `The finishing ledger reads ${result.home_tries}-${result.away_tries} in tries, ${homeConv}-${awayConv} off the tee, and the boot has done its share of the work.`,
     );
   }
 
@@ -621,7 +640,7 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
     const front = homeGain > awayGain ? home : away;
     const pcm = front.id === home.id ? result.home_post_contact_metres : result.away_post_contact_metres;
     parts.push(
-      `${front.short_name} are winning the collision battle, crossing the gainline on ${Math.max(homeGain, awayGain)}% of carries against ${Math.min(homeGain, awayGain)}%${pcm ? ` and adding ${pcm}m after contact` : ''}. Front-foot ball changes everything downstream.`,
+      `The collisions belong to ${front.short_name}, over the gainline on ${Math.max(homeGain, awayGain)}% of carries against ${Math.min(homeGain, awayGain)}%.${pcm ? ` Another ${pcm} metres have come after contact.` : ''} Front-foot ball changes everything downstream.`,
     );
   }
 
@@ -631,13 +650,13 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
   if (Math.max(homeErr, awayErr) >= 12) {
     const worse = homeErr > awayErr ? home : away;
     parts.push(
-      `${worse.short_name}'s handling has let them down (${Math.max(homeErr, awayErr)} errors in the match), meaning opportunities left on the floor.`,
+      `${worse.short_name}'s handling has been the flaw, ${Math.max(homeErr, awayErr)} errors in the match, each one an attacking platform given away.`,
     );
   }
 
   if (parts.length === 0) {
     parts.push(
-      `The attacking read is close: line breaks ${homeLB}-${awayLB}, metres ${Math.round(homeM)}-${Math.round(awayM)}, tries ${result.home_tries}-${result.away_tries}. Neither back line has been able to consistently ask the harder questions of the other.`,
+      `The two attacks mirror each other, line breaks ${homeLB}-${awayLB} and tries ${result.home_tries}-${result.away_tries}, and neither back line has found a question the other cannot answer.`,
     );
   }
 
@@ -663,17 +682,17 @@ function platformParagraph(
   if (Math.abs(homeKIP - awayKIP) >= 6) {
     const kicker = homeKIP > awayKIP ? home : away;
     parts.push(
-      `${kicker.short_name} the more kick-heavy of the two (${Math.max(homeKIP, awayKIP)} kicks in play against ${Math.min(homeKIP, awayKIP)}): deliberate territorial rugby, willing to hand the ball back for field position.`,
+      `${kicker.short_name} have played the more kick-shaped game, ${Math.max(homeKIP, awayKIP)} kicks in play to ${Math.min(homeKIP, awayKIP)}: territory first, and willing to give the ball back to get it.`,
     );
   }
   if (homeKM + awayKM > 0 && Math.abs(homeKM - awayKM) >= 200) {
     const better = homeKM > awayKM ? home : away;
     parts.push(
-      `${better.short_name}'s boot has produced ${Math.round(Math.max(homeKM, awayKM))}m of kicked distance against ${Math.round(Math.min(homeKM, awayKM))}m, winning the aerial territorial exchange.`,
+      `${better.short_name}'s boot has won the long-range exchange, ${Math.round(Math.max(homeKM, awayKM))} kicked metres to ${Math.round(Math.min(homeKM, awayKM))}, and with it the right to play in the opposition half.`,
     );
   } else if (homeKT + awayKT >= 20) {
     parts.push(
-      `Kicks to touch have piled up (${homeKT}-${awayKT}): a lineout-heavy, structured game rather than a broken-field one.`,
+      `Kicks to touch have stacked up (${homeKT}-${awayKT}). Both sides want this settled off lineout launches, not broken field.`,
     );
   }
 
@@ -685,7 +704,7 @@ function platformParagraph(
   if (Math.max(homeScrumLost, awayScrumLost) >= 2 || Math.max(homeLineoutLost, awayLineoutLost) >= 3) {
     const worseSet = homeScrumLost + homeLineoutLost > awayScrumLost + awayLineoutLost ? home : away;
     parts.push(
-      `${worseSet.short_name}'s set-piece has creaked at critical moments. Losing your own ball at scrum or lineout is the fastest way to bleed field position.`,
+      `${worseSet.short_name}'s set-piece has wobbled on its own ball, and possession given up at the source is the hardest kind to win back.`,
     );
   }
 
@@ -695,7 +714,7 @@ function platformParagraph(
   if (Math.abs(homeTOW - awayTOW) >= 4) {
     const jackaller = homeTOW > awayTOW ? home : away;
     parts.push(
-      `${jackaller.short_name}'s breakdown work has been the standout (${Math.max(homeTOW, awayTOW)} turnovers won against ${Math.min(homeTOW, awayTOW)}), and every steal is a possession swing and a momentum killer.`,
+      `At the contact area ${jackaller.short_name} have picked ${Math.max(homeTOW, awayTOW)} turnovers to ${Math.min(homeTOW, awayTOW)}, and each one has flipped the field just as the opposition were building.`,
     );
   }
 
@@ -709,7 +728,7 @@ function platformParagraph(
       const cleaner = homeRuckPct >= awayRuckPct ? home : away;
       const messier = cleaner.id === home.id ? away : home;
       parts.push(
-        `Ruck retention favours ${cleaner.short_name} (${Math.round(Math.max(homeRuckPct, awayRuckPct))}% to ${Math.round(Math.min(homeRuckPct, awayRuckPct))}%), and ${messier.short_name}'s loose ball at the breakdown keeps handing back cheap possession.`,
+        `Ruck ball tells its own story, ${cleaner.short_name} recycling at ${Math.round(Math.max(homeRuckPct, awayRuckPct))}% to ${Math.round(Math.min(homeRuckPct, awayRuckPct))}%, and ${messier.short_name}'s loose ball at the breakdown keeps handing back cheap possession.`,
       );
     }
   }
@@ -718,7 +737,7 @@ function platformParagraph(
   if (Math.abs(homeQuick - awayQuick) >= 10) {
     const faster = homeQuick > awayQuick ? home : away;
     parts.push(
-      `${faster.short_name} are also generating the quicker ball (${Math.max(homeQuick, awayQuick)}% of rucks recycled inside three seconds against ${Math.min(homeQuick, awayQuick)}%), which is why their attack keeps finding a defence that hasn't reset.`,
+      `Tempo belongs to ${faster.short_name}: ${Math.max(homeQuick, awayQuick)}% of their rucks produce ball inside three seconds, against ${Math.min(homeQuick, awayQuick)}%, which is why their attack keeps meeting a defence that has not reset.`,
     );
   }
 
@@ -729,10 +748,10 @@ function platformParagraph(
     const carded = homeCards > awayCards ? home : awayCards > homeCards ? away : null;
     if (carded) {
       parts.push(
-        `${carded.short_name} have shipped ${homeCards > awayCards ? homeCards : awayCards} card${(homeCards > awayCards ? homeCards : awayCards) === 1 ? '' : 's'}, and every minute a man short is a minute the game plan can't fully execute.`,
+        `${carded.short_name} have shipped ${homeCards > awayCards ? homeCards : awayCards} card${(homeCards > awayCards ? homeCards : awayCards) === 1 ? '' : 's'}, and a game plan does not survive minutes a man short intact.`,
       );
     } else {
-      parts.push('Cards to both sides gave the contest a scrappy, disciplinary edge.');
+      parts.push('Cards have gone both ways, adding a stop-start edge to the whole contest.');
     }
   }
 
@@ -740,16 +759,16 @@ function platformParagraph(
   if (isLive) {
     const remaining = Math.max(0, 80 - currentMinute);
     parts.push(
-      `${remaining} minutes still to run, with plenty of time for the axis story to change if either side finds a fresh gear off the bench.`,
+      `${remaining} minutes remain, time enough for a bench to swing the platform battle the other way.`,
     );
   } else {
     parts.push(
-      'Full-time confirmation of a match where the platform work (set-piece, breakdown, kicking exchange) did the quiet work behind whichever scoreline held up.',
+      'The platform work, the kicking exchange, the set-piece and the breakdown, is where the final scoreline was quietly built.',
     );
   }
 
   if (parts.length === 0) {
-    return 'The platform battle was largely a stalemate: set-piece stable both sides, breakdown even, kicking exchanges finding the same lengths.';
+    return 'The platform battle finished all square: solid set-piece on both sides, an even breakdown, kicking exchanges cancelling out. No hidden leverage in this one.';
   }
 
   return parts.join(' ');
@@ -773,7 +792,9 @@ function buildVariance(
   const gaps = computeAxisGaps(result);
   const decisive = gaps.filter((g) => Math.abs(g.signedGap) >= gapThreshold(g.key));
   if (decisive.length === 0) {
-    return `Near-mirror profiles across the eight axes, with no single dimension producing a decisive gap between ${home.short_name} and ${away.short_name}.`;
+    return isLive
+      ? `Near-mirror numbers so far, with no dimension yet opening a decisive gap between ${home.short_name} and ${away.short_name}.`
+      : `Near-mirror numbers throughout: no single dimension separated ${home.short_name} and ${away.short_name} decisively, and the match was settled in the margins.`;
   }
 
   const homeWinners = decisive.filter((g) => g.advantage === 'home');
@@ -783,10 +804,11 @@ function buildVariance(
   const topAway = awayWinners.slice().sort(rank).slice(0, 2);
 
   const parts: string[] = [];
-  if (topHome.length) parts.push(`${home.short_name} ahead on ${listGapLabels(topHome)}`);
-  if (topAway.length) parts.push(`${away.short_name} ahead on ${listGapLabels(topAway)}`);
-  const framing = isLive ? 'Where variance is opening up' : 'Where variance decided it';
-  return `${framing}: ${parts.join('; ')}. Those are the dimensions writing the scoreboard.`;
+  if (topHome.length) parts.push(`${home.short_name} ${isLive ? 'ahead' : 'came out ahead'} on ${listGapLabels(topHome)}`);
+  if (topAway.length) parts.push(`${away.short_name} ${isLive ? 'ahead' : 'ended up ahead'} on ${listGapLabels(topAway)}`);
+  return isLive
+    ? `The gaps that matter are opening up: ${parts.join('; ')}. Those are the dimensions writing the scoreboard.`
+    : `The gaps that mattered are plain: ${parts.join('; ')}. Those were the dimensions that wrote the scoreboard.`;
 }
 
 /** Threshold above which an axis gap is worth naming as decisive. Tight
@@ -874,16 +896,16 @@ function attackNarrative(result: Result, home: Team, away: Team, ctx: PreMatchCo
   const awayBase = ctx.awayAgg?.perGame.pointsScored;
 
   const openLine = homeS > awayS
-    ? `${home.short_name}'s attack has been the more productive of the two (${homeS} points to ${away.short_name}'s ${awayS}) at the sharp end of the scoreboard.`
+    ? `${home.short_name} have been the sharper attacking side, ${homeS} points to ${away.short_name}'s ${awayS} at the business end.`
     : awayS > homeS
-      ? `${away.short_name}'s attack has been the more productive of the two (${awayS} points to ${home.short_name}'s ${homeS}) at the sharp end of the scoreboard.`
-      : `Both attacks reached the same output (${homeS} points each), but the paths there tell different stories.`;
+      ? `${away.short_name} have been the sharper attacking side, ${awayS} points to ${home.short_name}'s ${homeS} at the business end.`
+      : `Two attacks, identical output: ${homeS} points apiece.`;
 
   const tryLine = Math.abs(homeT - awayT) >= 2
-    ? ` Tries have flowed ${homeT}-${awayT}, and that's the difference-maker, with ${homeT > awayT ? home.short_name : away.short_name}'s back-line asking the harder questions.`
+    ? ` It is the five-pointers doing the separating: tries have run ${homeT}-${awayT}, and ${homeT > awayT ? home.short_name : away.short_name}'s strike play is the difference.`
     : homeT + awayT === 0
-      ? ' Neither side has crossed the whitewash, and the boot is doing all the finishing today.'
-      : ` Tries even at ${homeT}-${awayT}, meaning the extra scoreboard yield has come from set-piece and penalty accuracy rather than five-pointer flair.`;
+      ? ' Neither side has crossed the whitewash, so the boot has done all the scoring.'
+      : ` With tries level at ${homeT}-${awayT}, any extra yield has come off the tee and the set-piece rather than from strike play.`;
 
   const varianceLine = attackVarianceReference(homeS, awayS, homeBase, awayBase, home, away);
 
@@ -899,16 +921,16 @@ function attackVarianceReference(
   away: Team,
 ): string {
   if (homeBase && homeBase > 0 && homeS > homeBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${home.short_name} are on for a season-best output, comfortably above their ${homeBase.toFixed(0)}-per-game norm.`;
+    return ` ${home.short_name} are running well clear of the ${homeBase.toFixed(0)} a game they normally manage; this is an attacking shift above their own standard.`;
   }
   if (awayBase && awayBase > 0 && awayS > awayBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${away.short_name} are on for a season-best output, comfortably above their ${awayBase.toFixed(0)}-per-game norm.`;
+    return ` ${away.short_name} are running well clear of the ${awayBase.toFixed(0)} a game they normally manage; this is an attacking shift above their own standard.`;
   }
   if (homeBase && homeBase > 0 && homeS < homeBase * (1 - BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${home.short_name} sit well below their ${homeBase.toFixed(0)}-per-game attacking baseline, and the phase count isn't translating into points.`;
+    return ` ${home.short_name} have fallen well short of their ${homeBase.toFixed(0)}-a-game standard, and that shortfall frames everything else in their performance.`;
   }
   if (awayBase && awayBase > 0 && awayS < awayBase * (1 - BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${away.short_name} sit well below their ${awayBase.toFixed(0)}-per-game attacking baseline, and the phase count isn't translating into points.`;
+    return ` ${away.short_name} have fallen well short of their ${awayBase.toFixed(0)}-a-game standard, and that shortfall frames everything else in their performance.`;
   }
   return '';
 }
@@ -923,14 +945,14 @@ function defenceNarrative(result: Result, home: Team, away: Team, ctx: PreMatchC
   const awayBase = ctx.awayAgg?.perGame.pointsConceded;
 
   const openLine = homeConceded < awayConceded
-    ? `${home.short_name}'s defensive line has been the harder to break (${homeConceded} conceded against ${awayConceded} for ${away.short_name}).`
+    ? `The harder line to break has been ${home.short_name}'s, ${homeConceded} conceded against ${awayConceded} at the other end.`
     : awayConceded < homeConceded
-      ? `${away.short_name}'s defensive line has been the harder to break (${awayConceded} conceded against ${homeConceded} for ${home.short_name}).`
-      : `Both defensive systems have conceded exactly the same (${homeConceded} apiece).`;
+      ? `The harder line to break has been ${away.short_name}'s, ${awayConceded} conceded against ${homeConceded} at the other end.`
+      : `Neither defence has given the other an inch of advantage: ${homeConceded} conceded apiece.`;
 
   const tackleLine = Math.abs(homeTackle - awayTackle) >= 5
-    ? ` Tackle completion tips it further (${Math.round(Math.max(homeTackle, awayTackle))}% to ${Math.round(Math.min(homeTackle, awayTackle))}%), and line integrity is doing real work.`
-    : ` Tackle completion is close (${Math.round(homeTackle)}% and ${Math.round(awayTackle)}%), so the concession gap is coming from field position rather than missed hits.`;
+    ? ` Tackle completion explains part of it, ${Math.round(Math.max(homeTackle, awayTackle))}% to ${Math.round(Math.min(homeTackle, awayTackle))}%, with line integrity doing the real work.`
+    : ` With tackle completion near-level (${Math.round(homeTackle)}% and ${Math.round(awayTackle)}%), any gap in concessions traces to field position rather than missed hits.`;
 
   const varianceLine = defenceVarianceReference(homeConceded, awayConceded, homeBase, awayBase, home, away);
 
@@ -946,10 +968,10 @@ function defenceVarianceReference(
   away: Team,
 ): string {
   if (homeBase && homeConceded > homeBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${home.short_name} are shipping above their ${homeBase.toFixed(0)}-per-game season line, and this isn't the defensive shape they normally hold.`;
+    return ` ${home.short_name} are leaking beyond the ${homeBase.toFixed(0)} a game they usually hold opponents to; this is not their normal shape.`;
   }
   if (awayBase && awayConceded > awayBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
-    return ` ${away.short_name} are conceding above their ${awayBase.toFixed(0)}-per-game season baseline, and the defensive system is under real strain.`;
+    return ` ${away.short_name} are leaking beyond the ${awayBase.toFixed(0)} a game they usually hold opponents to, and the system is under real strain.`;
   }
   return '';
 }
@@ -966,13 +988,13 @@ function setPieceNarrative(result: Result, home: Team, away: Team, _ctx: PreMatc
 
   if (Math.max(homeScrumLost, awayScrumLost) >= 2) {
     const worse = homeScrumLost > awayScrumLost ? home : away;
-    return `${worse.short_name}'s scrum has been the real point of pressure. Lost engagements at the set-piece are the fastest way to bleed field position, and ${worse.short_name} are shipping them today. The other pack is walking the game up-field on the back of that platform.${maulSentence}`;
+    return `The scrum is where the pressure is telling. ${worse.short_name} keep losing their own feed, and every lost engagement walks the opposing pack up-field for free.${maulSentence}`;
   }
   if (Math.max(homeLineoutLost, awayLineoutLost) >= 3) {
     const worse = homeLineoutLost > awayLineoutLost ? home : away;
-    return `${worse.short_name}'s lineout has been the leak. Throw and jump sync isn't holding today, and every misfire hands attacking territory straight back. The primary attacking platform has to come from somewhere else.${maulSentence}`;
+    return `The leak is at the lineout. ${worse.short_name}'s throw-and-jump timing has not held, each misfire hands attacking territory straight back, and their launch platform has to come from somewhere else.${maulSentence}`;
   }
-  return `Both packs have secured their own ball, and the set-piece has been an evenly-contested draw. Neither side is winning easy possession off the platform, so points have had to come from open play rather than structured launches.${maulSentence}`;
+  return `Both packs have looked after their own ball, and the set-piece has cancelled out. With no easy possession off the platform, the points have had to be built in open play.${maulSentence}`;
 }
 
 function maulRead(result: Result, home: Team, away: Team): string {
@@ -983,11 +1005,11 @@ function maulRead(result: Result, home: Team, away: Team): string {
 
   if (Math.max(homeMauls, awayMauls) >= 8 && Math.abs(homeMauls - awayMauls) >= 3) {
     const driver = homeMauls > awayMauls ? home : away;
-    return ` ${driver.short_name}'s driving maul has been a genuine weapon (${Math.max(homeMauls, awayMauls)} won), forcing the defence to commit numbers and opening space wide.`;
+    return ` ${driver.short_name}'s driving maul has been a weapon in its own right (${Math.max(homeMauls, awayMauls)} won), pulling in defenders and opening space out wide.`;
   }
   if (Math.max(homeMaulsLost, awayMaulsLost) >= 2) {
     const worse = homeMaulsLost > awayMaulsLost ? home : away;
-    return ` ${worse.short_name} have also had their maul held up more than once, wasting prime lineout platforms.`;
+    return ` ${worse.short_name} have also seen their maul held up more than once, prime lineout platforms wasted.`;
   }
   return '';
 }
@@ -1001,9 +1023,9 @@ function disciplineNarrative(result: Result, home: Team, away: Team, ctx: PreMat
   if (homeCards + awayCards > 0) {
     const carded = homeCards > awayCards ? home : awayCards > homeCards ? away : null;
     if (carded) {
-      return `${carded.short_name} have been forced to play part of the match short. Cards change territorial pressure and points-shipping risk substantially, and the impact has shown up in the scoreboard. The unshaded ${homeCards > awayCards ? away.short_name : home.short_name} side has managed the extra-man windows well.`;
+      return `${carded.short_name} have spent part of this match a man down, and cards shift the whole territorial equation. ${homeCards > awayCards ? away.short_name : home.short_name} have had extra-man windows to attack, and defending them is where ${carded.short_name}'s energy has gone.`;
     }
-    return `Both sides have shipped cards, giving the contest a scrappy disciplinary edge that's forced both coaching boxes to close ranks and defend numerically compromised phases. Neither has been decisively punished.`;
+    return `Cards on both sides have left each defence covering fourteen-man phases, and the contest has carried a scrappy disciplinary edge because of it. Neither side has been decisively punished.`;
   }
   if (Math.abs(homePens - awayPens) >= 3) {
     const worse = homePens > awayPens ? home : away;
@@ -1012,11 +1034,11 @@ function disciplineNarrative(result: Result, home: Team, away: Team, ctx: PreMat
       worse.id === home.id ? ctx.homeAgg?.perGame.penaltiesConceded : ctx.awayAgg?.perGame.penaltiesConceded;
     const varianceBit =
       worseBase && worseCount > worseBase * (1 + BASELINE_VARIANCE_THRESHOLD)
-        ? ` That's well above their ${worseBase.toFixed(0)}-per-game season line and it's costing them field position at critical moments.`
+        ? ` It is also well beyond their ${worseBase.toFixed(0)}-a-game season norm, so this is an off-day by their own standards, not a habit.`
         : '';
-    return `${worse.short_name}'s discipline has been the concern. A heavier penalty count is keeping them pinned back and gifting the opposition points at the tee.${varianceBit}${penaltyCauseRead(result, worse, worse.id === home.id)}`;
+    return `The penalty count runs against ${worse.short_name}, and every whistle is field position or points handed over. It is the quiet tax on everything else they are trying to do.${varianceBit}${penaltyCauseRead(result, worse, worse.id === home.id)}`;
   }
-  return `Discipline has been broadly clean on both sides. The referee has kept the whistle mostly in the pocket, and neither side is giving the other easy shots at goal. That leaves the game in the players' hands.`;
+  return `Discipline has held on both sides. With the whistle largely staying in the referee's pocket, neither side is being gifted shots at goal, and the contest is being settled by play rather than penalty.`;
 }
 
 /** Names the dominant penalty cause when one bucket carries half or
@@ -1031,7 +1053,7 @@ function penaltyCauseRead(result: Result, worse: Team, worseIsHome: boolean): st
   ];
   const [label, count] = causes.sort((x, y) => y[1] - x[1])[0]!;
   if (count / total < 0.5) return '';
-  return ` The leak is concentrated at ${label} (${count} of the ${total}), which at least gives the coaching box one specific problem to fix.`;
+  return ` The leak concentrates at ${label}, ${count} of the ${total}, which at least gives the coaches one specific problem to fix rather than a general talking-to.`;
 }
 
 function kickingNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
@@ -1045,13 +1067,13 @@ function kickingNarrative(result: Result, home: Team, away: Team, _ctx: PreMatch
 
   if (Math.abs(homeM - awayM) >= 8) {
     const better = homeM > awayM ? home : away;
-    return `${better.short_name}'s boot has been the more effective territorial weapon. More distance per kick means more field position won and the ability to pin the opposition deep. That aerial control has been a quiet but decisive edge.${fiftyTwentyTwo}`;
+    return `The territorial kicking duel has gone ${better.short_name}'s way. More distance per kick means the exits keep landing deeper, and the game keeps being played where they want it. A quiet edge, but a decisive one.${fiftyTwentyTwo}`;
   }
   if (Math.abs(homeKIP - awayKIP) >= 6) {
     const kicker = homeKIP > awayKIP ? home : away;
-    return `${kicker.short_name} have been the more kick-heavy of the two, choosing deliberate territorial rugby that's willing to hand the ball back for field position rather than force phases through contact. It's a strategic choice, not a lack of ideas.${fiftyTwentyTwo}`;
+    return `${kicker.short_name} have made the boot their strategy, kicking far more often and trusting field position over phase count. That is a choice, not a shortage of ideas.${fiftyTwentyTwo}`;
   }
-  return `Kicking exchanges have been evenly matched, with both fly-halves finding similar lengths and neither back-three winning the aerial contest decisively. The territorial battle is being fought on other fronts.${fiftyTwentyTwo}`;
+  return `Kicking exchanges have cancelled out, both boots finding similar lengths and neither back three winning the air decisively. The territorial contest is being fought elsewhere.${fiftyTwentyTwo}`;
 }
 
 function fiftyTwentyTwoRead(result: Result, home: Team, away: Team): string {
@@ -1060,7 +1082,7 @@ function fiftyTwentyTwoRead(result: Result, home: Team, away: Team): string {
   if (h === 0 && a === 0) return '';
   const kicker = h >= a ? home : away;
   const count = Math.max(h, a);
-  return ` ${kicker.short_name} have also landed ${count === 1 ? 'a 50/22' : `${count} 50/22s`}, the kind of momentum-flipping kick that turns defence straight into an attacking lineout.`;
+  return ` ${kicker.short_name} have also landed ${count === 1 ? 'a 50/22' : `${count} 50/22s`}, the kick that turns a defensive position into an attacking lineout in one swing.`;
 }
 
 function territoryNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
@@ -1068,26 +1090,26 @@ function territoryNarrative(result: Result, home: Team, away: Team, _ctx: PreMat
   if (Math.abs(delta) >= 15) {
     const dominant = delta > 0 ? home : away;
     const trailing = delta > 0 ? away : home;
-    return `${dominant.short_name} have squeezed the field decisively. Heavy territorial dominance means ${trailing.short_name} are defending from deep for long stretches, and that's the sort of sustained pressure that eventually breaks a defensive line. Whether it converts is the open question.`;
+    return `Territory has swung heavily ${dominant.short_name}'s way. That leaves ${trailing.short_name} defending from deep for long stretches, and sustained pressure of that kind eventually cracks most lines. Whether it converts is the open question.`;
   }
   if (Math.abs(delta) >= 8) {
     const dominant = delta > 0 ? home : away;
-    return `${dominant.short_name} have been the more territorially aggressive of the two, slowly walking the game up-field rather than blowing it open. The pressure is building rather than exploding.`;
+    return `The field-position battle is tilting towards ${dominant.short_name}, less an avalanche than a slow squeeze up-field. The pressure is building rather than exploding.`;
   }
-  return `Territory has been shared, with neither side pinning the other for extended stretches, and the game has stayed largely in the middle third of the field. That kind of even geography favours defensive systems.`;
+  return `Neither side has managed to pin the other back; the game has lived in the middle third, and even geography like that suits the defences.`;
 }
 
 function possessionNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
   const delta = result.home_possession_percent - result.away_possession_percent;
   if (Math.abs(delta) >= 15) {
     const dominant = delta > 0 ? home : away;
-    return `${dominant.short_name} have monopolised the ball, a heavy possession lean that says access isn't the problem, execution is. The question is whether that phase count converts into points before their opposition find a route back into the game.`;
+    return `Access to the ball is not ${dominant.short_name}'s problem; they have monopolised it. What that heavy lean demands is conversion, and the phase count has to start paying in points before the door closes on it.`;
   }
   if (Math.abs(delta) >= 8) {
     const dominant = delta > 0 ? home : away;
-    return `${dominant.short_name} have been shading possession, playing the more patient phase count of the two and asking their opposition to defend more work. Not a landslide, but a steady tempo advantage.`;
+    return `${dominant.short_name} are shading the ball and setting the tempo, asking the opposition to make more tackles than they would like. A steady lean, not a landslide.`;
   }
-  return `Possession has split near-even, with both sides trusting their carry-and-recycle game about equally. Whichever side wins the game will have done it on efficiency rather than volume of touches.`;
+  return `Possession has split near-even, both sides backing their carry-and-recycle game, so what separates them is efficiency rather than volume of touches.`;
 }
 
 function turnoversNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
@@ -1095,12 +1117,12 @@ function turnoversNarrative(result: Result, home: Team, away: Team, _ctx: PreMat
   const total = result.home_turnovers_won + result.away_turnovers_won;
   if (Math.abs(delta) >= 4) {
     const better = delta > 0 ? home : away;
-    return `${better.short_name}'s breakdown work has been the standout. Each turnover won is a possession swing and a momentum killer, and they've been the more aggressive of the two at the ruck. Their opposition is going to have to defend those extra opportunities on the counter.`;
+    return `The breakdown contest has a clear winner. ${better.short_name} keep coming away with opposition ball, and each steal is a possession swing plus a counter-attack the other side has to defend. That double cost is why turnovers hurt twice.`;
   }
   if (total >= 15) {
-    return `A high-turnover contest on both sides, with the breakdown a battle every phase and ball retention at a premium. That kind of chaos usually favours the side with the sharper counter-attack.`;
+    return `Turnovers are flying at both ends, ball retention at a premium and the breakdown a fight every phase. Chaos of that kind usually rewards the sharper counter-attack.`;
   }
-  return `Turnovers have run close, with neither breakdown winning the collisions decisively, and the game has flowed as a phase-count contest rather than a broken-field one.`;
+  return `Little to choose at the breakdown, with neither side winning the contact area decisively; this has flowed as a phase-count contest rather than a broken-field one.`;
 }
 
 // ─── Closing outlook ────────────────────────────────────────────────────────
@@ -1125,9 +1147,9 @@ function buildOutlook(
   if (homeArea) parts.push(`${home.short_name} will want to sharpen ${homeArea}`);
   if (awayArea) parts.push(`${away.short_name} will need to work on ${awayArea}`);
   if (parts.length === 0) {
-    return `${framing}, both sides walk away with a broadly balanced read, and no single dimension jumps out as the pressing weakness. Marginal gains are where the next steps live.`;
+    return `${framing}, the read is broadly balanced: no single dimension stands out as the pressing weakness, and the next steps live in marginal gains.`;
   }
-  return `${framing}, ${parts.join('; ')}. Those are the areas the coaching boxes will be circling in the review room.`;
+  return `${framing}, ${parts.join('; ')}. Those are the lines the review will open with.`;
 }
 
 /**
@@ -1150,14 +1172,14 @@ function weakestAreaFor(
       ? (result.home_yellow_cards ?? 0) + (result.home_red_cards ?? 0)
       : (result.away_yellow_cards ?? 0) + (result.away_red_cards ?? 0);
   if (cards > 0) {
-    return `discipline in the tackle contest (playing short has been costly against ${oppTeam.short_name})`;
+    return `discipline in the tackle contest (playing a man short has been costly against ${oppTeam.short_name})`;
   }
 
   const conceded = side === 'home' ? result.away_score : result.home_score;
   const concededBase =
     side === 'home' ? ctx.homeAgg?.perGame.pointsConceded : ctx.awayAgg?.perGame.pointsConceded;
   if (concededBase && conceded > concededBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
-    return `their defensive line (${conceded} points shipped is well above their ${concededBase.toFixed(0)}-per-game season norm)`;
+    return `their defensive line (${conceded} shipped against a season norm of ${concededBase.toFixed(0)} a game)`;
   }
 
   const scrumLost =
@@ -1165,7 +1187,7 @@ function weakestAreaFor(
   const lineoutLost =
     side === 'home' ? (result.home_lineouts_lost ?? 0) : (result.away_lineouts_lost ?? 0);
   if (scrumLost >= 2 || lineoutLost >= 3) {
-    return `their set-piece platform (losing their own ball at ${scrumLost >= 2 ? 'scrum' : 'lineout'} needs a fix at the review)`;
+    return `their set-piece platform (own ball lost at the ${scrumLost >= 2 ? 'scrum' : 'lineout'} is the first item on the review)`;
   }
 
   const pens =
@@ -1173,14 +1195,14 @@ function weakestAreaFor(
   const oppPens =
     side === 'home' ? (result.away_penalties_conceded ?? 0) : (result.home_penalties_conceded ?? 0);
   if (pens >= oppPens + 3) {
-    return `their penalty count (a ${pens}-count is field position given away for free)`;
+    return `their penalty count (${pens} conceded is field position handed over for free)`;
   }
 
   const scored = side === 'home' ? result.home_score : result.away_score;
   const scoredBase =
     side === 'home' ? ctx.homeAgg?.perGame.pointsScored : ctx.awayAgg?.perGame.pointsScored;
   if (scoredBase && scored < scoredBase * (1 - BASELINE_VARIANCE_THRESHOLD)) {
-    return `their attacking conversion (${scored} points is well short of their ${scoredBase.toFixed(0)}-per-game season line)`;
+    return `their attacking conversion (${scored} points against a ${scoredBase.toFixed(0)}-a-game season line)`;
   }
 
   return null;

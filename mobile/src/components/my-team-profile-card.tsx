@@ -38,7 +38,7 @@ function Populated({ teamId }: { teamId: string }) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>My Team Profile</Text>
+          <Text style={styles.sectionLabel}>Team Profile</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
