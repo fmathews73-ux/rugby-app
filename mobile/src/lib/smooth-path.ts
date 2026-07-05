@@ -9,19 +9,15 @@
  */
 
 /**
- * Neutral reference colour — dark grey (gray-700). Retained for
- * benchmark ticks (KPI T1-average marker, scout median marker) where a
- * neutral "this is the reference, not data" read is the point.
+ * Chart line colour — dark grey (gray-700). Single-team data lines
+ * (Form sparkline, Ranking Trajectory, player trends) draw in this
+ * neutral grey with outcome-coloured dots (green/red/grey) carrying the
+ * directional read; it doubles as the benchmark-tick colour (KPI
+ * T1-average marker, scout median marker). The blue-accent-line scheme
+ * was tried and reverted 2026-07-05 — Frank prefers grey lines with
+ * red/green markers.
  */
 export const CHART_LINE_COLOR = '#374151';
-
-/**
- * Accent colour for single-team data lines (Form sparkline, Ranking
- * Trajectory, player trend sparklines) — the same blue family as the
- * Profile radar polygon and the Momentum card's home side, so "blue =
- * the subject team's data" holds across every chart.
- */
-export const CHART_ACCENT_COLOR = '#3B82F6';
 
 export function smoothLinePath(
   points: readonly { x: number; y: number }[],

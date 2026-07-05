@@ -17,7 +17,9 @@ export function LineFadeRibbon({
   steps = 8,
   stepPx = 3,
   strokeWidth = 3.2,
-  baseOpacity = 0.12,
+  // Whisper-light default — the fade should read as a hint of depth
+  // under the line, not a shadow (0.12 was flagged too dark in grey).
+  baseOpacity = 0.05,
 }: {
   /** The line's SVG path `d` — the same one the visible stroke uses. */
   path: string;

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { Circle, ClipPath, Defs, G, Line, Path, Rect } from 'react-native-svg';
+import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -16,9 +16,13 @@ import {
   streakFor,
   type FormPoint,
 } from '@/lib/form-momentum';
-import { CHART_ACCENT_COLOR, smoothLinePath } from '@/lib/smooth-path';
-import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+
+// Outcome bar colours — same trio as FormCircles so W/L/D reads
+// identically across the dot strip and the margin bars.
+const WIN_COLOR = '#059669';
+const LOSS_COLOR = '#DC2626';
+const DRAW_COLOR = '#9CA3AF';
 
 const LOOKBACK = 10;
 
@@ -154,7 +158,7 @@ export function ExtendedMomentum({
       {points.length === 0 ? (
         <Text style={styles.empty}>Not enough matches yet.</Text>
       ) : (
-        <Sparkline points={points} />
+        <MarginBars points={points} />
       )}
 
       <MomentumInfoModal
@@ -166,34 +170,54 @@ export function ExtendedMomentum({
   );
 }
 
-function Sparkline({ points }: { points: readonly FormPoint[] }) {
-  // Real measured canvas — geometry is computed in actual pixels from
-  // onLayout, never stretched via viewBox scaling, so strokes and dots
-  // render true at any card height (the Home carousel stretches cards
-  // to their tallest sibling; minHeight covers intrinsic contexts).
+/**
+ * Diverging margin bars — the broadcast-standard form read. One bar
+ * per match off a shared zero baseline, oldest (left) to newest
+ * (right): wins rise in green, losses drop in red, bar height scales
+ * with the points margin, draws sit as small neutral stubs on the
+ * baseline. Static fills (no motion, by rule); geometry computed in
+ * real pixels from the onLayout-measured canvas.
+ */
+function MarginBars({ points }: { points: readonly FormPoint[] }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
-  const padY = 12;
+  // Vertical padding reserves room for the margin value labels above
+  // the tallest win bar and below the deepest loss bar.
+  const padY = 16;
   const maxAbs = Math.max(20, ...points.map((p) => Math.abs(p.diff)));
-
-  const svgPoints = useMemo(
-    () =>
-      points.map((p, i) => {
-        const t = points.length === 1 ? 0.5 : i / (points.length - 1);
-        const x = padX + t * (width - 2 * padX);
-        const yNorm = (p.diff + maxAbs) / (2 * maxAbs);
-        const y = height - padY - yNorm * (height - 2 * padY);
-        return { x, y, outcome: p.outcome, diff: p.diff };
-      }),
-    [points, maxAbs, width, height],
-  );
   const zeroY = height / 2;
+  const halfBand = height / 2 - padY;
 
-  // Smoothed Bézier path through the points — the curve stays static;
-  // no motion graphics.
-  const smoothPath = useMemo(() => smoothLinePath(svgPoints).path, [svgPoints]);
+  const bars = useMemo(() => {
+    const n = points.length;
+    if (n === 0 || width === 0 || height === 0) return [];
+    const slotW = (width - 2 * padX) / n;
+    const barW = Math.min(14, Math.max(6, slotW * 0.55));
+    return points.map((p, i) => {
+      const x = padX + i * slotW + (slotW - barW) / 2;
+      const cx = x + barW / 2;
+      const barH = (Math.abs(p.diff) / maxAbs) * halfBand;
+      if (p.diff === 0) {
+        // Draw — a 2px neutral stub straddling the baseline, no label
+        // (a zero margin is the absence of a story).
+        return { x, y: zeroY - 1, w: barW, h: 2, fill: DRAW_COLOR, label: null, labelY: 0, cx };
+      }
+      const isWin = p.diff > 0;
+      return {
+        x,
+        y: isWin ? zeroY - barH : zeroY,
+        w: barW,
+        h: barH,
+        fill: isWin ? WIN_COLOR : LOSS_COLOR,
+        // Margin value: above the bar for wins, below for losses.
+        label: String(Math.abs(p.diff)),
+        labelY: isWin ? zeroY - barH - 4 : zeroY + barH + 11,
+        cx,
+      };
+    });
+  }, [points, maxAbs, width, height, zeroY, halfBand]);
 
   return (
     <View
@@ -205,45 +229,36 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
         })
       }>
       {width > 0 && height > 0 ? (
-      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Defs>
-        <ClipPath id="form-plot-clip">
-          <Rect x={0} y={0} width={width} height={height - padY} />
-        </ClipPath>
-      </Defs>
-      <Line
-        x1={padX}
-        y1={zeroY}
-        x2={width - padX}
-        y2={zeroY}
-        stroke="#E5E7EB"
-        strokeWidth={0.8}
-        strokeDasharray="3 3"
-      />
-      {/* Contour-hugging fade — a short band directly beneath the line
-          that follows its shape (GA-style), instead of an area fill
-          reaching down to the axis. Clipped to the plot so the lowest
-          echoes never spill past the bottom pad. Single accent blue for
-          line, dots and fade — outcome colour lives in the streak /
-          momentum meta above the chart, not on the line itself. */}
-      {svgPoints.length > 1 ? (
-        <G clipPath="url(#form-plot-clip)">
-          <LineFadeRibbon path={smoothPath} stroke={CHART_ACCENT_COLOR} />
-        </G>
-      ) : null}
-      {svgPoints.length > 1 ? (
-        <Path
-          d={smoothPath}
-          stroke={CHART_ACCENT_COLOR}
-          strokeWidth={1}
-          fill="none"
-          strokeLinecap="round"
-        />
-      ) : null}
-      {svgPoints.map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={CHART_ACCENT_COLOR} />
-      ))}
-      </Svg>
+        <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          {bars.map((b, i) => (
+            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
+          ))}
+          {bars.map((b, i) =>
+            b.label ? (
+              <SvgText
+                key={`l${i}`}
+                x={b.cx}
+                y={b.labelY}
+                fill={Colors.light.textSecondary}
+                fontSize={8}
+                fontWeight="700"
+                textAnchor="middle">
+                {b.label}
+              </SvgText>
+            ) : null,
+          )}
+          {/* Baseline ON TOP of the bars so the zero line stays crisp
+              where bars meet it. Solid and a step darker than the old
+              dashed hairline — the axis is the anchor of the read. */}
+          <Line
+            x1={padX}
+            y1={zeroY}
+            x2={width - padX}
+            y2={zeroY}
+            stroke="#D1D5DB"
+            strokeWidth={1.2}
+          />
+        </Svg>
       ) : null}
     </View>
   );
@@ -271,10 +286,11 @@ function MomentumInfoModal({
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Extended form chart showing the selected team's last {lookback}
-            completed matches, oldest (left) to most recent (right). Each dot's
-            height is the points-differential (final margin) for that game.
-            Green = win, red = loss, grey = draw.
+            The selected team's last {lookback} completed matches, oldest
+            (left) to most recent (right). Each bar rises or falls from the
+            zero line by that game's points margin — green bars above the
+            line are wins, red bars below are losses, and a small grey stub
+            on the line is a draw. Taller bar = bigger margin.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>

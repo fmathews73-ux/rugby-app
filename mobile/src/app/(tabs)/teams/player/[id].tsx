@@ -26,7 +26,12 @@ import {
   POSITION_LABELS,
   type ScoutMetric,
 } from '@/lib/player-roles';
-import { CHART_ACCENT_COLOR, CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+
+// Trend dot colours — same trio as the form circles / Form chart.
+const TREND_UP_COLOR = '#059669';
+const TREND_DOWN_COLOR = '#DC2626';
+const TREND_FLAT_COLOR = '#9CA3AF';
 
 const LOOKBACK = PLAYER_LOOKBACK;
 const GOOD_COLOR = '#059669';
@@ -382,16 +387,23 @@ function TrendSparkline({
       <G clipPath={`url(#${gradientId}-clip)`}>
         <LineFadeRibbon
           path={linePath}
-          stroke={CHART_ACCENT_COLOR}
+          stroke={CHART_LINE_COLOR}
           steps={5}
           stepPx={2}
           strokeWidth={2.2}
         />
       </G>
-      <Path d={linePath} stroke={CHART_ACCENT_COLOR} strokeWidth={1} fill="none" strokeLinecap="round" />
-      {points.map((pt, i) => (
-        <Circle key={i} cx={pt.x} cy={pt.y} r={1.5} fill={CHART_ACCENT_COLOR} />
-      ))}
+      <Path d={linePath} stroke={CHART_LINE_COLOR} strokeWidth={1} fill="none" strokeLinecap="round" />
+      {/* Dots coloured by move vs the previous appearance (trend
+          metrics are all higher-is-better); first / unchanged points
+          take the neutral grey. */}
+      {points.map((pt, i) => {
+        const prev = i > 0 ? values[i - 1]! : null;
+        const v = values[i]!;
+        const fill =
+          prev === null || v === prev ? TREND_FLAT_COLOR : v > prev ? TREND_UP_COLOR : TREND_DOWN_COLOR;
+        return <Circle key={i} cx={pt.x} cy={pt.y} r={1.5} fill={fill} />;
+      })}
       </Svg>
     </View>
   );

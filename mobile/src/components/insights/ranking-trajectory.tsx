@@ -1,22 +1,25 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { Circle, ClipPath, Defs, G, Path, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
-import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { CHART_ACCENT_COLOR, smoothLinePath } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
+// Rank-move dot colours — green when the month's rank improved, red
+// when it slipped, neutral grey when it held. Same trio as the Form
+// card's margin bars.
+const BETTER_COLOR = '#059669';
+const WORSE_COLOR = '#DC2626';
+const HELD_COLOR = '#9CA3AF';
+
 /**
- * 12-month line chart of a team's World Rugby ranking position. Y-axis is
- * inverted (rank 1 at the top) so "moving up the rankings" reads as the line
- * going up. Uses the rankings-history endpoint which now returns 13 monthly
- * snapshots (July prior year → today). Rank points are annotated at each
- * data point so the reader gets both the ordinal (rank) and the underlying
- * points behind it.
+ * 12-month rank dot-lattice of a team's World Rugby position — see
+ * TrajectoryChart below for the chart grammar. Uses the
+ * rankings-history endpoint (13 monthly snapshots, July prior year →
+ * today).
  */
 export function RankingTrajectory({
   teamId,
@@ -131,54 +134,76 @@ export function RankingTrajectory({
   );
 }
 
+/**
+ * Rank dot-lattice — a punch-card of the team's World Rugby position.
+ * Rows are DISCRETE rank rungs scaled to the observed range (a side
+ * that moved between #3 and #9 gets six rungs, so a one-place move is
+ * a visible step, not a pixel). One dot per monthly snapshot, coloured
+ * by that month's direction: green climbed, red slipped, grey held /
+ * first snapshot. Faint labelled gridlines carry the exact rank read;
+ * the header meta keeps the window summary (#from \u2192 #to \u25b2n).
+ */
 function TrajectoryChart({
   series,
 }: {
   series: { date: string; rank: number; points: number }[];
 }) {
-  // Real measured canvas — geometry is computed in actual pixels from
-  // onLayout, never stretched via viewBox scaling, so strokes and dots
-  // render true at any card height (the Home carousel stretches cards
-  // to their tallest sibling; minHeight covers intrinsic contexts).
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
   const width = canvas.w;
   const height = canvas.h;
-  const padX = 8;
+  // Rank labels sit flush at x=0 so the axis aligns with the card's
+  // title / meta text column; gridlines start after the label band.
+  const padLeft = 18;
+  const padRight = 10;
   const padTop = 10;
-  const padBottom = 22;
-  // Domain headroom BELOW the worst rank — the line's band compresses
-  // upward by this much so even a bottom-riding trajectory always has
-  // fill space beneath it (the area still closes at the true plot
-  // bottom). Mirrors how GA-style charts floor their y-axis below the
-  // data minimum instead of pinning the line to the axis.
-  const bottomHeadroom = 20;
+  // Bottom band reserved for the first/last month labels.
+  const padBottom = 18;
 
-  // Y-domain: rank 1 at top, worst-visible rank at the bottom of the
-  // COMPRESSED band (plot bottom minus headroom). Use max rank across
-  // the series, floored at 8 so a top-tier team's chart doesn't
-  // collapse to a flat line.
-  const maxRank = Math.max(8, ...series.map((s) => s.rank));
-  const rankToY = (rank: number) => {
-    const t = (rank - 1) / (maxRank - 1);
-    return padTop + t * (height - padTop - padBottom - bottomHeadroom);
-  };
+  // Discrete rung domain: the observed rank range, padded to at least
+  // three rungs so a season spent on one rank still draws a lattice.
+  const observedMin = Math.min(...series.map((s) => s.rank));
+  const observedMax = Math.max(...series.map((s) => s.rank));
+  const minRank = observedMax - observedMin < 2 ? Math.max(1, observedMin - 1) : observedMin;
+  const maxRank = observedMax - observedMin < 2 ? minRank + 2 : observedMax;
+  const rungs: number[] = [];
+  for (let r = minRank; r <= maxRank; r++) rungs.push(r);
+
+  const plotBottom = height - padBottom;
+  // Dot columns are inset from the label band so the first dot never
+  // crowds the rung labels on the left.
+  const plotLeft = padLeft + 12;
+  const plotRight = width - padRight - 4;
+  const rankToY = (rank: number) =>
+    padTop + ((rank - minRank) / (maxRank - minRank)) * (plotBottom - padTop - 8);
   const idxToX = (i: number) => {
-    if (series.length === 1) return width / 2;
-    return padX + (i / (series.length - 1)) * (width - 2 * padX);
+    if (series.length === 1) return (plotLeft + plotRight) / 2;
+    return plotLeft + (i / (series.length - 1)) * (plotRight - plotLeft);
   };
 
-  const svgPoints = series.map((s, i) => ({
-    x: idxToX(i),
-    y: rankToY(s.rank),
-    rank: s.rank,
-    date: s.date,
-  }));
-  const smoothPath = smoothLinePath(svgPoints).path;
+  // Fixed landmark labels — #1, #5, #10 — so the axis reads as world-
+  // ranking territory rather than chart-relative ticks. When a ladder
+  // sits outside those landmarks entirely (e.g. a side ranging #14–#20),
+  // fall back to labelling its ends and midpoint.
+  const landmarks = [1, 5, 10].filter((r) => r >= minRank && r <= maxRank);
+  const labelled = new Set<number>(
+    landmarks.length > 0
+      ? landmarks
+      : [minRank, Math.round((minRank + maxRank) / 2), maxRank],
+  );
 
-  // First + last data-point labels only — every-point labels get noisy on
-  // a 13-point series inside a phone width.
-  const first = svgPoints[0];
-  const last = svgPoints[svgPoints.length - 1];
+  const dots = series.map((s, i) => {
+    const prev = i > 0 ? series[i - 1]! : null;
+    const fill =
+      prev === null || s.rank === prev.rank
+        ? HELD_COLOR
+        : s.rank < prev.rank
+          ? BETTER_COLOR
+          : WORSE_COLOR;
+    return { x: idxToX(i), y: rankToY(s.rank), fill };
+  });
+
+  const first = series[0];
+  const last = series[series.length - 1];
 
   return (
     <View
@@ -191,66 +216,43 @@ function TrajectoryChart({
       }>
       {width > 0 && height > 0 ? (
       <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Defs>
-        <ClipPath id="trajectory-plot-clip">
-          <Rect x={0} y={0} width={width} height={height - padBottom} />
-        </ClipPath>
-      </Defs>
-      {/* Contour-hugging fade — a short band directly beneath the line
-          that follows its shape (GA-style), clipped to the plot so the
-          lowest echoes never spill into the month labels. Single accent
-          blue for line, dots and fade — rank-change colour lives in the
-          delta meta above the chart, not on the line. */}
-      {svgPoints.length > 1 ? (
-        <G clipPath="url(#trajectory-plot-clip)">
-          <LineFadeRibbon path={smoothPath} stroke={CHART_ACCENT_COLOR} />
-        </G>
-      ) : null}
-      {/* Trajectory line — Catmull-Rom → Bezier smoothed so segment
-          junctions curve instead of cornering. */}
-      <Path
-        d={smoothPath}
-        stroke={CHART_ACCENT_COLOR}
-        strokeWidth={1}
-        fill="none"
-        strokeLinecap="round"
-      />
-      {svgPoints.map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={CHART_ACCENT_COLOR} />
+      {/* Rung gridlines + rank labels. */}
+      {rungs.map((r) => (
+        <Line
+          key={`g${r}`}
+          x1={padLeft}
+          y1={rankToY(r)}
+          x2={width - padRight}
+          y2={rankToY(r)}
+          stroke="#F3F4F6"
+          strokeWidth={1}
+        />
       ))}
-      {/* Rank annotations at each endpoint — same weight / fill / size so
-          start and end read as one style, differing only in anchor. No
-          '#' prefix: it visually clashes with the digits in SVG text and
-          the chart context already reads as ranks. */}
-      {first ? (
-        <SvgText
-          x={first.x}
-          // Above the point by default; when a top-of-chart rank (e.g.
-          // finishing #1) leaves no headroom, flip BELOW the point so
-          // the label never clips the SVG edge or sits on the line.
-          y={first.y >= 16 ? first.y - 6 : first.y + 14}
-          fill={Colors.light.textSecondary}
-          fontSize={10}
-          fontWeight="700"
-          textAnchor="start">
-          {first.rank}
-        </SvgText>
-      ) : null}
-      {last ? (
-        <SvgText
-          x={last.x}
-          y={last.y >= 16 ? last.y - 6 : last.y + 14}
-          fill={Colors.light.textSecondary}
-          fontSize={10}
-          fontWeight="700"
-          textAnchor="end">
-          {last.rank}
-        </SvgText>
-      ) : null}
+      {rungs.map((r) =>
+        labelled.has(r) ? (
+          // Bare number, flush left with the card's text column — the
+          // '#' prefix crowds double digits in SVG text; the header's
+          // "#10 → #1" already frames these as ranks.
+          <SvgText
+            key={`t${r}`}
+            x={0}
+            y={rankToY(r) + 3}
+            fill={Colors.light.textSecondary}
+            fontSize={9}
+            fontWeight="700"
+            textAnchor="start">
+            {r}
+          </SvgText>
+        ) : null,
+      )}
+      {/* One dot per monthly snapshot, coloured by direction. */}
+      {dots.map((d, i) => (
+        <Circle key={i} cx={d.x} cy={d.y} r={3.5} fill={d.fill} />
+      ))}
       {/* X-axis endpoints: month labels. */}
       {first ? (
         <SvgText
-          x={first.x}
+          x={plotLeft}
           y={height - 4}
           fill={Colors.light.textSecondary}
           fontSize={9}
@@ -260,7 +262,7 @@ function TrajectoryChart({
       ) : null}
       {last ? (
         <SvgText
-          x={last.x}
+          x={plotRight}
           y={height - 4}
           fill={Colors.light.textSecondary}
           fontSize={9}
@@ -297,12 +299,14 @@ function TrajectoryInfoModal({
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            The team's World Rugby ranking across the last 12 monthly snapshots,
-            oldest (left) to newest (right). The y-axis is inverted so
-            <Text style={styles.modalStrong}> rank 1 sits at the top</Text> —
-            climbing the rankings visually pulls the line upward. World Rugby's
-            algorithm is a rolling-weighted Elo variant, so movement is a
-            function of recent results plus opponent strength.
+            The team's World Rugby rank across the last 12 monthly snapshots,
+            oldest (left) to newest (right). Each dot sits on its rank rung —
+            the ladder only spans the ranks the team actually touched, so
+            even a one-place move is a visible step.{' '}
+            <Text style={styles.modalStrong}>Green means the rank improved
+            that month, red means it slipped, grey means it held.</Text>{' '}
+            World Rugby's algorithm is a rolling-weighted Elo variant, so
+            movement is a function of recent results plus opponent strength.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
