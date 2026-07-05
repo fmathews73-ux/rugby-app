@@ -110,15 +110,15 @@ export const PillStrip = {
 } as const;
 
 /**
- * Canonical sizes for `TeamFlagBall2D`. Four steps — hero / header / medium / row —
- * following Material's avatar spec (24/40/56/96) so hierarchy is legible without
- * near-duplicate sizes creeping in. Do not pass raw numbers to the flag component;
- * use one of these so the scale stays 4 steps forever.
+ * Canonical sizes for `TeamFlagBall2D`. Three steps — medium / row / xs —
+ * so hierarchy is legible without near-duplicate sizes creeping in.
+ * `medium` is the HERO scale: every drill hero (fixture matchup, team,
+ * player) tops out at 40pt. The old hero (96) and header (56) steps were
+ * removed once nothing rendered them — do not reintroduce oversized
+ * steps; do not pass raw numbers to the flag component.
  */
 export const FlagSize = {
-  hero: 96, // team detail page
-  header: 56, // fixture detail header, home fixture carousel cards
-  medium: 40, // teams tab rows, fixture line-up
+  medium: 40, // drill heroes, teams tab rows, fixture line-up
   row: 24, // standings, fixtures list, rankings tables, mini-carousels
   xs: 16, // card-header corner flags (Form / Trajectory / KPIs / Profile)
 } as const;

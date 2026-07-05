@@ -70,7 +70,7 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Analysis</Text>
+          <Text style={styles.sectionLabel}>Match Analysis</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -177,7 +177,7 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Analysis</Text>
+            <Text style={styles.modalTitle}>Match Analysis</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>

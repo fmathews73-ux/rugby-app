@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
 import Svg, { Circle, ClipPath, Defs, G, Line, Path, Rect } from 'react-native-svg';
 
@@ -33,6 +33,7 @@ export function ExtendedMomentum({
   teamId,
   compareTeamId,
   asOfDate,
+  style,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -40,6 +41,9 @@ export function ExtendedMomentum({
    *  timestamp — freezes the Form window to the state it held walking
    *  into a specific match. */
   asOfDate?: string;
+  /** Optional card-root style override — the Home carousel passes
+   *  `flex: 1` so sibling pages normalise to equal heights. */
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
@@ -101,7 +105,7 @@ export function ExtendedMomentum({
   );
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Form (prev. {LOOKBACK})</Text>
@@ -163,8 +167,13 @@ export function ExtendedMomentum({
 }
 
 function Sparkline({ points }: { points: readonly FormPoint[] }) {
-  const width = 280;
-  const height = 90;
+  // Real measured canvas — geometry is computed in actual pixels from
+  // onLayout, never stretched via viewBox scaling, so strokes and dots
+  // render true at any card height (the Home carousel stretches cards
+  // to their tallest sibling; minHeight covers intrinsic contexts).
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const width = canvas.w;
+  const height = canvas.h;
   const padX = 8;
   const padY = 12;
   const maxAbs = Math.max(20, ...points.map((p) => Math.abs(p.diff)));
@@ -178,7 +187,7 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
         const y = height - padY - yNorm * (height - 2 * padY);
         return { x, y, outcome: p.outcome, diff: p.diff };
       }),
-    [points, maxAbs],
+    [points, maxAbs, width, height],
   );
   const zeroY = height / 2;
 
@@ -187,7 +196,16 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
   const smoothPath = useMemo(() => smoothLinePath(svgPoints).path, [svgPoints]);
 
   return (
-    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+    <View
+      style={styles.chartFill}
+      onLayout={(e) =>
+        setCanvas({
+          w: Math.round(e.nativeEvent.layout.width),
+          h: Math.round(e.nativeEvent.layout.height),
+        })
+      }>
+      {width > 0 && height > 0 ? (
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         <ClipPath id="form-plot-clip">
           <Rect x={0} y={0} width={width} height={height - padY} />
@@ -225,7 +243,9 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
       {svgPoints.map((p, i) => (
         <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={CHART_ACCENT_COLOR} />
       ))}
-    </Svg>
+      </Svg>
+      ) : null}
+    </View>
   );
 }
 
@@ -329,6 +349,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
+  },
+  // Chart fills whatever height the card grants it (Home carousel
+  // stretches cards to the tallest sibling); minHeight preserves the
+  // original canvas in intrinsic-height contexts.
+  chartFill: {
+    flex: 1,
+    minHeight: 90,
   },
 
   // Modal

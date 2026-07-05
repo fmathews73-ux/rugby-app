@@ -5,12 +5,11 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
-import { usePlayer, usePlayerPercentiles, useTeams } from '@/api/hooks';
+import { usePlayer, usePlayerPercentiles } from '@/api/hooks';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
@@ -60,13 +59,6 @@ export default function PlayerCardScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const player = usePlayer(playerId);
-  const teams = useTeams();
-
-  const team = useMemo(
-    () => teams.data?.find((t) => t.id === player.data?.team_id),
-    [teams.data, player.data],
-  );
-
   // Same resolve-to-top gesture as the fixture drill's sub-tabs.
   const handleTabSelect = (next: PlayerTab) => {
     setTab(next);
@@ -99,25 +91,26 @@ export default function PlayerCardScreen() {
       {/* Identity + pills pinned OUTSIDE the ScrollView, mirroring the
           fixture drill's hero + sub-tab strip. */}
       <View style={styles.identityHeader}>
-        <View style={styles.identityRow}>
-          <View style={styles.monogram}>
-            <Text style={styles.monogramText}>{initialsOf(p.name)}</Text>
+        {/* Same hero treatment as the team drill: identity anchored
+            left (40pt monogram + name), quiet meta lines stacked
+            left-aligned in the right-hand space. */}
+        <View style={styles.heroRow}>
+          <View style={styles.heroIdentityGroup}>
+            <View style={styles.monogram}>
+              <Text style={styles.monogramText}>{initialsOf(p.name)}</Text>
+            </View>
+            <Text style={styles.heroName} numberOfLines={2}>
+              {p.name}
+            </Text>
           </View>
-          <View style={styles.identityText}>
-            <Text style={styles.playerName}>{p.name}</Text>
-            <Text style={styles.playerMeta}>
+          <View style={styles.heroMetaStack}>
+            <Text style={styles.heroMetaText}>
               {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
             </Text>
-            <Text style={styles.playerMeta}>
+            <Text style={styles.heroMetaText}>
               {p.height_cm} cm · {p.weight_kg} kg · {p.cap_count} caps
             </Text>
           </View>
-          {team ? (
-            <View style={styles.teamChip}>
-              <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} />
-              <Text style={styles.teamChipCode}>{team.short_name}</Text>
-            </View>
-          ) : null}
         </View>
       </View>
       <SegmentedTabs tabs={PLAYER_TABS} active={tab} onSelect={handleTabSelect} />
@@ -358,7 +351,9 @@ function TrendSparkline({
   values: readonly number[];
   gradientId: string;
 }) {
-  const width = 280;
+  // Measured canvas width — geometry in real pixels, no viewBox
+  // stretching, so dots and strokes render true at any card width.
+  const [width, setWidth] = useState(0);
   const height = 44;
   const padX = 4;
   const padY = 6;
@@ -370,8 +365,12 @@ function TrendSparkline({
   }));
   const linePath = smoothLinePath(points).path;
 
+  if (width === 0) {
+    return <View onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))} style={{ height }} />;
+  }
   return (
-    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+    <View onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))}>
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         <ClipPath id={`${gradientId}-clip`}>
           <Rect x={0} y={0} width={width} height={height - padY} />
@@ -393,7 +392,8 @@ function TrendSparkline({
       {points.map((pt, i) => (
         <Circle key={i} cx={pt.x} cy={pt.y} r={1.5} fill={CHART_ACCENT_COLOR} />
       ))}
-    </Svg>
+      </Svg>
+    </View>
   );
 }
 
@@ -586,7 +586,7 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Analysis</Text>
+          <Text style={styles.sectionLabel}>Player Analysis</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -621,7 +621,7 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
       <InfoModal
         visible={infoOpen}
         onClose={() => setInfoOpen(false)}
-        title="Analysis"
+        title="Player Analysis"
         paragraphs={[
           'A written synthesis of everything the other tabs show: the percentile profile from Insights, the trend lines from Preview, and the season record from Stats, pulled together into an analyst read.',
           'The scouting read names genuine strengths (70th percentile or better against positional peers) and soft spots (30th or below). The form read compares the recent half of the appearance window against the earlier half; moves under 15% are reported as steady.',
@@ -762,23 +762,33 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.three,
-    // Shared drill-hero box — identity row centres in the fixture
-    // hero's height so all three drills measure identically. The extra
-    // whitespace is a known trade; hero content gets revisited later.
+    // Shared drill-hero box — content centres in the fixture hero's
+    // height so all three drills measure identically.
     minHeight: DRILL_HERO_MIN_HEIGHT,
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  identityRow: {
+  // Single hero row: identity group left, meta stack filling the right
+  // — the same treatment as the team drill hero.
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
   },
+  heroIdentityGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    flexShrink: 1,
+  },
+  // 40pt monogram — matches the hero flag scale on the team drill
+  // (player photos are a Phase 6 image-rights tier; the monogram is
+  // the deliberate placeholder).
   monogram: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     backgroundColor: '#F3F4F6',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
@@ -786,30 +796,29 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   monogramText: {
-    fontSize: TextSize.lg,
+    fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },
-  identityText: { flex: 1, gap: 2 },
-  playerName: {
+  heroName: {
     fontSize: TextSize.lg,
     fontWeight: TextWeight.bold,
     color: Colors.light.text,
+    flexShrink: 1,
   },
-  playerMeta: {
+  // Meta stack — quiet lines (position · age, measurables · caps,
+  // team) left-aligned in the right-hand space.
+  heroMetaStack: {
+    flex: 1,
+    alignItems: 'flex-start',
+    gap: Spacing.one,
+    paddingLeft: Spacing.four,
+  },
+  heroMetaText: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
-  },
-  teamChip: {
-    alignItems: 'center',
-    gap: 2,
-  },
-  teamChipCode: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
   },
 
   // Scouting

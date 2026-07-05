@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
@@ -19,6 +19,7 @@ export function EfficiencyKpis({
   teamId,
   compareTeamId,
   asOfDate,
+  style,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -26,6 +27,9 @@ export function EfficiencyKpis({
    *  timestamp — freezes the season-to-date averages to the state as of
    *  a specific match. */
   asOfDate?: string;
+  /** Optional card-root style override — the Home carousel passes
+   *  `flex: 1` so sibling pages normalise to equal heights. */
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
@@ -91,7 +95,7 @@ export function EfficiencyKpis({
   }, [data]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Efficiency KPIs</Text>

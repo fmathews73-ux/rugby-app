@@ -10,17 +10,13 @@ import type { Fixture, Team } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useLatestRanking, useSeasons, useTeams } from '@/api/hooks';
 import { CompetitionPicker } from '@/components/competition-picker';
-import { FormCircles } from '@/components/form-circles';
 import { PageGradient } from '@/components/page-gradient';
+import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
-import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { worldCupTitles } from '@/lib/world-cup-titles';
 
-const TIER_1_IDS = new Set(['eng', 'fra', 'ire', 'ita', 'sco', 'wal', 'arg', 'aus', 'nzl', 'rsa']);
-const FORM_LOOKBACK = 5;
+import { TIER_1_IDS } from '@/lib/tiers';
 
 const ALL_FILTER = 'all';
 
@@ -68,11 +64,11 @@ export default function TeamsScreen() {
   const [filter, setFilter] = useState<string>(ALL_FILTER);
 
   // Latest men's World Rugby snapshot — annotates each row with the
-  // team's current rank, same as the Team Picker modal.
+  // team's current rank (and points, for the My Team hero row).
   const rankings = useLatestRanking();
-  const rankByTeam = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const row of rankings.data?.rows ?? []) m.set(row.team_id, row.rank);
+  const rankRowByTeam = useMemo(() => {
+    const m = new Map<string, { rank: number; points: number }>();
+    for (const row of rankings.data?.rows ?? []) m.set(row.team_id, { rank: row.rank, points: row.points });
     return m;
   }, [rankings.data]);
 
@@ -107,8 +103,8 @@ export default function TeamsScreen() {
     if (!query.data) return [];
     // Best world ranking first; unranked sides sink alphabetically.
     const byRank = (a: Team, b: Team) => {
-      const ra = rankByTeam.get(a.id) ?? Number.MAX_SAFE_INTEGER;
-      const rb = rankByTeam.get(b.id) ?? Number.MAX_SAFE_INTEGER;
+      const ra = rankRowByTeam.get(a.id)?.rank ?? Number.MAX_SAFE_INTEGER;
+      const rb = rankRowByTeam.get(b.id)?.rank ?? Number.MAX_SAFE_INTEGER;
       return ra !== rb ? ra - rb : a.name.localeCompare(b.name);
     };
 
@@ -165,66 +161,25 @@ export default function TeamsScreen() {
                   <Text style={styles.cardHeaderText}>{group.label}</Text>
                 </View>
               </View>
+              {/* Every row carries the shared hero-row grammar — same
+                  layout as the Home Team Selector and picker rows. */}
               {group.teams.map((t, i) => (
-                <TeamRow
+                <Pressable
                   key={t.id}
-                  team={t}
-                  rank={rankByTeam.get(t.id)}
-                  isLast={i === group.teams.length - 1}
                   onPress={() => router.push(`/teams/${t.id}`)}
-                />
+                  style={({ pressed }) => [
+                    styles.teamRow,
+                    i < group.teams.length - 1 && styles.teamRowDivider,
+                    pressed && styles.teamRowPressed,
+                  ]}>
+                  <TeamHeroRow team={t} rankRow={rankRowByTeam.get(t.id)} />
+                </Pressable>
               ))}
             </View>
           )}
         />
       )}
     </SafeAreaView>
-  );
-}
-
-/**
- * One row in a group card. No chevron (fixture rows don't carry one
- * either) — the whole row is the tap target. Form circles + trophy
- * right-aligned; the fixed trophy slot keeps the circles on one vertical
- * column across rows.
- */
-function TeamRow({
-  team,
-  rank,
-  isLast,
-  onPress,
-}: {
-  team: Team;
-  rank: number | undefined;
-  isLast: boolean;
-  onPress: () => void;
-}) {
-  const { outcomes } = useTeamRecentForm(team.id, FORM_LOOKBACK);
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        styles.teamRow,
-        !isLast && styles.teamRowDivider,
-        pressed && styles.teamRowPressed,
-      ]}>
-      <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
-      <View style={styles.rowText}>
-        <Text style={styles.rowShort}>{team.short_name}</Text>
-        {rank !== undefined ? <Text style={styles.rowRank}>#{rank}</Text> : null}
-      </View>
-      <View style={styles.rowRight}>
-        <FormCircles outcomes={outcomes} lookback={FORM_LOOKBACK} />
-        <View style={styles.rowTrophySlot}>
-          {worldCupTitles(team.id) > 0 ? (
-            <View style={styles.rowTrophyBadge}>
-              <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
-              <Text style={styles.rowTrophyCount}>X{worldCupTitles(team.id)}</Text>
-            </View>
-          ) : null}
-        </View>
-      </View>
-    </Pressable>
   );
 }
 
@@ -286,45 +241,4 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
-
-  rowText: {
-    gap: 2,
-    flexShrink: 1,
-  },
-  rowShort: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-  },
-  rowRank: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  // Right-aligned cluster: form circles then the fixed-width trophy slot.
-  rowRight: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'flex-end',
-    gap: Spacing.three,
-  },
-  rowTrophySlot: {
-    width: 40,
-    alignItems: 'flex-end',
-    justifyContent: 'center',
-  },
-  rowTrophyBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  rowTrophyCount: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
 });

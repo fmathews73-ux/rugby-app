@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, ClipPath, Defs, G, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
@@ -22,6 +22,7 @@ export function RankingTrajectory({
   teamId,
   compareTeamId,
   asOfDate,
+  style,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -29,6 +30,9 @@ export function RankingTrajectory({
    *  freezes the trajectory to what the reader would have seen walking
    *  into a specific match. */
   asOfDate?: string;
+  /** Optional card-root style override — the Home carousel passes
+   *  `flex: 1` so sibling pages normalise to equal heights. */
+  style?: StyleProp<ViewStyle>;
 }) {
   const history = useRankingHistory();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -73,7 +77,7 @@ export function RankingTrajectory({
   }, [series]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Ranking Trajectory</Text>
@@ -132,11 +136,13 @@ function TrajectoryChart({
 }: {
   series: { date: string; rank: number; points: number }[];
 }) {
-  // Width matches the Form sparkline; height bumped so the y-axis has
-  // enough vertical room per rank unit for the trajectory to read as a
-  // meaningful line rather than a compressed wiggle.
-  const width = 280;
-  const height = 130;
+  // Real measured canvas — geometry is computed in actual pixels from
+  // onLayout, never stretched via viewBox scaling, so strokes and dots
+  // render true at any card height (the Home carousel stretches cards
+  // to their tallest sibling; minHeight covers intrinsic contexts).
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const width = canvas.w;
+  const height = canvas.h;
   const padX = 8;
   const padTop = 10;
   const padBottom = 22;
@@ -175,7 +181,16 @@ function TrajectoryChart({
   const last = svgPoints[svgPoints.length - 1];
 
   return (
-    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+    <View
+      style={styles.chartFill}
+      onLayout={(e) =>
+        setCanvas({
+          w: Math.round(e.nativeEvent.layout.width),
+          h: Math.round(e.nativeEvent.layout.height),
+        })
+      }>
+      {width > 0 && height > 0 ? (
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         <ClipPath id="trajectory-plot-clip">
           <Rect x={0} y={0} width={width} height={height - padBottom} />
@@ -253,7 +268,9 @@ function TrajectoryChart({
           {formatMonth(last.date)}
         </SvgText>
       ) : null}
-    </Svg>
+      </Svg>
+      ) : null}
+    </View>
   );
 }
 
@@ -351,6 +368,13 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
+  },
+  // Chart fills whatever height the card grants it (Home carousel
+  // stretches cards to the tallest sibling); minHeight preserves the
+  // original canvas in intrinsic-height contexts.
+  chartFill: {
+    flex: 1,
+    minHeight: 130,
   },
 
   // Modal

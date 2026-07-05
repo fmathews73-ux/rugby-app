@@ -6,13 +6,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Team } from '@rugby-app/shared';
 
 import { useLatestRanking } from '@/api/hooks';
-import { FormCircles } from '@/components/form-circles';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { worldCupTitles } from '@/lib/world-cup-titles';
-
-const PICKER_FORM_LOOKBACK = 5;
+import { TeamHeroRow } from '@/components/team-hero-row';
+import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
  * Full-screen modal for picking a team. Default use case is picking a
@@ -50,20 +46,33 @@ export function TeamPickerModal({
     if (visible) setSelected(currentTeamId);
   }, [visible, currentTeamId]);
 
-  const sortedTeams = useMemo(
-    () => teams.slice().sort((a, b) => a.name.localeCompare(b.name)),
-    [teams],
-  );
-
-  // Latest men's World Rugby snapshot — used to annotate each row with the
-  // team's current rank (`#3`). Falls back to `null` when the team isn't
-  // in the snapshot (e.g. an unranked side).
+  // Latest men's World Rugby snapshot — annotates each row with the
+  // team's current rank + points for the shared hero-row meta line.
   const rankings = useLatestRanking();
-  const rankByTeam = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const row of rankings.data?.rows ?? []) m.set(row.team_id, row.rank);
+  const rankRowByTeam = useMemo(() => {
+    const m = new Map<string, { rank: number; points: number }>();
+    for (const row of rankings.data?.rows ?? []) m.set(row.team_id, { rank: row.rank, points: row.points });
     return m;
   }, [rankings.data]);
+
+  // Grouped exactly like the Teams landing page: Tier 1 / Tier 2
+  // Nations, best world ranking first within each group.
+  const groups = useMemo(() => {
+    const tier1: Team[] = [];
+    const tier2: Team[] = [];
+    for (const t of teams) (TIER_1_IDS.has(t.id) ? tier1 : tier2).push(t);
+    const byRank = (a: Team, b: Team) => {
+      const ra = rankRowByTeam.get(a.id)?.rank ?? Number.MAX_SAFE_INTEGER;
+      const rb = rankRowByTeam.get(b.id)?.rank ?? Number.MAX_SAFE_INTEGER;
+      return ra !== rb ? ra - rb : a.name.localeCompare(b.name);
+    };
+    tier1.sort(byRank);
+    tier2.sort(byRank);
+    return [
+      { label: 'Tier 1 Nations', teams: tier1 },
+      { label: 'Tier 2 Nations', teams: tier2 },
+    ];
+  }, [teams, rankRowByTeam]);
 
   return (
     <Modal
@@ -105,18 +114,28 @@ export function TeamPickerModal({
         </View>
 
         <FlatList
-          data={sortedTeams}
-          keyExtractor={(t) => t.id}
+          data={groups}
+          keyExtractor={(g) => g.label}
           contentContainerStyle={styles.listContent}
-          renderItem={({ item, index }) => (
-            <TeamRow
-              team={item}
-              rank={rankByTeam.get(item.id)}
-              selected={selected === item.id}
-              onSelect={() => setSelected(item.id)}
-              isFirst={index === 0}
-              isLast={index === sortedTeams.length - 1}
-            />
+          renderItem={({ item: group }) => (
+            <View style={styles.groupCard}>
+              {/* Title inside the card — same header treatment as the
+                  Teams landing / Fixtures day cards. */}
+              <View style={styles.groupHeader}>
+                <Ionicons name="list-outline" size={12} color={Colors.light.textSecondary} />
+                <Text style={styles.groupHeaderText}>{group.label}</Text>
+              </View>
+              {group.teams.map((t, i) => (
+                <TeamRow
+                  key={t.id}
+                  team={t}
+                  rankRow={rankRowByTeam.get(t.id)}
+                  selected={selected === t.id}
+                  onSelect={() => setSelected(t.id)}
+                  isLast={i === group.teams.length - 1}
+                />
+              ))}
+            </View>
           )}
         />
 
@@ -138,66 +157,43 @@ export function TeamPickerModal({
 }
 
 /**
- * One row in the picker list. Layout mirrors the Team Selector card on
- * the Home page:
- *   [flag]  CODE            [W L W W L]            [check]
- *           #3 🏆🏆🏆
- *
- * `useTeamRecentForm` is called per row so each row streams its own
- * last-5 form independently. TanStack Query dedupes the underlying
- * fixture-result fetches with other consumers (Home selector card,
- * per-team analytics), so overhead is minimal.
+ * One row in the picker list — the shared TeamHeroRow (flag + CODE
+ * left, rank · points · trophies and last-5 record stacked right) with
+ * the selection checkmark as the right accessory, matching the Home
+ * Team Selector card and the Teams directory's My Team spotlight.
  */
 function TeamRow({
   team,
-  rank,
+  rankRow,
   selected,
   onSelect,
-  isFirst,
   isLast,
 }: {
   team: Team;
-  rank: number | undefined;
+  rankRow: { rank: number; points: number } | undefined;
   selected: boolean;
   onSelect: () => void;
-  isFirst: boolean;
   isLast: boolean;
 }) {
-  const { outcomes } = useTeamRecentForm(team.id, PICKER_FORM_LOOKBACK);
   return (
     <Pressable
       onPress={onSelect}
       style={({ pressed }) => [
         styles.row,
-        isFirst && styles.rowFirst,
-        isLast && styles.rowLast,
+        !isLast && styles.rowDivider,
         pressed && styles.rowPressed,
       ]}>
-      <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
-      <View style={styles.rowText}>
-        <Text style={styles.rowShort}>{team.short_name}</Text>
-        {rank !== undefined ? <Text style={styles.rowRank}>#{rank}</Text> : null}
-      </View>
-      <View style={styles.rowFormSlot}>
-        <FormCircles outcomes={outcomes} lookback={PICKER_FORM_LOOKBACK} />
-      </View>
-      {/* Fixed-width trophy slot renders empty for teams with no World
-          Cup titles — reserving the space keeps every row's `rowFormSlot`
-          the same flex-1 width, so the form circles land on the same
-          vertical column across every row in the list. */}
-      <View style={styles.rowTrophySlot}>
-        {worldCupTitles(team.id) > 0 ? (
-          <View style={styles.rowTrophyBadge}>
-            <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
-            <Text style={styles.rowTrophyCount}>X{worldCupTitles(team.id)}</Text>
-          </View>
-        ) : null}
-      </View>
-      {selected ? (
-        <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
-      ) : (
-        <View style={styles.tickPlaceholder} />
-      )}
+      <TeamHeroRow
+        team={team}
+        rankRow={rankRow}
+        right={
+          selected ? (
+            <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
+          ) : (
+            <View style={styles.tickPlaceholder} />
+          )
+        }
+      />
     </Pressable>
   );
 }
@@ -224,84 +220,51 @@ const styles = StyleSheet.create({
 
   listContent: {
     padding: Spacing.four,
+    paddingTop: Spacing.two,
     paddingBottom: 40,
+    gap: Spacing.three,
   },
 
+  // Group card + rows — identical grammar to the Teams landing page
+  // (title inside the card, hairline dividers spanning full width).
+  groupCard: {
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: '#E5E7EB',
+    shadowColor: '#000',
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 1,
+    overflow: 'hidden',
+  },
+  groupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.three,
+    paddingBottom: Spacing.two,
+  },
+  groupHeaderText: {
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.semibold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
-    paddingHorizontal: Spacing.three,
+    paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two + 4,
-    backgroundColor: '#FFFFFF',
-    borderLeftWidth: StyleSheet.hairlineWidth,
-    borderRightWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+  },
+  rowDivider: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
-  rowFirst: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
-  },
-  rowLast: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
-  },
   rowPressed: { backgroundColor: '#F3F4F6' },
-  rowText: {
-    // Column stack: code on top, rank + trophy row beneath.
-    gap: 2,
-    flexShrink: 1,
-  },
-  // 3-letter team code — matches the `teamCode` treatment used in the
-  // Team Selector card and the FixtureCarouselCard hero row.
-  rowShort: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-  },
-  // Rank sits directly below the code in the text stack. No trophies
-  // here anymore — they live above the form circles in the centre.
-  rowRank: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  // Centre slot: form circles centred inside a flex-1 wrapper so they
-  // land at the visual midpoint of the row regardless of how wide the
-  // team-code text column is on the left.
-  rowFormSlot: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  // Fixed 40pt slot reserved on every row so the flex-1 `rowFormSlot`
-  // has a consistent width — form circles then land on the same vertical
-  // column across every row regardless of whether that row's team has
-  // any World Cup titles.
-  rowTrophySlot: {
-    width: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rowTrophyBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 3,
-  },
-  rowTrophyCount: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
   tickPlaceholder: { width: 26, height: 26 },
 
   footer: {

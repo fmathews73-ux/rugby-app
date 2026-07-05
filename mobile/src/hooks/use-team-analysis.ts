@@ -2,6 +2,7 @@ import { useMemo } from 'react';
 
 import { useLatestRanking, useRankingHistory, useTeams } from '@/api/hooks';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
+import { useTeamPointsPattern, type TeamPointsPattern } from '@/hooks/use-team-points-pattern';
 import { useTeamRecentForm, type FormOutcome } from '@/hooks/use-team-recent-form';
 
 /**
@@ -26,6 +27,10 @@ const PENS_LOW = 9;
 const RANK_MOVE = 2;
 // Streak length worth naming.
 const STREAK_MIN = 3;
+// Quarter share (%) that reads as a real scoring-timing skew.
+const TIMING_SKEW = 35;
+// Recent-window vs season-baseline divergence worth reporting.
+const BASELINE_DELTA = 0.15;
 
 export interface TeamAnalysis {
   /** Unlabeled cold-open, mirrors the match / player cards. */
@@ -51,6 +56,12 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
   const history = useRankingHistory();
   const form = useTeamRecentForm(teamId, WINDOW);
   const aggregate = useTeamAggregate(teamId, undefined, WINDOW);
+  // Season baseline — the Stats pane's second column, so the narrative
+  // can say whether the window is running above or below it.
+  const seasonAggregate = useTeamAggregate(teamId);
+  // Quarter-timing patterns — the Insights pane's Points Pattern cards.
+  const scoredPattern = useTeamPointsPattern(teamId, 'scored');
+  const concededPattern = useTeamPointsPattern(teamId, 'conceded');
 
   const data = useMemo<TeamAnalysis | undefined>(() => {
     const team = teams.data?.find((t) => t.id === teamId);
@@ -70,12 +81,22 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
 
     return {
       summary: buildSummary(team.name, rank, form.outcomes, agg),
-      form: buildForm(team.name, form.outcomes, agg),
+      form: buildForm(team.name, form.outcomes, agg, seasonAggregate.data),
       ranking: buildRanking(team.name, rankSeries),
-      season: buildSeason(team.name, agg),
+      season: buildSeason(team.name, agg, scoredPattern.data, concededPattern.data),
       outlook: buildOutlook(team.name, agg),
     };
-  }, [teams.data, latest.data, history.data, form.outcomes, aggregate.data, teamId]);
+  }, [
+    teams.data,
+    latest.data,
+    history.data,
+    form.outcomes,
+    aggregate.data,
+    seasonAggregate.data,
+    scoredPattern.data,
+    concededPattern.data,
+    teamId,
+  ]);
 
   return {
     data,
@@ -105,7 +126,12 @@ function buildSummary(
   return `${name}${rankBit} have won ${w} and lost ${l}${drawBit} of their last ${agg.gamesPlayed} completed matches, scoring ${fmt(agg.perGame.pointsScored)} points per game and conceding ${fmt(agg.perGame.pointsConceded)}.`;
 }
 
-function buildForm(name: string, outcomes: readonly FormOutcome[], agg: Agg): string {
+function buildForm(
+  name: string,
+  outcomes: readonly FormOutcome[],
+  agg: Agg,
+  season: Agg | undefined,
+): string {
   const parts: string[] = [];
   // Current streak — outcomes arrive newest-first.
   if (outcomes.length >= STREAK_MIN) {
@@ -134,7 +160,38 @@ function buildForm(name: string, outcomes: readonly FormOutcome[], agg: Agg): st
       `Margins have been tight either way (${margin >= 0 ? '+' : ''}${fmt(margin)} per game), so results have turned on fine details rather than dominance.`,
     );
   }
+
+  // Window vs season baseline — the same comparison the Stats pane's
+  // two columns make. Only reported when the divergence is real (±15%)
+  // and the season sample is bigger than the window itself.
+  if (season && season.gamesPlayed > agg.gamesPlayed) {
+    const scoredDelta = relativeDelta(agg.perGame.pointsScored, season.perGame.pointsScored);
+    const concededDelta = relativeDelta(agg.perGame.pointsConceded, season.perGame.pointsConceded);
+    if (scoredDelta >= BASELINE_DELTA) {
+      parts.push(
+        `Scoring is running above the season's established level (${fmt(agg.perGame.pointsScored)} per game in the window against ${fmt(season.perGame.pointsScored)} across the season).`,
+      );
+    } else if (scoredDelta <= -BASELINE_DELTA) {
+      parts.push(
+        `The attack has cooled relative to the season baseline (${fmt(agg.perGame.pointsScored)} per game in the window, ${fmt(season.perGame.pointsScored)} across the season).`,
+      );
+    }
+    if (concededDelta >= BASELINE_DELTA) {
+      parts.push(
+        `Defensively the window is leakier than the season norm (${fmt(agg.perGame.pointsConceded)} conceded per game against ${fmt(season.perGame.pointsConceded)}).`,
+      );
+    } else if (concededDelta <= -BASELINE_DELTA) {
+      parts.push(
+        `The defence has tightened relative to the season norm (${fmt(agg.perGame.pointsConceded)} conceded per game against ${fmt(season.perGame.pointsConceded)}).`,
+      );
+    }
+  }
   return parts.join(' ');
+}
+
+function relativeDelta(recent: number, baseline: number): number {
+  if (baseline <= 0) return 0;
+  return (recent - baseline) / baseline;
 }
 
 function buildRanking(name: string, series: readonly number[]): string {
@@ -153,7 +210,14 @@ function buildRanking(name: string, series: readonly number[]): string {
   return `The world ranking has held broadly steady across the snapshot span, moving between ${ordinal(Math.min(first, last))} and ${ordinal(Math.max(first, last))}.`;
 }
 
-function buildSeason(name: string, agg: Agg): string {
+const QUARTER_LABELS = ['first quarter', 'second quarter', 'third quarter', 'final quarter'] as const;
+
+function buildSeason(
+  name: string,
+  agg: Agg,
+  scored: TeamPointsPattern | undefined,
+  conceded: TeamPointsPattern | undefined,
+): string {
   const g = agg.perGame;
   const parts: string[] = [];
   parts.push(
@@ -178,7 +242,34 @@ function buildSeason(name: string, agg: Agg): string {
       `Discipline underpins it all, with just ${fmt(g.penaltiesConceded)} penalties conceded per game.`,
     );
   }
+
+  // Scoring-timing skews — the Points Pattern cards reduced to prose.
+  // Only a genuinely lopsided quarter (≥35% share) gets named.
+  const scoredSkew = timingSkew(scored);
+  if (scoredSkew) {
+    parts.push(
+      `The points arrive with a pattern: ${scoredSkew.pct}% of their scoring comes in the ${QUARTER_LABELS[scoredSkew.quarter]}.`,
+    );
+  }
+  const concededSkew = timingSkew(conceded);
+  if (concededSkew) {
+    parts.push(
+      `The soft period is the ${QUARTER_LABELS[concededSkew.quarter]}, where ${concededSkew.pct}% of the points against them are conceded.`,
+    );
+  }
   return parts.join(' ');
+}
+
+function timingSkew(
+  pattern: TeamPointsPattern | undefined,
+): { quarter: number; pct: number } | null {
+  if (!pattern || pattern.gamesUsed === 0) return null;
+  let quarter = 0;
+  for (let i = 1; i < 4; i++) {
+    if (pattern.avgPercentByQuarter[i]! > pattern.avgPercentByQuarter[quarter]!) quarter = i;
+  }
+  const pct = Math.round(pattern.avgPercentByQuarter[quarter]!);
+  return pct >= TIMING_SKEW ? { quarter, pct } : null;
 }
 
 function buildOutlook(name: string, agg: Agg): string {

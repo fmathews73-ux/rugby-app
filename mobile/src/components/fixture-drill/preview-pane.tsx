@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
@@ -26,6 +27,13 @@ export function PreviewPane({
    *  in 2027 still read as the *pre-match* view from 2025. */
   asOfDate: string;
 }) {
+  // The KPI card (tallest, content-driven) is the pane's height
+  // yardstick: its measured height becomes the minHeight of the two
+  // chart cards, whose measured-canvas charts then fill the extra
+  // space — all three cards render the same size.
+  const [kpiHeight, setKpiHeight] = useState(0);
+  const matchKpi = kpiHeight > 0 ? { minHeight: kpiHeight } : undefined;
+
   return (
     <View style={styles.insightsPaneStack}>
       {/* Form (last-10) leads — recent trend sets up the deeper season
@@ -35,17 +43,21 @@ export function PreviewPane({
         teamId={homeTeamId}
         compareTeamId={awayTeamId}
         asOfDate={asOfDate}
+        style={matchKpi}
       />
       <RankingTrajectory
         teamId={homeTeamId}
         compareTeamId={awayTeamId}
         asOfDate={asOfDate}
+        style={matchKpi}
       />
-      <EfficiencyKpis
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
-        asOfDate={asOfDate}
-      />
+      <View onLayout={(e) => setKpiHeight(Math.round(e.nativeEvent.layout.height))}>
+        <EfficiencyKpis
+          teamId={homeTeamId}
+          compareTeamId={awayTeamId}
+          asOfDate={asOfDate}
+        />
+      </View>
     </View>
   );
 }

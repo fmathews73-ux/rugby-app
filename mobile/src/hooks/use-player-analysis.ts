@@ -1,12 +1,16 @@
 import { useMemo } from 'react';
 
+import type { PlayerMatchStats } from '@rugby-app/shared';
+
 import { usePlayer, usePlayerPercentiles } from '@/api/hooks';
 import { usePlayerAggregate } from '@/hooks/use-player-aggregate';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
 import {
   BACK_SCOUT,
+  BACK_TREND,
   FORWARD_POSITIONS,
   FORWARD_SCOUT,
+  FORWARD_TREND,
   GROUP_LABELS,
   PLAYER_LOOKBACK,
   POSITION_LABELS,
@@ -90,7 +94,7 @@ export function usePlayerAnalysis(playerId: string): UsePlayerAnalysisResult {
 
     return {
       summary: buildSummary(p.name, surname, POSITION_LABELS[p.primary_position], p.cap_count, agg),
-      scouting: buildScouting(surname, groupLabel, pct.peers, strengths, softSpot, rated),
+      scouting: buildScouting(surname, groupLabel, pct.peers, strengths, softSpot, rated, agg.totals),
       form: buildForm(surname, isForward, sheets),
       outlook: buildOutlook(surname, strengths, softSpot),
     };
@@ -129,6 +133,7 @@ function buildScouting(
   strengths: RatedMetric[],
   softSpot: RatedMetric | undefined,
   rated: RatedMetric[],
+  totals: { yellow_cards: number; red_cards: number },
 ): string {
   const parts: string[] = [];
   if (strengths.length > 0) {
@@ -152,17 +157,25 @@ function buildScouting(
   } else if (rated.length > 0 && strengths.length > 0) {
     parts.push('There is no glaring weakness in the profile; the floor holds across every scouted dimension.');
   }
+  // Card count — the Stats pane's discipline row surfaced whenever it
+  // is non-zero. A sin-binned player's profile should say so.
+  const { yellow_cards: yc, red_cards: rc } = totals;
+  if (rc > 0) {
+    parts.push(
+      `The disciplinary record needs attention: ${rc} red ${rc === 1 ? 'card' : 'cards'}${yc > 0 ? ` and ${yc} yellow` : ''} in the window.`,
+    );
+  } else if (yc > 0) {
+    parts.push(
+      `The record also carries ${yc} yellow ${yc === 1 ? 'card' : 'cards'} in the window.`,
+    );
+  }
   return parts.join(' ');
 }
 
 function buildForm(
   surname: string,
   isForward: boolean,
-  sheets: readonly {
-    minutes_played: number;
-    tackles_made: number;
-    metres_carried: number;
-  }[],
+  sheets: readonly PlayerMatchStats[],
 ): string {
   // Server order is kickoff DESC — newest first.
   const apps = sheets.filter((s) => s.minutes_played > 0).slice(0, PLAYER_LOOKBACK);
@@ -174,20 +187,22 @@ function buildForm(
   const recent = apps.slice(0, half);
   const prior = apps.slice(half);
 
-  const keyLabel = isForward ? 'tackle count' : 'carry metres';
-  const keyOf = (s: (typeof apps)[number]) => (isForward ? s.tackles_made : s.metres_carried);
-  const keyRecent = avg(recent.map(keyOf));
-  const keyPrior = avg(prior.map(keyOf));
-  const keyRead = trendWord(keyRecent, keyPrior);
+  // ALL the role's Preview trend metrics, not just one — the same three
+  // sparklines the Preview tab draws, reduced to rise/dip/held reads.
+  const trendSet = isForward ? FORWARD_TREND : BACK_TREND;
+  const reads = trendSet.map((m) => {
+    const recentAvg = avg(recent.map((s) => s[m.field]));
+    const priorAvg = avg(prior.map((s) => s[m.field]));
+    const word = trendWord(recentAvg, priorAvg);
+    const label = m.label.toLowerCase();
+    if (word === 'held') return `${label} holding steady`;
+    return `${label} ${word === 'up' ? 'rising' : 'dipping'} (${formatRate(priorAvg)} to ${formatRate(recentAvg)} per game)`;
+  });
+  const trendSentence = `Across the last ${apps.length} matches played, ${surname}'s numbers show ${listJoin(reads)}.`;
 
   const minRecent = avg(recent.map((s) => s.minutes_played));
   const minPrior = avg(prior.map((s) => s.minutes_played));
   const minRead = trendWord(minRecent, minPrior);
-
-  const keySentence =
-    keyRead === 'held'
-      ? `Across the last ${apps.length} matches played, ${surname}'s ${keyLabel} has held steady (${formatRate(keyRecent)} per game recently against ${formatRate(keyPrior)} across the earlier stretch).`
-      : `Across the last ${apps.length} matches played, ${surname}'s ${keyLabel} has ${keyRead === 'up' ? 'risen' : 'dipped'} from ${formatRate(keyPrior)} to ${formatRate(keyRecent)} per game.`;
 
   const minSentence =
     minRead === 'held'
@@ -196,7 +211,12 @@ function buildForm(
         ? `Minutes have climbed from ${Math.round(minPrior)} to ${Math.round(minRecent)} per outing, a read on growing selection trust.`
         : `Minutes have slipped from ${Math.round(minPrior)} to ${Math.round(minRecent)} per outing, worth watching over the next squad naming.`;
 
-  return `${keySentence} ${minSentence}`;
+  return `${trendSentence} ${minSentence}`;
+}
+
+function listJoin(items: readonly string[]): string {
+  if (items.length <= 1) return items[0] ?? '';
+  return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
 }
 
 function buildOutlook(

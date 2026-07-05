@@ -1,8 +1,8 @@
 import { useMemo } from 'react';
 
-import type { Fixture, Result, Team } from '@rugby-app/shared';
+import type { Fixture, MatchEvent, Result, Team } from '@rugby-app/shared';
 
-import { useFixture, useFixtureResult, useTeams } from '@/api/hooks';
+import { useFixture, useFixtureEvents, useFixtureResult, useRankingHistory, useTeams } from '@/api/hooks';
 import { type TeamAggregate, useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { type FormOutcome, useTeamRecentForm } from '@/hooks/use-team-recent-form';
 
@@ -120,6 +120,24 @@ export function useMatchAnalysis(fixtureId: string): {
   const homeForm = useTeamRecentForm(homeTeamId, CONTEXT_FORM_LOOKBACK);
   const awayForm = useTeamRecentForm(awayTeamId, CONTEXT_FORM_LOOKBACK);
 
+  // World ranking as of kickoff — the same trajectory data the Preview
+  // pane charts, reduced to each side's position walking in.
+  const rankingHistory = useRankingHistory();
+  const { homeRank, awayRank } = useMemo(() => {
+    const snaps = (rankingHistory.data ?? [])
+      .filter((s) => s.source === 'world-rugby-mens' && (!asOfDate || s.snapshot_date < asOfDate))
+      .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date));
+    const latest = snaps[snaps.length - 1];
+    return {
+      homeRank: latest?.rows.find((r) => r.team_id === homeTeamId)?.rank ?? null,
+      awayRank: latest?.rows.find((r) => r.team_id === awayTeamId)?.rank ?? null,
+    };
+  }, [rankingHistory.data, asOfDate, homeTeamId, awayTeamId]);
+
+  // Event timeline — feeds the match-flow read (lead changes, decisive
+  // run), the narrative counterpart of the Scoring Progression chart.
+  const events = useFixtureEvents(fixtureId, fixture.data?.status);
+
   const isLoading =
     fixture.isLoading ||
     result.isLoading ||
@@ -141,6 +159,9 @@ export function useMatchAnalysis(fixtureId: string): {
       awayAgg: awayAgg.data,
       homeForm: homeForm.outcomes,
       awayForm: awayForm.outcomes,
+      homeRank,
+      awayRank,
+      events: events.data ?? [],
     });
   }, [
     fixture.data,
@@ -150,6 +171,9 @@ export function useMatchAnalysis(fixtureId: string): {
     awayAgg.data,
     homeForm.outcomes,
     awayForm.outcomes,
+    homeRank,
+    awayRank,
+    events.data,
   ]);
 
   return { data, isLoading };
@@ -163,6 +187,13 @@ interface PreMatchContext {
   awayAgg: TeamAggregate | undefined;
   homeForm: readonly FormOutcome[];
   awayForm: readonly FormOutcome[];
+  /** World ranking positions as of kickoff; null when unranked or the
+   *  snapshot isn't loaded yet. */
+  homeRank: number | null;
+  awayRank: number | null;
+  /** Chronological event timeline — scoring events feed the match-flow
+   *  read appended to Commentary. */
+  events: readonly MatchEvent[];
 }
 
 // ─── Analysis builder ───────────────────────────────────────────────────────
@@ -179,16 +210,115 @@ function buildAnalysis(
 
   const axes = buildAxes(result, home, away, ctx);
 
+  // Match-flow read (lead changes, decisive run) appends to Commentary
+  // as its closing paragraph — the narrative counterpart of the
+  // Scoring Progression / momentum charts on the Insights pane.
+  const flow = buildMatchFlow(ctx.events, home, away, isLive);
+  const commentary = buildCommentary(result, home, away, isLive, generatedAtMinute, ctx);
+
   return {
     summary: buildSummary(result, home, away, isLive, generatedAtMinute),
     context: buildContext(home, away, ctx),
-    commentary: buildCommentary(result, home, away, isLive, generatedAtMinute, ctx),
+    commentary: flow ? `${commentary}\n\n${flow}` : commentary,
     variance: buildVariance(result, home, away, isLive, ctx),
     axes,
     outlook: buildOutlook(result, home, away, isLive, ctx),
     generatedAtMinute,
     status: isLive ? 'live' : 'completed',
   };
+}
+
+/**
+ * Match-flow paragraph from the scoring timeline: lead changes, when
+ * the (current) leader hit the front, and the largest unanswered run.
+ * Returns '' when there are no scoring events yet — the paragraph is
+ * simply omitted rather than padded.
+ */
+function buildMatchFlow(
+  events: readonly MatchEvent[],
+  home: Team,
+  away: Team,
+  isLive: boolean,
+): string {
+  const scoring = events
+    .filter((e) => e.points > 0 && e.team_id !== null)
+    .slice()
+    .sort((a, b) => a.minute + a.stoppage / 100 - (b.minute + b.stoppage / 100));
+  if (scoring.length === 0) return '';
+
+  let h = 0, a = 0;
+  let leader: 'home' | 'away' | null = null;
+  let leadChanges = 0;
+  let leadTakenMinute = 0;
+  // Largest unanswered run.
+  let runTeam: string | null = null;
+  let runPts = 0;
+  let runStart = 0;
+  let runEnd = 0;
+  let bestRun = { team: null as string | null, pts: 0, start: 0, end: 0 };
+
+  for (const e of scoring) {
+    if (e.team_id === home.id) h += e.points;
+    else a += e.points;
+
+    const now: 'home' | 'away' | null = h > a ? 'home' : a > h ? 'away' : leader;
+    if (now !== leader && now !== null) {
+      if (leader !== null) leadChanges++;
+      leadTakenMinute = e.minute;
+      leader = now;
+    }
+
+    if (e.team_id === runTeam) {
+      runPts += e.points;
+      runEnd = e.minute;
+    } else {
+      runTeam = e.team_id;
+      runPts = e.points;
+      runStart = e.minute;
+      runEnd = e.minute;
+    }
+    if (runPts > bestRun.pts) bestRun = { team: runTeam, pts: runPts, start: runStart, end: runEnd };
+  }
+
+  const leaderTeam = leader === 'home' ? home : leader === 'away' ? away : null;
+  const parts: string[] = [];
+
+  if (h === a) {
+    parts.push(
+      isLive
+        ? `All square as it stands, with the lead having changed hands ${leadChanges === 0 ? 'not at all' : `${leadChanges} ${leadChanges === 1 ? 'time' : 'times'}`}.`
+        : `Neither side could make a lead stick: level at the end after ${leadChanges} ${leadChanges === 1 ? 'lead change' : 'lead changes'}.`,
+    );
+  } else if (leaderTeam) {
+    if (leadChanges === 0) {
+      parts.push(
+        isLive
+          ? `${leaderTeam.short_name} hit the front in the ${ordinalRank(Math.max(1, leadTakenMinute))} minute and have held it since.`
+          : `${leaderTeam.short_name} hit the front in the ${ordinalRank(Math.max(1, leadTakenMinute))} minute and never surrendered the lead.`,
+      );
+    } else {
+      parts.push(
+        isLive
+          ? `The lead has changed hands ${leadChanges} ${leadChanges === 1 ? 'time' : 'times'}, ${leaderTeam.short_name} holding it since the ${ordinalRank(leadTakenMinute)} minute.`
+          : `The lead changed hands ${leadChanges} ${leadChanges === 1 ? 'time' : 'times'} before ${leaderTeam.short_name} took it for good in the ${ordinalRank(leadTakenMinute)} minute.`,
+      );
+    }
+  }
+
+  // Decisive-run callout — only when the burst is big enough to be a
+  // story (10+ unanswered points).
+  if (bestRun.team && bestRun.pts >= 10) {
+    const runSide = bestRun.team === home.id ? home : away;
+    const span =
+      bestRun.start === bestRun.end
+        ? `in the ${ordinalRank(Math.max(1, bestRun.start))} minute`
+        : `between the ${ordinalRank(Math.max(1, bestRun.start))} and ${ordinalRank(bestRun.end)} minutes`;
+    parts.push(
+      `The biggest swing ${isLive ? 'so far is' : 'was'} ${bestRun.pts} unanswered points from ${runSide.short_name} ${span}.`,
+    );
+  }
+
+  return parts.join(' ');
 }
 
 function liveMinuteFromKickoff(fixture: Fixture): number {
@@ -206,10 +336,47 @@ function liveMinuteFromKickoff(fixture: Fixture): number {
  * paragraph so it functions as the "cold open" to the analysis.
  */
 function buildContext(home: Team, away: Team, ctx: PreMatchContext): string {
+  const ranking = rankingSentence(home, away, ctx.homeRank, ctx.awayRank);
   const homeSummary = teamContextSentence(home, ctx.homeAgg, ctx.homeForm);
   const awaySummary = teamContextSentence(away, ctx.awayAgg, ctx.awayForm);
   const contrast = contrastSentence(home, away, ctx.homeAgg, ctx.awayAgg);
-  return [homeSummary, awaySummary, contrast].filter(Boolean).join(' ');
+  return [ranking, homeSummary, awaySummary, contrast].filter(Boolean).join(' ');
+}
+
+/** World-ranking framing for the opener — the Preview trajectory card's
+ *  headline reduced to one sentence. Skipped when either side is
+ *  unranked (never invent a position). */
+function rankingSentence(
+  home: Team,
+  away: Team,
+  homeRank: number | null,
+  awayRank: number | null,
+): string {
+  if (homeRank == null || awayRank == null) return '';
+  if (homeRank === awayRank) return '';
+  const gap = Math.abs(homeRank - awayRank);
+  const higher = homeRank < awayRank ? home : away;
+  const lower = homeRank < awayRank ? away : home;
+  const hr = Math.min(homeRank, awayRank);
+  const lr = Math.max(homeRank, awayRank);
+  if (gap >= 8) {
+    return `On the world rankings this is a mismatch on paper: ${higher.short_name} ${ordinalRank(hr)} against ${lower.short_name} down at ${ordinalRank(lr)}.`;
+  }
+  if (gap >= 3) {
+    return `The rankings give ${higher.short_name} the edge, ${ordinalRank(hr)} in the world to ${lower.short_name}'s ${ordinalRank(lr)}.`;
+  }
+  return `Little between them on the world rankings: ${higher.short_name} ${ordinalRank(hr)}, ${lower.short_name} ${ordinalRank(lr)}.`;
+}
+
+function ordinalRank(n: number): string {
+  const rem100 = n % 100;
+  if (rem100 >= 11 && rem100 <= 13) return `${n}th`;
+  switch (n % 10) {
+    case 1: return `${n}st`;
+    case 2: return `${n}nd`;
+    case 3: return `${n}rd`;
+    default: return `${n}th`;
+  }
 }
 
 function teamContextSentence(

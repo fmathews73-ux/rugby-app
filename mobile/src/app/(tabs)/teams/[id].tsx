@@ -6,8 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
 
-import { useLatestRanking, useTeamPlayers, useTeams } from '@/api/hooks';
-import { FormCircles } from '@/components/form-circles';
+import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams } from '@/api/hooks';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
 import { ExtendedMomentum } from '@/components/insights/extended-momentum';
@@ -24,7 +23,6 @@ import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { initialsOf } from '@/lib/initials';
 import { worldCupTitles } from '@/lib/world-cup-titles';
 
-const FORM_LOOKBACK = 5;
 
 type TeamTab = 'preview' | 'squad' | 'stats' | 'insights' | 'analysis';
 
@@ -90,6 +88,10 @@ export default function TeamHubScreen() {
   const teamId = id ?? '';
   const [tab, setTab] = useState<TeamTab>('preview');
   const scrollRef = useRef<ScrollView>(null);
+  // Preview pane height yardstick — the KPI card's measured height
+  // becomes the chart cards' minHeight so all three match.
+  const [kpiHeight, setKpiHeight] = useState(0);
+  const matchKpi = kpiHeight > 0 ? { minHeight: kpiHeight } : undefined;
 
   // Same resolve-to-top gesture as the fixture drill's sub-tabs.
   const handleTabSelect = (next: TeamTab) => {
@@ -117,13 +119,28 @@ export default function TeamHubScreen() {
   );
 
   const players = useTeamPlayers(teamId);
-  const { outcomes } = useTeamRecentForm(teamId, FORM_LOOKBACK);
+
+  const staff = useTeamCoachingStaff(teamId);
+  const headCoach = useMemo(
+    () => staff.data?.find((c) => c.role === 'head-coach') ?? null,
+    [staff.data],
+  );
 
   const rankings = useLatestRanking();
-  const rank = useMemo(
-    () => rankings.data?.rows.find((r) => r.team_id === teamId)?.rank ?? null,
+  const rankRow = useMemo(
+    () => rankings.data?.rows.find((r) => r.team_id === teamId) ?? null,
     [rankings.data, teamId],
   );
+
+  // Last-10 record as quiet text (the dot strip stays off the hero —
+  // this is the one-line summary, the visual lives in Preview's Form).
+  const { outcomes } = useTeamRecentForm(teamId, 10);
+  const record = useMemo(() => {
+    if (outcomes.length === 0) return null;
+    let w = 0, l = 0, d = 0;
+    for (const o of outcomes) o === 'W' ? w++ : o === 'L' ? l++ : d++;
+    return `Last ${outcomes.length} · W${w} L${l}${d > 0 ? ` D${d}` : ''}`;
+  }, [outcomes]);
 
   const squadSections = useMemo(() => {
     if (!players.data) return [];
@@ -160,27 +177,38 @@ export default function TeamHubScreen() {
   return (
     <SafeAreaView edges={['bottom']} style={styles.safe}>
       <PageGradient />
-      {/* Identity + pills pinned OUTSIDE the ScrollView, mirroring the
-          fixture and player drill anatomy. Same grammar as the Home
-          Team Selector card: flag + CODE / #rank stack on the left,
-          form circles + trophy badge on the right. */}
+      {/* Identity + pills pinned OUTSIDE the ScrollView. Three centred
+          bands mirroring the fixture hero's grammar (date line / flags
+          + score / competition · venue): full name on top, flag + code
+          as the focus row, rank · points · trophies as the closing
+          meta line. Form dots deliberately absent — recent form lives
+          one tap away in Preview and on the directory rows. */}
       <View style={styles.identityHeader}>
-        <View style={styles.headerRow}>
-          <View style={styles.teamGroup}>
-            <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.header} />
-            <View style={styles.teamTextStack}>
-              <Text style={styles.teamCode}>{team.short_name}</Text>
-              {rank !== null ? <Text style={styles.teamRank}>#{rank}</Text> : null}
-            </View>
+        {/* Left-anchored identity: flag + nation CODE (name or code,
+            never both). The two meta text rows stack centred in the
+            remaining right-hand space. */}
+        <View style={styles.heroRow}>
+          <View style={styles.heroIdentityGroup}>
+            <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
+            <Text style={styles.heroName}>{team.short_name}</Text>
           </View>
-          <View style={styles.headerRight}>
-            <FormCircles outcomes={outcomes} lookback={FORM_LOOKBACK} />
-            {worldCupTitles(team.id) > 0 ? (
-              <View style={styles.trophyBadge}>
-                <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
-                <Text style={styles.trophyCount}>X{worldCupTitles(team.id)}</Text>
-              </View>
+          <View style={styles.heroMetaStack}>
+            {headCoach ? (
+              <Text style={styles.heroMetaText}>Head Coach · {headCoach.name}</Text>
             ) : null}
+            <View style={styles.heroMetaRow}>
+              <Text style={styles.heroMetaText}>
+                {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
+              </Text>
+              {worldCupTitles(team.id) > 0 ? (
+                <View style={styles.heroTrophyGroup}>
+                  <Text style={styles.heroMetaText}> · </Text>
+                  <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
+                  <Text style={styles.heroMetaText}> X{worldCupTitles(team.id)}</Text>
+                </View>
+              ) : null}
+            </View>
+            {record ? <Text style={styles.heroMetaText}>{record}</Text> : null}
           </View>
         </View>
       </View>
@@ -190,10 +218,13 @@ export default function TeamHubScreen() {
         {tab === 'preview' && (
           <>
             {/* Same backdrop card set as the fixture drill's Preview
-                (Form → Trajectory → KPIs), single-team scoped. */}
-            <ExtendedMomentum teamId={teamId} />
-            <RankingTrajectory teamId={teamId} />
-            <EfficiencyKpis teamId={teamId} />
+                (Form → Trajectory → KPIs), single-team scoped and
+                height-matched to the KPI card, the pane's yardstick. */}
+            <ExtendedMomentum teamId={teamId} style={matchKpi} />
+            <RankingTrajectory teamId={teamId} style={matchKpi} />
+            <View onLayout={(e) => setKpiHeight(Math.round(e.nativeEvent.layout.height))}>
+              <EfficiencyKpis teamId={teamId} />
+            </View>
           </>
         )}
 
@@ -438,7 +469,7 @@ function TeamAnalysisCard({ teamId }: { teamId: string }) {
     <View style={styles.card}>
       <View style={styles.cardHeaderRow}>
         <View style={styles.cardHeaderTitleGroup}>
-          <Text style={styles.sectionLabel}>Analysis</Text>
+          <Text style={styles.sectionLabel}>Team Analysis</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -477,7 +508,7 @@ function TeamAnalysisCard({ teamId }: { teamId: string }) {
         <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
           <Pressable style={styles.modalCard} onPress={() => {}}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Analysis</Text>
+              <Text style={styles.modalTitle}>Team Analysis</Text>
               <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={Colors.light.text} />
               </Pressable>
@@ -586,49 +617,51 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.three,
-    // Shared drill-hero box — identity row centres in the fixture
-    // hero's height so all three drills measure identically. The extra
-    // whitespace is a known trade; hero content gets revisited later.
+    gap: Spacing.two,
+    alignItems: 'center',
+    // Shared drill-hero box — three centred bands fill the fixture
+    // hero's height so all drills measure identically.
     minHeight: DRILL_HERO_MIN_HEIGHT,
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
-  headerRow: {
+  // Single hero row: identity group left, meta stack filling the right.
+  heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    alignSelf: 'stretch',
+    gap: Spacing.three,
   },
-  teamGroup: {
+  heroIdentityGroup: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.three,
   },
-  teamTextStack: { gap: 2 },
-  teamCode: {
-    fontSize: TextSize.lg,
+  heroName: {
+    fontSize: TextSize.xl,
     fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
   },
-  teamRank: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
+  // Meta stack — the two quiet lines (head coach; rank · points ·
+  // trophies) left-aligned one above the other in the right-hand space.
+  heroMetaStack: {
+    flex: 1,
+    alignItems: 'flex-start',
+    gap: Spacing.one,
+    paddingLeft: Spacing.four,
   },
-  headerRight: {
-    alignItems: 'flex-end',
-    gap: Spacing.two,
-  },
-  trophyBadge: {
+  heroMetaRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 3,
   },
-  trophyCount: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+  heroTrophyGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  heroMetaText: {
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },

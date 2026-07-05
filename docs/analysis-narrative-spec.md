@@ -31,8 +31,8 @@ The Analysis card renders 12 labeled prose sections, in this order:
 | # | Section | Icon | Content |
 |---|---|---|---|
 | 0 | *(Summary)* | — | 1 sentence: scoreline + high-level shape. Unlabeled. |
-| 1 | Coming in | `time-outline` | Pre-match backdrop: form (last-5 W/L/D) + season averages (points scored, points conceded) for both sides + contrast sentence. |
-| 2 | Commentary | `mic-outline` | 3-paragraph broadcast prose (shape / attack pattern / platform work). Paragraphs `\n\n` separated. |
+| 1 | Coming in | `time-outline` | Pre-match backdrop: world-ranking framing (both sides' positions as of kickoff — gap ≥8 places reads as a mismatch, ≥3 an edge, else "little between them"; omitted if either side is unranked) + form (last-5 W/L/D) + season averages (points scored, points conceded) for both sides + contrast sentence. |
+| 2 | Commentary | `mic-outline` | 3-paragraph broadcast prose (shape / attack pattern / platform work) + a closing MATCH-FLOW paragraph from the scoring timeline: lead changes, when the (current) leader hit the front, and the largest unanswered run (named only at 10+ points). Flow paragraph is omitted when there are no scoring events. Paragraphs `\n\n` separated. |
 | 3 | Variance | `analytics-outline` | Names the 2–3 axes with biggest gaps as the deciding dimensions. |
 | 4 | Attack | `flash-outline` | Axis narrative. |
 | 5 | Defence | `shield-outline` | Axis narrative. |
@@ -320,7 +320,13 @@ read-model, or the season aggregate. Never invent a number.
   band is reported as steady.
 - **Minimum sample:** fewer than 6 appearances → no halves comparison;
   say the trend read is thin and point at the profile instead.
-- **Role key metric:** forwards = tackle count, backs = carry metres.
+- **Trend coverage:** the form read covers ALL THREE of the role's
+  Preview trend metrics (forwards: tackles / carries / metres; backs:
+  metres / defenders beaten / points), each labelled rising / dipping /
+  holding steady, plus the minutes trend. Never narrate only one.
+- **Discipline:** any red card in the window is always named ("needs
+  attention"); yellows are named when present. Zero cards → silence,
+  never "clean record" padding.
 
 ### 9.3 Content rules specific to players
 
@@ -382,6 +388,17 @@ narrative lives in §9.
 - **Ranking move:** ± 2 or more places across the snapshot span is a
   climb/slide; less holds steady. Fewer than 2 snapshots → say the
   history is insufficient, do not extrapolate.
+- **Window vs season baseline (Form read):** points scored / conceded
+  per game in the window compared against the FULL-SEASON per-game
+  baseline (the Stats pane's second column). Reported only when the
+  divergence is ± 15% or more AND the season sample is larger than the
+  window itself.
+- **Scoring timing (Season read):** the Points Pattern quarters (Q1–Q4
+  share of points scored and conceded, averaged across completed
+  matches). A quarter is named only when it carries ≥ 35% of the
+  relevant points — one sentence for the scoring skew, one for the
+  soft period conceding-wise. Below the threshold, timing goes
+  unmentioned.
 
 ---
 
@@ -399,3 +416,12 @@ narrative lives in §9.
 - **v3** — Added §10 team analysis narrative (team overview Analysis
   tab): structure, thresholds, no-player-references rule. Template
   implementation: `use-team-analysis.ts`.
+- **v4** — Pane-coverage pass: every narrative now accounts for its
+  drill's Preview / Stats / Insights data. Match: ranking framing in
+  Coming in + match-flow paragraph closing Commentary (lead changes,
+  decisive run). Team: window-vs-season baseline deltas in the Form
+  read + Q1–Q4 scoring-timing sentences in the Season read. Player:
+  form read covers all three role trend metrics + discipline (cards)
+  in the scouting read. Pitch-heatmap spatial data deliberately
+  excluded from narratives (density does not convert to grounded
+  prose).
