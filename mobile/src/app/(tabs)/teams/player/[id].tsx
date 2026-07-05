@@ -170,7 +170,7 @@ function ScoutingCard({
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Scouting (prev. {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>Scouting</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -287,7 +287,7 @@ function TrendCard({
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Form (prev. {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>Form</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}

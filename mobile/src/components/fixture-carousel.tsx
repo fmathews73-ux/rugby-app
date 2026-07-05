@@ -28,9 +28,10 @@ const CARD_GAP = 12;
  *   2. Otherwise the next scheduled match (kickoff >= now).
  *   3. Otherwise the most recent completed match.
  *
- * The 3 cards to the left of centre are the immediately-preceding fixtures
- * in chronological order; the 3 to the right are the next three. Fewer than
- * 7 render if the window is at the ends of the sorted list.
+ * The 3 cards to the left of centre are the previous 3 COMPLETED matches;
+ * the 3 to the right are the next 3 SCHEDULED matches. Postponed /
+ * cancelled fixtures never occupy a slot. Fewer than 7 render near the
+ * ends of the season.
  *
  * Horizontal `<ScrollView>` with snap-to-interval + a paged-look dot
  * indicator underneath. No extra deps.
@@ -66,40 +67,36 @@ export function FixtureCarousel() {
       .sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc));
   }, [fixtureQueries]);
 
-  const currentIdx = useMemo(() => {
-    if (allFixtures.length === 0) return -1;
+  // Window composition is BY STATUS, not by list position: the centre
+  // card is always the "current" fixture (live if one is on, else the
+  // next upcoming kickoff, else the most recent completed as a
+  // fallback), flanked by exactly the previous 3 COMPLETED matches on
+  // the left and the next 3 SCHEDULED matches on the right. Postponed /
+  // cancelled fixtures never occupy a slot.
+  const { windowFixtures, centreIndexInWindow } = useMemo(() => {
+    if (allFixtures.length === 0) return { windowFixtures: [], centreIndexInWindow: 0 };
     const now = new Date().toISOString();
-    // 1. live / half-time
-    const liveIdx = allFixtures.findIndex(
-      (f) => f.status === 'live' || f.status === 'half-time',
-    );
-    if (liveIdx !== -1) return liveIdx;
-    // 2. next scheduled at or after now
-    const nextIdx = allFixtures.findIndex(
+    const completed = allFixtures.filter((f) => f.status === 'completed');
+    const upcoming = allFixtures.filter(
       (f) => f.status === 'scheduled' && f.kickoff_utc >= now,
     );
-    if (nextIdx !== -1) return nextIdx;
-    // 3. last completed
-    let lastCompleted = -1;
-    for (let i = 0; i < allFixtures.length; i++) {
-      const f = allFixtures[i];
-      if (f && f.status === 'completed') lastCompleted = i;
-    }
-    return lastCompleted;
+    const live = allFixtures.find((f) => f.status === 'live' || f.status === 'half-time');
+
+    const centre = live ?? upcoming[0] ?? completed[completed.length - 1];
+    if (!centre) return { windowFixtures: [], centreIndexInWindow: 0 };
+
+    const left = completed
+      .filter((f) => f.id !== centre.id && f.kickoff_utc < centre.kickoff_utc)
+      .slice(-CARDS_EITHER_SIDE);
+    const right = upcoming
+      .filter((f) => f.id !== centre.id && f.kickoff_utc > centre.kickoff_utc)
+      .slice(0, CARDS_EITHER_SIDE);
+
+    return {
+      windowFixtures: [...left, centre, ...right],
+      centreIndexInWindow: left.length,
+    };
   }, [allFixtures]);
-
-  const windowFixtures = useMemo(() => {
-    if (currentIdx === -1 || allFixtures.length === 0) return [];
-    const start = Math.max(0, currentIdx - CARDS_EITHER_SIDE);
-    const end = Math.min(allFixtures.length, currentIdx + CARDS_EITHER_SIDE + 1);
-    return allFixtures.slice(start, end);
-  }, [allFixtures, currentIdx]);
-
-  // Where in the window is the centre / current fixture?
-  const centreIndexInWindow = useMemo(() => {
-    if (currentIdx === -1) return 0;
-    return currentIdx - Math.max(0, currentIdx - CARDS_EITHER_SIDE);
-  }, [currentIdx]);
 
   // Fetch results only for fixtures that might have one. Live / half-time
   // fixtures poll every 30 s so the visible carousel score stays fresh

@@ -23,7 +23,6 @@ import { StatsPane } from '@/components/fixture-drill/stats-pane';
 import { SubTabBar, type SubTab } from '@/components/fixture-drill/sub-tab-bar';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { SimLiveToggle } from '@/dev/sim-live-toggle';
 import { Spacing } from '@/constants/theme';
 
 /**
@@ -140,11 +139,6 @@ export default function FixtureDetailScreen() {
               {tab === 'analysis' && (
                 <AnalysisPane fixture={fixture.data} />
               )}
-              {/* Dev-only synthetic-live toggle — visible only in __DEV__
-                  and only for completed fixtures. Rewinds the match to
-                  minute 0 and plays it out at ~8× speed so the polling
-                  cadence + chart updates can be smoke-tested visually. */}
-              <SimLiveToggle fixture={fixture.data} />
             </View>
           </ScrollView>
         </>

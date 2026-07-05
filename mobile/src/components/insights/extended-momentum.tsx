@@ -10,12 +10,7 @@ import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import {
-  formPointsFor,
-  momentumFor,
-  streakFor,
-  type FormPoint,
-} from '@/lib/form-momentum';
+import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 // Outcome bar colours — same trio as FormCircles so W/L/D reads
@@ -38,6 +33,8 @@ export function ExtendedMomentum({
   compareTeamId,
   asOfDate,
   style,
+  title,
+  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -48,6 +45,11 @@ export function ExtendedMomentum({
   /** Optional card-root style override — the Home carousel passes
    *  `flex: 1` so sibling pages normalise to equal heights. */
   style?: StyleProp<ViewStyle>;
+  /** Optional header label override (e.g. Home's "My Team ..." titles). */
+  title?: string;
+  /** Hide the corner flag — Home's my-team cards drop it since the
+   *  whole stack is already scoped to the selected team. */
+  showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
@@ -99,20 +101,11 @@ export function ExtendedMomentum({
     () => formPointsFor(activeTeamId, completedFixtures, resultByFixture, LOOKBACK),
     [activeTeamId, completedFixtures, resultByFixture],
   );
-  const momentum = useMemo(
-    () => momentumFor(activeTeamId, completedFixtures, resultByFixture),
-    [activeTeamId, completedFixtures, resultByFixture],
-  );
-  const streak = useMemo(
-    () => streakFor(activeTeamId, completedFixtures, resultByFixture),
-    [activeTeamId, completedFixtures, resultByFixture],
-  );
-
   return (
     <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Form (prev. {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>{title ?? 'Form'}</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -128,32 +121,13 @@ export function ExtendedMomentum({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
-        ) : primaryTeam.data ? (
-          // Single-team mode (Home page) — anchor the header with the
-          // team's flag on the right corner so the card identifies its
-          // subject at a glance.
+        ) : showCornerFlag && primaryTeam.data ? (
+          // Single-team mode — anchor the header with the team's flag
+          // so the card identifies its subject at a glance (Home's
+          // my-team stack opts out; its scope is already explicit).
           <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
-
-      {/* Streak + momentum meta always sits on its own row below the header
-          title, whether or not the toggle pill is present. Keeps the meta
-          in a consistent location and gives it visual breathing room from
-          the title. */}
-      {streak && points.length > 0 ? (
-        <View style={styles.subHeaderMeta}>
-          <Text style={styles.streakText}>
-            {streak.count}
-            {streak.letter}
-          </Text>
-          <Text style={styles.separator}> · </Text>
-          <Text style={styles.momentumText}>
-            {momentum > 0 ? '+' : ''}
-            {momentum}
-            {momentum > 0 ? ' ▲' : momentum < 0 ? ' ▼' : ''}
-          </Text>
-        </View>
-      ) : null}
 
       {points.length === 0 ? (
         <Text style={styles.empty}>Not enough matches yet.</Text>
@@ -290,16 +264,8 @@ function MomentumInfoModal({
             (left) to most recent (right). Each bar rises or falls from the
             zero line by that game's points margin — green bars above the
             line are wins, red bars below are losses, and a small grey stub
-            on the line is a draw. Taller bar = bigger margin.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            The <Text style={styles.modalStrong}>streak</Text> in the header (e.g.
-            2W) counts consecutive same-outcome matches from the most recent
-            game backwards. The <Text style={styles.modalStrong}>momentum</Text>
-            {' '}score (e.g. +18 ▲) is a recency-weighted sum of the last five
-            point-differentials (1.0, 0.8, 0.6, 0.4, 0.2) — a scan-friendly
-            "how are they trending right now" number.
+            on the line is a draw. Taller bar = bigger margin; the number on
+            each bar is the final margin itself.
           </Text>
         </Pressable>
       </Pressable>
@@ -337,27 +303,6 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
-  },
-  headerMeta: { flexDirection: 'row', alignItems: 'baseline' },
-  // Streak + momentum sits on its own row directly below the title, left-
-  // aligned so it reads as an annotation of "Form (last 10)".
-  subHeaderMeta: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  streakText: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  separator: { fontSize: TextSize.sm, color: Colors.light.textSecondary },
-  momentumText: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   empty: {
     fontSize: TextSize.sm,

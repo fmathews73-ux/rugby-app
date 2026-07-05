@@ -26,6 +26,8 @@ export function RankingTrajectory({
   compareTeamId,
   asOfDate,
   style,
+  title,
+  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -36,6 +38,11 @@ export function RankingTrajectory({
   /** Optional card-root style override — the Home carousel passes
    *  `flex: 1` so sibling pages normalise to equal heights. */
   style?: StyleProp<ViewStyle>;
+  /** Optional header label override (e.g. Home's "My Team ..." titles). */
+  title?: string;
+  /** Hide the corner flag — Home's my-team cards drop it since the
+   *  whole stack is already scoped to the selected team. */
+  showCornerFlag?: boolean;
 }) {
   const history = useRankingHistory();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -67,28 +74,16 @@ export function RankingTrajectory({
     return points;
   }, [history.data, activeTeamId, asOfDate]);
 
-  const summary = useMemo(() => {
-    if (series.length < 2) return null;
-    const first = series[0]!;
-    const last = series[series.length - 1]!;
-    return {
-      from: first.rank,
-      to: last.rank,
-      delta: first.rank - last.rank, // Positive = climbed (rank number went down)
-      currentPoints: last.points,
-    };
-  }, [series]);
-
   return (
     <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Ranking Trajectory</Text>
+          <Text style={styles.sectionLabel}>{title ?? 'World Ranking'}</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Explain Ranking Trajectory">
+            accessibilityLabel="Explain the World Ranking chart">
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
@@ -99,27 +94,10 @@ export function RankingTrajectory({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
-        ) : primaryTeam.data ? (
+        ) : showCornerFlag && primaryTeam.data ? (
           <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
-
-      {/* Rank delta meta sits on its own row below the title — consistent
-          placement with Form (streak/momentum), regardless of whether the
-          toggle pill occupies the top-right slot. */}
-      {summary ? (
-        <View style={styles.subHeaderMeta}>
-          <Text style={styles.headerMetaText}>
-            #{summary.from} → #{summary.to}
-          </Text>
-          {summary.delta !== 0 ? (
-            <Text style={styles.headerMetaDelta}>
-              {'  '}
-              {summary.delta > 0 ? '▲' : '▼'} {Math.abs(summary.delta)}
-            </Text>
-          ) : null}
-        </View>
-      ) : null}
 
       {history.isLoading && series.length === 0 ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -180,16 +158,15 @@ function TrajectoryChart({
     return plotLeft + (i / (series.length - 1)) * (plotRight - plotLeft);
   };
 
-  // Fixed landmark labels — #1, #5, #10 — so the axis reads as world-
-  // ranking territory rather than chart-relative ticks. When a ladder
-  // sits outside those landmarks entirely (e.g. a side ranging #14–#20),
-  // fall back to labelling its ends and midpoint.
-  const landmarks = [1, 5, 10].filter((r) => r >= minRank && r <= maxRank);
-  const labelled = new Set<number>(
-    landmarks.length > 0
-      ? landmarks
-      : [minRank, Math.round((minRank + maxRank) / 2), maxRank],
-  );
+  // The ladder's ENDS are always labelled — best and worst rank in the
+  // window — so the reader can compute the variance at a glance. World-
+  // ranking landmarks (1 / 5 / 10) are added where they fall inside the
+  // ladder, skipped when within 2 rungs of an end so labels never crowd
+  // or duplicate.
+  const labelled = new Set<number>([minRank, maxRank]);
+  for (const landmark of [1, 5, 10]) {
+    if (landmark - minRank >= 2 && maxRank - landmark >= 2) labelled.add(landmark);
+  }
 
   const dots = series.map((s, i) => {
     const prev = i > 0 ? series[i - 1]! : null;
@@ -293,25 +270,26 @@ function TrajectoryInfoModal({
       <Pressable style={styles.modalBackdrop} onPress={onClose}>
         <Pressable style={styles.modalCard} onPress={() => {}}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Ranking Trajectory</Text>
+            <Text style={styles.modalTitle}>World Ranking (12 mo)</Text>
             <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
               <Ionicons name="close" size={20} color={Colors.light.text} />
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            The team's World Rugby rank across the last 12 monthly snapshots,
-            oldest (left) to newest (right). Each dot sits on its rank rung —
-            the ladder only spans the ranks the team actually touched, so
-            even a one-place move is a visible step.{' '}
+            The team's official World Rugby rank across the last 12 monthly
+            snapshots, oldest (left) to newest (right). Each dot sits on its
+            rank rung — the ladder only spans the ranks the team actually
+            touched, so even a one-place move is a visible step.{' '}
             <Text style={styles.modalStrong}>Green means the rank improved
-            that month, red means it slipped, grey means it held.</Text>{' '}
-            World Rugby's algorithm is a rolling-weighted Elo variant, so
-            movement is a function of recent results plus opponent strength.
+            that month, red means it slipped, grey means it held.</Text>
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
-            The header shows the start → end rank across the visible window and
-            a total-climb indicator (▲ up, ▼ down).
+            The gridline numbers mark world-ranking landmarks (1, 5, 10)
+            where they fall inside the ladder. World Rugby's algorithm is a
+            rolling-weighted Elo variant, so movement is a function of
+            recent results plus opponent strength — beating a higher-ranked
+            side moves you further than beating a lower-ranked one.
           </Text>
         </Pressable>
       </Pressable>
@@ -349,22 +327,6 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
-  },
-  headerMeta: { flexDirection: 'row', alignItems: 'baseline' },
-  subHeaderMeta: { flexDirection: 'row', alignItems: 'baseline' },
-  headerMetaText: {
-    fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-    fontWeight: TextWeight.bold,
-    fontVariant: ['tabular-nums'],
-  },
-  headerMetaDelta: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    fontVariant: ['tabular-nums'],
-    // Grey, not outcome-coloured — red/green clashed with the all-blue
-    // chart treatment; grey and blue sit together cleanly.
-    color: Colors.light.textSecondary,
   },
   empty: {
     fontSize: TextSize.sm,

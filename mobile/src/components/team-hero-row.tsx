@@ -1,4 +1,3 @@
-import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 
@@ -7,9 +6,13 @@ import type { Team } from '@rugby-app/shared';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { worldCupTitles } from '@/lib/world-cup-titles';
 
 const FORM_LOOKBACK = 5;
+
+// Same outcome trio as FormCircles / the Form chart.
+const WIN_COLOR = '#059669';
+const LOSS_COLOR = '#DC2626';
+const DRAW_COLOR = '#9CA3AF';
 
 /**
  * Compact row-scale version of the drill-hero grammar, shared by every
@@ -31,13 +34,6 @@ export function TeamHeroRow({
   right?: ReactNode;
 }) {
   const { outcomes } = useTeamRecentForm(team.id, FORM_LOOKBACK);
-  let w = 0, l = 0, d = 0;
-  for (const o of outcomes) o === 'W' ? w++ : o === 'L' ? l++ : d++;
-  const record =
-    outcomes.length > 0
-      ? `Last ${outcomes.length} · W${w} L${l}${d > 0 ? ` D${d}` : ''}`
-      : null;
-  const titles = worldCupTitles(team.id);
 
   return (
     <View style={styles.row}>
@@ -46,19 +42,29 @@ export function TeamHeroRow({
         <Text style={styles.code}>{team.short_name}</Text>
       </View>
       <View style={styles.metaStack}>
-        <View style={styles.metaLine}>
-          <Text style={styles.metaText}>
-            {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
-          </Text>
-          {titles > 0 ? (
-            <>
-              <Text style={styles.metaText}> · </Text>
-              <Ionicons name="trophy" size={11} color={Colors.light.textSecondary} />
-              <Text style={styles.metaText}> X{titles}</Text>
-            </>
-          ) : null}
-        </View>
-        {record ? <Text style={styles.metaText}>{record}</Text> : null}
+        <Text style={styles.metaText}>
+          {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
+        </Text>
+        {outcomes.length > 0 ? (
+          // Result sequence as bare colour dots (newest first, matching
+          // the old FormCircles convention) — sized to sit inside the
+          // meta line's height so the row rhythm doesn't change.
+          <View style={styles.recordRow}>
+            <Text style={styles.metaText}>Last {outcomes.length} · </Text>
+            {outcomes.map((o, i) => (
+              <View
+                key={i}
+                style={[
+                  styles.recordDot,
+                  {
+                    backgroundColor:
+                      o === 'W' ? WIN_COLOR : o === 'L' ? LOSS_COLOR : DRAW_COLOR,
+                  },
+                ]}
+              />
+            ))}
+          </View>
+        ) : null}
       </View>
       {right}
     </View>
@@ -88,13 +94,20 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     paddingLeft: Spacing.three,
   },
-  metaLine: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
   metaText: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
+  },
+  recordRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+  },
+  // 7pt dots — small enough to live inside the meta line's height.
+  recordDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
   },
 });

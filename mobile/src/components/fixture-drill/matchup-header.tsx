@@ -4,7 +4,6 @@ import type { Fixture, Result, Team } from '@rugby-app/shared';
 
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { useSimLive } from '@/dev/sim-live';
 import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Matchup header ──────────────────────────────────────────────────────────
@@ -24,15 +23,10 @@ export function MatchupHeader({
 }) {
   const isCompleted = fixture.status === 'completed';
   const isLive = fixture.status === 'live' || fixture.status === 'half-time';
-  const sim = useSimLive();
 
-  // Match minute for the LIVE chip: sim mode sources from the sim's
-  // virtual clock (kickoff is in the past — real elapsed would be huge).
-  // Real live mode: elapsed real minutes since kickoff, clamped 0–80.
+  // Match minute for the LIVE chip: elapsed real minutes since kickoff,
+  // clamped 0–80.
   const liveMinute = (() => {
-    if (sim.active && sim.fixtureId === fixture.id) {
-      return Math.floor(sim.virtualMinute);
-    }
     const elapsed = Math.floor((Date.now() - new Date(fixture.kickoff_utc).getTime()) / 60000);
     return Math.min(80, Math.max(0, elapsed));
   })();

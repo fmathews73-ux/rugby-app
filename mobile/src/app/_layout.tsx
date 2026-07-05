@@ -7,7 +7,6 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { BackButton } from '@/components/back-button';
 import { DevModeBanner } from '@/components/dev-mode-banner';
-import { SimLiveProvider } from '@/dev/sim-live';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -46,8 +45,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <SimLiveProvider>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
           <SafeAreaProvider>
             <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
               <DevModeBanner />
@@ -67,8 +65,7 @@ export default function RootLayout() {
               </Stack>
             </View>
           </SafeAreaProvider>
-        </ThemeProvider>
-      </SimLiveProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

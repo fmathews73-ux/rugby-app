@@ -2,10 +2,8 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { useTeam } from '@/api/hooks';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 
@@ -33,7 +31,6 @@ export function MyTeamProfileCard() {
 
 function Populated({ teamId }: { teamId: string }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const primaryTeam = useTeam(teamId);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
   const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
 
@@ -41,7 +38,7 @@ function Populated({ teamId }: { teamId: string }) {
     <View style={styles.card}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Profile (prev. {LOOKBACK})</Text>
+          <Text style={styles.sectionLabel}>My Team Profile</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -50,9 +47,6 @@ function Populated({ teamId }: { teamId: string }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
-        ) : null}
       </View>
 
       {aggregate && aggregate.gamesPlayed > 0 ? (
@@ -94,10 +88,10 @@ function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void
             average.
           </Text>
           <Text style={styles.modalBody}>
-            The window mirrors the Form (prev. {LOOKBACK}) sparkline
-            immediately below — Form shows the sequence of results,
-            Profile shows the shape of those results across the eight
-            playing dimensions.
+            The window matches the Form and Efficiency KPI cards in the
+            carousel below — Form shows the sequence of results, the KPIs
+            the headline numbers, and Profile the shape of those results
+            across the eight playing dimensions.
           </Text>
         </Pressable>
       </Pressable>

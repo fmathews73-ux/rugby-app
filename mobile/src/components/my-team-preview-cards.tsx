@@ -60,14 +60,31 @@ export function MyTeamPreviewCards() {
           showsHorizontalScrollIndicator={false}
           onScroll={handleScroll}
           scrollEventThrottle={16}>
+          {/* "My Team ..." titles + no corner flag — the whole stack is
+              already scoped to the selected team. */}
           <View style={[styles.page, { width: screenWidth }]}>
-            <ExtendedMomentum teamId={myTeamId} style={styles.pageCard} />
+            <ExtendedMomentum
+              teamId={myTeamId}
+              style={styles.pageCard}
+              title="My Team Form"
+              showCornerFlag={false}
+            />
           </View>
           <View style={[styles.page, { width: screenWidth }]}>
-            <RankingTrajectory teamId={myTeamId} style={styles.pageCard} />
+            <RankingTrajectory
+              teamId={myTeamId}
+              style={styles.pageCard}
+              title="My Team World Ranking"
+              showCornerFlag={false}
+            />
           </View>
           <View style={[styles.page, { width: screenWidth }]}>
-            <EfficiencyKpis teamId={myTeamId} style={styles.pageCard} />
+            <EfficiencyKpis
+              teamId={myTeamId}
+              style={styles.pageCard}
+              title="My Team Efficiency KPIs"
+              showCornerFlag={false}
+            />
           </View>
         </ScrollView>
 

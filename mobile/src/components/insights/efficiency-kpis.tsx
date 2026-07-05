@@ -9,6 +9,8 @@ import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
+const LOOKBACK = 10;
+
 /**
  * Compact KPI strip below the Radar. Numbers-first surface for viewers who
  * want the underlying values rather than the shape of the radar. Each row
@@ -20,6 +22,8 @@ export function EfficiencyKpis({
   compareTeamId,
   asOfDate,
   style,
+  title,
+  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -30,6 +34,11 @@ export function EfficiencyKpis({
   /** Optional card-root style override — the Home carousel passes
    *  `flex: 1` so sibling pages normalise to equal heights. */
   style?: StyleProp<ViewStyle>;
+  /** Optional header label override (e.g. Home's "My Team ..." titles). */
+  title?: string;
+  /** Hide the corner flag — Home's my-team cards drop it since the
+   *  whole stack is already scoped to the selected team. */
+  showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
@@ -41,8 +50,12 @@ export function EfficiencyKpis({
 
   const primaryTeam = useTeam(teamId);
   const compareTeam = useTeam(compareTeamId ?? '');
-  const primaryAggregate = useTeamAggregate(teamId, asOfDate);
-  const compareAggregate = useTeamAggregate(compareTeamId ?? '', asOfDate);
+  // Prev-10 window — the same lookback as Form, Profile, and the
+  // scouting/percentile reads, so every BI card describes one coherent
+  // stretch of matches. The full-season baseline lives in the team
+  // Stats pane and the analysis narrative instead.
+  const primaryAggregate = useTeamAggregate(teamId, asOfDate, LOOKBACK);
+  const compareAggregate = useTeamAggregate(compareTeamId ?? '', asOfDate, LOOKBACK);
 
   const hasCompare = Boolean(compareTeamId);
   const activeAggregate = activeSide === 'primary' ? primaryAggregate : compareAggregate;
@@ -98,7 +111,7 @@ export function EfficiencyKpis({
     <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Efficiency KPIs</Text>
+          <Text style={styles.sectionLabel}>{title ?? 'Efficiency KPIs'}</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -114,7 +127,7 @@ export function EfficiencyKpis({
             activeSide={activeSide}
             onSelect={setActiveSide}
           />
-        ) : primaryTeam.data ? (
+        ) : showCornerFlag && primaryTeam.data ? (
           <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
@@ -240,17 +253,26 @@ function KpiInfoModal({
             </Pressable>
           </View>
           <Text style={styles.modalBody}>
-            Averages per completed game across the six most-scanned rugby
-            metrics. Each bar shows the value relative to a plausible Tier-1
-            ceiling, giving a quick "how good is this number, really?" read
-            without needing to memorise benchmarks.
+            Per-game averages across the team's last 10 completed matches —
+            the same window as Form and Profile — over the six most-scanned
+            rugby metrics. Each bar shows the value relative to a plausible
+            Tier-1 ceiling, giving a quick "how good is this number,
+            really?" read without needing to memorise benchmarks.
+          </Text>
+          <View style={styles.modalDivider} />
+          <Text style={styles.modalBody}>
+            The small dark tick on each bar marks the{' '}
+            <Text style={styles.modalStrong}>Tier-1 average</Text> for that
+            metric — a bar ending past the tick is running ahead of the
+            typical top-tier side, and the fill turns green or red by how
+            the value compares to it.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>
             Two rows are <Text style={styles.modalStrong}>inverted</Text>{' '}
             (Points conceded, Penalties conceded) — a longer bar means the team
-            is giving away more, which is worse. Those rows use the secondary
-            text colour to visually flag that "more is not better".
+            is giving away more, which is worse, so their colours flip: staying
+            UNDER the tick is the good side.
           </Text>
         </Pressable>
       </Pressable>
