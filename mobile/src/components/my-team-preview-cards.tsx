@@ -7,9 +7,9 @@ import { MyTeamProfileCard } from '@/components/my-team-profile-card';
 import { Spacing } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
-// Matches FixtureCarousel's `screenWidth - 60` card width so these cards
-// align with the hero carousel cards above.
-const HORIZONTAL_MARGIN = 30;
+// App-wide 24pt card column — matches FixtureCarousel's card width and
+// the Fixtures / Teams landing pages.
+const HORIZONTAL_MARGIN = Spacing.four;
 
 /**
  * Home-page stack of the three fixture-drill Preview cards — Form

@@ -5,7 +5,8 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import {
   RADAR_AWAY_FILL,
@@ -76,12 +77,16 @@ export function InsightsCanvas({
         {/* Legend swatches use the polygon FILL tokens (light shades)
             so the chip colour reads as the polygon body colour rather
             than the darker stroke — matches what the eye actually sees
-            in the chart. */}
+            in the chart. Single-team mode anchors the header with the
+            team's xs flag instead — same treatment as the Form /
+            Trajectory / KPI cards. */}
         {hasCompare ? (
           <View style={styles.legend}>
             <LegendChip label={primaryShort} color={RADAR_FILL} />
             <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
           </View>
+        ) : primaryTeam.data ? (
+          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
         ) : null}
       </View>
 

@@ -113,7 +113,8 @@ export function TeamSelectorCard() {
   );
 }
 
-const HORIZONTAL_MARGIN = 30;
+// App-wide 24pt card column (matches Fixtures / Teams landing pages).
+const HORIZONTAL_MARGIN = Spacing.four;
 
 const styles = StyleSheet.create({
   page: { paddingHorizontal: HORIZONTAL_MARGIN },

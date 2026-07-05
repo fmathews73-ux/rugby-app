@@ -1,16 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Defs, LinearGradient, Path, Stop, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
+import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { CHART_ACCENT_COLOR, smoothLinePath } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-
-const BETTER_COLOR = '#059669';
-const WORSE_COLOR = StatusColor.live;
 
 /**
  * 12-month line chart of a team's World Rugby ranking position. Y-axis is
@@ -108,11 +106,7 @@ export function RankingTrajectory({
             #{summary.from} → #{summary.to}
           </Text>
           {summary.delta !== 0 ? (
-            <Text
-              style={[
-                styles.headerMetaDelta,
-                { color: summary.delta > 0 ? '#059669' : '#DC2626' },
-              ]}>
+            <Text style={styles.headerMetaDelta}>
               {'  '}
               {summary.delta > 0 ? '▲' : '▼'} {Math.abs(summary.delta)}
             </Text>
@@ -175,15 +169,6 @@ function TrajectoryChart({
   }));
   const smoothPath = smoothLinePath(svgPoints).path;
 
-  // Closed area path directly beneath the trajectory. Drops to the bottom
-  // pad edge at the last point, traces back to the first, closes. Filled
-  // with a gradient that fades to zero by mid-height so the tint reads as
-  // a soft halo below the line rather than a full area-under-the-curve.
-  const areaPath =
-    svgPoints.length > 1 && svgPoints[0] && svgPoints[svgPoints.length - 1]
-      ? `${smoothPath} L ${svgPoints[svgPoints.length - 1]!.x.toFixed(1)} ${(height - padBottom).toFixed(1)} L ${svgPoints[0]!.x.toFixed(1)} ${(height - padBottom).toFixed(1)} Z`
-      : '';
-
   // First + last data-point labels only — every-point labels get noisy on
   // a 13-point series inside a phone width.
   const first = svgPoints[0];
@@ -192,51 +177,32 @@ function TrajectoryChart({
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <Defs>
-        {/* Fade anchored to the plot area in user space — colour at plot
-            top, transparent exactly at plot bottom, so the fill spreads
-            the full way beneath the line regardless of where it sits. */}
-        <LinearGradient
-          id="trajectory-area-gradient"
-          x1="0"
-          y1={padTop}
-          x2="0"
-          y2={height - padBottom}
-          gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
-          {/* Mid stop keeps the fade visibly present three-quarters of
-              the way down — without it, the fill under a low-riding
-              trajectory sits in the near-zero tail and reads as absent. */}
-          <Stop offset="0.7" stopColor={CHART_LINE_COLOR} stopOpacity="0.1" />
-          <Stop offset="1" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
-        </LinearGradient>
+        <ClipPath id="trajectory-plot-clip">
+          <Rect x={0} y={0} width={width} height={height - padBottom} />
+        </ClipPath>
       </Defs>
-      {areaPath ? <Path d={areaPath} fill="url(#trajectory-area-gradient)" stroke="none" /> : null}
+      {/* Contour-hugging fade — a short band directly beneath the line
+          that follows its shape (GA-style), clipped to the plot so the
+          lowest echoes never spill into the month labels. Single accent
+          blue for line, dots and fade — rank-change colour lives in the
+          delta meta above the chart, not on the line. */}
+      {svgPoints.length > 1 ? (
+        <G clipPath="url(#trajectory-plot-clip)">
+          <LineFadeRibbon path={smoothPath} stroke={CHART_ACCENT_COLOR} />
+        </G>
+      ) : null}
       {/* Trajectory line — Catmull-Rom → Bezier smoothed so segment
           junctions curve instead of cornering. */}
       <Path
         d={smoothPath}
-        stroke={CHART_LINE_COLOR}
+        stroke={CHART_ACCENT_COLOR}
         strokeWidth={1}
         fill="none"
         strokeLinecap="round"
       />
-      {/* Data dots — coloured by rank change vs the PREVIOUS snapshot.
-          Lower rank number = better, so an equal or improved rank reads
-          as green; a worse (higher) rank reads as red. The first point
-          has no predecessor and defaults to the "better" colour. */}
-      {svgPoints.map((p, i) => {
-        const prev = i > 0 ? svgPoints[i - 1]! : null;
-        const isBetter = !prev || p.rank <= prev.rank;
-        return (
-          <Circle
-            key={i}
-            cx={p.x}
-            cy={p.y}
-            r={2}
-            fill={isBetter ? BETTER_COLOR : WORSE_COLOR}
-          />
-        );
-      })}
+      {svgPoints.map((p, i) => (
+        <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={CHART_ACCENT_COLOR} />
+      ))}
       {/* Rank annotations at each endpoint — same weight / fill / size so
           start and end read as one style, differing only in anchor. No
           '#' prefix: it visually clashes with the digits in SVG text and
@@ -244,8 +210,11 @@ function TrajectoryChart({
       {first ? (
         <SvgText
           x={first.x}
-          y={first.y - 6}
-          fill={Colors.light.text}
+          // Above the point by default; when a top-of-chart rank (e.g.
+          // finishing #1) leaves no headroom, flip BELOW the point so
+          // the label never clips the SVG edge or sits on the line.
+          y={first.y >= 16 ? first.y - 6 : first.y + 14}
+          fill={Colors.light.textSecondary}
           fontSize={10}
           fontWeight="700"
           textAnchor="start">
@@ -255,8 +224,8 @@ function TrajectoryChart({
       {last ? (
         <SvgText
           x={last.x}
-          y={last.y - 6}
-          fill={Colors.light.text}
+          y={last.y >= 16 ? last.y - 6 : last.y + 14}
+          fill={Colors.light.textSecondary}
           fontSize={10}
           fontWeight="700"
           textAnchor="end">
@@ -372,6 +341,9 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     fontVariant: ['tabular-nums'],
+    // Grey, not outcome-coloured — red/green clashed with the all-blue
+    // chart treatment; grey and blue sit together cleanly.
+    color: Colors.light.textSecondary,
   },
   empty: {
     fontSize: TextSize.sm,

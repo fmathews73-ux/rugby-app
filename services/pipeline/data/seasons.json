@@ -32,6 +32,22 @@
     "status": "completed"
   },
   {
+    "id": "pacific-nations-cup-2025",
+    "competition_id": "pacific-nations-cup",
+    "year_label": "2025",
+    "start_date": "2025-08-23",
+    "end_date": "2025-09-20",
+    "status": "completed"
+  },
+  {
+    "id": "rugby-europe-championship-2025",
+    "competition_id": "rugby-europe-championship",
+    "year_label": "2025",
+    "start_date": "2025-02-01",
+    "end_date": "2025-03-15",
+    "status": "completed"
+  },
+  {
     "id": "six-nations-2026",
     "competition_id": "six-nations",
     "year_label": "2026",
@@ -61,6 +77,22 @@
     "year_label": "2026",
     "start_date": "2026-11-07",
     "end_date": "2026-11-28",
+    "status": "upcoming"
+  },
+  {
+    "id": "rugby-europe-championship-2026",
+    "competition_id": "rugby-europe-championship",
+    "year_label": "2026",
+    "start_date": "2026-02-07",
+    "end_date": "2026-03-14",
+    "status": "completed"
+  },
+  {
+    "id": "pacific-nations-cup-2026",
+    "competition_id": "pacific-nations-cup",
+    "year_label": "2026",
+    "start_date": "2026-08-22",
+    "end_date": "2026-09-19",
     "status": "upcoming"
   },
   {

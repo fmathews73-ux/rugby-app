@@ -20,12 +20,11 @@ import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 const ALL_COMPETITIONS = 'all';
 
-/** Horizontal page margin for the day-cards — matches Home cards
- * (FixtureCarousel / HomeRankingsCarousel / MyTeamCard) so cards align
- * across tabs. Only viable now that the fixed left-hand time column has
- * been dropped: the time / FT lives in the middle slot instead, so the
- * row's total content width fits comfortably in a 40pt-margin card. */
-const HORIZONTAL_MARGIN = 40;
+/** Horizontal page margin for the day-cards — 24pt, matching the Teams
+ * directory column (and the pill strip's own inset) so the two landing
+ * pages share one card column and the first pill sits flush with the
+ * card edge on both. */
+const HORIZONTAL_MARGIN = Spacing.four;
 
 const FILTER_OPTIONS = [
   { id: ALL_COMPETITIONS, label: 'All' },
@@ -33,6 +32,8 @@ const FILTER_OPTIONS = [
   { id: 'rugby-championship', label: 'Rugby C’ship' },
   { id: 'summer-tests', label: 'Summer' },
   { id: 'autumn-tests', label: 'Autumn' },
+  { id: 'rugby-europe-championship', label: 'Rugby Europe' },
+  { id: 'pacific-nations-cup', label: 'Pacific Cup' },
   { id: 'world-cup', label: 'World Cup' },
 ] as const;
 
@@ -168,6 +169,10 @@ export default function FixturesScreen() {
         listRef.current?.scrollToIndex({
           index: closestToTodayDayIndex,
           viewPosition: 0,
+          // Keep the 8pt hairline-to-card drop visible — without this
+          // the landmark scroll pins the card flush to the strip,
+          // scrolling the contentContainer's paddingTop out of view.
+          viewOffset: Spacing.two,
           animated,
         });
       } catch {
@@ -238,13 +243,11 @@ export default function FixturesScreen() {
     // shows through.
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
-      <View style={styles.pickerWrap}>
-        <CompetitionPicker
-          options={FILTER_OPTIONS}
-          selected={competitionFilter}
-          onSelect={setCompetitionFilter}
-        />
-      </View>
+      <CompetitionPicker
+        options={FILTER_OPTIONS}
+        selected={competitionFilter}
+        onSelect={setCompetitionFilter}
+      />
       <FlatList<DayGroup>
         ref={listRef}
         data={sections}
@@ -409,17 +412,12 @@ function statusMidExtraStyle(status: Fixture['status']) {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   center: { flex: 1, alignItems: 'center', justifyContent: 'center' },
-  pickerWrap: {
-    // 16pt wrap + CompetitionPicker's 24pt inner = 40pt total, matching
-    // the card column's `HORIZONTAL_MARGIN` so the first pill sits flush
-    // with the card left edge below. Vertical padding halved so the
-    // pills sit tight to the AppHeader's bottom edge.
-    paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.two,
-  },
   listContent: {
     paddingHorizontal: HORIZONTAL_MARGIN,
+    // 8pt below the pill strip's hairline to the first card — the same
+    // drop Home uses between the header and the hero carousel, applied
+    // on every strip-topped page (Fixtures / Teams / Standings).
+    paddingTop: Spacing.two,
     // No paddingBottom — cards scroll cleanly under the tab bar, matching
     // the Home page pattern.
     gap: Spacing.three,

@@ -91,10 +91,13 @@ export function StatsPane({
     {
       title: 'Attack',
       description:
-        'The "how did they move forward" numbers. Metres = total ground gained ball-in-hand. Line breaks = clean breaches of the defensive line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
+        'The "how did they move forward" numbers. Metres = total ground gained ball-in-hand. Post-contact metres = the subset won AFTER the first hit — the leg-drive read. Line breaks = clean breaches of the defensive line. Defenders beaten = tackle attempts evaded. Gainline % = share of carries that crossed the advantage line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
       stats: [
         { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
+        { label: 'Post-contact metres', home: result.home_post_contact_metres, away: result.away_post_contact_metres, premium: true },
         { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
+        { label: 'Defenders beaten', home: result.home_defenders_beaten, away: result.away_defenders_beaten, premium: true },
+        { label: 'Gainline success %', home: result.home_gainline_success_percent, away: result.away_gainline_success_percent, premium: true },
         { label: 'Carries', home: result.home_carries, away: result.away_carries, premium: true },
         { label: 'Passes', home: result.home_passes, away: result.away_passes, premium: true },
         { label: 'Offloads', home: result.home_offloads, away: result.away_offloads, premium: true },
@@ -103,11 +106,12 @@ export function StatsPane({
     {
       title: 'Kicking',
       description:
-        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
+        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. 50/22s = kicks from your own half bouncing into touch inside the opposition 22, winning your own lineout throw — rare, and a momentum event every time. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
       stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
         { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
         { label: 'Kick metres gained', home: result.home_kick_meters, away: result.away_kick_meters, premium: true },
+        { label: '50/22 kicks', home: result.home_fifty_twenty_twos, away: result.away_fifty_twenty_twos, premium: true },
       ],
     },
     {
@@ -122,12 +126,25 @@ export function StatsPane({
       ],
     },
     {
+      title: 'Breakdown',
+      description:
+        'The ruck-and-maul engine room. Rucks won = attacking rucks where possession was retained; rucks lost = breakdown turnovers conceded (a Tier-1 side retains 90%+). Quick ball % = share of attacking rucks recycled inside 3 seconds — the single best predictor of attacking tempo, because slow ball lets the defence reset. Mauls won = driving mauls (usually off a lineout) that ended with possession retained or a penalty; mauls lost = held up or turned over.',
+      stats: [
+        { label: 'Rucks won', home: result.home_rucks_won, away: result.away_rucks_won, premium: false },
+        { label: 'Rucks lost', home: result.home_rucks_lost, away: result.away_rucks_lost, premium: false },
+        { label: 'Quick ball % (0-3s)', home: result.home_ruck_speed_0_3s_percent, away: result.away_ruck_speed_0_3s_percent, premium: true },
+        { label: 'Mauls won', home: result.home_mauls_won, away: result.away_mauls_won, premium: false },
+        { label: 'Mauls lost', home: result.home_mauls_lost, away: result.away_mauls_lost, premium: false },
+      ],
+    },
+    {
       title: 'Defence',
       description:
-        'The defensive read. Tackles made = total completed tackles. Tackle success % = the share of attempted tackles that stuck (85% is a solid Tier-1 baseline; below 80% usually means a leaky defensive shape). Turnovers won = ball reclaimed at the breakdown or via steals. Turnovers conceded = ball lost in contact — the flip side of the same coin.',
+        'The defensive read. Tackles made = total completed tackles. Tackle success % = the share of attempted tackles that stuck (85% is a solid Tier-1 baseline; below 80% usually means a leaky defensive shape). Dominant tackles = hits that drove the carrier backwards — the momentum-swinging subset. Turnovers won = ball reclaimed at the breakdown or via steals. Turnovers conceded = ball lost in contact — the flip side of the same coin.',
       stats: [
         { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made, premium: true },
         { label: 'Tackle success %', home: result.home_tackle_success_percent, away: result.away_tackle_success_percent, premium: true },
+        { label: 'Dominant tackles', home: result.home_dominant_tackles, away: result.away_dominant_tackles, premium: true },
         { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won, premium: true },
         { label: 'Turnovers conceded', home: result.home_turnovers_conceded, away: result.away_turnovers_conceded, premium: true },
       ],
@@ -135,9 +152,12 @@ export function StatsPane({
     {
       title: 'Discipline',
       description:
-        'How well each team stayed inside the laws. Penalties conceded = referee whistles against. Handling errors = knock-ons and forward passes. Yellow cards = 10-minute sin-bin. Red cards = permanent dismissal. A well-drilled team tends to sit below 8 penalties a game; anything over 12 hands the opponent easy territory and shots at goal.',
+        'How well each team stayed inside the laws. Penalties conceded = referee whistles against, with the three primary causes split out beneath (scrum, breakdown, offside — the remainder is other offences). Handling errors = knock-ons and forward passes. Yellow cards = 10-minute sin-bin. Red cards = permanent dismissal. A well-drilled team tends to sit below 8 penalties a game; anything over 12 hands the opponent easy territory and shots at goal.',
       stats: [
         { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true },
+        { label: 'Scrum penalties', home: result.home_scrum_penalties_conceded, away: result.away_scrum_penalties_conceded, premium: true },
+        { label: 'Breakdown penalties', home: result.home_breakdown_penalties_conceded, away: result.away_breakdown_penalties_conceded, premium: true },
+        { label: 'Offside penalties', home: result.home_offside_penalties_conceded, away: result.away_offside_penalties_conceded, premium: true },
         { label: 'Handling errors', home: result.home_handling_errors, away: result.away_handling_errors, premium: true },
         { label: 'Yellow cards', home: result.home_yellow_cards, away: result.away_yellow_cards, premium: true },
         { label: 'Red cards', home: result.home_red_cards, away: result.away_red_cards, premium: true },

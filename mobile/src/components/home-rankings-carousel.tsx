@@ -20,9 +20,9 @@ import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextWeight } from '@
 const UP = '#059669';
 const DOWN = '#DC2626';
 
-/** Matches Home's `HORIZONTAL_MARGIN` — used per-page inside the carousel so
+/** App-wide 24pt card column — used per-page inside the carousel so
  * both pages align to the centre carousel card above. */
-const PAGE_HORIZONTAL_MARGIN = 40;
+const PAGE_HORIZONTAL_MARGIN = Spacing.four;
 
 /**
  * Two-page paged carousel: Men's rankings + Women's placeholder.

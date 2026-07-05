@@ -1,6 +1,6 @@
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, PillStrip } from '@/constants/theme';
 
 export interface PickerOption {
   id: string;
@@ -55,19 +55,19 @@ const styles = StyleSheet.create({
     // the padded edge on the right, not at the screen edge. Result: the
     // scrollable strip visually spans the same column as any content
     // rendered below it, symmetric on both sides.
-    paddingHorizontal: Spacing.four,
+    paddingHorizontal: PillStrip.stripPadH,
   },
   inner: {
-    paddingVertical: Spacing.two + 2,
-    gap: Spacing.two,
+    paddingVertical: PillStrip.stripPadV,
+    gap: PillStrip.gap,
   },
   // Borderless — fills alone carry the active/inactive contrast (dark for
   // active, white for inactive against the grey page bg). Matches the
   // sub-tab + TeamToggle pill treatment across the app.
   pill: {
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 999,
+    paddingHorizontal: PillStrip.padH,
+    paddingVertical: PillStrip.padV,
+    borderRadius: PillStrip.radius,
   },
   pillActive: {
     backgroundColor: Colors.light.text,
@@ -76,9 +76,9 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   pillLabel: {
-    fontSize: 12,
+    fontSize: PillStrip.labelSize,
     fontWeight: '700',
-    letterSpacing: 0.4,
+    letterSpacing: PillStrip.labelTracking,
   },
   pillLabelActive: { color: Colors.light.background },
   pillLabelInactive: { color: Colors.light.textSecondary },

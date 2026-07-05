@@ -2,28 +2,25 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { Circle, Defs, LinearGradient, Line, Path, Stop } from 'react-native-svg';
+import Svg, { Circle, ClipPath, Defs, G, Line, Path, Rect } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import {
   formPointsFor,
   momentumFor,
   streakFor,
-  type FormOutcome,
   type FormPoint,
 } from '@/lib/form-momentum';
-import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { CHART_ACCENT_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 const LOOKBACK = 10;
-const WIN_COLOR = '#059669';
-const LOSS_COLOR = StatusColor.live;
-const DRAW_COLOR = Colors.light.textSecondary;
 
 /**
  * Extended Momentum sparkline — same weighted-momentum + streak treatment as
@@ -137,12 +134,12 @@ export function ExtendedMomentum({
           the title. */}
       {streak && points.length > 0 ? (
         <View style={styles.subHeaderMeta}>
-          <Text style={[styles.streakText, { color: outcomeColor(streak.letter) }]}>
+          <Text style={styles.streakText}>
             {streak.count}
             {streak.letter}
           </Text>
           <Text style={styles.separator}> · </Text>
-          <Text style={[styles.momentumText, { color: momentumColor(momentum) }]}>
+          <Text style={styles.momentumText}>
             {momentum > 0 ? '+' : ''}
             {momentum}
             {momentum > 0 ? ' ▲' : momentum < 0 ? ' ▼' : ''}
@@ -189,37 +186,12 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
   // no motion graphics.
   const smoothPath = useMemo(() => smoothLinePath(svgPoints).path, [svgPoints]);
 
-  // Closed area path directly beneath the smooth line: same curve along
-  // the top, drop straight down to the bottom pad edge at the last point,
-  // trace along the bottom back to the first point, close. Filled with a
-  // gradient that fades to zero well before the bottom so the tint sits
-  // as a soft halo below the line rather than a full "area under the curve".
-  const areaPath = useMemo(() => {
-    if (svgPoints.length < 2) return '';
-    const first = svgPoints[0]!;
-    const last = svgPoints[svgPoints.length - 1]!;
-    const baseY = height - padY;
-    return `${smoothPath} L ${last.x.toFixed(1)} ${baseY.toFixed(1)} L ${first.x.toFixed(1)} ${baseY.toFixed(1)} Z`;
-  }, [smoothPath, svgPoints, height, padY]);
-
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
       <Defs>
-        {/* Vertical fade anchored to the PLOT AREA in user space (not the
-            area shape's own bounding box). Coloured at the plot top,
-            fully transparent exactly at the plot bottom — so the fill
-            under the line always spreads the whole way down, never
-            "chopping off" halfway when the line rides high. */}
-        <LinearGradient
-          id="form-area-gradient"
-          x1="0"
-          y1={padY}
-          x2="0"
-          y2={height - padY}
-          gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={CHART_LINE_COLOR} stopOpacity="0.22" />
-          <Stop offset="1" stopColor={CHART_LINE_COLOR} stopOpacity="0" />
-        </LinearGradient>
+        <ClipPath id="form-plot-clip">
+          <Rect x={0} y={0} width={width} height={height - padY} />
+        </ClipPath>
       </Defs>
       <Line
         x1={padX}
@@ -230,32 +202,34 @@ function Sparkline({ points }: { points: readonly FormPoint[] }) {
         strokeWidth={0.8}
         strokeDasharray="3 3"
       />
+      {/* Contour-hugging fade — a short band directly beneath the line
+          that follows its shape (GA-style), instead of an area fill
+          reaching down to the axis. Clipped to the plot so the lowest
+          echoes never spill past the bottom pad. Single accent blue for
+          line, dots and fade — outcome colour lives in the streak /
+          momentum meta above the chart, not on the line itself. */}
       {svgPoints.length > 1 ? (
-        <Path d={areaPath} fill="url(#form-area-gradient)" stroke="none" />
+        <G clipPath="url(#form-plot-clip)">
+          <LineFadeRibbon path={smoothPath} stroke={CHART_ACCENT_COLOR} />
+        </G>
       ) : null}
       {svgPoints.length > 1 ? (
         <Path
           d={smoothPath}
-          stroke={CHART_LINE_COLOR}
+          stroke={CHART_ACCENT_COLOR}
           strokeWidth={1}
           fill="none"
           strokeLinecap="round"
         />
       ) : null}
       {svgPoints.map((p, i) => (
-        <Circle key={i} cx={p.x} cy={p.y} r={2} fill={outcomeColor(p.outcome)} />
+        <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={CHART_ACCENT_COLOR} />
       ))}
     </Svg>
   );
 }
 
 
-function outcomeColor(o: FormOutcome): string {
-  return o === 'W' ? WIN_COLOR : o === 'L' ? LOSS_COLOR : DRAW_COLOR;
-}
-function momentumColor(m: number): string {
-  return m > 0 ? WIN_COLOR : m < 0 ? LOSS_COLOR : DRAW_COLOR;
-}
 
 function MomentumInfoModal({
   visible,
@@ -339,12 +313,14 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   separator: { fontSize: TextSize.sm, color: Colors.light.textSecondary },
   momentumText: {
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },
   empty: {

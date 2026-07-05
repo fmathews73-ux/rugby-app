@@ -28,6 +28,20 @@
     "governing_body": "World Rugby"
   },
   {
+    "id": "pacific-nations-cup",
+    "name": "Pacific Nations Cup",
+    "short_name": "Pacific Nations Cup",
+    "format": "round-robin",
+    "governing_body": "World Rugby"
+  },
+  {
+    "id": "rugby-europe-championship",
+    "name": "Rugby Europe Championship",
+    "short_name": "Rugby Europe",
+    "format": "round-robin",
+    "governing_body": "Rugby Europe"
+  },
+  {
     "id": "six-nations",
     "name": "Six Nations Championship",
     "short_name": "Six Nations",
@@ -53,6 +67,20 @@
     "name": "Autumn Nations Series",
     "short_name": "Autumn Nations",
     "format": "test-window",
+    "governing_body": "World Rugby"
+  },
+  {
+    "id": "rugby-europe-championship",
+    "name": "Rugby Europe Championship",
+    "short_name": "Rugby Europe",
+    "format": "round-robin",
+    "governing_body": "Rugby Europe"
+  },
+  {
+    "id": "pacific-nations-cup",
+    "name": "Pacific Nations Cup",
+    "short_name": "Pacific Nations Cup",
+    "format": "round-robin",
     "governing_body": "World Rugby"
   },
   {

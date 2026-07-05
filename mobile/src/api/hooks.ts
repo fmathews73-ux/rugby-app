@@ -14,6 +14,7 @@ import type {
   Player,
   MatchEvent,
   MatchOfficial,
+  PlayerPercentiles,
   RankingSnapshot,
   Result,
   Season,
@@ -243,10 +244,36 @@ export function useTeamSquad(
   });
 }
 
+/** Season-agnostic player pool for a team — the Teams-hub roster
+ *  surface. Squad-of-a-season selection stays on `useTeamSquad`. */
+export function useTeamPlayers(teamId: string): UseQueryResult<Player[]> {
+  return useQuery({
+    queryKey: ['teamPlayers', teamId],
+    queryFn: () => fetchJson<Player[]>(`/teams/${teamId}/players`),
+    enabled: Boolean(teamId),
+  });
+}
+
 export function usePlayer(playerId: string): UseQueryResult<Player> {
   return useQuery({
     queryKey: ['player', playerId],
     queryFn: () => fetchJson<Player>(`/players/${playerId}`),
+    enabled: Boolean(playerId),
+  });
+}
+
+/** Server-computed percentiles vs position-group peers over the
+ *  player's most recent `lookback` appearances. Percentiles arrive
+ *  NEUTRAL (share of peers at or below the per-80 rate) — presentation
+ *  flips lower-is-better metrics client-side. */
+export function usePlayerPercentiles(
+  playerId: string,
+  lookback = 10,
+): UseQueryResult<PlayerPercentiles> {
+  return useQuery({
+    queryKey: ['playerPercentiles', playerId, lookback],
+    queryFn: () =>
+      fetchJson<PlayerPercentiles>(`/players/${playerId}/percentiles?lookback=${lookback}`),
     enabled: Boolean(playerId),
   });
 }

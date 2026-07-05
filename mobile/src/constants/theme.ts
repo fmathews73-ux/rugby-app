@@ -79,6 +79,37 @@ export const Spacing = {
 } as const;
 
 /**
+ * Canonical pill-strip grammar — shared by CompetitionPicker (scrollable
+ * filter strips on Fixtures / Standings / Teams) and SegmentedTabs
+ * (equal-width sub-tabs on the fixture / team / player drills). Both
+ * components MUST read these tokens rather than local numbers so every
+ * pill strip in the app carries identical padding, dims, and type.
+ */
+/**
+ * Shared drill-hero height — the pinned white identity block above the
+ * sub-tab pills on the fixture, team, and player drills. Sized to the
+ * fixture matchup hero's natural content (date line + 56pt flag/score
+ * row + meta line, 16pt padding each end); the team / player heroes
+ * centre their shorter content inside the same height so all three
+ * drills measure identically from header to pill strip.
+ */
+export const DRILL_HERO_MIN_HEIGHT = 140;
+
+export const PillStrip = {
+  /** Pill label: 12pt bold, wide tracking. */
+  labelSize: 12,
+  labelTracking: 0.4,
+  /** Pill body. */
+  padV: 6,
+  padH: 12,
+  radius: 999,
+  /** Strip chrome. */
+  stripPadV: Spacing.two + 2,
+  stripPadH: Spacing.four,
+  gap: Spacing.two,
+} as const;
+
+/**
  * Canonical sizes for `TeamFlagBall2D`. Four steps — hero / header / medium / row —
  * following Material's avatar spec (24/40/56/96) so hierarchy is legible without
  * near-duplicate sizes creeping in. Do not pass raw numbers to the flag component;

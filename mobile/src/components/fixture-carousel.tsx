@@ -38,11 +38,11 @@ const CARD_GAP = 12;
 const CARDS_EITHER_SIDE = 3;
 export function FixtureCarousel() {
   const { width: screenWidth } = useWindowDimensions();
-  // Card width leaves ~30pt outer margin on each side of the screen (was
-  // 40pt) — the extra 20pt lets a completed fixture's `[score][FT][score]`
-  // cluster + both flag+code clusters + card padding all fit without
-  // clipping the away-team flag on smaller phones.
-  const CARD_WIDTH = Math.round(screenWidth - 60);
+  // Card width leaves the app-wide 24pt card column on each side,
+  // matching the Fixtures / Teams landing pages. Wider than the old
+  // 30pt margins, so the completed-fixture `[score][FT][score]` cluster
+  // fits with room to spare.
+  const CARD_WIDTH = Math.round(screenWidth - Spacing.four * 2);
   const SNAP = CARD_WIDTH + CARD_GAP;
   const SIDE_PAD = Math.round((screenWidth - CARD_WIDTH) / 2);
 

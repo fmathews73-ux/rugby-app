@@ -77,5 +77,7 @@ const styles = StyleSheet.create({
   // Insights pane — vertical stack of the same BI cards used on the
   // Insights tab, scoped to this fixture's two teams. Each card handles its
   // own horizontal margin, so the stack just needs vertical breathing room.
-  insightsPaneStack: { gap: Spacing.three, paddingBottom: Spacing.four },
+  // No paddingBottom — the drill screen's scroll container owns the
+  // bottom inset (60pt), same as the team / player drills.
+  insightsPaneStack: { gap: Spacing.three },
 });

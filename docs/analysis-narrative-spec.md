@@ -103,6 +103,26 @@ payload, don't mention it. If the payload has zero events yet (kick-off
 just happened, sim mode not run), reflect that — don't fabricate a
 turning point.
 
+**Metric coverage.** The Result payload includes, beyond the classic
+box-score set: breakdown counts (rucks won/lost, mauls won/lost, quick-
+ball % recycled inside 3s), extended attack (defenders beaten, post-
+contact metres, gainline success %), 50/22 kicks, dominant tackles, and
+the penalty-cause split (scrum / breakdown / offside). These are
+REPORTABLE dimensions, threshold-gated like everything else:
+
+- Ruck retention: name it when either side dips under 88% or the gap
+  is ≥ 4pp (platform paragraph).
+- Quick ball: name a ≥ 10pp gap as the tempo story.
+- Mauls: a weapon at 8+ won with a ≥ 3 gap; a liability at 2+ lost
+  (woven into the Set-piece axis narrative — mauls are lineout-drive
+  adjacent).
+- Gainline: name a ≥ 8pp gap, qualified with post-contact metres
+  (attack paragraph).
+- 50/22: rare enough that ANY successful one gets named (kicking
+  narrative).
+- Penalty causes: name the dominant bucket only when it carries ≥ 50%
+  of the offending side's count.
+
 ### 5.2 Baseline references
 
 For each side's per-team baseline (season aggregate as of kickoff),
@@ -247,16 +267,121 @@ build without the following:
 
 ## 8. Non-goals
 
-- **No player-level commentary in v1.** The synthetic dataset ships
-  fake player names (root `CLAUDE.md` §9). Even with real data at
-  Phase 6, name-level analysis needs licensing sign-off. This spec
-  keeps the analysis team-level.
+- **No player-level commentary inside the MATCH analysis.** The match
+  card stays team-level. Player-scoped narrative lives on the player
+  card's own Analysis tab and is governed by §9 below — do not weave
+  named-player reads into the match sections. (With real data at
+  Phase 6, name-level analysis additionally needs licensing sign-off.)
 - **No historical head-to-head references.** The Team tab (or a
   future Fixtures head-to-head surface) is where H2H narrative lives.
   Don't cross-contaminate.
 - **No betting / odds / prediction language.** Explicitly out of scope
   in v1 (root `CLAUDE.md` §9). Do not write "expected to win", "value
   bet", "trading at", etc.
+
+---
+
+## 9. Player analysis narrative (player card · Analysis tab)
+
+The player card (Teams → team hub → player) carries the same
+Preview / Stats / Insights / Analysis sub-tab anatomy as the fixture
+drill. Its Analysis tab renders a PLAYER-scoped narrative. During
+Phase 0–5 the copy is produced client-side by
+`mobile/src/hooks/use-player-analysis.ts`; at Phase 6 the same cutover
+model applies (server-side inference, this section as the system
+prompt, the `PlayerAnalysis` interface as the response contract).
+
+All tone rules (§3), style rules (§4), the language avoid-list (§5.5),
+and sentence-starter variation (§5.6) apply unchanged. Grounding (§5.1)
+applies with the player's data instead of the fixture's: every claim
+must trace to the player's match sheets, the positional percentile
+read-model, or the season aggregate. Never invent a number.
+
+### 9.1 Card structure (fixed, in order)
+
+| # | Section | Icon | Content |
+|---|---|---|---|
+| 0 | *(Summary)* | — | 1–2 sentences: name, position, caps, appearance/start/minute record, points contribution if any. Unlabeled cold open. |
+| 1 | Scouting read | `analytics-outline` | Percentile profile vs positional peers (per-80 rates, prev.-10 window). Names strengths and the soft spot. |
+| 2 | Form read | `time-outline` | Recent-half vs earlier-half comparison across the appearance window: role key metric + minutes trend. |
+| 3 | Going forward | `compass-outline` | Closing outlook built from the profile: what to lift, what to hold. Mirrors the summary as an opener/closer pair. |
+
+### 9.2 Thresholds (must match the template / future prompt)
+
+- **Strength:** presentation percentile ≥ 70 vs positional peers
+  (inverted metrics — penalties conceded, handling errors — are
+  flipped before the test, so higher is always better). Name at most
+  the top two.
+- **Soft spot:** presentation percentile ≤ 30. Name only the weakest.
+  If nothing qualifies either way, say the profile is balanced — do
+  not manufacture a verdict.
+- **Form move:** recent half of the appearance window vs the earlier
+  half; a change of ±15% or more is a rise/dip, anything inside that
+  band is reported as steady.
+- **Minimum sample:** fewer than 6 appearances → no halves comparison;
+  say the trend read is thin and point at the profile instead.
+- **Role key metric:** forwards = tackle count, backs = carry metres.
+
+### 9.3 Content rules specific to players
+
+- **Refer to the player by surname** after the summary's full-name
+  introduction. No nicknames, no pronoun guessing.
+- **The scouting read and the Insights tab must agree.** Both are
+  built from the same curated role dimension sets
+  (`mobile/src/lib/player-roles.ts`) and the same percentile
+  read-model. If the sets change, both surfaces change together.
+- **No selection speculation beyond the data.** Minutes trends may be
+  framed as "a read on selection trust"; do not predict future squad
+  naming, and never use prediction/betting language (§8).
+- **Synthetic-name rule carries over:** v1 players are fake names on
+  real national teams (root `CLAUDE.md` §9); with real data at
+  Phase 6, player-level narrative requires the licensing sign-off
+  flagged in §8 before cutover.
+
+---
+
+## 10. Team analysis narrative (team overview · Analysis tab)
+
+The team overview page (Teams → team hub) carries the drill sub-tab
+anatomy (Preview / Squad / Insights / Analysis). Its Analysis tab
+renders a TEAM-scoped narrative. During Phase 0–5 the copy is produced
+client-side by `mobile/src/hooks/use-team-analysis.ts`; at Phase 6 the
+same cutover model applies (server-side inference, this section as the
+system prompt, the `TeamAnalysis` interface as the response contract).
+
+All tone rules (§3), style rules (§4), the language avoid-list (§5.5),
+and sentence-starter variation (§5.6) apply unchanged. Grounding (§5.1)
+applies with the team's data: every claim must trace to the team's
+completed-fixture results window, the World Rugby ranking snapshots, or
+the per-game season aggregate. Never invent a number. Unlike the match
+card, this narrative may NOT reference individual players — player
+narrative lives in §9.
+
+### 10.1 Card structure (fixed, in order)
+
+| # | Section | Icon | Content |
+|---|---|---|---|
+| 0 | *(Summary)* | — | 1 sentence: name, current world rank, W-L(-D) record over the window, points for/against per game. Unlabeled cold open. |
+| 1 | Form read | `time-outline` | Current streak (if it qualifies) + average margin framing. |
+| 2 | Ranking read | `podium-outline` | Trajectory across the monthly ranking snapshots: climbed / slipped / held, with start and end positions. |
+| 3 | Season read | `analytics-outline` | Per-game profile: attack (tries, carry metres, possession), defence (tries conceded, tackle %), then threshold-gated set-piece and discipline sentences. |
+| 4 | Going forward | `compass-outline` | Names the single most pressing repair job, in priority order: discipline → weaker set piece → defensive leakage → consolidation. Mirrors the summary as an opener/closer pair. |
+
+### 10.2 Thresholds (must match the template / future prompt)
+
+- **Window:** last 10 completed fixtures for record, margin, and season
+  profile.
+- **Streak:** named only at 3+ consecutive wins or losses (draws never
+  form a streak).
+- **Dominance / struggle:** average margin of ±7 points per game;
+  inside that band, margins are framed as tight.
+- **Set piece:** ≥ 90% on BOTH scrum and lineout reads as a platform;
+  either below 85% is flagged, naming the weaker of the two.
+- **Discipline:** ≥ 12 penalties conceded per game is a problem;
+  ≤ 9 is praised; between, discipline goes unmentioned.
+- **Ranking move:** ± 2 or more places across the snapshot span is a
+  climb/slide; less holds steady. Fewer than 2 snapshots → say the
+  history is insufficient, do not extrapolate.
 
 ---
 
@@ -267,3 +392,10 @@ build without the following:
   cutover checklist, and language avoid-list. The templated
   `use-match-analysis.ts` implements this spec directly and is the
   reference implementation.
+- **v2** — Added §9 player analysis narrative (player card Analysis
+  tab): structure, thresholds, player-specific content rules.
+  Re-scoped the §8 player-commentary non-goal to the match card only.
+  Template implementation: `use-player-analysis.ts`.
+- **v3** — Added §10 team analysis narrative (team overview Analysis
+  tab): structure, thresholds, no-player-references rule. Template
+  implementation: `use-team-analysis.ts`.

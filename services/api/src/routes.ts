@@ -1,9 +1,61 @@
 import type { FastifyInstance, FastifyReply } from 'fastify';
 
+import type { Position } from '@rugby-app/shared';
+
 import type { Store } from './store.js';
 
 function notFound(reply: FastifyReply, message: string): FastifyReply {
   return reply.code(404).send({ error: 'not_found', message });
+}
+
+// ─── Percentile read-model config ────────────────────────────────────────────
+
+/** Numeric PlayerMatchStats fields ranked in the percentile read-model.
+ *  Matches the mobile aggregate's field list. */
+const PERCENTILE_FIELDS = [
+  'tries',
+  'try_assists',
+  'points',
+  'carries',
+  'metres_carried',
+  'clean_breaks',
+  'defenders_beaten',
+  'offloads',
+  'passes',
+  'handling_errors',
+  'conversions',
+  'penalty_goals',
+  'drop_goals',
+  'kicks_from_hand',
+  'kick_metres',
+  'tackles_made',
+  'missed_tackles',
+  'turnovers_won',
+  'rucks_hit',
+  'lineout_takes',
+  'lineout_steals',
+  'penalties_conceded',
+  'yellow_cards',
+  'red_cards',
+] as const;
+
+/** Peer pools for percentile comparison. A prop's numbers are only
+ *  meaningful against other front-rowers, a fly-half's against other
+ *  half-backs — cross-position comparison is noise. */
+const POSITION_GROUP_MEMBERS: Record<string, readonly Position[]> = {
+  'front-row': ['loose-head-prop', 'hooker', 'tight-head-prop'],
+  locks: ['lock'],
+  'back-row': ['blindside-flanker', 'openside-flanker', 'number-8'],
+  'half-backs': ['scrum-half', 'fly-half'],
+  centres: ['inside-centre', 'outside-centre'],
+  'back-three': ['left-wing', 'right-wing', 'fullback'],
+};
+
+function positionGroupOf(position: Position): string {
+  for (const [group, members] of Object.entries(POSITION_GROUP_MEMBERS)) {
+    if (members.includes(position)) return group;
+  }
+  return 'back-three';
 }
 
 export function registerRoutes(app: FastifyInstance, store: Store): void {
@@ -101,6 +153,16 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     return store.eventsByFixture.get(req.params.id) ?? [];
   });
 
+  // Per-player per-match stat sheets for a fixture — one per matchday-23
+  // member of both sides. Only completed fixtures have sheets; empty array
+  // (not 404) otherwise, matching the lineups route's empty behaviour.
+  app.get<{ Params: { id: string } }>('/fixtures/:id/player-stats', async (req, reply) => {
+    if (!store.fixtureById.has(req.params.id)) {
+      return notFound(reply, `fixture ${req.params.id} not found`);
+    }
+    return store.playerStatsByFixture.get(req.params.id) ?? [];
+  });
+
   // Match officials for a fixture — referee, two assistant referees
   // (sideline), and the TMO. Announced pre-match so this endpoint returns
   // a full slate even for scheduled fixtures. Empty array (not 404) when
@@ -151,6 +213,16 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     };
   });
 
+  // Full player pool for a team — the "current roster" surface for the
+  // Teams hub. Squads stay per-season (see /teams/:id/squad for a
+  // season-scoped selection); this is the season-agnostic pool.
+  app.get<{ Params: { id: string } }>('/teams/:id/players', async (req, reply) => {
+    if (!store.teamById.has(req.params.id)) {
+      return notFound(reply, `team ${req.params.id} not found`);
+    }
+    return store.playersByTeam.get(req.params.id) ?? [];
+  });
+
   // Coaching staff for a team — synthetic in dev (PRD §5.5). Empty array
   // when unavailable rather than 404 so the client can treat "no data" as a
   // hide-the-section signal without a special error branch. Availability
@@ -191,6 +263,109 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     const p = store.playerById.get(req.params.id);
     return p ?? notFound(reply, `player ${req.params.id} not found`);
   });
+
+  // All per-match stat sheets for a player, most recent fixture first
+  // (kickoff DESC). Empty array when the player has no completed fixtures
+  // yet — consumers treat empty as "no data" without an error branch.
+  app.get<{ Params: { id: string } }>('/players/:id/match-stats', async (req, reply) => {
+    if (!store.playerById.has(req.params.id)) {
+      return notFound(reply, `player ${req.params.id} not found`);
+    }
+    const sheets = store.playerStatsByPlayer.get(req.params.id) ?? [];
+    return sheets.slice().sort((a, b) => {
+      const ka = store.fixtureById.get(a.fixture_id)?.kickoff_utc ?? '';
+      const kb = store.fixtureById.get(b.fixture_id)?.kickoff_utc ?? '';
+      return kb.localeCompare(ka);
+    });
+  });
+
+  // Percentiles vs position-group peers — the scouting-bar read-model
+  // for the player card. Computed here because ranking one player needs
+  // EVERY peer's sheets; they're all in memory server-side, absurd to
+  // fan out to the client. Percentiles are neutral (share of peers at
+  // or below the subject's per-80 rate) — the client flips presentation
+  // for lower-is-better metrics.
+  app.get<{ Params: { id: string }; Querystring: { lookback?: string } }>(
+    '/players/:id/percentiles',
+    async (req, reply) => {
+      const subject = store.playerById.get(req.params.id);
+      if (!subject) return notFound(reply, `player ${req.params.id} not found`);
+
+      const lookback = Math.max(1, Number(req.query.lookback) || 10);
+      const group = positionGroupOf(subject.primary_position);
+      const groupPositions = POSITION_GROUP_MEMBERS[group] ?? [];
+
+      // Per-80 rates over each peer's own window. Peers need at least
+      // MIN_PEER_APPEARANCES inside the window to qualify — a player
+      // with one 12-minute cameo shouldn't set the distribution's tail.
+      const MIN_PEER_APPEARANCES = 3;
+      const ratesByPlayer = new Map<string, Record<string, number>>();
+      let subjectAppearances = 0;
+
+      for (const p of store.players) {
+        if (!groupPositions.includes(p.primary_position)) continue;
+        const sheets = (store.playerStatsByPlayer.get(p.id) ?? [])
+          .filter((s) => s.minutes_played > 0)
+          .sort((a, b) => {
+            const ka = store.fixtureById.get(a.fixture_id)?.kickoff_utc ?? '';
+            const kb = store.fixtureById.get(b.fixture_id)?.kickoff_utc ?? '';
+            return kb.localeCompare(ka);
+          })
+          .slice(0, lookback);
+        if (p.id === subject.id) subjectAppearances = sheets.length;
+        if (sheets.length < MIN_PEER_APPEARANCES && p.id !== subject.id) continue;
+        if (sheets.length === 0) continue;
+
+        let minutes = 0;
+        const totals: Record<string, number> = {};
+        for (const f of PERCENTILE_FIELDS) totals[f] = 0;
+        for (const s of sheets) {
+          minutes += s.minutes_played;
+          for (const f of PERCENTILE_FIELDS) {
+            totals[f]! += s[f as keyof typeof s] as number;
+          }
+        }
+        const rates: Record<string, number> = {};
+        for (const f of PERCENTILE_FIELDS) {
+          rates[f] = minutes > 0 ? (totals[f]! * 80) / minutes : 0;
+        }
+        ratesByPlayer.set(p.id, rates);
+      }
+
+      const subjectRates = ratesByPlayer.get(subject.id);
+      if (!subjectRates) {
+        // No appearances at all — empty metrics, zero peers context.
+        return {
+          player_id: subject.id,
+          position_group: group,
+          lookback,
+          appearances: 0,
+          peers: ratesByPlayer.size,
+          metrics: [],
+        };
+      }
+
+      const peerRates = [...ratesByPlayer.values()];
+      const metrics = PERCENTILE_FIELDS.map((field) => {
+        const mine = subjectRates[field]!;
+        const atOrBelow = peerRates.filter((r) => r[field]! <= mine).length;
+        return {
+          field,
+          per80: Number(mine.toFixed(2)),
+          percentile: Math.round((atOrBelow / peerRates.length) * 100),
+        };
+      });
+
+      return {
+        player_id: subject.id,
+        position_group: group,
+        lookback,
+        appearances: subjectAppearances,
+        peers: peerRates.length,
+        metrics,
+      };
+    },
+  );
 
   // ─── Rankings ─────────────────────────────────────────────────────────────
   // `/rankings` = latest men's snapshot (kept for backward compatibility with

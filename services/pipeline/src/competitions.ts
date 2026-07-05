@@ -502,16 +502,180 @@ const WORLD_CUP_2027: CompetitionBundle = (() => {
   };
 })();
 
+// ─── Pacific Nations Cup (v0.7 scope broadening) ─────────────────────────────
+// The primary annual competition for six of the v1 Tier-2 nations. The real
+// PNC runs two pools + a finals weekend; the synthetic dataset simplifies to
+// a single round-robin table (same class of simplification as the monthly
+// rankings cadence) — revisit at real-data cutover (PRD register #7).
+
+const PNC_TEAMS: readonly TeamId[] = ['fij', 'jpn', 'sam', 'tga', 'usa', 'can'];
+
+const PACIFIC_NATIONS_CUP_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'pacific-nations-cup';
+  const sid: SeasonId = 'pacific-nations-cup-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'Pacific Nations Cup',
+      short_name: 'Pacific Nations Cup',
+      format: 'round-robin',
+      governing_body: 'World Rugby',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-08-23', end_date: '2025-09-20', status: 'completed',
+    },
+    team_ids: PNC_TEAMS,
+    fixtures: [
+      // Round 1 (Aug 23)
+      fx('pnc25-r1-fij-can', cid, sid, 'Round 1', 'fij', 'can', '2025-08-23T03:00:00Z'),
+      fx('pnc25-r1-jpn-usa', cid, sid, 'Round 1', 'jpn', 'usa', '2025-08-23T06:00:00Z'),
+      fx('pnc25-r1-sam-tga', cid, sid, 'Round 1', 'sam', 'tga', '2025-08-23T01:00:00Z'),
+      // Round 2 (Aug 30)
+      fx('pnc25-r2-fij-usa', cid, sid, 'Round 2', 'fij', 'usa', '2025-08-30T03:00:00Z'),
+      fx('pnc25-r2-tga-can', cid, sid, 'Round 2', 'tga', 'can', '2025-08-30T02:00:00Z'),
+      fx('pnc25-r2-jpn-sam', cid, sid, 'Round 2', 'jpn', 'sam', '2025-08-30T06:00:00Z'),
+      // Round 3 (Sep 6)
+      fx('pnc25-r3-fij-tga', cid, sid, 'Round 3', 'fij', 'tga', '2025-09-06T03:00:00Z'),
+      fx('pnc25-r3-usa-sam', cid, sid, 'Round 3', 'usa', 'sam', '2025-09-06T22:00:00Z'),
+      fx('pnc25-r3-can-jpn', cid, sid, 'Round 3', 'can', 'jpn', '2025-09-06T21:00:00Z'),
+      // Round 4 (Sep 13)
+      fx('pnc25-r4-fij-sam', cid, sid, 'Round 4', 'fij', 'sam', '2025-09-13T03:00:00Z'),
+      fx('pnc25-r4-tga-jpn', cid, sid, 'Round 4', 'tga', 'jpn', '2025-09-13T02:00:00Z'),
+      fx('pnc25-r4-usa-can', cid, sid, 'Round 4', 'usa', 'can', '2025-09-13T22:00:00Z'),
+      // Round 5 (Sep 20)
+      fx('pnc25-r5-fij-jpn', cid, sid, 'Round 5', 'fij', 'jpn', '2025-09-20T03:00:00Z'),
+      fx('pnc25-r5-sam-can', cid, sid, 'Round 5', 'sam', 'can', '2025-09-20T01:00:00Z'),
+      fx('pnc25-r5-tga-usa', cid, sid, 'Round 5', 'tga', 'usa', '2025-09-20T02:00:00Z'),
+    ],
+  };
+})();
+
+const PACIFIC_NATIONS_CUP_2026: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'pacific-nations-cup';
+  const sid: SeasonId = 'pacific-nations-cup-2026';
+  return {
+    competition: PACIFIC_NATIONS_CUP_2025.competition,
+    season: {
+      id: sid, competition_id: cid, year_label: '2026',
+      start_date: '2026-08-22', end_date: '2026-09-19', status: 'upcoming',
+    },
+    team_ids: PNC_TEAMS,
+    fixtures: [
+      // Home/away flipped vs 2025.
+      // Round 1 (Aug 22)
+      fx('pnc26-r1-can-fij', cid, sid, 'Round 1', 'can', 'fij', '2026-08-22T21:00:00Z'),
+      fx('pnc26-r1-usa-jpn', cid, sid, 'Round 1', 'usa', 'jpn', '2026-08-22T22:00:00Z'),
+      fx('pnc26-r1-tga-sam', cid, sid, 'Round 1', 'tga', 'sam', '2026-08-22T02:00:00Z'),
+      // Round 2 (Aug 29)
+      fx('pnc26-r2-usa-fij', cid, sid, 'Round 2', 'usa', 'fij', '2026-08-29T22:00:00Z'),
+      fx('pnc26-r2-can-tga', cid, sid, 'Round 2', 'can', 'tga', '2026-08-29T21:00:00Z'),
+      fx('pnc26-r2-sam-jpn', cid, sid, 'Round 2', 'sam', 'jpn', '2026-08-29T01:00:00Z'),
+      // Round 3 (Sep 5)
+      fx('pnc26-r3-tga-fij', cid, sid, 'Round 3', 'tga', 'fij', '2026-09-05T02:00:00Z'),
+      fx('pnc26-r3-sam-usa', cid, sid, 'Round 3', 'sam', 'usa', '2026-09-05T01:00:00Z'),
+      fx('pnc26-r3-jpn-can', cid, sid, 'Round 3', 'jpn', 'can', '2026-09-05T06:00:00Z'),
+      // Round 4 (Sep 12)
+      fx('pnc26-r4-sam-fij', cid, sid, 'Round 4', 'sam', 'fij', '2026-09-12T01:00:00Z'),
+      fx('pnc26-r4-jpn-tga', cid, sid, 'Round 4', 'jpn', 'tga', '2026-09-12T06:00:00Z'),
+      fx('pnc26-r4-can-usa', cid, sid, 'Round 4', 'can', 'usa', '2026-09-12T21:00:00Z'),
+      // Round 5 (Sep 19)
+      fx('pnc26-r5-jpn-fij', cid, sid, 'Round 5', 'jpn', 'fij', '2026-09-19T06:00:00Z'),
+      fx('pnc26-r5-can-sam', cid, sid, 'Round 5', 'can', 'sam', '2026-09-19T21:00:00Z'),
+      fx('pnc26-r5-usa-tga', cid, sid, 'Round 5', 'usa', 'tga', '2026-09-19T22:00:00Z'),
+    ],
+  };
+})();
+
+// ─── Rugby Europe Championship (v0.7 scope broadening) ───────────────────────
+// Modelled with the FIVE of its eight real participants inside the v1
+// 28-team roster (Georgia, Portugal, Spain, Romania, Netherlands). Belgium,
+// Germany and Switzerland are outside team scope (PRD §3.4) and excluded
+// from the synthetic table. 5-team round robin: one side rests each round.
+
+const REC_TEAMS: readonly TeamId[] = ['geo', 'por', 'esp', 'rou', 'ned'];
+
+const RUGBY_EUROPE_2025: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'rugby-europe-championship';
+  const sid: SeasonId = 'rugby-europe-championship-2025';
+  return {
+    competition: {
+      id: cid,
+      name: 'Rugby Europe Championship',
+      short_name: 'Rugby Europe',
+      format: 'round-robin',
+      governing_body: 'Rugby Europe',
+    },
+    season: {
+      id: sid, competition_id: cid, year_label: '2025',
+      start_date: '2025-02-01', end_date: '2025-03-15', status: 'completed',
+    },
+    team_ids: REC_TEAMS,
+    fixtures: [
+      // Round 1 (Feb 1) — Georgia rest
+      fx('rec25-r1-por-ned', cid, sid, 'Round 1', 'por', 'ned', '2025-02-01T15:00:00Z'),
+      fx('rec25-r1-esp-rou', cid, sid, 'Round 1', 'esp', 'rou', '2025-02-01T12:45:00Z'),
+      // Round 2 (Feb 8) — Romania rest
+      fx('rec25-r2-geo-ned', cid, sid, 'Round 2', 'geo', 'ned', '2025-02-08T13:00:00Z'),
+      fx('rec25-r2-por-esp', cid, sid, 'Round 2', 'por', 'esp', '2025-02-08T15:00:00Z'),
+      // Round 3 (Feb 22) — Portugal rest
+      fx('rec25-r3-geo-rou', cid, sid, 'Round 3', 'geo', 'rou', '2025-02-22T13:00:00Z'),
+      fx('rec25-r3-ned-esp', cid, sid, 'Round 3', 'ned', 'esp', '2025-02-22T13:30:00Z'),
+      // Round 4 (Mar 8) — Netherlands rest
+      fx('rec25-r4-geo-esp', cid, sid, 'Round 4', 'geo', 'esp', '2025-03-08T13:00:00Z'),
+      fx('rec25-r4-rou-por', cid, sid, 'Round 4', 'rou', 'por', '2025-03-08T12:00:00Z'),
+      // Round 5 (Mar 15) — Spain rest
+      fx('rec25-r5-geo-por', cid, sid, 'Round 5', 'geo', 'por', '2025-03-15T13:00:00Z'),
+      fx('rec25-r5-rou-ned', cid, sid, 'Round 5', 'rou', 'ned', '2025-03-15T12:00:00Z'),
+    ],
+  };
+})();
+
+const RUGBY_EUROPE_2026: CompetitionBundle = (() => {
+  const cid: CompetitionId = 'rugby-europe-championship';
+  const sid: SeasonId = 'rugby-europe-championship-2026';
+  return {
+    competition: RUGBY_EUROPE_2025.competition,
+    season: {
+      id: sid, competition_id: cid, year_label: '2026',
+      start_date: '2026-02-07', end_date: '2026-03-14', status: 'completed',
+    },
+    team_ids: REC_TEAMS,
+    fixtures: [
+      // Home/away flipped vs 2025.
+      // Round 1 (Feb 7) — Georgia rest
+      fx('rec26-r1-ned-por', cid, sid, 'Round 1', 'ned', 'por', '2026-02-07T13:30:00Z'),
+      fx('rec26-r1-rou-esp', cid, sid, 'Round 1', 'rou', 'esp', '2026-02-07T12:00:00Z'),
+      // Round 2 (Feb 14) — Romania rest
+      fx('rec26-r2-ned-geo', cid, sid, 'Round 2', 'ned', 'geo', '2026-02-14T13:30:00Z'),
+      fx('rec26-r2-esp-por', cid, sid, 'Round 2', 'esp', 'por', '2026-02-14T12:45:00Z'),
+      // Round 3 (Feb 28) — Portugal rest
+      fx('rec26-r3-rou-geo', cid, sid, 'Round 3', 'rou', 'geo', '2026-02-28T12:00:00Z'),
+      fx('rec26-r3-esp-ned', cid, sid, 'Round 3', 'esp', 'ned', '2026-02-28T12:45:00Z'),
+      // Round 4 (Mar 7) — Netherlands rest
+      fx('rec26-r4-esp-geo', cid, sid, 'Round 4', 'esp', 'geo', '2026-03-07T12:45:00Z'),
+      fx('rec26-r4-por-rou', cid, sid, 'Round 4', 'por', 'rou', '2026-03-07T15:00:00Z'),
+      // Round 5 (Mar 14) — Spain rest
+      fx('rec26-r5-por-geo', cid, sid, 'Round 5', 'por', 'geo', '2026-03-14T15:00:00Z'),
+      fx('rec26-r5-ned-rou', cid, sid, 'Round 5', 'ned', 'rou', '2026-03-14T13:30:00Z'),
+    ],
+  };
+})();
+
 export const ALL_COMPETITIONS: readonly CompetitionBundle[] = [
   // Prior season — fully completed, feeds form + rankings history.
   SIX_NATIONS_2025,
   RUGBY_CHAMPIONSHIP_2025,
   SUMMER_TESTS_2025,
   AUTUMN_TESTS_2025,
+  PACIFIC_NATIONS_CUP_2025,
+  RUGBY_EUROPE_2025,
   // Current season.
   SIX_NATIONS_2026,
   RUGBY_CHAMPIONSHIP_2026,
   SUMMER_TESTS_2026,
   AUTUMN_TESTS_2026,
+  RUGBY_EUROPE_2026,
+  PACIFIC_NATIONS_CUP_2026,
   WORLD_CUP_2027,
 ];

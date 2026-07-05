@@ -3,17 +3,19 @@ import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, {
   Circle,
+  ClipPath,
   Defs,
-  LinearGradient,
+  G,
   Line,
   Path,
-  Stop,
+  Rect,
   Text as SvgText,
 } from 'react-native-svg';
 
 import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
+import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Match-scoped team-colour convention shared with the Momentum card and
@@ -91,8 +93,12 @@ export function ScoringProgression({
 
   const homePath = stepPath(series.home, scaleX, scaleY);
   const awayPath = stepPath(series.away, scaleX, scaleY);
-  const homeArea = stepAreaPath(series.home, scaleX, scaleY);
-  const awayAreaPathD = stepAreaPath(series.away, scaleX, scaleY);
+  // Ribbon paths carry only the horizontal treads: the fade is built
+  // from vertically-offset echo strokes, and echoing a vertical riser
+  // just re-draws it on top of itself — the smudged build-up you'd
+  // otherwise see at every score transition.
+  const homeTreads = stepTreadsPath(series.home, scaleX, scaleY);
+  const awayTreads = stepTreadsPath(series.away, scaleX, scaleY);
 
   const isLoading = events.isLoading;
   const hasScoring = series.home.length > 1 || series.away.length > 1;
@@ -132,40 +138,20 @@ export function ScoringProgression({
         <Text style={styles.empty}>No scoring events yet.</Text>
       ) : (
         <Svg width="100%" height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`} preserveAspectRatio="none">
-          {/* Vertical fade gradients per team, anchored to the PLOT AREA
-              in user space — colour at the plot top, fully transparent
-              exactly at the baseline (plot bottom). Anchoring in user
-              space (not each area shape's own bounding box) means the
-              fill under either worm spreads the whole way down to the
-              axis, never chopping off mid-shape when a worm rides high. */}
           <Defs>
-            <LinearGradient
-              id="home-area-gradient"
-              x1="0"
-              y1={PAD_TOP}
-              x2="0"
-              y2={PAD_TOP + PLOT_H}
-              gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor={HOME_LINE} stopOpacity="0.22" />
-              <Stop offset="1" stopColor={HOME_LINE} stopOpacity="0" />
-            </LinearGradient>
-            <LinearGradient
-              id="away-area-gradient"
-              x1="0"
-              y1={PAD_TOP}
-              x2="0"
-              y2={PAD_TOP + PLOT_H}
-              gradientUnits="userSpaceOnUse">
-              <Stop offset="0" stopColor={AWAY_LINE} stopOpacity="0.22" />
-              <Stop offset="1" stopColor={AWAY_LINE} stopOpacity="0" />
-            </LinearGradient>
+            <ClipPath id="progression-plot-clip">
+              <Rect x={0} y={0} width={CHART_W} height={PAD_TOP + PLOT_H} />
+            </ClipPath>
           </Defs>
 
-          {/* Area fills — rendered first so the strokes and gridlines sit
-              cleanly on top. Overlap regions where the two worms are
-              close naturally darken, subtly signalling "close scoreline". */}
-          <Path d={awayAreaPathD} fill="url(#away-area-gradient)" stroke="none" />
-          <Path d={homeArea} fill="url(#home-area-gradient)" stroke="none" />
+          {/* Contour-hugging fades — a short band beneath each worm
+              that follows its steps (GA-style), instead of area fills
+              reaching down to the axis. Away first so home's band sits
+              on top where the worms run close. */}
+          <G clipPath="url(#progression-plot-clip)">
+            <LineFadeRibbon path={awayTreads} stroke={AWAY_LINE} />
+            <LineFadeRibbon path={homeTreads} stroke={HOME_LINE} />
+          </G>
 
           {/* Y-axis gridlines. Numeric labels dropped so the chart matches
               the minimal-chrome Preview line charts; scale is implicit
@@ -227,10 +213,10 @@ export function ScoringProgression({
 
           {/* Endpoint markers so the eye lands on the final totals. */}
           {homeFinal > 0 ? (
-            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={2} fill={HOME_LINE} />
+            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={HOME_LINE} />
           ) : null}
           {awayFinal > 0 ? (
-            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={2} fill={AWAY_LINE} />
+            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
           ) : null}
         </Svg>
       )}
@@ -289,6 +275,29 @@ function buildSeries(
  * total, vertical jump at each scoring event. Matches the classic
  * broadcast-worm shape (staircase, not smooth curve).
  */
+/**
+ * The step chart's horizontal treads only, as disconnected subpaths —
+ * feeds LineFadeRibbon so the fade hangs beneath each level run without
+ * echoing the vertical risers.
+ */
+function stepTreadsPath(
+  points: readonly ScorePoint[],
+  scaleX: (minute: number) => number,
+  scaleY: (pts: number) => number,
+): string {
+  const parts: string[] = [];
+  for (let i = 1; i < points.length; i++) {
+    const prev = points[i - 1]!;
+    const curr = points[i]!;
+    if (curr.minute === prev.minute) continue;
+    const y = scaleY(prev.pts).toFixed(1);
+    parts.push(
+      `M ${scaleX(prev.minute).toFixed(1)} ${y} L ${scaleX(curr.minute).toFixed(1)} ${y}`,
+    );
+  }
+  return parts.join(' ');
+}
+
 function stepPath(
   points: readonly ScorePoint[],
   scaleX: (minute: number) => number,
@@ -307,28 +316,6 @@ function stepPath(
   return d;
 }
 
-/**
- * Closed area under the step-line, for the tinted fill beneath each
- * worm. Traces the same staircase along the top, then drops to the
- * 0-pts baseline at full-time and closes back to the origin. Baseline
- * is `scaleY(0)` so the fill sits between the worm and the x-axis.
- */
-function stepAreaPath(
-  points: readonly ScorePoint[],
-  scaleX: (minute: number) => number,
-  scaleY: (pts: number) => number,
-): string {
-  if (points.length === 0) return '';
-  const line = stepPath(points, scaleX, scaleY);
-  const last = points[points.length - 1]!;
-  const first = points[0]!;
-  const baselineY = scaleY(0);
-  return (
-    `${line} ` +
-    `L ${scaleX(last.minute).toFixed(1)} ${baselineY.toFixed(1)} ` +
-    `L ${scaleX(first.minute).toFixed(1)} ${baselineY.toFixed(1)} Z`
-  );
-}
 
 /**
  * Y-axis top = 10 points above the higher final score. Maximises use of

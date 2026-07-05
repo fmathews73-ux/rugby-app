@@ -20,12 +20,16 @@ import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@
 const STANDINGS_OPTIONS = [
   { id: 'six-nations-2026', label: 'Six Nations' },
   { id: 'rugby-championship-2026', label: 'Rugby C’ship' },
+  { id: 'rugby-europe-championship-2026', label: 'Rugby Europe' },
+  { id: 'pacific-nations-cup-2026', label: 'Pacific Cup' },
   { id: 'world-cup-2027', label: 'World Cup' },
 ] as const;
 
 const SEASON_TITLE: Record<string, { title: string; subtitle: string }> = {
   'six-nations-2026': { title: 'Six Nations 2026', subtitle: 'Final standings' },
   'rugby-championship-2026': { title: 'Rugby Championship 2026', subtitle: 'Kicks off Aug 2026' },
+  'rugby-europe-championship-2026': { title: 'Rugby Europe Championship 2026', subtitle: 'Final standings' },
+  'pacific-nations-cup-2026': { title: 'Pacific Nations Cup 2026', subtitle: 'Kicks off Aug 2026' },
   'world-cup-2027': { title: 'Rugby World Cup 2027', subtitle: 'Pool stage · Oct 2027' },
 };
 
@@ -127,7 +131,14 @@ function StandingsTable({
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
+  scroll: {
+    paddingHorizontal: Spacing.four,
+    // 8pt drop from the pill strip's hairline — matches Home's
+    // header-to-hero gap and the Fixtures / Teams pages.
+    paddingTop: Spacing.two,
+    paddingBottom: 40,
+    gap: Spacing.three,
+  },
 
   headerBlock: { gap: 4 },
   title: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text },

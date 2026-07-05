@@ -287,6 +287,51 @@ export interface Result {
   home_lineouts_lost: number;
   away_lineouts_lost: number;
 
+  // Breakdown — rucks are the possession-retention engine of the modern
+  // game; mauls the lineout-drive weapon. Won/lost pairs so success
+  // rates are derivable without extra fields.
+  home_rucks_won: number;
+  away_rucks_won: number;
+  home_rucks_lost: number;
+  away_rucks_lost: number;
+  home_mauls_won: number;
+  away_mauls_won: number;
+  home_mauls_lost: number;
+  away_mauls_lost: number;
+
+  // Attack (extended)
+  home_defenders_beaten: number;
+  away_defenders_beaten: number;
+  /** 50/22 kicks landed — rare (0-2 per match) but high narrative value. */
+  home_fifty_twenty_twos: number;
+  away_fifty_twenty_twos: number;
+
+  // ─── Advanced tier ─────────────────────────────────────────────────
+  // Premium-feed metrics (aggregator advanced tier). Modelled at TEAM
+  // level only; player-level advanced splits stay out until the Phase 6
+  // licence confirms them. All serve the premium-gated Stats surface.
+  /** Metres made after first contact. Always ≤ total metres. */
+  home_post_contact_metres: number;
+  away_post_contact_metres: number;
+  /** Share of carries that crossed the gainline (0-100). */
+  home_gainline_success_percent: number;
+  away_gainline_success_percent: number;
+  /** Tackles that drove the carrier backwards. */
+  home_dominant_tackles: number;
+  away_dominant_tackles: number;
+  /** Share of attacking rucks recycled inside 3 seconds (0-100) — the
+   *  standard "quick ball" read. */
+  home_ruck_speed_0_3s_percent: number;
+  away_ruck_speed_0_3s_percent: number;
+  /** Penalty-cause split. The three primary causes; they sum to less
+   *  than penalties_conceded (remainder = other offences). */
+  home_scrum_penalties_conceded: number;
+  away_scrum_penalties_conceded: number;
+  home_breakdown_penalties_conceded: number;
+  away_breakdown_penalties_conceded: number;
+  home_offside_penalties_conceded: number;
+  away_offside_penalties_conceded: number;
+
   // Defence
   home_tackles_made: number;
   away_tackles_made: number;
@@ -324,6 +369,81 @@ export interface LineUpEntry {
   shirt_number: number; // 1-15 starting, 16-23 bench
   player_id: PlayerId;
   position: Position; // position played for this fixture
+}
+
+/**
+ * Server-computed percentile read-model for one player against their
+ * position-group peers. Percentiles are NEUTRAL: they express the share
+ * of peers at or below the player's per-80 value (higher raw value →
+ * higher percentile), with NO good/bad inversion applied — clients flip
+ * presentation for lower-is-better metrics (discipline etc.) themselves.
+ * Peers qualify with a minimum number of appearances in the window so
+ * tiny samples don't pollute the distribution.
+ */
+export interface PlayerPercentiles {
+  player_id: PlayerId;
+  /** Position-group key the peer pool was drawn from, e.g. 'back-row'. */
+  position_group: string;
+  /** Window size requested (most recent N appearances per player). */
+  lookback: number;
+  /** The subject's appearances inside the window. */
+  appearances: number;
+  /** Qualifying peer-pool size, subject included. */
+  peers: number;
+  metrics: {
+    /** PlayerMatchStats numeric field name, e.g. 'tackles_made'. */
+    field: string;
+    /** The subject's per-80-minute rate over the window. */
+    per80: number;
+    /** 0–100. Share of the peer pool at or below the subject's rate. */
+    percentile: number;
+  }[];
+}
+
+/**
+ * Per-player per-match stat sheet — mirrors the shape an aggregator feed
+ * supplies for a completed fixture (one sheet per player in either matchday
+ * 23). Only exists for completed fixtures; scheduled / live fixtures have no
+ * sheets. Event-derived counts (tries, tackles, cards, …) reconcile exactly
+ * with the fixture's MatchEvent timeline, and side-level sums reconcile with
+ * the fixture's Result totals.
+ */
+export interface PlayerMatchStats {
+  fixture_id: FixtureId;
+  team_id: TeamId;
+  player_id: PlayerId;
+  // Participation
+  started: boolean;
+  minutes_played: number;
+  // Attacking
+  tries: number;
+  try_assists: number;
+  points: number;
+  carries: number;
+  metres_carried: number;
+  clean_breaks: number;
+  defenders_beaten: number;
+  offloads: number;
+  passes: number;
+  handling_errors: number;
+  // Kicking
+  conversions: number;
+  penalty_goals: number;
+  drop_goals: number;
+  kicks_from_hand: number;
+  kick_metres: number;
+  // Defence
+  tackles_made: number;
+  missed_tackles: number;
+  turnovers_won: number;
+  // Breakdown / set piece
+  rucks_hit: number;
+  lineout_takes: number;
+  lineout_steals: number;
+  // Discipline
+  penalties_conceded: number;
+  yellow_cards: number;
+  red_cards: number;
 }
 
 // ─── Standings (round-robin) ─────────────────────────────────────────────────

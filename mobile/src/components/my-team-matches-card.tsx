@@ -13,9 +13,9 @@ import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking, TextWe
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { formatFixtureDate } from '@/lib/format-fixture-date';
 
-// Matches FixtureCarousel's `screenWidth - 60` card width so this card
-// aligns with the hero carousel cards above.
-const HORIZONTAL_MARGIN = 30;
+// App-wide 24pt card column — matches FixtureCarousel's card width and
+// the Fixtures / Teams landing pages.
+const HORIZONTAL_MARGIN = Spacing.four;
 
 /**
  * Home-page card that surfaces the user's team's next and last fixtures

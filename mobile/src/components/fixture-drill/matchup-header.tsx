@@ -5,7 +5,7 @@ import type { Fixture, Result, Team } from '@rugby-app/shared';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { useSimLive } from '@/dev/sim-live';
-import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Matchup header ──────────────────────────────────────────────────────────
 
@@ -182,6 +182,11 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.three,
     gap: Spacing.two,
     alignItems: 'center',
+    // Shared drill-hero height — the team / player heroes centre their
+    // shorter content in the same box so all three drills measure
+    // identically from header to pill strip.
+    minHeight: DRILL_HERO_MIN_HEIGHT,
+    justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },

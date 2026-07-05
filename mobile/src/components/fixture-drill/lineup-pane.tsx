@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { StyleSheet, Text, View } from 'react-native';
+import { useState } from 'react';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Coach, CoachRole, Fixture, LineUp, MatchOfficial, MatchOfficialRole, Player } from '@rugby-app/shared';
 
 import { useFixtureOfficials, useTeamCoachingStaff } from '@/api/hooks';
+import { PlayerMatchSheet } from '@/components/fixture-drill/player-match-sheet';
 import { LoadingState } from '@/components/state-views';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
@@ -23,6 +25,8 @@ export function LineUpPane({
   const homeCoaches = useTeamCoachingStaff(fixture.home_team_id);
   const awayCoaches = useTeamCoachingStaff(fixture.away_team_id);
   const officials = useFixtureOfficials(fixture.id);
+  // Player whose match-scoped stat sheet is open in the bottom modal.
+  const [sheetPlayerId, setSheetPlayerId] = useState<string | null>(null);
   if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
@@ -63,7 +67,13 @@ export function LineUpPane({
         <Text style={styles.categoryLabel}>Starting XV</Text>
       </View>
       {startingRows.map(({ home, away }, i) => (
-        <LineUpCompareRow key={`start-${i}`} home={home} away={away} playerById={playerById} />
+        <LineUpCompareRow
+          key={`start-${i}`}
+          home={home}
+          away={away}
+          playerById={playerById}
+          onPressPlayer={setSheetPlayerId}
+        />
       ))}
 
       <View style={styles.lineupSectionHeader}>
@@ -71,7 +81,13 @@ export function LineUpPane({
         <Text style={styles.categoryLabel}>Bench</Text>
       </View>
       {benchRows.map(({ home, away }, i) => (
-        <LineUpCompareRow key={`bench-${i}`} home={home} away={away} playerById={playerById} />
+        <LineUpCompareRow
+          key={`bench-${i}`}
+          home={home}
+          away={away}
+          playerById={playerById}
+          onPressPlayer={setSheetPlayerId}
+        />
       ))}
 
       {/* Coaching staff — hidden entirely if the feed returns nothing (real
@@ -104,6 +120,14 @@ export function LineUpPane({
           ))}
         </>
       ) : null}
+
+      {/* Match-scoped player stat sheet — opened by tapping any XV or
+          bench player name above. */}
+      <PlayerMatchSheet
+        fixture={fixture}
+        playerId={sheetPlayerId}
+        onClose={() => setSheetPlayerId(null)}
+      />
     </View>
   );
 }
@@ -239,15 +263,18 @@ function LineUpCompareRow({
   home,
   away,
   playerById,
+  onPressPlayer,
 }: {
   home: LineUpEntry | null;
   away: LineUpEntry | null;
   playerById: Map<string, Player>;
+  onPressPlayer: (playerId: string) => void;
 }) {
   // Each side renders `[shirt#] [player name]` on the home side and its
   // mirror `[player name] [shirt#]` on the away side. Falls back to the
   // canonical position label if the player lookup misses (shouldn't
-  // happen when the API resolves properly).
+  // happen when the API resolves properly). Each side is independently
+  // tappable and opens that player's match stat sheet.
   const homeLabel = home
     ? playerById.get(home.player_id)?.name ?? formatPosition(home.position)
     : '';
@@ -256,22 +283,28 @@ function LineUpCompareRow({
     : '';
   return (
     <View style={styles.lineupCompareRow}>
-      <View style={styles.lineupSideLeft}>
+      <Pressable
+        onPress={home ? () => onPressPlayer(home.player_id) : undefined}
+        disabled={!home}
+        style={({ pressed }) => [styles.lineupSideLeft, pressed && { opacity: 0.6 }]}>
         <View style={styles.lineupNumberBadge}>
           <Text style={styles.lineupNumberText}>{home?.shirt_number ?? '·'}</Text>
         </View>
         <Text style={styles.lineupPosPlayer} numberOfLines={1}>
           {homeLabel}
         </Text>
-      </View>
-      <View style={styles.lineupSideRight}>
+      </Pressable>
+      <Pressable
+        onPress={away ? () => onPressPlayer(away.player_id) : undefined}
+        disabled={!away}
+        style={({ pressed }) => [styles.lineupSideRight, pressed && { opacity: 0.6 }]}>
         <Text style={[styles.lineupPosPlayer, styles.lineupPosPlayerRight]} numberOfLines={1}>
           {awayLabel}
         </Text>
         <View style={styles.lineupNumberBadge}>
           <Text style={styles.lineupNumberText}>{away?.shirt_number ?? '·'}</Text>
         </View>
-      </View>
+      </Pressable>
     </View>
   );
 }

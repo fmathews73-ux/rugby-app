@@ -446,6 +446,18 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
     );
   }
 
+  // Gainline dominance — an 8pp gap in gainline success is a front-foot
+  // story worth naming; post-contact metres qualify it.
+  const homeGain = result.home_gainline_success_percent ?? 0;
+  const awayGain = result.away_gainline_success_percent ?? 0;
+  if (Math.abs(homeGain - awayGain) >= 8) {
+    const front = homeGain > awayGain ? home : away;
+    const pcm = front.id === home.id ? result.home_post_contact_metres : result.away_post_contact_metres;
+    parts.push(
+      `${front.short_name} are winning the collision battle, crossing the gainline on ${Math.max(homeGain, awayGain)}% of carries against ${Math.min(homeGain, awayGain)}%${pcm ? ` and adding ${pcm}m after contact` : ''}. Front-foot ball changes everything downstream.`,
+    );
+  }
+
   // Handling — attacking execution
   const homeErr = result.home_handling_errors ?? 0;
   const awayErr = result.away_handling_errors ?? 0;
@@ -517,6 +529,29 @@ function platformParagraph(
     const jackaller = homeTOW > awayTOW ? home : away;
     parts.push(
       `${jackaller.short_name}'s breakdown work has been the standout (${Math.max(homeTOW, awayTOW)} turnovers won against ${Math.min(homeTOW, awayTOW)}), and every steal is a possession swing and a momentum killer.`,
+    );
+  }
+
+  // Ruck retention + quick-ball tempo. Retention gaps of 4pp or a side
+  // dipping under 88% are real breakdown stories; a 10pp quick-ball gap
+  // is the tempo read.
+  const homeRuckPct = ruckRetention(result.home_rucks_won, result.home_rucks_lost);
+  const awayRuckPct = ruckRetention(result.away_rucks_won, result.away_rucks_lost);
+  if (homeRuckPct !== null && awayRuckPct !== null) {
+    if (Math.min(homeRuckPct, awayRuckPct) < 88 || Math.abs(homeRuckPct - awayRuckPct) >= 4) {
+      const cleaner = homeRuckPct >= awayRuckPct ? home : away;
+      const messier = cleaner.id === home.id ? away : home;
+      parts.push(
+        `Ruck retention favours ${cleaner.short_name} (${Math.round(Math.max(homeRuckPct, awayRuckPct))}% to ${Math.round(Math.min(homeRuckPct, awayRuckPct))}%), and ${messier.short_name}'s loose ball at the breakdown keeps handing back cheap possession.`,
+      );
+    }
+  }
+  const homeQuick = result.home_ruck_speed_0_3s_percent ?? 0;
+  const awayQuick = result.away_ruck_speed_0_3s_percent ?? 0;
+  if (Math.abs(homeQuick - awayQuick) >= 10) {
+    const faster = homeQuick > awayQuick ? home : away;
+    parts.push(
+      `${faster.short_name} are also generating the quicker ball (${Math.max(homeQuick, awayQuick)}% of rucks recycled inside three seconds against ${Math.min(homeQuick, awayQuick)}%), which is why their attack keeps finding a defence that hasn't reset.`,
     );
   }
 
@@ -758,15 +793,36 @@ function setPieceNarrative(result: Result, home: Team, away: Team, _ctx: PreMatc
   const homeLineoutLost = result.home_lineouts_lost ?? 0;
   const awayLineoutLost = result.away_lineouts_lost ?? 0;
 
+  // Maul read appended when either pack has made the drive a weapon
+  // (8+ mauls won) or a liability (2+ lost).
+  const maulSentence = maulRead(result, home, away);
+
   if (Math.max(homeScrumLost, awayScrumLost) >= 2) {
     const worse = homeScrumLost > awayScrumLost ? home : away;
-    return `${worse.short_name}'s scrum has been the real point of pressure. Lost engagements at the set-piece are the fastest way to bleed field position, and ${worse.short_name} are shipping them today. The other pack is walking the game up-field on the back of that platform.`;
+    return `${worse.short_name}'s scrum has been the real point of pressure. Lost engagements at the set-piece are the fastest way to bleed field position, and ${worse.short_name} are shipping them today. The other pack is walking the game up-field on the back of that platform.${maulSentence}`;
   }
   if (Math.max(homeLineoutLost, awayLineoutLost) >= 3) {
     const worse = homeLineoutLost > awayLineoutLost ? home : away;
-    return `${worse.short_name}'s lineout has been the leak. Throw and jump sync isn't holding today, and every misfire hands attacking territory straight back. The primary attacking platform has to come from somewhere else.`;
+    return `${worse.short_name}'s lineout has been the leak. Throw and jump sync isn't holding today, and every misfire hands attacking territory straight back. The primary attacking platform has to come from somewhere else.${maulSentence}`;
   }
-  return `Both packs have secured their own ball, and the set-piece has been an evenly-contested draw. Neither side is winning easy possession off the platform, so points have had to come from open play rather than structured launches.`;
+  return `Both packs have secured their own ball, and the set-piece has been an evenly-contested draw. Neither side is winning easy possession off the platform, so points have had to come from open play rather than structured launches.${maulSentence}`;
+}
+
+function maulRead(result: Result, home: Team, away: Team): string {
+  const homeMauls = result.home_mauls_won ?? 0;
+  const awayMauls = result.away_mauls_won ?? 0;
+  const homeMaulsLost = result.home_mauls_lost ?? 0;
+  const awayMaulsLost = result.away_mauls_lost ?? 0;
+
+  if (Math.max(homeMauls, awayMauls) >= 8 && Math.abs(homeMauls - awayMauls) >= 3) {
+    const driver = homeMauls > awayMauls ? home : away;
+    return ` ${driver.short_name}'s driving maul has been a genuine weapon (${Math.max(homeMauls, awayMauls)} won), forcing the defence to commit numbers and opening space wide.`;
+  }
+  if (Math.max(homeMaulsLost, awayMaulsLost) >= 2) {
+    const worse = homeMaulsLost > awayMaulsLost ? home : away;
+    return ` ${worse.short_name} have also had their maul held up more than once, wasting prime lineout platforms.`;
+  }
+  return '';
 }
 
 function disciplineNarrative(result: Result, home: Team, away: Team, ctx: PreMatchContext): string {
@@ -791,9 +847,24 @@ function disciplineNarrative(result: Result, home: Team, away: Team, ctx: PreMat
       worseBase && worseCount > worseBase * (1 + BASELINE_VARIANCE_THRESHOLD)
         ? ` That's well above their ${worseBase.toFixed(0)}-per-game season line and it's costing them field position at critical moments.`
         : '';
-    return `${worse.short_name}'s discipline has been the concern. A heavier penalty count is keeping them pinned back and gifting the opposition points at the tee.${varianceBit}`;
+    return `${worse.short_name}'s discipline has been the concern. A heavier penalty count is keeping them pinned back and gifting the opposition points at the tee.${varianceBit}${penaltyCauseRead(result, worse, worse.id === home.id)}`;
   }
   return `Discipline has been broadly clean on both sides. The referee has kept the whistle mostly in the pocket, and neither side is giving the other easy shots at goal. That leaves the game in the players' hands.`;
+}
+
+/** Names the dominant penalty cause when one bucket carries half or
+ *  more of the offending side's count — the "where the leak is" read. */
+function penaltyCauseRead(result: Result, worse: Team, worseIsHome: boolean): string {
+  const total = worseIsHome ? result.home_penalties_conceded : result.away_penalties_conceded;
+  if (!total) return '';
+  const causes: [string, number][] = [
+    ['the scrum', worseIsHome ? result.home_scrum_penalties_conceded : result.away_scrum_penalties_conceded],
+    ['the breakdown', worseIsHome ? result.home_breakdown_penalties_conceded : result.away_breakdown_penalties_conceded],
+    ['offside', worseIsHome ? result.home_offside_penalties_conceded : result.away_offside_penalties_conceded],
+  ];
+  const [label, count] = causes.sort((x, y) => y[1] - x[1])[0]!;
+  if (count / total < 0.5) return '';
+  return ` The leak is concentrated at ${label} (${count} of the ${total}), which at least gives the coaching box one specific problem to fix.`;
 }
 
 function kickingNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
@@ -802,15 +873,27 @@ function kickingNarrative(result: Result, home: Team, away: Team, _ctx: PreMatch
   const homeKIP = result.home_kicks_in_play ?? 0;
   const awayKIP = result.away_kicks_in_play ?? 0;
 
+  // 50/22s are rare enough that any successful one is worth naming.
+  const fiftyTwentyTwo = fiftyTwentyTwoRead(result, home, away);
+
   if (Math.abs(homeM - awayM) >= 8) {
     const better = homeM > awayM ? home : away;
-    return `${better.short_name}'s boot has been the more effective territorial weapon. More distance per kick means more field position won and the ability to pin the opposition deep. That aerial control has been a quiet but decisive edge.`;
+    return `${better.short_name}'s boot has been the more effective territorial weapon. More distance per kick means more field position won and the ability to pin the opposition deep. That aerial control has been a quiet but decisive edge.${fiftyTwentyTwo}`;
   }
   if (Math.abs(homeKIP - awayKIP) >= 6) {
     const kicker = homeKIP > awayKIP ? home : away;
-    return `${kicker.short_name} have been the more kick-heavy of the two, choosing deliberate territorial rugby that's willing to hand the ball back for field position rather than force phases through contact. It's a strategic choice, not a lack of ideas.`;
+    return `${kicker.short_name} have been the more kick-heavy of the two, choosing deliberate territorial rugby that's willing to hand the ball back for field position rather than force phases through contact. It's a strategic choice, not a lack of ideas.${fiftyTwentyTwo}`;
   }
-  return `Kicking exchanges have been evenly matched, with both fly-halves finding similar lengths and neither back-three winning the aerial contest decisively. The territorial battle is being fought on other fronts.`;
+  return `Kicking exchanges have been evenly matched, with both fly-halves finding similar lengths and neither back-three winning the aerial contest decisively. The territorial battle is being fought on other fronts.${fiftyTwentyTwo}`;
+}
+
+function fiftyTwentyTwoRead(result: Result, home: Team, away: Team): string {
+  const h = result.home_fifty_twenty_twos ?? 0;
+  const a = result.away_fifty_twenty_twos ?? 0;
+  if (h === 0 && a === 0) return '';
+  const kicker = h >= a ? home : away;
+  const count = Math.max(h, a);
+  return ` ${kicker.short_name} have also landed ${count === 1 ? 'a 50/22' : `${count} 50/22s`}, the kind of momentum-flipping kick that turns defence straight into an attacking lineout.`;
 }
 
 function territoryNarrative(result: Result, home: Team, away: Team, _ctx: PreMatchContext): string {
@@ -937,6 +1020,15 @@ function weakestAreaFor(
 }
 
 // ─── Small helpers ──────────────────────────────────────────────────────────
+
+/** Ruck retention percentage, or null when a side somehow has no
+ *  recorded rucks (defensive-only live snapshot). */
+function ruckRetention(won: number | undefined, lost: number | undefined): number | null {
+  const w = won ?? 0;
+  const l = lost ?? 0;
+  if (w + l === 0) return null;
+  return (w / (w + l)) * 100;
+}
 
 /** Combined scrum + lineout success percentage — mirrors the radar's
  *  set-piece axis. Falls back to 0 when a team has no set-pieces. */

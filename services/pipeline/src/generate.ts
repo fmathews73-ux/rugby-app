@@ -23,6 +23,7 @@ import type {
   MatchEvent,
   MatchOfficial,
   Player,
+  PlayerMatchStats,
   Position,
   RankingSnapshot,
   Result,
@@ -38,13 +39,16 @@ import {
   generateLineUp,
   generateMatchEvents,
   generateMatchOfficials,
+  generatePlayerMatchStats,
+  generateAnchoredRankingSeries,
   generateRanking,
   generateResult,
-  generateSquad,
-  STARTING_POSITIONS,
+  generateTeamPool,
+  selectSquadFromPool,
 } from './generators.js';
 import { ALL_TEAMS, RUGBY_APP_SEED } from './registry.js';
 import { makeRng } from './rng.js';
+import { MENS_RANKING_SEED } from './world-ranking-seed.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUTPUT_DIR = join(__dirname, '..', 'data');
@@ -62,55 +66,54 @@ const womensRankingRng = root.fork();
 const eventsRng = root.fork();
 const coachRng = root.fork();
 const officialRng = root.fork();
+const playerStatsRng = root.fork();
 
-// ─── Squads and players ─────────────────────────────────────────────────────
-// One squad per team per season that team participates in.
+// ─── Player pools and season squads ──────────────────────────────────────────
+// ONE persistent 45-player pool per team (stable IDs, same humans across
+// every season), then one squad per (team, season) SELECTED from that
+// pool. Players accumulate appearances across competitions the way real
+// internationals do, and IDs never collide across season bundles.
 
-interface SquadAcc {
-  players: Player[];
-  squads: Squad[];
-  playersByTeam: Map<TeamId, Player[]>;
-  squadByKey: Map<string, Squad>; // key = `${teamId}::${seasonId}`
-}
-
-const squadAcc: SquadAcc = {
-  players: [],
-  squads: [],
-  playersByTeam: new Map(),
-  squadByKey: new Map(),
-};
+const teamPools = new Map<TeamId, Player[]>();
+const squads: Squad[] = [];
+const squadByKey = new Map<string, Squad>(); // key = `${teamId}::${seasonId}`
 
 for (const bundle of ALL_COMPETITIONS) {
   for (const teamId of bundle.team_ids) {
+    if (!teamPools.has(teamId)) {
+      teamPools.set(teamId, generateTeamPool(squadRng, teamId, TODAY_ISO));
+    }
     const key = `${teamId}::${bundle.season.id}`;
-    if (squadAcc.squadByKey.has(key)) continue;
-    const { squad, players } = generateSquad(squadRng, teamId, bundle.season.id, TODAY_ISO);
-    squadAcc.squads.push(squad);
-    squadAcc.players.push(...players);
-    squadAcc.playersByTeam.set(teamId, [
-      ...(squadAcc.playersByTeam.get(teamId) ?? []),
-      ...players,
-    ]);
-    squadAcc.squadByKey.set(key, squad);
+    if (squadByKey.has(key)) continue;
+    const squad = selectSquadFromPool(
+      squadRng,
+      teamId,
+      bundle.season.id,
+      teamPools.get(teamId)!,
+    );
+    squads.push(squad);
+    squadByKey.set(key, squad);
   }
 }
 
-// Index players by (team, position) for fast lineup picking.
-const playersByTeamAndPos = new Map<TeamId, Map<Position, string[]>>();
-for (const [teamId, players] of squadAcc.playersByTeam) {
+const allPlayers: Player[] = [...teamPools.values()].flat();
+const playerById = new Map(allPlayers.map((p) => [p.id, p]));
+
+// Position index per SEASON SQUAD (not per team) so lineups only field
+// players actually named in that season's squad. Every position is
+// guaranteed two-deep by the selection template, so no fill fallback
+// is needed.
+const posMapBySquadKey = new Map<string, Map<Position, string[]>>();
+for (const squad of squads) {
   const map = new Map<Position, string[]>();
-  for (const p of players) {
+  for (const pid of squad.player_ids) {
+    const p = playerById.get(pid);
+    if (!p) continue;
     const arr = map.get(p.primary_position) ?? [];
-    arr.push(p.id);
+    arr.push(pid);
     map.set(p.primary_position, arr);
   }
-  // Ensure every position has at least one candidate — fill from any player.
-  for (const pos of STARTING_POSITIONS) {
-    if ((map.get(pos)?.length ?? 0) === 0) {
-      map.set(pos, players.map((p) => p.id));
-    }
-  }
-  playersByTeamAndPos.set(teamId, map);
+  posMapBySquadKey.set(`${squad.team_id}::${squad.season_id}`, map);
 }
 
 // ─── Results + lineups for completed fixtures ────────────────────────────────
@@ -119,6 +122,7 @@ const results: Result[] = [];
 const resultByFixture = new Map<string, Result>();
 const lineups: LineUp[] = [];
 const events: MatchEvent[] = [];
+const playerMatchStats: PlayerMatchStats[] = [];
 
 for (const bundle of ALL_COMPETITIONS) {
   for (const fx of bundle.fixtures) {
@@ -131,8 +135,8 @@ for (const bundle of ALL_COMPETITIONS) {
     let homeLineup: LineUp | undefined;
     let awayLineup: LineUp | undefined;
     for (const teamId of [fx.home_team_id, fx.away_team_id] as const) {
-      const squad = squadAcc.squadByKey.get(`${teamId}::${bundle.season.id}`);
-      const posMap = playersByTeamAndPos.get(teamId);
+      const squad = squadByKey.get(`${teamId}::${bundle.season.id}`);
+      const posMap = posMapBySquadKey.get(`${teamId}::${bundle.season.id}`);
       if (!squad || !posMap) continue;
       const lu = generateLineUp(lineupRng, fx, teamId, squad, posMap);
       lineups.push(lu);
@@ -142,9 +146,16 @@ for (const bundle of ALL_COMPETITIONS) {
 
     // Event timeline — reconciled to Result (try/conv/pen/drop counts match),
     // players sourced from the lineups just produced.
-    for (const ev of generateMatchEvents(eventsRng, fx, r, homeLineup, awayLineup)) {
-      events.push(ev);
-    }
+    const fxEvents = generateMatchEvents(eventsRng, fx, r, homeLineup, awayLineup);
+    events.push(...fxEvents);
+
+    // Per-player stat sheets — one per matchday-23 member of a completed
+    // fixture. Event-derived counts reconcile with the timeline above;
+    // distributed counts sum per side exactly to the Result totals.
+    const fxLineups = [homeLineup, awayLineup].filter((l): l is LineUp => l !== undefined);
+    playerMatchStats.push(
+      ...generatePlayerMatchStats(playerStatsRng, fx, r, fxLineups, fxEvents),
+    );
   }
 }
 
@@ -206,12 +217,12 @@ const snapshotDates = [
   TODAY_ISO,
 ];
 
-let prevMensRankByTeam: Map<TeamId, number> | null = null;
-for (const date of snapshotDates) {
-  const snap = generateRanking(rankingRng, date, ALL_TEAMS, prevMensRankByTeam, 'world-rugby-mens');
-  rankings.push(snap);
-  prevMensRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
-}
+// Men's series is anchored to the REAL World Rugby table (see
+// world-ranking-seed.ts): the latest snapshot matches reality, history
+// drifts backwards from it.
+rankings.push(
+  ...generateAnchoredRankingSeries(rankingRng, snapshotDates, MENS_RANKING_SEED, 'world-rugby-mens'),
+);
 
 let prevWomensRankByTeam: Map<TeamId, number> | null = null;
 for (const date of snapshotDates) {
@@ -251,8 +262,8 @@ const outputs: OutputFile[] = [
   { file: 'competitions.json', data: ALL_COMPETITIONS.map((b) => b.competition) },
   { file: 'seasons.json', data: ALL_COMPETITIONS.map((b) => b.season) },
   { file: 'teams.json', data: ALL_TEAMS },
-  { file: 'players.json', data: squadAcc.players },
-  { file: 'squads.json', data: squadAcc.squads },
+  { file: 'players.json', data: allPlayers },
+  { file: 'squads.json', data: squads },
   { file: 'fixtures.json', data: ALL_COMPETITIONS.flatMap((b) => b.fixtures) },
   { file: 'results.json', data: results },
   { file: 'lineups.json', data: lineups },
@@ -262,6 +273,7 @@ const outputs: OutputFile[] = [
   { file: 'events.json', data: events },
   { file: 'coaches.json', data: coaches },
   { file: 'officials.json', data: officials },
+  { file: 'player-match-stats.json', data: playerMatchStats },
 ];
 
 mkdirSync(OUTPUT_DIR, { recursive: true });
@@ -275,8 +287,8 @@ const totals = {
   competitions: ALL_COMPETITIONS.length,
   seasons: ALL_COMPETITIONS.length,
   teams: ALL_TEAMS.length,
-  players: squadAcc.players.length,
-  squads: squadAcc.squads.length,
+  players: allPlayers.length,
+  squads: squads.length,
   fixtures: ALL_COMPETITIONS.reduce((n, b) => n + b.fixtures.length, 0),
   results: results.length,
   lineups: lineups.length,
@@ -286,6 +298,7 @@ const totals = {
   events: events.length,
   coaches: coaches.length,
   officials: officials.length,
+  playerMatchStats: playerMatchStats.length,
 };
 // eslint-disable-next-line no-console -- CLI tool output
 console.log('Wrote synthetic dataset:', totals);

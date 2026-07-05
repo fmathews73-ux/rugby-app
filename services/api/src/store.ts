@@ -18,6 +18,7 @@ import type {
   LineUp,
   Player,
   PlayerId,
+  PlayerMatchStats,
   MatchEvent,
   MatchOfficial,
   RankingSnapshot,
@@ -43,6 +44,7 @@ export interface Store {
 
   players: readonly Player[];
   playerById: ReadonlyMap<PlayerId, Player>;
+  playersByTeam: ReadonlyMap<TeamId, Player[]>;
 
   squads: readonly Squad[];
   /** Key: `${teamId}::${seasonId}`. */
@@ -77,6 +79,10 @@ export interface Store {
 
   officials: readonly MatchOfficial[];
   officialsByFixture: ReadonlyMap<FixtureId, MatchOfficial[]>;
+
+  playerMatchStats: readonly PlayerMatchStats[];
+  playerStatsByFixture: ReadonlyMap<FixtureId, PlayerMatchStats[]>;
+  playerStatsByPlayer: ReadonlyMap<PlayerId, PlayerMatchStats[]>;
 }
 
 function readJson<T>(dir: string, file: string): T {
@@ -115,6 +121,7 @@ export function loadStore(dataDir: string): Store {
   const events = readJson<MatchEvent[]>(dataDir, 'events.json');
   const coaches = readJson<Coach[]>(dataDir, 'coaches.json');
   const officials = readJson<MatchOfficial[]>(dataDir, 'officials.json');
+  const playerMatchStats = readJson<PlayerMatchStats[]>(dataDir, 'player-match-stats.json');
 
   const fixturesByTeam = new Map<TeamId, Fixture[]>();
   for (const fx of fixtures) {
@@ -138,6 +145,7 @@ export function loadStore(dataDir: string): Store {
 
     players,
     playerById: indexBy(players, (p) => p.id),
+    playersByTeam: groupBy(players, (p) => p.team_id),
 
     squads,
     squadByTeamSeason: indexBy(squads, (s) => `${s.team_id}::${s.season_id}`),
@@ -175,5 +183,9 @@ export function loadStore(dataDir: string): Store {
 
     officials,
     officialsByFixture: groupBy(officials, (o) => o.fixture_id),
+
+    playerMatchStats,
+    playerStatsByFixture: groupBy(playerMatchStats, (s) => s.fixture_id),
+    playerStatsByPlayer: groupBy(playerMatchStats, (s) => s.player_id),
   };
 }

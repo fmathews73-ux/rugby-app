@@ -158,5 +158,7 @@ export default function FixtureDetailScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingBottom: 60 },
-  pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.two },
+  // gap matches the app-wide 16pt inter-card rhythm (each pane renders
+  // one stack today, but any future sibling gets the standard gap).
+  pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.three },
 });

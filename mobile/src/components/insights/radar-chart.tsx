@@ -4,7 +4,7 @@
  * card can compose the same SVG chart + axis math without duplicating them.
  */
 
-import Svg, { Circle, Line, Path, Polygon, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Defs, Line, Path, Polygon, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 import { Colors } from '@/constants/theme';
 import type { TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -206,8 +206,44 @@ export function RadarChart({
     .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
     .join(' ');
 
+  // Gradient IDs derive from the fill colour so two radars with the
+  // same palette share a definition and different palettes never
+  // collide across SVG trees.
+  const primaryGradientId = `radar-fill-${fillColor.replace('#', '')}`;
+  const compareGradientId = `radar-fill-${compareFillColor.replace('#', '')}`;
+
   return (
     <Svg width="100%" height={height} viewBox={`0 0 ${size} ${height}`}>
+      <Defs>
+        {/* Radial fade anchored to the radar geometry (user space):
+            faint at the centre, strongest at full radius. Because the
+            gradient scales with radius, the fill at each axis's data
+            boundary is only as hot as the value that put it there —
+            strong dimensions literally glow brighter at their edge
+            than weak ones. */}
+        <RadialGradient
+          id={primaryGradientId}
+          cx={cx}
+          cy={cy}
+          r={r}
+          gradientUnits="userSpaceOnUse">
+          <Stop offset="0" stopColor={fillColor} stopOpacity="0.06" />
+          <Stop offset="0.6" stopColor={fillColor} stopOpacity="0.22" />
+          <Stop offset="1" stopColor={fillColor} stopOpacity="0.55" />
+        </RadialGradient>
+        {compareAxes ? (
+          <RadialGradient
+            id={compareGradientId}
+            cx={cx}
+            cy={cy}
+            r={r}
+            gradientUnits="userSpaceOnUse">
+            <Stop offset="0" stopColor={compareFillColor} stopOpacity="0.06" />
+            <Stop offset="0.6" stopColor={compareFillColor} stopOpacity="0.22" />
+            <Stop offset="1" stopColor={compareFillColor} stopOpacity="0.55" />
+          </RadialGradient>
+        ) : null}
+      </Defs>
       {[0.25, 0.5, 0.75, 1].map((frac) => {
         const pts = axes
           .map((_, i) => pointOn(i, r * frac))
@@ -255,26 +291,24 @@ export function RadarChart({
       {comparePath ? (
         <Path
           d={comparePath}
-          fill={compareFillColor}
-          fillOpacity={0.35}
+          fill={`url(#${compareGradientId})`}
           stroke={compareStrokeColor}
           strokeWidth={1}
         />
       ) : null}
       <Path
         d={teamPath}
-        fill={fillColor}
-        fillOpacity={0.35}
+        fill={`url(#${primaryGradientId})`}
         stroke={strokeColor}
         strokeWidth={1}
       />
       {compareAxes?.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={2} fill={compareStrokeColor} />;
+        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.5} fill={compareStrokeColor} />;
       })}
       {axes.map((ax, i) => {
         const p = pointOn(i, r * ax.value);
-        return <Circle key={i} cx={p.x} cy={p.y} r={2} fill={strokeColor} />;
+        return <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={strokeColor} />;
       })}
       {axes.map((ax, i) => {
         const labelP = pointOn(i, r + 16);

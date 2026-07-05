@@ -16,6 +16,7 @@ import type {
   MatchOfficialRole,
   Player,
   PlayerId,
+  PlayerMatchStats,
   Position,
   RankingRow,
   RankingSnapshot,
@@ -135,34 +136,76 @@ export function generatePlayer(
   };
 }
 
+/** Pool depth at every starting position. 15 positions × 3 = a
+ *  45-player persistent pool per team, under the 50-per-team product
+ *  cap with rotation headroom over the 33-player season squad. */
+export const POOL_DEPTH_PER_POSITION = 3;
+
 /**
- * A 33-player squad: two per starting position (30), plus 3 utility forwards
- * of coach's choice — approximated as extras at flanker / lock.
+ * One persistent player pool per team — the SAME humans across every
+ * season, with stable IDs (`${teamId}-p001` … `-p045`). Season squads
+ * are SELECTED from this pool rather than freshly generated, so a
+ * player accumulates appearances across competitions the way real
+ * internationals do (and IDs never collide across season bundles —
+ * the old per-season generation minted several different people per
+ * Tier-1 ID).
  */
-export function generateSquad(
+export function generateTeamPool(
   rng: Rng,
   teamId: TeamId,
-  seasonId: string,
   todayIso: string,
-): { squad: Squad; players: Player[] } {
+): Player[] {
   const players: Player[] = [];
   let idx = 1;
   for (const position of STARTING_POSITIONS) {
-    players.push(generatePlayer(rng, teamId, idx++, position, todayIso));
-    players.push(generatePlayer(rng, teamId, idx++, position, todayIso));
+    for (let depth = 0; depth < POOL_DEPTH_PER_POSITION; depth++) {
+      players.push(generatePlayer(rng, teamId, idx++, position, todayIso));
+    }
   }
-  // 3 extra utility forwards
-  for (const position of ['blindside-flanker', 'openside-flanker', 'lock'] as const) {
-    players.push(generatePlayer(rng, teamId, idx++, position, todayIso));
+  return players;
+}
+
+/**
+ * Select a 33-player season squad from the team pool: two of the three
+ * players at each starting position (rotated per season by rng), plus
+ * 3 utility forwards drawn from the unselected flanker / lock
+ * candidates. Mirrors the previous squad template exactly — the only
+ * change is that identities persist across seasons.
+ */
+export function selectSquadFromPool(
+  rng: Rng,
+  teamId: TeamId,
+  seasonId: string,
+  pool: readonly Player[],
+): Squad {
+  const byPos = new Map<Position, Player[]>();
+  for (const p of pool) {
+    const arr = byPos.get(p.primary_position) ?? [];
+    arr.push(p);
+    byPos.set(p.primary_position, arr);
   }
 
-  const squad: Squad = {
+  const chosen: string[] = [];
+  const utilityCandidates: string[] = [];
+  for (const position of STARTING_POSITIONS) {
+    const shuffled = rng.shuffle([...(byPos.get(position) ?? [])]);
+    chosen.push(...shuffled.slice(0, 2).map((p) => p.id));
+    if (
+      position === 'lock' ||
+      position === 'blindside-flanker' ||
+      position === 'openside-flanker'
+    ) {
+      utilityCandidates.push(...shuffled.slice(2).map((p) => p.id));
+    }
+  }
+  chosen.push(...rng.shuffle(utilityCandidates).slice(0, 3));
+
+  return {
     id: `${teamId}-${seasonId}-squad`,
     team_id: teamId,
     season_id: seasonId,
-    player_ids: players.map((p) => p.id),
+    player_ids: chosen,
   };
-  return { squad, players };
 }
 
 /**
@@ -195,6 +238,29 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
   const home_territory_percent = rng.int(35, 66);
   const away_territory_percent = 100 - home_territory_percent;
 
+  // Hoisted so the advanced-tier derived metrics can reference them and
+  // keep their invariants (post-contact ≤ metres, dominant ≤ tackles,
+  // penalty causes ≤ penalties conceded).
+  const home_meters = rng.int(300, 700);
+  const away_meters = rng.int(300, 700);
+  const home_tackles_made = rng.int(100, 200);
+  const away_tackles_made = rng.int(100, 200);
+  const home_penalties_conceded = rng.int(5, 16);
+  const away_penalties_conceded = rng.int(5, 16);
+
+  // Penalty-cause partition — three primary causes summing to at most
+  // the side's total; the remainder reads as "other offences".
+  const penaltyCauses = (pens: number) => {
+    const scrum = Math.round((pens * rng.int(20, 36)) / 100);
+    let breakdown = Math.round((pens * rng.int(30, 46)) / 100);
+    const offside = Math.round((pens * rng.int(15, 26)) / 100);
+    const overflow = scrum + breakdown + offside - pens;
+    if (overflow > 0) breakdown = Math.max(0, breakdown - overflow);
+    return { scrum, breakdown, offside };
+  };
+  const homeCauses = penaltyCauses(home_penalties_conceded);
+  const awayCauses = penaltyCauses(away_penalties_conceded);
+
   return {
     fixture_id: fixture.id,
     home_score,
@@ -215,8 +281,8 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     home_territory_percent,
     away_territory_percent,
 
-    home_meters: rng.int(300, 700),
-    away_meters: rng.int(300, 700),
+    home_meters,
+    away_meters,
     home_line_breaks: rng.int(2, 15),
     away_line_breaks: rng.int(2, 15),
     home_carries: rng.int(100, 180),
@@ -242,8 +308,8 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     home_lineouts_lost: rng.int(1, 5),
     away_lineouts_lost: rng.int(1, 5),
 
-    home_tackles_made: rng.int(100, 200),
-    away_tackles_made: rng.int(100, 200),
+    home_tackles_made,
+    away_tackles_made,
     home_tackle_success_percent: rng.int(80, 96),
     away_tackle_success_percent: rng.int(80, 96),
     home_turnovers_won: rng.int(3, 13),
@@ -251,14 +317,47 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     home_turnovers_conceded: rng.int(3, 15),
     away_turnovers_conceded: rng.int(3, 15),
 
-    home_penalties_conceded: rng.int(5, 16),
-    away_penalties_conceded: rng.int(5, 16),
+    home_penalties_conceded,
+    away_penalties_conceded,
     home_handling_errors: rng.int(5, 16),
     away_handling_errors: rng.int(5, 16),
     home_yellow_cards: rng.chance(0.3) ? rng.int(1, 3) : 0,
     away_yellow_cards: rng.chance(0.3) ? rng.int(1, 3) : 0,
     home_red_cards: rng.chance(0.05) ? 1 : 0,
     away_red_cards: rng.chance(0.05) ? 1 : 0,
+
+    // Breakdown — Tier-1 sides typically recycle 80-130 rucks with a
+    // 90%+ retention rate; mauls are far rarer, mostly lineout drives.
+    home_rucks_won: rng.int(70, 131),
+    away_rucks_won: rng.int(70, 131),
+    home_rucks_lost: rng.int(3, 13),
+    away_rucks_lost: rng.int(3, 13),
+    home_mauls_won: rng.int(3, 13),
+    away_mauls_won: rng.int(3, 13),
+    home_mauls_lost: rng.int(0, 4),
+    away_mauls_lost: rng.int(0, 4),
+
+    home_defenders_beaten: rng.int(12, 36),
+    away_defenders_beaten: rng.int(12, 36),
+    home_fifty_twenty_twos: rng.chance(0.25) ? rng.int(1, 3) : 0,
+    away_fifty_twenty_twos: rng.chance(0.25) ? rng.int(1, 3) : 0,
+
+    // Advanced tier — derived where an invariant binds them to the
+    // standard-tier value they qualify.
+    home_post_contact_metres: Math.round((home_meters * rng.int(28, 43)) / 100),
+    away_post_contact_metres: Math.round((away_meters * rng.int(28, 43)) / 100),
+    home_gainline_success_percent: rng.int(44, 66),
+    away_gainline_success_percent: rng.int(44, 66),
+    home_dominant_tackles: Math.round((home_tackles_made * rng.int(5, 13)) / 100),
+    away_dominant_tackles: Math.round((away_tackles_made * rng.int(5, 13)) / 100),
+    home_ruck_speed_0_3s_percent: rng.int(52, 76),
+    away_ruck_speed_0_3s_percent: rng.int(52, 76),
+    home_scrum_penalties_conceded: homeCauses.scrum,
+    away_scrum_penalties_conceded: awayCauses.scrum,
+    home_breakdown_penalties_conceded: homeCauses.breakdown,
+    away_breakdown_penalties_conceded: awayCauses.breakdown,
+    home_offside_penalties_conceded: homeCauses.offside,
+    away_offside_penalties_conceded: awayCauses.offside,
   };
 }
 
@@ -408,6 +507,66 @@ export function generateRanking(
     snapshot_date: snapshotDate,
     rows,
   };
+}
+
+/**
+ * Generate a ranking snapshot SERIES anchored to a real-world seed: the
+ * FINAL snapshot reproduces the seed exactly (real World Rugby positions
+ * and points for the v1 nations), and earlier snapshots drift away from
+ * it walking backwards in time with the same ±2-position jitter as
+ * `generateRanking`. Rank values are always drawn from the seed's fixed
+ * position slots (which may carry real-table gaps for nations outside
+ * v1 scope), so the series never invents positions the real table
+ * doesn't have.
+ */
+export function generateAnchoredRankingSeries(
+  rng: Rng,
+  snapshotDates: readonly string[],
+  seed: readonly { teamId: TeamId; pos: number; pts: number }[],
+  source: RankingSnapshot['source'],
+): RankingSnapshot[] {
+  const slots = [...seed].sort((a, b) => a.pos - b.pos);
+
+  // Orderings per snapshot as indexes into `slots`. Last = seed order;
+  // walk backwards, perturbing each step.
+  const orderings: number[][] = new Array(snapshotDates.length);
+  orderings[snapshotDates.length - 1] = slots.map((_, i) => i);
+  for (let s = snapshotDates.length - 2; s >= 0; s--) {
+    const next = orderings[s + 1]!;
+    const scored = next.map((teamIdx, position) => ({
+      teamIdx,
+      score: position + (rng.next() - 0.5) * 4, // ~[-2, +2] positions
+    }));
+    scored.sort((a, b) => a.score - b.score);
+    orderings[s] = scored.map((x) => x.teamIdx);
+  }
+
+  const snapshots: RankingSnapshot[] = [];
+  let prevRankByTeam: Map<TeamId, number> | null = null;
+  for (let s = 0; s < snapshotDates.length; s++) {
+    const isLast = s === snapshotDates.length - 1;
+    const rows: RankingRow[] = orderings[s]!.map((teamIdx, position) => {
+      const team = slots[teamIdx]!;
+      const slot = slots[position]!;
+      const rank = slot.pos;
+      // Points follow the slot's real anchor with small historical
+      // jitter; the final snapshot is the real table verbatim.
+      const points = isLast
+        ? team.pts
+        : Math.round((slot.pts + (rng.next() - 0.5) * 2) * 100) / 100;
+      const previous_rank = prevRankByTeam?.get(team.teamId) ?? null;
+      const movement = previous_rank == null ? null : previous_rank - rank;
+      return { rank, team_id: team.teamId, points, previous_rank, movement };
+    });
+    prevRankByTeam = new Map(rows.map((r) => [r.team_id, r.rank]));
+    snapshots.push({
+      id: `${source}-${snapshotDates[s]}`,
+      source,
+      snapshot_date: snapshotDates[s]!,
+      rows,
+    });
+  }
+  return snapshots;
 }
 
 /**
@@ -1012,4 +1171,334 @@ export function generateMatchOfficials(rng: Rng, fixture: Fixture): MatchOfficia
       role,
     };
   });
+}
+
+// ─── Player match stats ──────────────────────────────────────────────────────
+
+/** The 7 forward positions (pack). Everything else is a back. Classified by
+ * position string rather than shirt number so bench entries (shirts 16-23)
+ * are classified correctly by the position they cover. */
+const FORWARD_POSITIONS: ReadonlySet<Position> = new Set<Position>([
+  'loose-head-prop',
+  'hooker',
+  'tight-head-prop',
+  'lock',
+  'blindside-flanker',
+  'openside-flanker',
+  'number-8',
+]);
+
+function isForward(position: Position): boolean {
+  return FORWARD_POSITIONS.has(position);
+}
+
+/** Lineout jumper weights: locks dominate throws, back-row are secondary
+ * options, the hooker occasionally takes a shortened throw. */
+function lineoutWeight(position: Position): number {
+  if (position === 'lock') return 5;
+  if (
+    position === 'blindside-flanker' ||
+    position === 'openside-flanker' ||
+    position === 'number-8'
+  ) {
+    return 2;
+  }
+  if (position === 'hooker') return 0.5;
+  return 0;
+}
+
+/** Kicking-duty weights: fly-half owns the boot, scrum-half box-kicks,
+ * fullback returns, wings the odd chip; everyone else almost never kicks. */
+function kickWeight(position: Position): number {
+  if (position === 'fly-half') return 5;
+  if (position === 'scrum-half') return 4;
+  if (position === 'fullback') return 3;
+  if (position === 'left-wing' || position === 'right-wing') return 1;
+  return 0.1;
+}
+
+/**
+ * Split an integer `total` across recipients proportionally to weight, with
+ * every allocation a non-negative integer and the allocations summing to
+ * EXACTLY `total` (weighted largest-remainder). Zero-weight recipients get 0.
+ * The rng only breaks remainder ties (via a pre-sort shuffle), so equal-weight
+ * recipients don't always favour lineup order.
+ */
+export function distributeTotal(
+  rng: Rng,
+  total: number,
+  recipients: readonly { playerId: PlayerId; weight: number }[],
+): Map<PlayerId, number> {
+  const out = new Map<PlayerId, number>();
+  for (const r of recipients) out.set(r.playerId, 0);
+
+  const positive = recipients.filter((r) => r.weight > 0);
+  if (total <= 0 || positive.length === 0) return out;
+
+  const weightSum = positive.reduce((sum, r) => sum + r.weight, 0);
+  let allocated = 0;
+  const remainders: { playerId: PlayerId; frac: number }[] = [];
+  for (const r of positive) {
+    const exact = (total * r.weight) / weightSum;
+    const base = Math.floor(exact);
+    out.set(r.playerId, base);
+    allocated += base;
+    remainders.push({ playerId: r.playerId, frac: exact - base });
+  }
+
+  // Hand out the remaining units to the largest fractional parts. Shuffle
+  // first so ties break randomly rather than by input order.
+  rng.shuffle(remainders);
+  remainders.sort((a, b) => b.frac - a.frac);
+  let remaining = total - allocated;
+  for (let i = 0; remaining > 0 && remainders.length > 0; i++) {
+    const r = remainders[i % remainders.length]!;
+    out.set(r.playerId, (out.get(r.playerId) ?? 0) + 1);
+    remaining--;
+  }
+
+  return out;
+}
+
+interface SheetSideTotals {
+  carries: number;
+  metres: number;
+  passes: number;
+  offloads: number;
+  handlingErrors: number;
+  penaltiesConceded: number;
+  kicksFromHand: number;
+  kickMetres: number;
+  defendersBeaten: number;
+  missedTackles: number;
+  lineoutsWon: number;
+  opponentLineoutsLost: number;
+}
+
+/**
+ * Generate one per-player per-match stat sheet for every player in either
+ * matchday 23 (starting XV + bench) of a COMPLETED fixture. Callers only
+ * invoke this for completed fixtures.
+ *
+ * Consistency guarantees:
+ *  - Event-derived counts (tries, kicks at goal, tackles, turnovers, line
+ *    breaks, try assists, cards) are EXACT counts of the fixture's
+ *    MatchEvent[] by player_id — never resampled.
+ *  - `minutes_played` derives exactly from substitution events (starter
+ *    never subbed = 80; subbed off at m = m; bench on at m = 80 − m;
+ *    unused bench = 0).
+ *  - Distributed stats (carries, metres, passes, …) sum per side EXACTLY
+ *    to the corresponding Result total via `distributeTotal`.
+ *  - Synthesized stats (defenders_beaten, rucks_hit) have no Result total
+ *    to anchor to — plausible smallish numbers scaled by minutes.
+ */
+export function generatePlayerMatchStats(
+  rng: Rng,
+  fixture: Fixture,
+  result: Result,
+  lineups: readonly LineUp[],
+  events: readonly MatchEvent[],
+): PlayerMatchStats[] {
+  // ── Event-derived lookups (whole fixture, keyed by player) ──────────────
+  const countByPlayer = new Map<PlayerId, Map<MatchEventType, number>>();
+  const subbedOffAt = new Map<PlayerId, number>();
+  const cameOnAt = new Map<PlayerId, number>();
+  for (const ev of events) {
+    if (ev.type === 'substitution') {
+      if (ev.player_id) subbedOffAt.set(ev.player_id, ev.minute);
+      if (ev.related_player_id) cameOnAt.set(ev.related_player_id, ev.minute);
+      continue;
+    }
+    if (!ev.player_id) continue;
+    const perType = countByPlayer.get(ev.player_id) ?? new Map<MatchEventType, number>();
+    perType.set(ev.type, (perType.get(ev.type) ?? 0) + 1);
+    countByPlayer.set(ev.player_id, perType);
+  }
+  const eventCount = (playerId: PlayerId, type: MatchEventType): number =>
+    countByPlayer.get(playerId)?.get(type) ?? 0;
+
+  const sheets: PlayerMatchStats[] = [];
+
+  for (const lineup of lineups) {
+    const isHome = lineup.team_id === fixture.home_team_id;
+
+    // Side totals from the Result — the distribution anchors.
+    const tacklesTotal = isHome ? result.home_tackles_made : result.away_tackles_made;
+    const tackleSuccess = isHome
+      ? result.home_tackle_success_percent
+      : result.away_tackle_success_percent;
+    const totals: SheetSideTotals = {
+      carries: isHome ? result.home_carries : result.away_carries,
+      metres: isHome ? result.home_meters : result.away_meters,
+      passes: isHome ? result.home_passes : result.away_passes,
+      offloads: isHome ? result.home_offloads : result.away_offloads,
+      handlingErrors: isHome ? result.home_handling_errors : result.away_handling_errors,
+      penaltiesConceded: isHome
+        ? result.home_penalties_conceded
+        : result.away_penalties_conceded,
+      kicksFromHand: isHome
+        ? result.home_kicks_in_play + result.home_kicks_to_touch
+        : result.away_kicks_in_play + result.away_kicks_to_touch,
+      kickMetres: isHome ? result.home_kick_meters : result.away_kick_meters,
+      defendersBeaten: isHome
+        ? result.home_defenders_beaten
+        : result.away_defenders_beaten,
+      // No Result field for missed tackles — derive the side total from the
+      // recorded tackle-success percentage: made / (made + missed) = pct.
+      missedTackles: Math.round((tacklesTotal * (100 - tackleSuccess)) / tackleSuccess),
+      lineoutsWon: isHome ? result.home_lineouts_won : result.away_lineouts_won,
+      // Steals are the OPPONENT's lost throws.
+      opponentLineoutsLost: isHome ? result.away_lineouts_lost : result.home_lineouts_lost,
+    };
+
+    // ── Participation ──────────────────────────────────────────────────────
+    const starterIds = new Set(lineup.starting_xv.map((e) => e.player_id));
+    const entries: LineUpEntry[] = [...lineup.starting_xv, ...lineup.bench];
+    const minutesOf = new Map<PlayerId, number>();
+    for (const entry of entries) {
+      let minutes: number;
+      if (starterIds.has(entry.player_id)) {
+        const off = subbedOffAt.get(entry.player_id);
+        minutes = off === undefined ? 80 : off;
+      } else {
+        const on = cameOnAt.get(entry.player_id);
+        minutes = on === undefined ? 0 : 80 - on;
+      }
+      minutesOf.set(entry.player_id, minutes);
+    }
+
+    // ── Distributed stats — weighted by role × minutes ─────────────────────
+    // Players with 0 minutes are excluded (they receive 0 of everything).
+    const recipients = (roleWeight: (e: LineUpEntry) => number) =>
+      entries
+        .filter((e) => (minutesOf.get(e.player_id) ?? 0) > 0)
+        .map((e) => ({
+          playerId: e.player_id,
+          weight: roleWeight(e) * ((minutesOf.get(e.player_id) ?? 0) / 80),
+        }));
+
+    const carriesBy = distributeTotal(
+      rng,
+      totals.carries,
+      recipients((e) =>
+        e.position === 'scrum-half' ? 0.6 : isForward(e.position) ? 1.2 : 0.9,
+      ),
+    );
+    const metresBy = distributeTotal(
+      rng,
+      totals.metres,
+      recipients((e) => (isForward(e.position) ? 0.8 : 1.4)),
+    );
+    const passesBy = distributeTotal(
+      rng,
+      totals.passes,
+      recipients((e) =>
+        e.position === 'scrum-half' ? 8 : e.position === 'fly-half' ? 3 : 1,
+      ),
+    );
+    const offloadsBy = distributeTotal(
+      rng,
+      totals.offloads,
+      recipients((e) => (isForward(e.position) ? 1.2 : 1.0)),
+    );
+    const handlingErrorsBy = distributeTotal(
+      rng,
+      totals.handlingErrors,
+      recipients(() => 1),
+    );
+    const penaltiesBy = distributeTotal(
+      rng,
+      totals.penaltiesConceded,
+      recipients((e) => (isForward(e.position) ? 1.5 : 0.8)),
+    );
+    const kicksBy = distributeTotal(
+      rng,
+      totals.kicksFromHand,
+      recipients((e) => kickWeight(e.position)),
+    );
+    const kickMetresBy = distributeTotal(
+      rng,
+      totals.kickMetres,
+      recipients((e) => kickWeight(e.position)),
+    );
+    const missedTacklesBy = distributeTotal(
+      rng,
+      totals.missedTackles,
+      recipients(() => 1),
+    );
+    // Defenders beaten — reconciles exactly to the Result team total now
+    // that the field exists there (was independently synthesized before).
+    // Back-heavy: broken tackles cluster on the outside backs.
+    const defendersBeatenBy = distributeTotal(
+      rng,
+      totals.defendersBeaten,
+      recipients((e) => (isForward(e.position) ? 0.7 : 1.5)),
+    );
+    const lineoutTakesBy = distributeTotal(
+      rng,
+      totals.lineoutsWon,
+      recipients((e) => lineoutWeight(e.position)),
+    );
+    const lineoutStealsBy = distributeTotal(
+      rng,
+      totals.opponentLineoutsLost,
+      recipients((e) => lineoutWeight(e.position)),
+    );
+
+    // ── Assemble sheets ────────────────────────────────────────────────────
+    for (const entry of entries) {
+      const pid = entry.player_id;
+      const minutes = minutesOf.get(pid) ?? 0;
+
+      const tries = eventCount(pid, 'try');
+      const conversions = eventCount(pid, 'conversion');
+      const penaltyGoals = eventCount(pid, 'penalty-goal');
+      const dropGoals = eventCount(pid, 'drop-goal');
+      const cleanBreaks = eventCount(pid, 'line-break');
+      const carries = carriesBy.get(pid) ?? 0;
+
+      // Synthesized: ruck involvements — forward-heavy, scaled by minutes.
+      const rucksHit =
+        minutes === 0
+          ? 0
+          : Math.round(
+              (isForward(entry.position) ? rng.int(15, 36) : rng.int(4, 13)) *
+                (minutes / 80),
+            );
+
+      sheets.push({
+        fixture_id: fixture.id,
+        team_id: lineup.team_id,
+        player_id: pid,
+        started: starterIds.has(pid),
+        minutes_played: minutes,
+        tries,
+        try_assists: eventCount(pid, 'try-assist'),
+        points: tries * 5 + conversions * 2 + (penaltyGoals + dropGoals) * 3,
+        carries,
+        metres_carried: metresBy.get(pid) ?? 0,
+        clean_breaks: cleanBreaks,
+        defenders_beaten: defendersBeatenBy.get(pid) ?? 0,
+        offloads: offloadsBy.get(pid) ?? 0,
+        passes: passesBy.get(pid) ?? 0,
+        handling_errors: handlingErrorsBy.get(pid) ?? 0,
+        conversions,
+        penalty_goals: penaltyGoals,
+        drop_goals: dropGoals,
+        kicks_from_hand: kicksBy.get(pid) ?? 0,
+        kick_metres: kickMetresBy.get(pid) ?? 0,
+        tackles_made: eventCount(pid, 'tackle'),
+        missed_tackles: missedTacklesBy.get(pid) ?? 0,
+        turnovers_won: eventCount(pid, 'turnover-won'),
+        rucks_hit: rucksHit,
+        lineout_takes: lineoutTakesBy.get(pid) ?? 0,
+        lineout_steals: lineoutStealsBy.get(pid) ?? 0,
+        penalties_conceded: penaltiesBy.get(pid) ?? 0,
+        yellow_cards: eventCount(pid, 'yellow-card'),
+        red_cards: eventCount(pid, 'red-card'),
+      });
+    }
+  }
+
+  return sheets;
 }
