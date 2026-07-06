@@ -1,24 +1,24 @@
 import { SegmentedTabs } from '@/components/segmented-tabs';
 
-export type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'insights' | 'analysis';
+export type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'analysis';
 
 export const SUB_TABS: readonly { id: SubTab; label: string }[] = [
-  // Temporal flow, synthesis at the end. Pre-Match leads with kickoff-
-  // frozen context (form, ranking, KPI baselines + the written
-  // pre-match analysis) — the backdrop the match plays out against.
-  // Line-Up follows with the cast on the day. Timeline is the running
-  // event log ("what happens / happened"). Stats is the numeric
-  // record; Insights the visual analytical read. Analysis closes — the
-  // narrative synthesis (deliberately NOT "Post-Match": it also serves
-  // live fixtures, with the card's LIVE / FULL-TIME chips carrying the
-  // temporal state). Reader flows left-to-right through:
-  // expectation → cast → events → data → visual → narrative.
+  // Narrative arc first, reference material after. Pre-Match leads
+  // with kickoff-frozen context — the backdrop the match plays out
+  // against. Line-Up follows with the cast on the day; Timeline is the
+  // running event log. Match Analysis sits straight after the events —
+  // the analyst read of THIS match, live-updating and persisting at
+  // full-time ("Match Analysis" pairs with "Pre-Match"; deliberately
+  // NOT "Post-Match" since it also serves live fixtures, the card's
+  // LIVE / FULL-TIME chips carrying the temporal state). Stats trails
+  // as the reference table. (The Insights pill was retired 2026-07-06:
+  // its charts live inside Match Analysis as evidence pages.) Reader
+  // flows: expectation → cast → events → narrative → data.
   { id: 'preview', label: 'Pre-Match' },
   { id: 'lineup', label: 'Line-Up' },
   { id: 'overview', label: 'Timeline' },
+  { id: 'analysis', label: 'Match Analysis' },
   { id: 'stats', label: 'Stats' },
-  { id: 'insights', label: 'Insights' },
-  { id: 'analysis', label: 'Analysis' },
 ];
 
 /** Fixture-drill sub-tab strip — thin wrapper over the shared

@@ -132,8 +132,11 @@ function MomentumMirror({
   maxAbs: number;
   effectiveMinute: number;
 }) {
-  const width = 320;
-  const height = 200;
+  // Measured canvas — geometry in real pixels (no viewBox stretching),
+  // filling whatever height the carousel grants the card.
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const width = canvas.w;
+  const height = canvas.h;
   // 8pt horizontal padding matches the other insights charts (Preview
   // sparklines, Scoring Progression) so all match-scoped charts share
   // one plot-area rhythm.
@@ -181,7 +184,16 @@ function MomentumMirror({
   const intermediateMilestones: readonly number[] = [20, 60];
 
   return (
-    <Svg width="100%" height={height} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
+    <View
+      style={styles.chartFill}
+      onLayout={(e) =>
+        setCanvas({
+          w: Math.round(e.nativeEvent.layout.width),
+          h: Math.round(e.nativeEvent.layout.height),
+        })
+      }>
+      {width > 0 && height > 0 ? (
+    <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         {/* Home fill (upper half) — strong colour at the peak, fading
             to near-transparent at the zero baseline so the two halves
@@ -330,6 +342,8 @@ function MomentumMirror({
         </SvgText>
       ))}
     </Svg>
+      ) : null}
+    </View>
   );
 }
 
@@ -426,6 +440,13 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.semibold,
     color: Colors.light.text,
     fontVariant: ['tabular-nums'],
+  },
+  // Fills the card height the carousel grants (tallest-sibling
+  // normalisation); minHeight preserves the original canvas in
+  // intrinsic-height contexts.
+  chartFill: {
+    flex: 1,
+    minHeight: 200,
   },
   empty: {
     fontSize: TextSize.sm,

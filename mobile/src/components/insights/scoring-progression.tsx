@@ -33,8 +33,6 @@ const HALF_TIME_MIN = 40;
 
 // SVG viewBox — matches Form / Trajectory / Momentum chart dims so the
 // three cards stack visually consistently.
-const CHART_W = 320;
-const CHART_H = 200;
 const PAD_TOP = 16;
 const PAD_BOTTOM = 26;
 // Symmetric 8pt horizontal padding — matches Preview's Form / Ranking
@@ -43,8 +41,6 @@ const PAD_BOTTOM = 26;
 // the header legend (`ENG 36 · FRA 28`) carries the scale context.
 const PAD_LEFT = 8;
 const PAD_RIGHT = 8;
-const PLOT_W = CHART_W - PAD_LEFT - PAD_RIGHT;
-const PLOT_H = CHART_H - PAD_TOP - PAD_BOTTOM;
 
 /**
  * Scoring Progression — cumulative-points "worm" for the match.
@@ -82,6 +78,14 @@ export function ScoringProgression({
     () => buildSeries(events.data ?? [], homeTeamId, awayTeamId),
     [events.data, homeTeamId, awayTeamId],
   );
+
+  // Measured canvas — geometry in real pixels (no viewBox stretching),
+  // filling whatever height the carousel grants the card.
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const CHART_W = canvas.w;
+  const CHART_H = canvas.h;
+  const PLOT_W = Math.max(1, CHART_W - PAD_LEFT - PAD_RIGHT);
+  const PLOT_H = Math.max(1, CHART_H - PAD_TOP - PAD_BOTTOM);
 
   const homeFinal = series.home[series.home.length - 1]?.pts ?? 0;
   const awayFinal = series.away[series.away.length - 1]?.pts ?? 0;
@@ -139,7 +143,16 @@ export function ScoringProgression({
       ) : !hasScoring ? (
         <Text style={styles.empty}>No scoring events yet.</Text>
       ) : (
-        <Svg width="100%" height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`} preserveAspectRatio="none">
+        <View
+          style={styles.chartFill}
+          onLayout={(e) =>
+            setCanvas({
+              w: Math.round(e.nativeEvent.layout.width),
+              h: Math.round(e.nativeEvent.layout.height),
+            })
+          }>
+          {CHART_W > 0 && CHART_H > 0 ? (
+        <Svg width={CHART_W} height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
           <Defs>
             <ClipPath id="progression-plot-clip">
               <Rect x={0} y={0} width={CHART_W} height={PAD_TOP + PLOT_H} />
@@ -221,6 +234,8 @@ export function ScoringProgression({
             <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
           ) : null}
         </Svg>
+          ) : null}
+        </View>
       )}
 
       <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
@@ -429,6 +444,13 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.semibold,
     color: Colors.light.text,
     fontVariant: ['tabular-nums'],
+  },
+  // Fills the card height the carousel grants (tallest-sibling
+  // normalisation); minHeight preserves the original canvas in
+  // intrinsic-height contexts.
+  chartFill: {
+    flex: 1,
+    minHeight: 200,
   },
   empty: {
     fontSize: TextSize.sm,

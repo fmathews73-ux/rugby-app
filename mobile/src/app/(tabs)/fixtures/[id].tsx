@@ -14,7 +14,6 @@ import {
   useTeams,
 } from '@/api/hooks';
 import { AnalysisPane } from '@/components/fixture-drill/analysis-pane';
-import { InsightsPane } from '@/components/fixture-drill/insights-pane';
 import { LineUpPane } from '@/components/fixture-drill/lineup-pane';
 import { MatchupHeader } from '@/components/fixture-drill/matchup-header';
 import { OverviewPane } from '@/components/fixture-drill/overview-pane';
@@ -127,14 +126,6 @@ export default function FixtureDetailScreen() {
                   fixture={fixture.data}
                   result={result.data ?? null}
                   resultLoading={result.isLoading}
-                />
-              )}
-              {tab === 'insights' && (
-                <InsightsPane
-                  fixtureId={fixture.data.id}
-                  homeTeamId={fixture.data.home_team_id}
-                  awayTeamId={fixture.data.away_team_id}
-                  fixtureStatus={fixture.data.status}
                 />
               )}
               {tab === 'analysis' && (

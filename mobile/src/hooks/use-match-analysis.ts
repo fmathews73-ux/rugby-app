@@ -19,14 +19,18 @@ const BASELINE_VARIANCE_THRESHOLD = 0.15;
  * On top of that a summary and a variance story name the dimensions
  * that decided (or are deciding) the match.
  */
+/** Signed, threshold-normalised in-match axis gap for chart surfaces
+ *  (the Match Gaps card). norm > 0 = home ahead; |norm| >= 1 crosses
+ *  the "decisive" threshold buildVariance names axes at. */
+export interface MatchGapView {
+  key: AxisKey;
+  label: string;
+  norm: number;
+}
+
 export interface MatchAnalysis {
   /** Scoreline + high-level narrative shape. 1 paragraph. */
   summary: string;
-  /** Pre-match context — coming-in form + season baseline story for
-   *  both teams, framed as a broadcast opener ("Coming into this
-   *  fixture..."). Sets the backdrop the current match plays out
-   *  against. 1 paragraph. */
-  context: string;
   /** Broadcast-style prose commentary. Weaves the deeper stats not
    *  covered by the 8 profile axes (attacking shape detail, kicking
    *  strategy, breakdown work, half-time turning-point, cards) into a
@@ -39,10 +43,13 @@ export interface MatchAnalysis {
    *  radar. Each axis is a mini-section rendered under its own
    *  small-caps label — full prose with metrics woven in, no table. */
   axes: AxisAnalysis[];
-  /** Closing forward-looking statement — mirrors the `context` opener.
-   *  Names what each side will want to sharpen going forward, given
-   *  the read of today's performance. 1 paragraph. */
-  outlook: string;
+  /** All 8 in-match gaps, biggest first — chart feed for Match Gaps so
+   *  the visual and the Variance prose come off one engine. */
+  gaps: MatchGapView[];
+  /** Closing verdict — the match summarised through the control-vs-
+   *  conversion lens (matches the pane's closing chart). NOT forward-
+   *  looking: it seals the story the sections above told. */
+  verdict: string;
   /** For live matches: the latest event minute analysis was rebuilt on.
    *  For completed: 80. */
   generatedAtMinute: number;
@@ -220,11 +227,17 @@ function buildAnalysis(
 
   return {
     summary: buildSummary(result, home, away, isLive, generatedAtMinute),
-    context: buildContext(home, away, ctx),
     commentary: flow ? `${commentary}\n\n${flow}` : commentary,
     variance: buildVariance(result, home, away, isLive, ctx),
+    gaps: computeAxisGaps(result)
+      .map((g) => ({
+        key: g.key,
+        label: g.label,
+        norm: ((g.advantage === 'home' ? 1 : -1) * g.signedGap) / gapThreshold(g.key),
+      }))
+      .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm)),
     axes,
-    outlook: buildOutlook(result, home, away, isLive, ctx),
+    verdict: buildVerdict(result, home, away, isLive),
     generatedAtMinute,
     status: isLive ? 'live' : 'completed',
   };
@@ -334,45 +347,7 @@ function liveMinuteFromKickoff(fixture: Fixture): number {
 
 // ─── Pre-match context ──────────────────────────────────────────────────────
 
-/**
- * Broadcast-style opener that establishes how each side arrived at
- * kick-off. Reads form (last-N W/L/D) + season aggregate anchors
- * (points scored, points conceded, discipline) — the same three
- * cards the Preview pane surfaces. Renders as a single dense
- * paragraph so it functions as the "cold open" to the analysis.
- */
-function buildContext(home: Team, away: Team, ctx: PreMatchContext): string {
-  const ranking = rankingSentence(home, away, ctx.homeRank, ctx.awayRank);
-  const homeSummary = teamContextSentence(home, ctx.homeAgg, ctx.homeForm, 0);
-  const awaySummary = teamContextSentence(away, ctx.awayAgg, ctx.awayForm, 1);
-  const contrast = contrastSentence(home, away, ctx.homeAgg, ctx.awayAgg);
-  return [ranking, homeSummary, awaySummary, contrast].filter(Boolean).join(' ');
-}
 
-/** World-ranking framing for the opener — the Preview trajectory card's
- *  headline reduced to one sentence. Skipped when either side is
- *  unranked (never invent a position). */
-function rankingSentence(
-  home: Team,
-  away: Team,
-  homeRank: number | null,
-  awayRank: number | null,
-): string {
-  if (homeRank == null || awayRank == null) return '';
-  if (homeRank === awayRank) return '';
-  const gap = Math.abs(homeRank - awayRank);
-  const higher = homeRank < awayRank ? home : away;
-  const lower = homeRank < awayRank ? away : home;
-  const hr = Math.min(homeRank, awayRank);
-  const lr = Math.max(homeRank, awayRank);
-  if (gap >= 8) {
-    return `On the world rankings this is a mismatch on paper: ${higher.short_name} ${ordinalRank(hr)} against ${lower.short_name} down at ${ordinalRank(lr)}.`;
-  }
-  if (gap >= 3) {
-    return `The rankings give ${higher.short_name} the edge, ${ordinalRank(hr)} in the world to ${lower.short_name}'s ${ordinalRank(lr)}.`;
-  }
-  return `The world rankings barely separate them, ${higher.short_name} ${ordinalRank(hr)} to ${lower.short_name}'s ${ordinalRank(lr)}.`;
-}
 
 function ordinalRank(n: number): string {
   const rem100 = n % 100;
@@ -385,73 +360,7 @@ function ordinalRank(n: number): string {
   }
 }
 
-/** One coming-in sentence per side. The `variant` flag only varies the
- *  phrasing skeleton so the home and away sentences never read as the
- *  same template run twice. */
-function teamContextSentence(
-  team: Team,
-  agg: TeamAggregate | undefined,
-  form: readonly FormOutcome[],
-  variant: 0 | 1 = 0,
-): string {
-  const formBits: string[] = [];
-  const wins = form.filter((f) => f === 'W').length;
-  const losses = form.filter((f) => f === 'L').length;
-  const draws = form.filter((f) => f === 'D').length;
-  if (form.length > 0) {
-    const record = `${wins}-${losses}${draws ? '-' + draws : ''}`;
-    if (wins >= 4) formBits.push(`on a run of ${wins} wins from their last ${form.length}`);
-    else if (losses >= 4) formBits.push(`carrying the weight of ${losses} defeats in their last ${form.length}`);
-    else if (wins > losses) formBits.push(`in decent nick at ${record} over their last ${form.length}`);
-    else if (losses > wins) formBits.push(`still hunting form at ${record} over their last ${form.length}`);
-    else formBits.push(`having split their recent results ${record}`);
-  }
-  const aggBits: string[] = [];
-  if (agg && agg.gamesPlayed > 0) {
-    const pts = agg.perGame.pointsScored.toFixed(0);
-    const conc = agg.perGame.pointsConceded.toFixed(0);
-    aggBits.push(
-      variant === 0
-        ? `scoring ${pts} a game and conceding ${conc}`
-        : `putting up ${pts} a game while shipping ${conc}`,
-    );
-  }
-  if (formBits.length === 0 && aggBits.length === 0) {
-    return `${team.short_name} arrive with no season record to measure this against.`;
-  }
-  const trailing = [...formBits, ...aggBits].join(', ');
-  return variant === 0
-    ? `${team.short_name} arrive ${trailing}.`
-    : `${team.short_name}, for their part, come in ${trailing}.`;
-}
 
-function contrastSentence(
-  home: Team,
-  away: Team,
-  homeAgg: TeamAggregate | undefined,
-  awayAgg: TeamAggregate | undefined,
-): string {
-  if (!homeAgg || !awayAgg || homeAgg.gamesPlayed === 0 || awayAgg.gamesPlayed === 0) {
-    return '';
-  }
-  const homePts = homeAgg.perGame.pointsScored;
-  const awayPts = awayAgg.perGame.pointsScored;
-  const homeDefPts = homeAgg.perGame.pointsConceded;
-  const awayDefPts = awayAgg.perGame.pointsConceded;
-  const gap = homePts - awayPts;
-  const defGap = homeDefPts - awayDefPts;
-  if (Math.abs(gap) >= 8) {
-    const better = gap > 0 ? home : away;
-    const other = gap > 0 ? away : home;
-    return `On season scoring the gap is real: ${better.short_name} put up ${Math.abs(gap).toFixed(0)} more points a game, and the onus is on ${other.short_name} to make this the kind of match that number cannot win.`;
-  }
-  if (Math.abs(defGap) >= 8) {
-    const better = defGap < 0 ? home : away;
-    const other = defGap < 0 ? away : home;
-    return `The defensive baselines are where they part: ${better.short_name} have shipped ${Math.abs(defGap).toFixed(0)} fewer points a game this season, and that line is the first problem ${other.short_name} have to solve.`;
-  }
-  return `The season baselines separate nothing, so whatever decides this will be built inside the eighty minutes rather than carried in on form.`;
-}
 
 // ─── The 8 axes ─────────────────────────────────────────────────────────────
 
@@ -1125,32 +1034,48 @@ function turnoversNarrative(result: Result, home: Team, away: Team, _ctx: PreMat
   return `Little to choose at the breakdown, with neither side winning the contact area decisively; this has flowed as a phase-count contest rather than a broken-field one.`;
 }
 
-// ─── Closing outlook ────────────────────────────────────────────────────────
+// ─── Closing verdict ────────────────────────────────────────────────────────
 
 /**
- * Forward-looking closing statement — mirrors the `context` opener with
- * an actionable read on what each side will want to sharpen. Reads the
- * biggest axis gaps AND any material variances vs season baseline, then
- * frames them constructively (weak points as growth areas).
+ * Closing verdict — the match read back through the control-vs-
+ * conversion lens (the pane's closing chart): who held the ball and
+ * the ground, who turned control into points, and which of the two
+ * settled it. A summary that seals the story, never a forward look
+ * (that job belongs to the team cards' Outlook sections).
  */
-function buildOutlook(
-  result: Result,
-  home: Team,
-  away: Team,
-  isLive: boolean,
-  ctx: PreMatchContext,
-): string {
-  const homeArea = weakestAreaFor(result, home, away, 'home', ctx);
-  const awayArea = weakestAreaFor(result, home, away, 'away', ctx);
-  const framing = isLive ? 'Going forward from here' : 'Going forward';
-  const parts: string[] = [];
-  if (homeArea) parts.push(`${home.short_name} will want to sharpen ${homeArea}`);
-  if (awayArea) parts.push(`${away.short_name} will need to work on ${awayArea}`);
-  if (parts.length === 0) {
-    return `${framing}, the read is broadly balanced: no single dimension stands out as the pressing weakness, and the next steps live in marginal gains.`;
+function buildVerdict(result: Result, home: Team, away: Team, isLive: boolean): string {
+  const homeCtrl = (result.home_possession_percent + result.home_territory_percent) / 2;
+  const awayCtrl = 100 - homeCtrl;
+  const controller = homeCtrl >= awayCtrl ? home : away;
+  const ctrlShare = Math.round(Math.max(homeCtrl, awayCtrl));
+  const controllerScore = controller === home ? result.home_score : result.away_score;
+  const otherScore = controller === home ? result.away_score : result.home_score;
+  const other = controller === home ? away : home;
+  const tight = ctrlShare <= 53;
+
+  if (tight) {
+    const leader = result.home_score >= result.away_score ? home : away;
+    const lead = Math.abs(result.home_score - result.away_score);
+    if (lead === 0) {
+      return isLive
+        ? `The story so far in one line: control split down the middle and nothing between them on the scoreboard — whoever converts the next visit tilts it.`
+        : `The story in one line: control split down the middle, and the scoreboard never escaped it — a match settled in the margins rather than won by either shape.`;
+    }
+    return isLive
+      ? `The story so far in one line: neither side owns the ball or the ground, but ${leader.short_name} are ${lead} up on conversion alone. Control is even; the kicking of chances isn't.`
+      : `The story in one line: control was even all day, and ${leader.short_name} won it on conversion — ${lead} the margin between two sides who shared the ball and the ground.`;
   }
-  return `${framing}, ${parts.join('; ')}. Those are the lines the review will open with.`;
+
+  if (controllerScore >= otherScore) {
+    return isLive
+      ? `The story so far in one line: ${controller.short_name} hold ${ctrlShare}% of the control read and the scoreboard with it — control is being converted, and ${other.short_name} are living off scraps.`
+      : `The story in one line: ${controller.short_name} took ${ctrlShare}% of the control read and made it pay on the scoreboard — the match went the way the ball did.`;
+  }
+  return isLive
+    ? `The story so far in one line: ${controller.short_name} own the ball at ${ctrlShare}% of the control read, but ${other.short_name} own the scoreboard — conversion is beating control, the oldest upset shape in rugby.`
+    : `The story in one line: ${controller.short_name} controlled it at ${ctrlShare}% and lost it anyway — ${other.short_name} converted what little they had, and conversion beat control.`;
 }
+
 
 /**
  * Pick the axis or aspect most in need of improvement for the given

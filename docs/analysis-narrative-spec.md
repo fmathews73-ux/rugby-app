@@ -31,7 +31,6 @@ The Analysis card renders 12 labeled prose sections, in this order:
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | 1 sentence: scoreline + high-level shape. Unlabeled. |
-| 1 | Coming in | Pre-match backdrop: world-ranking framing (both sides' positions as of kickoff — gap ≥8 places reads as a mismatch, ≥3 an edge, else "little between them"; omitted if either side is unranked) + form (last-5 W/L/D) + season averages (points scored, points conceded) for both sides + contrast sentence. |
 | 2 | Commentary | 3-paragraph broadcast prose (shape / attack pattern / platform work) + a closing MATCH-FLOW paragraph from the scoring timeline: lead changes, when the (current) leader hit the front, and the largest unanswered run (named only at 10+ points). Flow paragraph is omitted when there are no scoring events. Paragraphs `\n\n` separated. |
 | 3 | Variance | Names the 2–3 axes with biggest gaps as the deciding dimensions. |
 | 4 | Attack | Axis narrative. |
@@ -42,7 +41,12 @@ The Analysis card renders 12 labeled prose sections, in this order:
 | 9 | Territory | Axis narrative. |
 | 10 | Possession | Axis narrative. |
 | 11 | Turnovers | Axis narrative. |
-| 12 | Outlook | Closing outlook: what each side will want to sharpen. Mirrors Coming in as an opener/closer pair. |
+| 12 | Verdict | Closing verdict — the match read back through the control-vs-conversion lens (who held ball + ground, who converted, which settled it). Seals the story; NEVER forward-looking (renamed from Outlook 2026-07-06 — its evidence chart is Control vs Conversion, a this-match verdict, so the prose matches). Team/player cards keep their forward-looking Outlook. |
+
+"Coming in" was RETIRED from the match analysis (2026-07-06): the
+kickoff backdrop belongs to the Pre-Match surface (§11 Shape now opens
+with the per-game baselines), keeping the split clean — Pre-Match =
+known at kickoff, match analysis = strictly the match itself.
 
 Every section header renders the standard info icon (14pt,
 `information-circle-outline`) after its label, opening that section's
@@ -151,11 +155,13 @@ form (`"comfortably above their 22-per-game norm"`), not chip form.
 
 ### 5.3 Opener / closer symmetry
 
-- **Coming in** sets the pre-match backdrop (form, coming-in season
-  averages). It names each side once, then contrasts them.
-- **Outlook** names one growth area for each side, based on the
-  biggest weakness surfaced today, framed constructively (`"will want
-  to sharpen X"`). If a side has no material weakness, gracefully
+- **The summary** cold-opens the card (Coming in retired 2026-07-06 —
+  the kickoff backdrop lives on the Pre-Match surface, §11 Shape).
+- **Verdict** (match card) seals the story through the control-vs-
+  conversion lens — even control → margins; control converted → the
+  match went the way of the ball; control beaten → conversion won it.
+  (Team/player Outlook sections remain forward-looking.) If the read is
+  balanced, gracefully
   fall back to `"a broadly balanced read, marginal gains only"`.
 
 Weakness priority (highest first):
@@ -459,7 +465,7 @@ and must stay on the right side of it. Conditions, not outcomes.
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | The billing: ranking framing (mismatch ≥8 places / edge ≥3 / meeting of equals) + both sides' last-5 win counts. |
-| 1 | Shape | The 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds, values woven in. Balanced profiles are called balanced ("decided by execution"), never forced. |
+| 1 | Shape | OPENS with the coming-in backdrop (both sides' prev-10 points for/against per game — moved here from the match analysis 2026-07-06), then the 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds. Balanced profiles are called balanced ("decided by execution"), never forced. |
 | 2–9 | Attack / Defence / Set-piece / Discipline / Kicking / Territory / Possession / Turnovers | same glyphs as §1's axes | Per-axis coming-in comparison — the SAME eight axes, order, and icons as the match analysis so the pre- and post-match reads line up section for section. Each axis compares one headline metric on fixed thresholds into three tiers: clear edge / shades it / even (see 11.2), with secondary metrics woven in for texture. "Edge" is a data statement about the coming-in numbers, never a result call. |
 | 10 | Danger periods | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
 | 11 | Keys | One condition per side, ALWAYS derived from the signed axis gaps — the side ahead on the fixture's biggest gap gets the EXPLOIT framing (how to press it), the side behind gets the NEUTRALISE framing (the survival job), each with the numbers woven in. When the second-ranked gap is ≥70% of the top gap and favours the other side, that side keys off its own weapon instead — two battlegrounds beat two views of one. Dead-heat profiles (top gap < half threshold) still key off the largest gap, framed as the fine margin. NO generic filler, ever — if a key could be written without this fixture's data, it is wrong. |

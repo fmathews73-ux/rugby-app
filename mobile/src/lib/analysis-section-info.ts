@@ -71,13 +71,6 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
 };
 
 export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
-  'Coming in': {
-    title: 'Coming in',
-    paragraphs: [
-      'The backdrop at kickoff: each side’s recent form and season baseline as they stood walking into this match — frozen, so the read never changes after the fact.',
-      'Context is what separates a shock from a script. Knowing what both sides brought in tells you whether the match confirmed the pattern or broke it.',
-    ],
-  },
   Commentary: {
     title: 'Commentary',
     paragraphs: [
@@ -92,11 +85,11 @@ export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
       'Most matches are level on most numbers. The variance read filters the noise down to where the match was actually won and lost.',
     ],
   },
-  Outlook: {
-    title: 'Outlook',
+  Verdict: {
+    title: 'Verdict',
     paragraphs: [
-      'What each side takes forward from this performance — the area most in need of sharpening before the next outing.',
-      'One match is a data point, not a verdict; the outlook frames what this result suggests about the work-ons.',
+      'The match sealed in one read: who held the ball and the ground, who turned that control into points, and which of the two settled it.',
+      'Control and conversion are the two ways to win a rugby match — most are won by converting control, and the memorable upsets by conversion beating it. The Control vs Conversion chart above is this section’s picture.',
     ],
   },
 };

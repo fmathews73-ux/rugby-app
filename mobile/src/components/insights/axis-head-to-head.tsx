@@ -57,10 +57,16 @@ const AXIS_ROWS: Record<
   possession: [
     { field: 'possessionPercent', label: 'Possession', percent: true },
     { field: 'metersMade', label: 'Metres made' },
+    // Converted possession — possession only matters against the
+    // scoreboard, and PPE is that link (repeats on Kicking & Territory
+    // by design: each card tells a complete story).
+    { field: 'pointsPerTwentyTwoEntry', label: 'Points per 22 entry' },
   ],
   turnovers: [
     { field: 'turnoversWon', label: 'Turnovers won' },
     { field: 'turnoversConceded', label: 'Turnovers conceded', inverted: true },
+    // The giveaway component of the ledger — how most possession dies.
+    { field: 'handlingErrors', label: 'Handling errors', inverted: true },
   ],
 };
 

@@ -6,6 +6,7 @@ import Svg, { Line, Rect } from 'react-native-svg';
 import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
+import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Rugby playing field is 100m × 70m; using a 10:7 viewBox so measurements
@@ -52,6 +53,8 @@ export function PitchHeatmap({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   const events = useFixtureEvents(fixtureId, fixtureStatus);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
@@ -104,19 +107,15 @@ export function PitchHeatmap({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {/* Colour-swatch legend matches the Momentum / Progression /
-            Profile cards. Both teams shown simultaneously so there's no
-            toggle to drive. */}
-        <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: HOME_HEAT }]} />
-            <Text style={styles.legendText}>{homeShort}</Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: AWAY_HEAT }]} />
-            <Text style={styles.legendText}>{awayShort}</Text>
-          </View>
-        </View>
+        {/* One side at a time — overlapping dual heat muddied both
+            reads; the toggle isolates each side's focus areas
+            (toggle on/off to compare). */}
+        <TeamToggle
+          primaryLabel={homeShort}
+          compareLabel={awayShort}
+          activeSide={activeSide}
+          onSelect={setActiveSide}
+        />
       </View>
 
       {isLoading ? (
@@ -124,20 +123,33 @@ export function PitchHeatmap({
       ) : !hasData ? (
         <Text style={styles.empty}>No positional data yet.</Text>
       ) : (
+        <View
+          style={styles.chartFill}
+          onLayout={(e) =>
+            setCanvas({
+              w: Math.round(e.nativeEvent.layout.width),
+              h: Math.round(e.nativeEvent.layout.height),
+            })
+          }>
+          {canvas.w > 0 && canvas.h > 0 ? (
         <Svg
-          width="100%"
-          height={PITCH_H * 0.55}
+          width={canvas.w}
+          height={canvas.h}
           viewBox={`0 0 ${PITCH_W} ${PITCH_H}`}
+          // Uniform (aspect-preserving) scale — the heatmap is a MAP,
+          // so it letterboxes into the granted space rather than
+          // stretching; "meet" is legal under the no-stretch rule,
+          // which bans only non-uniform scaling.
           preserveAspectRatio="xMidYMid meet">
           {/* Neutral pitch canvas — matches the flat page-background
               tone used across the Insights tab rather than the
               broadcast-green wash. Heat colours pop cleanly against it. */}
           <Rect x={0} y={0} width={PITCH_W} height={PITCH_H} fill="#FAFAFA" />
 
-          {/* Home team heat — rendered first so away heat blends over
-              the top of it. Overlap regions where both teams contested
-              the same zone naturally mix into a deeper composite colour. */}
-          {homeGrid.flatMap((row, r) =>
+          {/* Only the toggled side's heat renders — overlap blending
+              was tried and retired: two translucent fields muddied
+              both. Flipping the toggle is the comparison. */}
+          {activeSide === 'primary' && homeGrid.flatMap((row, r) =>
             row.map((v, c) => {
               if (v <= 0.01) return null;
               const alpha = Math.min(0.7, (v / (maxDensity || 1)) * 0.7);
@@ -155,8 +167,7 @@ export function PitchHeatmap({
             }),
           )}
 
-          {/* Away team heat overlaid on top of home. */}
-          {awayGrid.flatMap((row, r) =>
+          {activeSide === 'compare' && awayGrid.flatMap((row, r) =>
             row.map((v, c) => {
               if (v <= 0.01) return null;
               const alpha = Math.min(0.7, (v / (maxDensity || 1)) * 0.7);
@@ -298,6 +309,8 @@ export function PitchHeatmap({
             strokeDasharray="2 4"
           />
         </Svg>
+          ) : null}
+        </View>
       )}
 
       <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
@@ -413,26 +426,11 @@ const styles = StyleSheet.create({
   },
   // Legend styling matches Momentum, Progression and Profile — one
   // grammar across every Insights card.
-  legend: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  legendSwatch: {
-    width: 10,
-    height: 3,
-    borderRadius: 1,
-  },
-  legendText: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+  // Fills the card height the carousel grants; the pitch letterboxes
+  // inside it at its own aspect ratio.
+  chartFill: {
+    flex: 1,
+    minHeight: 190,
   },
   empty: {
     fontSize: TextSize.sm,

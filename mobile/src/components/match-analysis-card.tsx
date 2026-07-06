@@ -7,8 +7,8 @@ import type { Fixture } from '@rugby-app/shared';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMatchAnalysis } from '@/hooks/use-match-analysis';
+import { MATCH_AXIS_PAIRS, matchPairInfo } from '@/components/insights/match-h2h';
 import {
-  AXIS_INFO,
   MATCH_SECTION_INFO,
   type SectionInfo,
 } from '@/lib/analysis-section-info';
@@ -51,17 +51,33 @@ import {
  * current template-based implementation of that spec; see the hook's
  * top-of-file TODO for the cutover plan.
  */
-export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
+export function MatchAnalysisCard({
+  fixture,
+  openSection: controlledSection,
+  onOpenSection,
+}: {
+  fixture: Fixture;
+  /** When provided, the accordion is CONTROLLED — the parent owns the
+   *  open section (two-way carousel sync). Omit for standalone use. */
+  openSection?: string;
+  /** Fires with the newly-open section key. */
+  onOpenSection?: (section: string) => void;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
   // Accordion: exactly one section open at all times. The title row's
   // summary is the resting state — it starts open, closes when a
   // category dropdown opens, and reopens whenever the open dropdown is
   // closed (closing never leaves the card empty).
-  const [openSection, setOpenSection] = useState<string>('__summary__');
+  const [internalSection, setInternalSection] = useState<string>('__summary__');
+  const openSection = controlledSection ?? internalSection;
   const accordion = (label: string) => ({
     open: openSection === label,
-    onToggle: () => setOpenSection((p) => (p === label ? '__summary__' : label)),
+    onToggle: () => {
+      const next = openSection === label ? '__summary__' : label;
+      setInternalSection(next);
+      onOpenSection?.(next);
+    },
   });
 
   const { data, isLoading } = useMatchAnalysis(fixture.id);
@@ -120,11 +136,6 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             <Text style={styles.summary}>{data.summary}</Text>
           ) : null}
 
-          {/* Pre-match backdrop — form + coming-in season baseline. */}
-          <NarrativeSection label="Coming in" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Coming in']!)} {...accordion("Coming in")}>
-            <Text style={styles.body}>{data.context}</Text>
-          </NarrativeSection>
-
           {/* Broadcast prose — shape / attack / platform. Rendered as
               three tight paragraphs under a single Commentary label so
               the section reads as one continuous analyst passage. */}
@@ -141,22 +152,33 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             <Text style={styles.body}>{data.variance}</Text>
           </NarrativeSection>
 
-          {/* 8 per-axis narratives — each with its own small-caps label
-              and axis-specific glyph. Same visual grammar as every other
-              section on the card. */}
-          {data.axes.map((axis) => (
-            <NarrativeSection
-              key={axis.key}
-              label={axis.label}
-              onInfo={() => setSectionInfo(AXIS_INFO[axis.key]!)}
-              {...accordion(axis.label)}>
-              <Text style={styles.body}>{axis.narrative}</Text>
-            </NarrativeSection>
-          ))}
+          {/* Paired axis narratives — two axes per section for a denser
+              read, same pairings as the evidence carousel and the
+              pre-match card. */}
+          {MATCH_AXIS_PAIRS.map((pair) => {
+            const narratives = pair.keys
+              .map((k) => data.axes.find((ax) => ax.key === k)?.narrative)
+              .filter((n): n is string => Boolean(n));
+            if (narratives.length === 0) return null;
+            return (
+              <NarrativeSection
+                key={pair.title}
+                label={pair.title}
+                onInfo={() => setSectionInfo(matchPairInfo(pair))}
+                {...accordion(pair.title)}>
+                {narratives.map((n, i) => (
+                  <Text key={i} style={styles.body}>
+                    {n}
+                  </Text>
+                ))}
+              </NarrativeSection>
+            );
+          })}
 
-          {/* Closing forward-look — mirrors the "Coming in" opener. */}
-          <NarrativeSection label="Outlook" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Outlook']!)} {...accordion("Outlook")}>
-            <Text style={styles.body}>{data.outlook}</Text>
+          {/* Closing verdict — seals the story; the pane's Control vs
+              Conversion chart is its picture. */}
+          <NarrativeSection label="Verdict" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Verdict']!)} {...accordion("Verdict")}>
+            <Text style={styles.body}>{data.verdict}</Text>
           </NarrativeSection>
         </View>
       )}

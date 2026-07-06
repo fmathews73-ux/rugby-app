@@ -252,13 +252,24 @@ function buildSummary(
  * guide §6: don't restate adjacent sections).
  */
 function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate): string {
+  // Coming-in backdrop opens the section (moved here from the match
+  // analysis card 2026-07-06 — the kickoff baselines belong on the
+  // pre-match surface; match analysis is strictly the match itself).
+  const f1 = h.perGame.pointsScored.toFixed(1);
+  const c1 = h.perGame.pointsConceded.toFixed(1);
+  const f2 = a.perGame.pointsScored.toFixed(1);
+  const c2 = a.perGame.pointsConceded.toFixed(1);
+  const backdrop =
+    `${home.short_name} come in scoring ${f1} a game and conceding ${c1}. ` +
+    `${away.short_name} arrive at ${f2} for, ${c2} against.`;
+
   const gaps = computeSignedGaps(h, a)
     .filter((g) => Math.abs(g.norm) >= 0.5)
     .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm))
     .slice(0, 3);
 
   if (gaps.length === 0) {
-    return `The profiles refuse to separate: nothing in the last ten matches picks a battleground. Fixtures like this get settled by execution, the first fifty-fifty refereeing call, and nerve.`;
+    return `${backdrop} The profiles refuse to separate beyond that: nothing in the last ten matches picks a battleground. Fixtures like this get settled by execution, the first fifty-fifty refereeing call, and nerve.`;
   }
 
   const phrase = (g: SignedGap): string => {
@@ -285,10 +296,10 @@ function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate):
         : `The levers are split between the two sides, which is precisely what makes it a match.`;
 
   if (gaps.length === 1) {
-    return `One battleground picks itself: ${phrase(gaps[0]!)}. ${verdict}`;
+    return `${backdrop} One battleground picks itself: ${phrase(gaps[0]!)}. ${verdict}`;
   }
   const names = gaps.map(phrase);
-  return `${gaps.length === 3 ? 'Three battlegrounds pick themselves' : 'Two battlegrounds pick themselves'}: ${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}. ${verdict}`;
+  return `${backdrop} ${gaps.length === 3 ? 'Three battlegrounds pick themselves' : 'Two battlegrounds pick themselves'}: ${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}. ${verdict}`;
 }
 
 // ─── Per-axis coming-in comparison ──────────────────────────────────────────
