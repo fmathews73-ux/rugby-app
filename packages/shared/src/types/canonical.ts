@@ -306,6 +306,24 @@ export interface Result {
   home_fifty_twenty_twos: number;
   away_fifty_twenty_twos: number;
 
+  // Red zone — the Opta "visits to the 22" pair. Points-per-entry (PPE)
+  // is derived (points_from / entries), both attacking and defensive
+  // (opponent's pair), so no ratio field is stored.
+  home_twenty_two_entries: number;
+  away_twenty_two_entries: number;
+  /** Points scored from possessions inside the opposition 22. Always ≤ score. */
+  home_points_from_twenty_two_entries: number;
+  away_points_from_twenty_two_entries: number;
+
+  // Goal kicking — attempts alongside the made counts already stored
+  // (conversions / penalties), so kicking success % is derivable.
+  /** Conversion attempts. Equals tries except when a kick is declined/timed out. */
+  home_conversion_attempts: number;
+  away_conversion_attempts: number;
+  /** Shots at goal from penalties (made + missed). ≥ penalties (made). */
+  home_penalty_goal_attempts: number;
+  away_penalty_goal_attempts: number;
+
   // ─── Advanced tier ─────────────────────────────────────────────────
   // Premium-feed metrics (aggregator advanced tier). Modelled at TEAM
   // level only; player-level advanced splits stay out until the Phase 6

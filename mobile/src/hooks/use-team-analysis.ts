@@ -59,9 +59,9 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
   // Season baseline — the Stats pane's second column, so the narrative
   // can say whether the window is running above or below it.
   const seasonAggregate = useTeamAggregate(teamId);
-  // Quarter-timing patterns — the Insights pane's Points Pattern cards.
-  const scoredPattern = useTeamPointsPattern(teamId, 'scored');
-  const concededPattern = useTeamPointsPattern(teamId, 'conceded');
+  // Quarter-timing patterns — same prev-10 window as every other read.
+  const scoredPattern = useTeamPointsPattern(teamId, 'scored', undefined, WINDOW);
+  const concededPattern = useTeamPointsPattern(teamId, 'conceded', undefined, WINDOW);
 
   const data = useMemo<TeamAnalysis | undefined>(() => {
     const team = teams.data?.find((t) => t.id === teamId);

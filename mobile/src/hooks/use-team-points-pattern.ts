@@ -46,16 +46,23 @@ export function useTeamPointsPattern(
    *  count — freezes the pattern to the state walking into a specific
    *  match (same semantic as useTeamAggregate). */
   asOfDate?: string,
+  /** When set, only the most recent N completed fixtures (after the
+   *  asOfDate filter) feed the pattern — callers pass 10 to match the
+   *  app-wide prev-10 analytical window. */
+  lookback?: number,
 ): Result {
   const team = useTeam(teamId);
 
-  const completedFixtures: Fixture[] = useMemo(
-    () =>
-      (team.data?.fixtures ?? []).filter(
-        (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
-      ),
-    [team.data, asOfDate],
-  );
+  const completedFixtures: Fixture[] = useMemo(() => {
+    const all = (team.data?.fixtures ?? []).filter(
+      (f) => f.status === 'completed' && (!asOfDate || f.kickoff_utc < asOfDate),
+    );
+    if (lookback === undefined) return all;
+    return all
+      .slice()
+      .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
+      .slice(0, lookback);
+  }, [team.data, asOfDate, lookback]);
 
   const eventQueries = useQueries({
     queries: completedFixtures.map((f) => ({

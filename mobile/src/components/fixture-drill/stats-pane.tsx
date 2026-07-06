@@ -75,6 +75,12 @@ export function StatsPane({
         { label: 'Conversions', home: result.home_conversions, away: result.away_conversions, premium: false },
         { label: 'Penalties', home: result.home_penalties, away: result.away_penalties, premium: true },
         { label: 'Drop goals', home: result.home_drop_goals, away: result.away_drop_goals, premium: true },
+        {
+          label: 'Goal kicking %',
+          home: Math.round(((result.home_conversions + result.home_penalties) / Math.max(1, result.home_conversion_attempts + result.home_penalty_goal_attempts)) * 100),
+          away: Math.round(((result.away_conversions + result.away_penalties) / Math.max(1, result.away_conversion_attempts + result.away_penalty_goal_attempts)) * 100),
+          premium: false,
+        },
       ],
     },
     {
@@ -91,8 +97,15 @@ export function StatsPane({
     {
       title: 'Attack',
       description:
-        'The "how did they move forward" numbers. Metres = total ground gained ball-in-hand. Post-contact metres = the subset won AFTER the first hit — the leg-drive read. Line breaks = clean breaches of the defensive line. Defenders beaten = tackle attempts evaded. Gainline % = share of carries that crossed the advantage line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
+        'The "how did they move forward" numbers. 22 entries = visits into the opposition 22 — the red zone. Points per 22 entry = how many points each visit yielded on average; around 2 is par at Test level, 3+ is clinical, and a side entering often but scoring little is leaving results on the table. Metres = total ground gained ball-in-hand. Post-contact metres = the subset won AFTER the first hit — the leg-drive read. Line breaks = clean breaches of the defensive line. Defenders beaten = tackle attempts evaded. Gainline % = share of carries that crossed the advantage line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
       stats: [
+        { label: '22 entries', home: result.home_twenty_two_entries, away: result.away_twenty_two_entries, premium: false },
+        {
+          label: 'Points per 22 entry',
+          home: Math.round((result.home_points_from_twenty_two_entries / Math.max(1, result.home_twenty_two_entries)) * 10) / 10,
+          away: Math.round((result.away_points_from_twenty_two_entries / Math.max(1, result.away_twenty_two_entries)) * 10) / 10,
+          premium: false,
+        },
         { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
         { label: 'Post-contact metres', home: result.home_post_contact_metres, away: result.away_post_contact_metres, premium: true },
         { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
@@ -167,33 +180,54 @@ export function StatsPane({
 
   const activeSection = sections.find((s) => s.title === openInfoTitle) ?? null;
 
+  // Category pairings — natural rugby couples: points then their
+  // timing, with-the-ball, the possession contests, without-the-ball.
+  // Rendered as a vertical stack (Match Overview first, then the paired
+  // cards): stats are scan-and-compare reads, so scrolling beats a
+  // carousel here.
+  const headline = sections[0]!;
+  const pages: (typeof sections)[] = [
+    [sections[1]!, sections[2]!], // Scoring + Scoring by Quarter
+    [sections[3]!, sections[4]!], // Attack + Kicking
+    [sections[5]!, sections[6]!], // Set Piece + Breakdown
+    [sections[7]!, sections[8]!], // Defence + Discipline
+  ];
+
+  const renderSection = (section: (typeof sections)[number]) => (
+    <View key={section.title} style={styles.sectionBlock}>
+      <View style={styles.categoryHeaderRow}>
+        <Text style={styles.categoryLabel}>{section.title}</Text>
+        <Pressable
+          onPress={() => setOpenInfoTitle(section.title)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={`Explain ${section.title}`}>
+          <Ionicons
+            name="information-circle-outline"
+            size={14}
+            color={Colors.light.textSecondary}
+          />
+        </Pressable>
+      </View>
+      {section.stats.map((s) => (
+        <StatBar
+          key={s.label}
+          label={s.label}
+          home={s.home}
+          away={s.away}
+          locked={s.premium && !IS_SUBSCRIBED}
+        />
+      ))}
+    </View>
+  );
+
   return (
     <View style={styles.statsPaneStack}>
-      {sections.map((section) => (
-        <View key={section.title} style={styles.statsCard}>
-          <View style={styles.categoryHeaderRow}>
-            <Text style={styles.categoryLabel}>{section.title}</Text>
-            <Pressable
-              onPress={() => setOpenInfoTitle(section.title)}
-              hitSlop={10}
-              accessibilityRole="button"
-              accessibilityLabel={`Explain ${section.title}`}>
-              <Ionicons
-                name="information-circle-outline"
-                size={14}
-                color={Colors.light.textSecondary}
-              />
-            </Pressable>
-          </View>
-          {section.stats.map((s) => (
-            <StatBar
-              key={s.label}
-              label={s.label}
-              home={s.home}
-              away={s.away}
-              locked={s.premium && !IS_SUBSCRIBED}
-            />
-          ))}
+      <View style={styles.statsCard}>{renderSection(headline)}</View>
+
+      {pages.map((pair) => (
+        <View key={pair[0]!.title} style={styles.statsCard}>
+          {pair.map(renderSection)}
         </View>
       ))}
       <CategoryInfoModal
@@ -352,6 +386,9 @@ const styles = StyleSheet.create({
   // card with a small `categoryLabel` header (matching the Form / Momentum
   // / KPI card title convention) and the stat rows below.
   statsPaneStack: { gap: Spacing.three },
+  // One category inside a (possibly two-category) card — carries the
+  // same internal rhythm the standalone category cards had.
+  sectionBlock: { gap: Spacing.two },
   categoryLabel: {
     fontSize: TextSize.xs,
     fontWeight: TextWeight.bold,

@@ -221,8 +221,10 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
   const homeAdvantage = rng.chance(0.6);
   const home_tries = rng.int(2, homeAdvantage ? 6 : 4);
   const away_tries = rng.int(2, homeAdvantage ? 4 : 6);
-  const home_conversions = Math.min(home_tries, rng.int(0, home_tries));
-  const away_conversions = Math.min(away_tries, rng.int(0, away_tries));
+  // Test-level kickers convert ~60-95% of tries; uniform 0..tries was
+  // producing a 46% goal-kicking read once that stat surfaced.
+  const home_conversions = Math.min(home_tries, Math.round(home_tries * rng.int(60, 96) / 100));
+  const away_conversions = Math.min(away_tries, Math.round(away_tries * rng.int(60, 96) / 100));
   const home_penalties = rng.int(0, 4);
   const away_penalties = rng.int(0, 4);
   const home_drop_goals = rng.chance(0.12) ? 1 : 0;
@@ -260,6 +262,20 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
   };
   const homeCauses = penaltyCauses(home_penalties_conceded);
   const awayCauses = penaltyCauses(away_penalties_conceded);
+
+  // Red zone — derive points-from-22 from the scoreboard by removing
+  // what plausibly came from outside the 22 (drop goals + a share of
+  // penalty goals kicked long), then size the entry count so PPE lands
+  // in the observed international band (~1.5-3.5 points per visit).
+  const redZone = (score: number, penGoals: number, dropGoals: number) => {
+    const longPenGoals = Math.round(penGoals * rng.int(40, 71) / 100);
+    const points = Math.max(0, score - dropGoals * 3 - longPenGoals * 3);
+    const ppeTarget = rng.int(15, 36) / 10;
+    const entries = Math.max(4, Math.min(18, Math.round(points / ppeTarget) + rng.int(0, 3)));
+    return { entries, points };
+  };
+  const homeRedZone = redZone(home_score, home_penalties, home_drop_goals);
+  const awayRedZone = redZone(away_score, away_penalties, away_drop_goals);
 
   return {
     fixture_id: fixture.id,
@@ -341,6 +357,18 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     away_defenders_beaten: rng.int(12, 36),
     home_fifty_twenty_twos: rng.chance(0.25) ? rng.int(1, 3) : 0,
     away_fifty_twenty_twos: rng.chance(0.25) ? rng.int(1, 3) : 0,
+
+    home_twenty_two_entries: homeRedZone.entries,
+    away_twenty_two_entries: awayRedZone.entries,
+    home_points_from_twenty_two_entries: homeRedZone.points,
+    away_points_from_twenty_two_entries: awayRedZone.points,
+
+    // Conversion attempts equal tries (declined attempts are vanishingly
+    // rare); penalty attempts add 0-3 misses on top of the makes.
+    home_conversion_attempts: home_tries,
+    away_conversion_attempts: away_tries,
+    home_penalty_goal_attempts: home_penalties + rng.int(0, 2),
+    away_penalty_goal_attempts: away_penalties + rng.int(0, 2),
 
     // Advanced tier — derived where an invariant binds them to the
     // standard-tier value they qualify.

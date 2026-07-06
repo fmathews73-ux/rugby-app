@@ -411,12 +411,12 @@ narrative lives in §9.
   baseline (the Stats pane's second column). Reported only when the
   divergence is ± 15% or more AND the season sample is larger than the
   window itself.
-- **Scoring timing (Season read):** the Points Pattern quarters (Q1–Q4
-  share of points scored and conceded, averaged across completed
-  matches). A quarter is named only when it carries ≥ 35% of the
-  relevant points — one sentence for the scoring skew, one for the
-  soft period conceding-wise. Below the threshold, timing goes
-  unmentioned.
+- **Scoring timing (Season read):** the quarter split (Q1–Q4 share of
+  points scored and conceded), averaged across the LAST-10 window —
+  the same prev-10 window as every other analytical read. A quarter is
+  named only when it carries ≥ 35% of the relevant points — one
+  sentence for the scoring skew, one for the soft period
+  conceding-wise. Below the threshold, timing goes unmentioned.
 
 ---
 
@@ -479,7 +479,7 @@ tier fires at half the threshold; inside that, the axis reads even):
 - **The shape of it** ranks the qualifying gaps by normalised size and
   names at most three.
 - **Timing skew:** a quarter carrying ≥ 35% of the relevant points
-  (same threshold as §10.2).
+  across the prev-10 window (same threshold and window as §10.2).
 - **Sample:** either side with zero completed matches → no preview
   (empty state), never a padded one.
 

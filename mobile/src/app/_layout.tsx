@@ -1,3 +1,4 @@
+import { Anton_400Regular, useFonts } from '@expo-google-fonts/anton';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -20,15 +21,20 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  // Brand wordmark face (see AppHeader). Impact itself isn't available
+  // on iOS/Android and can't be bundled without a Monotype licence;
+  // Anton (OFL) is the standard substitute.
+  const [fontsLoaded] = useFonts({ Anton_400Regular });
 
   // Splash-screen hide. `preventAutoHideAsync()` above holds the splash
   // until React has mounted; without a matching `hideAsync()` the app
   // shows the launch screen forever. `AnimatedSplashOverlay` was
   // intended to own this handoff but isn't rendered anywhere in the
-  // tree, so we hide directly here after the first render.
+  // tree, so we hide directly here after the first render (once the
+  // wordmark font is in, so the header doesn't flash a fallback face).
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
-  }, []);
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
 
   const queryClient = useMemo(
     () =>

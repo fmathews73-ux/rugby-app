@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 
 import type { Fixture, MatchEvent } from '@rugby-app/shared';
@@ -43,11 +43,13 @@ export function PitchHeatmap({
   homeTeamId,
   awayTeamId,
   fixtureStatus,
+  style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
   fixtureStatus?: Fixture['status'];
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const events = useFixtureEvents(fixtureId, fixtureStatus);
@@ -90,7 +92,7 @@ export function PitchHeatmap({
   const hasData = homeEvents.length > 0 || awayEvents.length > 0;
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Pitch Heatmap</Text>

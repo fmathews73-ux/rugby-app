@@ -282,3 +282,26 @@ export function useWomensRankingHistory(): UseQueryResult<RankingSnapshot[]> {
     queryFn: () => fetchJson<RankingSnapshot[]>('/rankings/womens/history'),
   });
 }
+
+export interface TeamFormSummary {
+  team_id: string;
+  games_played: number;
+  points_scored_per_game: number;
+  points_conceded_per_game: number;
+  scrum_success_percent: number;
+  lineout_success_percent: number;
+  penalties_conceded_per_game: number;
+  possession_percent: number;
+  /** Full per-game stat sheet — keys mirror TeamAggregate.perGame so
+   *  tier averaging needs no field-name crosswalk. */
+  per_game: Record<string, number>;
+}
+
+/** Whole-pool prev-10 per-game read-model — one fetch powers the Team
+ *  Landscape matrix (28 dots) without per-fixture fan-out. */
+export function useTeamsFormSummary(): UseQueryResult<TeamFormSummary[]> {
+  return useQuery({
+    queryKey: ['teamsFormSummary'],
+    queryFn: () => fetchJson<TeamFormSummary[]>('/teams/form-summary'),
+  });
+}

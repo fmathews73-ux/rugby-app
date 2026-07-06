@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, {
   Circle,
   ClipPath,
@@ -65,11 +65,13 @@ export function ScoringProgression({
   homeTeamId,
   awayTeamId,
   fixtureStatus,
+  style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
   fixtureStatus?: Fixture['status'];
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const events = useFixtureEvents(fixtureId, fixtureStatus);
@@ -104,7 +106,7 @@ export function ScoringProgression({
   const hasScoring = series.home.length > 1 || series.away.length > 1;
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Scoring Progression</Text>

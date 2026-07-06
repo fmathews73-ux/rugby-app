@@ -31,10 +31,16 @@ const HORIZONTAL_MARGIN = Spacing.four;
 export function MyTeamMatchesCard() {
   const [myTeamId] = useMyTeamId();
   if (!myTeamId) return null;
-  return <Populated teamId={myTeamId} />;
+  return <Populated teamId={myTeamId} padded />;
 }
 
-function Populated({ teamId }: { teamId: string }) {
+/** Team-scoped variant for the team drill — no outer page padding
+ *  (the drill pane owns the 24pt card column). */
+export function TeamMatchesCard({ teamId }: { teamId: string }) {
+  return <Populated teamId={teamId} />;
+}
+
+function Populated({ teamId, padded = false }: { teamId: string; padded?: boolean }) {
   const router = useRouter();
   const team = useTeam(teamId);
   const allTeams = useTeams();
@@ -90,7 +96,7 @@ function Populated({ teamId }: { teamId: string }) {
   if (!team.data) return null;
 
   return (
-    <View style={styles.page}>
+    <View style={padded ? styles.page : undefined}>
       <View style={styles.card}>
         <NavSection
           label="Next Match"

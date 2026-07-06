@@ -203,6 +203,111 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
   // ─── Teams ────────────────────────────────────────────────────────────────
   app.get('/teams', async () => store.teams);
 
+  // Per-team prev-10 per-game read-model — one response for the whole
+  // pool so landscape-style charts (all 28 teams on one canvas) don't
+  // fan out hundreds of per-fixture requests from the client. Fields
+  // cover the Team Landscape axes plus the likely next axis pairs
+  // (set-piece, discipline, possession).
+  app.get('/teams/form-summary', async () => {
+    const LOOKBACK = 10;
+    return store.teams.map((team) => {
+      const completed = (store.fixturesByTeam.get(team.id) ?? [])
+        .filter((f) => f.status === 'completed')
+        .slice()
+        .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
+        .slice(0, LOOKBACK);
+
+      let ptsFor = 0, ptsAgainst = 0, triesFor = 0, triesAgainst = 0;
+      let scrumWon = 0, scrumLost = 0, lineoutWon = 0, lineoutLost = 0;
+      let pens = 0, poss = 0, terr = 0, meters = 0, lineBreaks = 0;
+      let kicksInPlay = 0, kickMeters = 0, tacklePct = 0;
+      let toWon = 0, toConceded = 0, errors = 0, yellows = 0, reds = 0;
+      let entries22 = 0, pointsFrom22 = 0;
+      let goalKicksMade = 0, goalKicksAttempted = 0;
+      let games = 0;
+      for (const fx of completed) {
+        const r = store.resultByFixture.get(fx.id);
+        if (!r) continue;
+        const isHome = fx.home_team_id === team.id;
+        games++;
+        ptsFor += isHome ? r.home_score : r.away_score;
+        ptsAgainst += isHome ? r.away_score : r.home_score;
+        triesFor += isHome ? r.home_tries : r.away_tries;
+        triesAgainst += isHome ? r.away_tries : r.home_tries;
+        scrumWon += isHome ? r.home_scrums_won : r.away_scrums_won;
+        scrumLost += isHome ? r.home_scrums_lost : r.away_scrums_lost;
+        lineoutWon += isHome ? r.home_lineouts_won : r.away_lineouts_won;
+        lineoutLost += isHome ? r.home_lineouts_lost : r.away_lineouts_lost;
+        pens += isHome ? r.home_penalties_conceded : r.away_penalties_conceded;
+        poss += isHome ? r.home_possession_percent : r.away_possession_percent;
+        terr += isHome ? r.home_territory_percent : r.away_territory_percent;
+        meters += isHome ? r.home_meters : r.away_meters;
+        lineBreaks += isHome ? r.home_line_breaks : r.away_line_breaks;
+        kicksInPlay += isHome ? r.home_kicks_in_play : r.away_kicks_in_play;
+        kickMeters += isHome ? r.home_kick_meters : r.away_kick_meters;
+        tacklePct += isHome ? r.home_tackle_success_percent : r.away_tackle_success_percent;
+        toWon += isHome ? r.home_turnovers_won : r.away_turnovers_won;
+        toConceded += isHome ? r.home_turnovers_conceded : r.away_turnovers_conceded;
+        errors += isHome ? r.home_handling_errors : r.away_handling_errors;
+        yellows += isHome ? r.home_yellow_cards : r.away_yellow_cards;
+        reds += isHome ? r.home_red_cards : r.away_red_cards;
+        entries22 += isHome ? r.home_twenty_two_entries : r.away_twenty_two_entries;
+        pointsFrom22 += isHome
+          ? r.home_points_from_twenty_two_entries
+          : r.away_points_from_twenty_two_entries;
+        goalKicksMade += isHome
+          ? r.home_conversions + r.home_penalties
+          : r.away_conversions + r.away_penalties;
+        goalKicksAttempted += isHome
+          ? r.home_conversion_attempts + r.home_penalty_goal_attempts
+          : r.away_conversion_attempts + r.away_penalty_goal_attempts;
+      }
+      const scrumTotal = scrumWon + scrumLost;
+      const lineoutTotal = lineoutWon + lineoutLost;
+      const g = Math.max(1, games);
+      return {
+        team_id: team.id,
+        games_played: games,
+        points_scored_per_game: games > 0 ? ptsFor / g : 0,
+        points_conceded_per_game: games > 0 ? ptsAgainst / g : 0,
+        scrum_success_percent: scrumTotal > 0 ? (scrumWon / scrumTotal) * 100 : 0,
+        lineout_success_percent: lineoutTotal > 0 ? (lineoutWon / lineoutTotal) * 100 : 0,
+        penalties_conceded_per_game: games > 0 ? pens / g : 0,
+        possession_percent: games > 0 ? poss / g : 0,
+        // Full per-game stat sheet — keys deliberately mirror the
+        // client's TeamAggregate.perGame shape so the Stats table can
+        // average tiers without a field-name crosswalk.
+        per_game: {
+          pointsScored: ptsFor / g,
+          pointsConceded: ptsAgainst / g,
+          tries: triesFor / g,
+          triesConceded: triesAgainst / g,
+          possessionPercent: poss / g,
+          territoryPercent: terr / g,
+          metersMade: meters / g,
+          lineBreaks: lineBreaks / g,
+          kicksInPlay: kicksInPlay / g,
+          kickMeters: kickMeters / g,
+          scrumSuccessPercent: scrumTotal > 0 ? (scrumWon / scrumTotal) * 100 : 0,
+          lineoutSuccessPercent: lineoutTotal > 0 ? (lineoutWon / lineoutTotal) * 100 : 0,
+          tackleSuccessPercent: tacklePct / g,
+          turnoversWon: toWon / g,
+          turnoversConceded: toConceded / g,
+          penaltiesConceded: pens / g,
+          handlingErrors: errors / g,
+          yellowCards: yellows / g,
+          redCards: reds / g,
+          twentyTwoEntries: entries22 / g,
+          // Ratio-of-sums, not average-of-ratios — a 2-entry game
+          // shouldn't weigh as much as a 15-entry game.
+          pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+          goalKickingPercent:
+            goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
+        },
+      };
+    });
+  });
+
   app.get<{ Params: { id: string } }>('/teams/:id', async (req, reply) => {
     const t = store.teamById.get(req.params.id);
     if (!t) return notFound(reply, `team ${req.params.id} not found`);

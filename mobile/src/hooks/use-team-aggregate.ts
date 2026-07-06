@@ -41,6 +41,9 @@ export interface TeamAggregate {
     handlingErrors: number;
     yellowCards: number;
     redCards: number;
+    twentyTwoEntries: number;
+    pointsPerTwentyTwoEntry: number;
+    goalKickingPercent: number;
   };
 }
 
@@ -111,6 +114,7 @@ export function useTeamAggregate(
     let tackleSuccess = 0;
     let turnoversWon = 0, turnoversConceded = 0;
     let pensConceded = 0, handlingErrors = 0, yellows = 0, reds = 0;
+    let entries22 = 0, pointsFrom22 = 0, goalKicksMade = 0, goalKicksAttempted = 0;
 
     for (const { result, fixture } of results) {
       const isHome = fixture.home_team_id === teamId;
@@ -141,6 +145,18 @@ export function useTeamAggregate(
       handlingErrors += isHome ? result.home_handling_errors : result.away_handling_errors;
       yellows += isHome ? result.home_yellow_cards : result.away_yellow_cards;
       reds += isHome ? result.home_red_cards : result.away_red_cards;
+      entries22 += isHome
+        ? result.home_twenty_two_entries
+        : result.away_twenty_two_entries;
+      pointsFrom22 += isHome
+        ? result.home_points_from_twenty_two_entries
+        : result.away_points_from_twenty_two_entries;
+      goalKicksMade += isHome
+        ? result.home_conversions + result.home_penalties
+        : result.away_conversions + result.away_penalties;
+      goalKicksAttempted += isHome
+        ? result.home_conversion_attempts + result.home_penalty_goal_attempts
+        : result.away_conversion_attempts + result.away_penalty_goal_attempts;
     }
 
     const n = results.length;
@@ -170,6 +186,11 @@ export function useTeamAggregate(
         handlingErrors: handlingErrors / n,
         yellowCards: yellows / n,
         redCards: reds / n,
+        twentyTwoEntries: entries22 / n,
+        // Ratio-of-sums so light-entry games don't overweigh.
+        pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+        goalKickingPercent:
+          goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
       },
     };
   }, [team.data, resultQueries, completedFixtures, teamId]);
@@ -197,6 +218,9 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   handlingErrors: 0,
   yellowCards: 0,
   redCards: 0,
+  twentyTwoEntries: 0,
+  pointsPerTwentyTwoEntry: 0,
+  goalKickingPercent: 0,
 };
 
 /**

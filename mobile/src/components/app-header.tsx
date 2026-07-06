@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useSegments } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
-import { Colors, TextSize, TextWeight } from '@/constants/theme';
+import { Colors, TextSize } from '@/constants/theme';
 
 /**
  * Persistent header (PRD §4.1). Left: user profile avatar / entry point on
@@ -47,9 +47,11 @@ export function AppHeader() {
       <View style={styles.centreSlot}>
         {/* Brand mark: "RUGBY" + superscripted "IQ". `alignItems: 'flex-start'`
             on the row aligns top-edges, so the smaller IQ Text sits above
-            RUGBY's baseline — the superscript effect. Font family reserved
-            for Proxima Nova once licensed + loaded via expo-font; until
-            then the system extra-bold face carries the weight. */}
+            RUGBY's baseline — the superscript effect. Face is Anton
+            (loaded in the root layout) — the Impact stand-in, since
+            Impact isn't shipped on iOS/Android and can't be bundled
+            without a Monotype licence. Neither face has a true italic,
+            so the skew transform on the row supplies the slant. */}
         <View style={styles.appNameRow}>
           <Text style={styles.appName}>RUGBY</Text>
           <Text style={styles.appNameSuperscript}>IQ</Text>
@@ -91,30 +93,31 @@ const styles = StyleSheet.create({
     // superscript effect. Do NOT set alignItems: 'center' here.
     alignItems: 'flex-start',
     gap: 1,
+    // Synthetic italic: Anton ships upright-only, so the slant is a
+    // skew on the whole row (keeps RUGBY + IQ on the same angle).
+    // scaleY squashes Anton's tall condensed caps into a flatter,
+    // wider-reading mark without touching the letter widths.
+    transform: [{ skewX: '-10deg' }, { scaleY: 0.8 }],
   },
   appName: {
     fontSize: TextSize.xl,
-    // Extra-bold (800) — off the TextWeight scale, allowed as a brand-mark
-    // exception (same category as the intentional letterSpacing: -1 for
-    // hero display numbers). Do not use elsewhere.
-    fontWeight: '800',
+    fontFamily: 'Anton_400Regular',
+    // Anton sets very tight by default; open the tracking so the
+    // condensed caps breathe.
+    letterSpacing: 1.5,
     color: Colors.light.text,
-    // fontFamily: 'ProximaNova-ExtraBold' — reserved. Requires (a) a
-    // commercial licence from Mark Simonson Studio / Adobe Fonts and
-    // (b) the font loaded via expo-font at app startup. Falls back to
-    // system extra-bold until then.
   },
   appNameSuperscript: {
     fontSize: 12, // ~55% of appName size, standard superscript ratio
-    // Normal weight — lets the "RUGBY" mark carry the visual heft while
-    // the IQ superscript reads as a lighter tagline / descriptor.
-    fontWeight: TextWeight.regular,
+    // Superscript stays on the brand face but at reduced size, reading
+    // as the lighter descriptor against RUGBY's heft.
+    fontFamily: 'Anton_400Regular',
     color: Colors.light.text,
-    // Small nudge down so IQ's cap-line aligns near the cap-line of
-    // RUGBY rather than sitting flush at the very top of the row.
-    marginTop: 1,
-    // Tight line-height keeps the superscript compact.
-    lineHeight: 12,
+    // Line box must clear Anton's tall ascender or the glyph tops get
+    // clipped (Anton's cap height exceeds a lineHeight equal to the
+    // font size). 16 gives the caps room; the row's flex-start
+    // alignment still produces the superscript position.
+    lineHeight: 16,
   },
   rightSlot: {
     minWidth: 44,

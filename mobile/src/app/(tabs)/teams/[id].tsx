@@ -6,22 +6,26 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
 
-import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams } from '@/api/hooks';
-import { InsightsCanvas } from '@/components/insights/insights-canvas';
+import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
+import { CardCarousel } from '@/components/card-carousel';
+import { TeamMatchesCard } from '@/components/my-team-matches-card';
+import { TeamProfileCard } from '@/components/my-team-profile-card';
 import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
 import { ExtendedMomentum } from '@/components/insights/extended-momentum';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
-import { PointsPattern } from '@/components/insights/points-pattern';
+import { DisciplineTrend } from '@/components/insights/discipline-trend';
+import { PossessionOutcome } from '@/components/insights/possession-outcome';
+import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
+import { SetPieceDiscipline } from '@/components/insights/set-piece-discipline';
+import { TeamLandscape } from '@/components/insights/team-landscape';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamAnalysisCard } from '@/components/team-analysis-card';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
 import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { initialsOf } from '@/lib/initials';
-import { worldCupTitles } from '@/lib/world-cup-titles';
+import { TIER_1_IDS } from '@/lib/tiers';
 
 
 type TeamTab = 'preview' | 'squad' | 'stats' | 'insights' | 'analysis';
@@ -40,11 +44,10 @@ const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
   { id: 'analysis', label: 'Analysis' },
 ];
 
-// Stats window: last-10 completed matches, not calendar months — the
-// international calendar is lumpy (a 3-month window can hold 0 or 7
-// Tests), so a match-count window keeps the sample stable and matches
-// the "prev. 10" convention used by Form / Scouting / percentiles.
-const STATS_LOOKBACK = 10;
+// Hero outcome-dot colours — same trio as FormCircles.
+const HERO_WIN = '#059669';
+const HERO_LOSS = '#DC2626';
+const HERO_DRAW = '#9CA3AF';
 
 /** Position → squad-section grouping, in traditional team-sheet order. */
 const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] }[] = [
@@ -88,10 +91,6 @@ export default function TeamHubScreen() {
   const teamId = id ?? '';
   const [tab, setTab] = useState<TeamTab>('preview');
   const scrollRef = useRef<ScrollView>(null);
-  // Preview pane height yardstick — the KPI card's measured height
-  // becomes the chart cards' minHeight so all three match.
-  const [kpiHeight, setKpiHeight] = useState(0);
-  const matchKpi = kpiHeight > 0 ? { minHeight: kpiHeight } : undefined;
 
   // Same resolve-to-top gesture as the fixture drill's sub-tabs.
   const handleTabSelect = (next: TeamTab) => {
@@ -102,6 +101,7 @@ export default function TeamHubScreen() {
   // 45-player pool rolled up into six group headers keeps the card
   // compact; users open only the units they're interested in.
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [squadInfoOpen, setSquadInfoOpen] = useState(false);
 
   const toggleGroup = (label: string) => {
     setExpandedGroups((prev) => {
@@ -132,30 +132,36 @@ export default function TeamHubScreen() {
     [rankings.data, teamId],
   );
 
-  // Last-10 record as quiet text (the dot strip stays off the hero —
-  // this is the one-line summary, the visual lives in Preview's Form).
-  const { outcomes } = useTeamRecentForm(teamId, 10);
-  const record = useMemo(() => {
-    if (outcomes.length === 0) return null;
-    let w = 0, l = 0, d = 0;
-    for (const o of outcomes) o === 'W' ? w++ : o === 'L' ? l++ : d++;
-    return `Last ${outcomes.length} · W${w} L${l}${d > 0 ? ` D${d}` : ''}`;
-  }, [outcomes]);
+  // Last-5 form-guide dots (newest first) — same window and grammar as
+  // the TeamHeroRow surfaces.
+  const { outcomes } = useTeamRecentForm(teamId, 5);
 
   const squadSections = useMemo(() => {
     if (!players.data) return [];
-    return POSITION_GROUPS.map((group) => ({
-      label: group.label,
-      players: players.data
+    return POSITION_GROUPS.map((group) => {
+      const groupPlayers = players.data
         .filter((p) => group.positions.includes(p.primary_position))
         .sort(
           (a, b) =>
             group.positions.indexOf(a.primary_position) -
               group.positions.indexOf(b.primary_position) ||
             a.name.localeCompare(b.name),
-        ),
-    })).filter((s) => s.players.length > 0);
+        );
+      return {
+        label: group.label,
+        players: groupPlayers,
+        caps: groupPlayers.reduce((sum, p) => sum + p.cap_count, 0),
+      };
+    }).filter((s) => s.players.length > 0);
   }, [players.data]);
+
+  const squadTotals = useMemo(
+    () => ({
+      players: squadSections.reduce((sum, s) => sum + s.players.length, 0),
+      caps: squadSections.reduce((sum, s) => sum + s.caps, 0),
+    }),
+    [squadSections],
+  );
 
   if (teams.isLoading) {
     return (
@@ -196,19 +202,26 @@ export default function TeamHubScreen() {
             {headCoach ? (
               <Text style={styles.heroMetaText}>Head Coach · {headCoach.name}</Text>
             ) : null}
-            <View style={styles.heroMetaRow}>
-              <Text style={styles.heroMetaText}>
-                {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
-              </Text>
-              {worldCupTitles(team.id) > 0 ? (
-                <View style={styles.heroTrophyGroup}>
-                  <Text style={styles.heroMetaText}> · </Text>
-                  <Ionicons name="trophy" size={12} color={Colors.light.textSecondary} />
-                  <Text style={styles.heroMetaText}> X{worldCupTitles(team.id)}</Text>
-                </View>
-              ) : null}
-            </View>
-            {record ? <Text style={styles.heroMetaText}>{record}</Text> : null}
+            <Text style={styles.heroMetaText}>
+              {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
+            </Text>
+            {outcomes.length > 0 ? (
+              <View style={styles.heroRecordRow}>
+                <Text style={styles.heroMetaText}>Last {outcomes.length} · </Text>
+                {outcomes.map((o, i) => (
+                  <View
+                    key={i}
+                    style={[
+                      styles.heroRecordDot,
+                      {
+                        backgroundColor:
+                          o === 'W' ? HERO_WIN : o === 'L' ? HERO_LOSS : HERO_DRAW,
+                      },
+                    ]}
+                  />
+                ))}
+              </View>
+            ) : null}
           </View>
         </View>
       </View>
@@ -217,13 +230,40 @@ export default function TeamHubScreen() {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <>
-            {/* Same backdrop card set as the fixture drill's Preview
-                (Form → Trajectory → KPIs), single-team scoped and
-                height-matched to the KPI card, the pane's yardstick. */}
-            <ExtendedMomentum teamId={teamId} style={matchKpi} />
-            <RankingTrajectory teamId={teamId} style={matchKpi} />
-            <View onLayout={(e) => setKpiHeight(Math.round(e.nativeEvent.layout.height))}>
-              <EfficiencyKpis teamId={teamId} />
+            {/* Home's My Team stack, hub-scoped — the hero above stands
+                in for Home's team card, so the pane opens with next /
+                last match, then Profile, then the chart carousel.
+                Analysis stays on its own pill one tap away. */}
+            <TeamMatchesCard teamId={teamId} />
+            <TeamProfileCard teamId={teamId} />
+            <View style={styles.carouselBleed}>
+              {/* Same titles + no corner flag as Home's carousel — the
+                  page is already scoped to this team by the hero. */}
+              <CardCarousel
+                pages={[
+                  <ExtendedMomentum
+                    key="form"
+                    teamId={teamId}
+                    style={styles.pageCard}
+                    title="Team Form"
+                    showCornerFlag={false}
+                  />,
+                  <RankingTrajectory
+                    key="ranking"
+                    teamId={teamId}
+                    style={styles.pageCard}
+                    title="Team World Ranking"
+                    showCornerFlag={false}
+                  />,
+                  <EfficiencyKpis
+                    key="kpis"
+                    teamId={teamId}
+                    style={styles.pageCard}
+                    title="Team Efficiency KPIs"
+                    showCornerFlag={false}
+                  />,
+                ]}
+              />
             </View>
           </>
         )}
@@ -231,9 +271,66 @@ export default function TeamHubScreen() {
         {tab === 'squad' && (
           <View style={styles.card}>
             <View style={styles.cardHeaderRow}>
-              <Text style={styles.sectionLabel}>Squad</Text>
-              <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.xs} />
+              <View style={styles.squadTitleGroup}>
+                <Text style={styles.sectionLabel}>Squad</Text>
+                <Pressable
+                  onPress={() => setSquadInfoOpen(true)}
+                  hitSlop={10}
+                  accessibilityRole="button"
+                  accessibilityLabel="Explain the squad card">
+                  <Ionicons
+                    name="information-circle-outline"
+                    size={14}
+                    color={Colors.light.textSecondary}
+                  />
+                </Pressable>
+              </View>
+              <View style={styles.squadMetaRow}>
+                <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
+                <Text style={styles.sectionLabel}>
+                  {squadTotals.caps.toLocaleString('en-GB')}
+                </Text>
+                <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
+                <Text style={styles.sectionLabel}>{squadTotals.players}</Text>
+              </View>
             </View>
+
+            <Modal
+              visible={squadInfoOpen}
+              transparent
+              animationType="fade"
+              onRequestClose={() => setSquadInfoOpen(false)}>
+              <Pressable style={styles.modalBackdrop} onPress={() => setSquadInfoOpen(false)}>
+                <Pressable style={styles.modalCard} onPress={() => {}}>
+                  <View style={styles.modalHeader}>
+                    <Text style={styles.modalTitle}>Squad</Text>
+                    <Pressable
+                      onPress={() => setSquadInfoOpen(false)}
+                      hitSlop={10}
+                      accessibilityLabel="Close">
+                      <Ionicons name="close" size={20} color={Colors.light.text} />
+                    </Pressable>
+                  </View>
+                  <Text style={styles.modalBody}>
+                    The full player pool grouped into positional units in
+                    team-sheet order — front row through to the back three. The{' '}
+                    <Ionicons name="shirt-outline" size={12} color={Colors.light.text} />{' '}
+                    figure is the unit&apos;s combined <Text style={styles.modalStrong}>caps</Text>{' '}
+                    (international appearances) and the{' '}
+                    <Ionicons name="people-outline" size={12} color={Colors.light.text} />{' '}
+                    figure its player count.
+                  </Text>
+                  <Text style={styles.modalBody}>
+                    The blue bar is the unit&apos;s <Text style={styles.modalStrong}>share of the
+                    squad&apos;s total caps</Text> — where the experience is
+                    concentrated. A pack carrying most of the caps points to a
+                    forward-led, set-piece side; caps loaded in the back line
+                    suggest the attacking know-how lives out wide. Units light on
+                    caps are where a coach is blooding the next generation.
+                  </Text>
+                </Pressable>
+              </Pressable>
+            </Modal>
             {players.isLoading ? (
               <Text style={styles.empty}>Loading…</Text>
             ) : squadSections.length === 0 ? (
@@ -253,14 +350,49 @@ export default function TeamHubScreen() {
                       ]}
                       accessibilityRole="button"
                       accessibilityLabel={`${expanded ? 'Collapse' : 'Expand'} ${section.label}`}>
-                      <Text style={styles.squadSectionLabel}>{section.label}</Text>
-                      <View style={styles.squadGroupHeaderRight}>
-                        <Text style={styles.squadGroupCount}>{section.players.length}</Text>
+                      <View style={styles.squadGroupHeaderTop}>
+                        <Text style={styles.squadSectionLabel}>{section.label}</Text>
                         <Ionicons
                           name={expanded ? 'chevron-up' : 'chevron-down'}
                           size={14}
                           color={Colors.light.textSecondary}
                         />
+                      </View>
+                      {/* Meta line: caps + players icons left, then the
+                          experience-share bar (this unit's slice of squad
+                          caps) inline — same 4pt anatomy as the stats
+                          bars. Static fill (no-motion rule). */}
+                      <View style={styles.capsShareRow}>
+                        <View style={styles.squadMetaRow}>
+                          <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
+                          <Text style={styles.sectionLabel}>
+                            {section.caps.toLocaleString('en-GB')}
+                          </Text>
+                          <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
+                          <Text style={styles.sectionLabel}>{section.players.length}</Text>
+                        </View>
+                        <View style={styles.capsShareTrack}>
+                          <View
+                            style={[
+                              styles.capsShareFill,
+                              { flex: squadTotals.caps > 0 ? section.caps / squadTotals.caps : 0 },
+                            ]}
+                          />
+                          <View
+                            style={{
+                              flex:
+                                squadTotals.caps > 0
+                                  ? 1 - section.caps / squadTotals.caps
+                                  : 1,
+                            }}
+                          />
+                        </View>
+                        <Text style={styles.capsSharePct}>
+                          {squadTotals.caps > 0
+                            ? Math.round((section.caps / squadTotals.caps) * 100)
+                            : 0}
+                          %
+                        </Text>
                       </View>
                     </Pressable>
                     {expanded
@@ -283,13 +415,30 @@ export default function TeamHubScreen() {
 
         {tab === 'insights' && (
           <>
-            {/* TEAM-specific analytics — the team-scoped counterpart of
-                the fixture drill's match-specific Insights: profile
-                radar, then when-do-they-score / when-do-they-leak
-                patterns averaged over completed matches. */}
-            <InsightsCanvas primaryTeamId={teamId} />
-            <PointsPattern teamId={teamId} mode="scored" />
-            <PointsPattern teamId={teamId} mode="conceded" />
+            {/* TEAM-specific analytics. The three 2x2 quadrant reads
+                share one carousel (output landscape, control matrix,
+                per-match possession scatter); the stacked cards below
+                read the per-match record: when they score and leak,
+                and the penalty habit against the narrative's bands. */}
+            <View style={styles.carouselBleed}>
+              <CardCarousel
+                pages={[
+                  <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
+                  <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
+                  <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
+                ]}
+              />
+            </View>
+            {/* Per-match record pair in its own carousel beneath the
+                2x2 trio. */}
+            <View style={styles.carouselBleed}>
+              <CardCarousel
+                pages={[
+                  <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
+                  <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
+                ]}
+              />
+            </View>
           </>
         )}
 
@@ -301,15 +450,9 @@ export default function TeamHubScreen() {
 
 // ─── Stats table ────────────────────────────────────────────────────────────
 
-const STAT_COL_WIDTH = 64;
-
-type TeamStatField = keyof ReturnType<typeof useTeamAggregate> extends never
-  ? never
-  : keyof NonNullable<ReturnType<typeof useTeamAggregate>['data']>['perGame'];
-
-const TEAM_STAT_GROUPS: readonly {
+const TIER_STAT_GROUPS: readonly {
   label: string;
-  rows: readonly { field: TeamStatField; label: string; percent?: boolean }[];
+  rows: readonly { field: string; label: string; percent?: boolean; inverted?: boolean }[];
 }[] = [
   {
     label: 'Attack',
@@ -318,6 +461,8 @@ const TEAM_STAT_GROUPS: readonly {
       { field: 'tries', label: 'Tries' },
       { field: 'metersMade', label: 'Metres made' },
       { field: 'lineBreaks', label: 'Line breaks' },
+      { field: 'twentyTwoEntries', label: '22 entries' },
+      { field: 'pointsPerTwentyTwoEntry', label: 'Points per 22 entry' },
       { field: 'possessionPercent', label: 'Possession', percent: true },
       { field: 'territoryPercent', label: 'Territory', percent: true },
     ],
@@ -327,13 +472,14 @@ const TEAM_STAT_GROUPS: readonly {
     rows: [
       { field: 'kicksInPlay', label: 'Kicks in play' },
       { field: 'kickMeters', label: 'Kick metres' },
+      { field: 'goalKickingPercent', label: 'Goal kicking', percent: true },
     ],
   },
   {
     label: 'Defence',
     rows: [
-      { field: 'pointsConceded', label: 'Points conceded' },
-      { field: 'triesConceded', label: 'Tries conceded' },
+      { field: 'pointsConceded', label: 'Points conceded', inverted: true },
+      { field: 'triesConceded', label: 'Tries conceded', inverted: true },
       { field: 'tackleSuccessPercent', label: 'Tackle success', percent: true },
       { field: 'turnoversWon', label: 'Turnovers won' },
     ],
@@ -348,100 +494,202 @@ const TEAM_STAT_GROUPS: readonly {
   {
     label: 'Discipline',
     rows: [
-      { field: 'penaltiesConceded', label: 'Penalties conceded' },
-      { field: 'handlingErrors', label: 'Handling errors' },
-      { field: 'turnoversConceded', label: 'Turnovers conceded' },
-      { field: 'yellowCards', label: 'Yellow cards' },
-      { field: 'redCards', label: 'Red cards' },
+      { field: 'penaltiesConceded', label: 'Penalties conceded', inverted: true },
+      { field: 'handlingErrors', label: 'Handling errors', inverted: true },
+      { field: 'turnoversConceded', label: 'Turnovers conceded', inverted: true },
+      { field: 'yellowCards', label: 'Yellow cards', inverted: true },
+      { field: 'redCards', label: 'Red cards', inverted: true },
     ],
   },
 ];
 
+const LEADING_COLOR = '#059669';
+const LAGGING_COLOR = '#DC2626';
+const TIE_COLOR = Colors.light.textSecondary;
+
 /**
- * Team Stats pane — per-game AVERAGES over the last-10 window alongside
- * the full-season baseline, grouped by category. Match-count window
- * (not months): the international calendar is too lumpy for calendar
- * windows to hold a stable sample.
+ * Team Stats pane — the fixture Stats pane's exact anatomy (category
+ * cards, centred labels, diverging bars, flanking values), but the
+ * comparison is the team's prev-10 per-game numbers against the
+ * AVERAGE OF ITS OWN TIER (Tier 1 side vs the Tier-1 mean, Tier 2 vs
+ * Tier 2). Each row also carries the signed variance, coloured by
+ * whether the gap favours the team (inverted-aware, so being UNDER
+ * the tier average on penalties reads green).
  */
 function TeamStatsTable({ teamId }: { teamId: string }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const recent = useTeamAggregate(teamId, undefined, STATS_LOOKBACK);
-  const season = useTeamAggregate(teamId);
+  const summary = useTeamsFormSummary();
 
-  const loading = (recent.isLoading || season.isLoading) && !recent.data;
+  const isTier1 = TIER_1_IDS.has(teamId);
+  const { subject, tierAvg } = useMemo(() => {
+    const rows = summary.data ?? [];
+    const subj = rows.find((r) => r.team_id === teamId);
+    const members = rows.filter(
+      (r) => TIER_1_IDS.has(r.team_id) === isTier1 && r.games_played > 0,
+    );
+    const avg: Record<string, number> = {};
+    if (members.length > 0) {
+      for (const key of Object.keys(members[0]!.per_game)) {
+        avg[key] =
+          members.reduce((sum, m) => sum + (m.per_game[key] ?? 0), 0) / members.length;
+      }
+    }
+    return { subject: subj, tierAvg: avg };
+  }, [summary.data, teamId, isTier1]);
+
+  const tierLabel = isTier1 ? 'TIER 1 AVG' : 'TIER 2 AVG';
+  const teams = useTeams();
+  const teamCode =
+    teams.data?.find((t) => t.id === teamId)?.short_name ?? teamId.toUpperCase();
+
+  if (summary.isLoading && !subject) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.empty}>Loading…</Text>
+      </View>
+    );
+  }
+  if (!subject || subject.games_played === 0) {
+    return (
+      <View style={styles.card}>
+        <Text style={styles.empty}>No completed matches yet.</Text>
+      </View>
+    );
+  }
 
   return (
-    <View style={styles.card}>
-      <View style={styles.cardHeaderRow}>
-        <View style={styles.cardHeaderTitleGroup}>
-          <Text style={styles.sectionLabel}>Team Averages</Text>
+    <>
+      {/* Legend row — which side of the bars is which. */}
+      <View style={styles.statLegendRow}>
+        <View style={styles.statLegendLeftGroup}>
+          <Text style={styles.statLegendText}>{teamCode}</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Explain the team averages">
+            accessibilityLabel="Explain the team statistics">
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
+        <Text style={styles.statLegendText}>{tierLabel}</Text>
       </View>
 
-      {loading ? (
-        <Text style={styles.empty}>Loading…</Text>
-      ) : !recent.data || recent.data.gamesPlayed === 0 ? (
-        <Text style={styles.empty}>No completed matches yet.</Text>
-      ) : (
-        <>
-          <Text style={styles.statSubMeta}>
-            per game · {recent.data.gamesPlayed} recent / {season.data?.gamesPlayed ?? 0} season matches
-          </Text>
-          <View style={styles.statColHeadRow}>
-            <View style={styles.statLabelSpacer} />
-            <Text style={styles.statColHead}>Prev {STATS_LOOKBACK}</Text>
-            <Text style={styles.statColHead}>Season</Text>
-          </View>
-          {TEAM_STAT_GROUPS.map((group) => (
-            <View key={group.label} style={styles.statGroup}>
-              <Text style={styles.statGroupLabel}>{group.label}</Text>
-              {group.rows.map((row) => (
-                <View key={row.field} style={styles.statRow}>
-                  <Text style={styles.statRowLabel}>{row.label}</Text>
-                  <Text style={styles.statCell}>
-                    {formatStat(recent.data!.perGame[row.field], row.percent)}
-                  </Text>
-                  <Text style={styles.statCell}>
-                    {season.data ? formatStat(season.data.perGame[row.field], row.percent) : '—'}
-                  </Text>
-                </View>
-              ))}
+      {/* Paired category cards, stacked — with-the-ball (Attack +
+          Kicking), denying-and-securing (Defence + Set piece), and
+          Discipline standing alone. Vertical scroll, not a carousel:
+          stats are scan-and-compare reads. */}
+      {[
+        [TIER_STAT_GROUPS[0]!, TIER_STAT_GROUPS[1]!],
+        [TIER_STAT_GROUPS[2]!, TIER_STAT_GROUPS[3]!],
+        [TIER_STAT_GROUPS[4]!],
+      ].map((pair) => (
+        <View key={pair[0]!.label} style={styles.card}>
+          {pair.map((group, gi) => (
+            <View
+              key={group.label}
+              style={[styles.tierStatGroupBlock, gi > 0 && styles.tierStatGroupFollowing]}>
+              <Text style={styles.sectionLabel}>{group.label}</Text>
+              <View style={styles.tierStatList}>
+                {group.rows.map((row) => (
+                  <TierStatBar
+                    key={row.field}
+                    label={row.label}
+                    team={subject.per_game[row.field] ?? 0}
+                    tier={tierAvg[row.field] ?? 0}
+                    percent={row.percent}
+                    inverted={row.inverted}
+                  />
+                ))}
+              </View>
             </View>
           ))}
-        </>
-      )}
+        </View>
+      ))}
 
       <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
         <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
           <Pressable style={styles.modalCard} onPress={() => {}}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Team Averages</Text>
+              <Text style={styles.modalTitle}>Team Statistics</Text>
               <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={Colors.light.text} />
               </Pressable>
             </View>
             <Text style={styles.modalBody}>
-              Per-game averages across the team&apos;s completed matches. The first column
-              covers the last {STATS_LOOKBACK} matches played (the same window Form and
-              Scouting use); the second is the full-season baseline, so a gap between the
-              columns shows where current form is running above or below the team&apos;s
-              established level.
+              Per-game averages across the team&apos;s last 10 completed matches (left
+              side of each bar) against the average of every side in the same tier
+              (right side) — a Tier 1 team is measured against the Tier 1 mean, a
+              Tier 2 team against the Tier 2 mean.
             </Text>
             <Text style={styles.modalBody}>
-              The window counts matches rather than months because the international
-              calendar is uneven: a calendar window can hold anything from zero to seven
-              Tests, while a match-count window always compares like with like.
+              The green bar marks the better side of each comparison and the signed
+              number beside the label is the variance from the tier average. For
+              lower-is-better rows (points conceded, penalties, errors, cards) the
+              colouring flips: sitting UNDER the tier average reads green.
             </Text>
           </Pressable>
         </Pressable>
       </Modal>
+    </>
+  );
+}
+
+/** Fixture-StatBar anatomy, team vs tier average, inverted-aware. */
+function TierStatBar({
+  label,
+  team,
+  tier,
+  percent,
+  inverted,
+}: {
+  label: string;
+  team: number;
+  tier: number;
+  percent?: boolean;
+  inverted?: boolean;
+}) {
+  const maxValue = Math.max(team, tier, 1);
+  const teamSegFlex = Math.max(0.001, team / maxValue);
+  const teamSpacerFlex = Math.max(0.001, 1 - team / maxValue);
+  const tierSegFlex = Math.max(0.001, tier / maxValue);
+  const tierSpacerFlex = Math.max(0.001, 1 - tier / maxValue);
+
+  // Better-side colouring: higher wins unless the metric is inverted.
+  const variance = team - tier;
+  const favourable = inverted ? variance < 0 : variance > 0;
+  const isTie = Math.abs(variance) < 0.05;
+  const teamColor = isTie ? TIE_COLOR : favourable ? LEADING_COLOR : LAGGING_COLOR;
+  const tierColor = TIE_COLOR;
+
+  const varText = `${variance >= 0 ? '+' : ''}${formatStat(variance, percent)}`;
+
+  return (
+    <View style={styles.tierStatBlock}>
+      <View style={styles.tierStatLabelRow}>
+        <Text style={styles.tierStatLabel}>{label}</Text>
+        <Text
+          style={[
+            styles.tierStatVariance,
+            { color: isTie ? TIE_COLOR : favourable ? LEADING_COLOR : LAGGING_COLOR },
+          ]}>
+          {' '}{varText}
+        </Text>
+      </View>
+      <View style={styles.tierStatBarRow}>
+        <Text style={styles.tierStatValueLeft}>{formatStat(team, percent)}</Text>
+        <View style={styles.tierBarTrack}>
+          <View style={styles.tierBarHalfLeft}>
+            <View style={[styles.tierBarSeg, { flex: teamSegFlex, backgroundColor: teamColor }]} />
+            <View style={{ flex: teamSpacerFlex }} />
+          </View>
+          <View style={styles.tierBarCentreGap} />
+          <View style={styles.tierBarHalfRight}>
+            <View style={[styles.tierBarSeg, { flex: tierSegFlex, backgroundColor: tierColor }]} />
+            <View style={{ flex: tierSpacerFlex }} />
+          </View>
+        </View>
+        <Text style={styles.tierStatValueRight}>{formatStat(tier, percent)}</Text>
+      </View>
     </View>
   );
 }
@@ -449,7 +697,7 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
 function formatStat(v: number, percent?: boolean): string {
   const r = Math.round(v * 10) / 10;
   const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
-  return percent ? `${Math.round(v)}%` : s;
+  return percent ? `${s}%` : s;
 }
 
 function PlayerRow({ player, onPress }: { player: Player; onPress: () => void }) {
@@ -458,11 +706,10 @@ function PlayerRow({ player, onPress }: { player: Player; onPress: () => void })
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.playerRow, pressed && styles.playerRowPressed]}>
-      {/* Row-scale monogram avatar — same treatment as the player card's
-          56pt identity monogram, sized down for list rows. */}
-      <View style={styles.playerMonogram}>
-        <Text style={styles.playerMonogramText}>{initialsOf(player.name)}</Text>
-      </View>
+      {/* Same person-circle glyph as the header's profile entry, in the
+          secondary grey — anonymous placeholder until a licensed player
+          photo path exists (register #5 image-rights tier). */}
+      <Ionicons name="person-circle-outline" size={32} color={Colors.light.textSecondary} />
       <View style={styles.playerText}>
         <Text style={styles.playerName}>{player.name}</Text>
         <Text style={styles.playerMeta}>
@@ -495,6 +742,10 @@ const styles = StyleSheet.create({
     paddingBottom: 60,
     gap: Spacing.three,
   },
+  // Carousel pages are full screen width — bleed out of the pane's
+  // 24pt padding; pages re-apply the card column internally.
+  carouselBleed: { marginHorizontal: -Spacing.four },
+  pageCard: { flex: 1 },
 
   card: {
     backgroundColor: '#FFFFFF',
@@ -553,13 +804,15 @@ const styles = StyleSheet.create({
     gap: Spacing.one,
     paddingLeft: Spacing.four,
   },
-  heroMetaRow: {
+  heroRecordRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 5,
   },
-  heroTrophyGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  heroRecordDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 999,
   },
   heroMetaText: {
     fontSize: TextSize.sm,
@@ -594,23 +847,64 @@ const styles = StyleSheet.create({
   // beneath separates the header from the rows when expanded and from
   // the next header when collapsed.
   squadGroupHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
     paddingVertical: Spacing.two,
+    gap: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
-  squadGroupHeaderRight: {
+  squadGroupHeaderTop: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.one + 2,
+    justifyContent: 'space-between',
   },
   squadGroupCount: {
     fontSize: TextSize.xs,
     fontWeight: TextWeight.semibold,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
+  },
+  // Experience-share bar under each group header: unit caps as a share
+  // of squad caps.
+  capsShareRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  squadTitleGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  // Icon + value meta pairs (shirt = caps, people = players).
+  squadMetaRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  squadMetaSecondIcon: { marginLeft: 6 },
+  // Same track anatomy as the stats bars (4pt, radius 2, grey track),
+  // blue fill — informational, not a better/worse verdict, so it stays
+  // off the green/red outcome pair.
+  capsShareTrack: {
+    flex: 1,
+    flexDirection: 'row',
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F3F4F6',
+    overflow: 'hidden',
+  },
+  capsShareFill: {
+    backgroundColor: '#3B82F6',
+    borderRadius: 2,
+    height: 4,
+  },
+  capsSharePct: {
+    fontSize: 9,
+    fontWeight: TextWeight.semibold,
+    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
+    minWidth: 26,
+    textAlign: 'right',
   },
   squadSectionLabel: {
     fontSize: TextSize.xs,
@@ -628,22 +922,6 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   playerRowPressed: { opacity: 0.6 },
-  playerMonogram: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: '#F3F4F6',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  playerMonogramText: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-  },
   playerText: { flex: 1, gap: 2 },
   playerName: {
     fontSize: TextSize.sm,
@@ -662,55 +940,99 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  // Stats table — same grammar as the player card's stats pane.
-  statSubMeta: {
-    fontSize: TextSize.xs,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  statColHeadRow: {
+  // Stats pane — fixture Stats anatomy: legend row, category cards,
+  // centred labels with variance, diverging team-vs-tier bars.
+  statLegendRow: {
     flexDirection: 'row',
-    alignItems: 'baseline',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.one,
+  },
+  statLegendLeftGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  statLegendText: {
+    fontSize: 10,
+    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
+  tierStatList: {
+    gap: Spacing.two + 4,
     marginTop: Spacing.one,
   },
-  statLabelSpacer: { flex: 1 },
-  statColHead: {
-    width: STAT_COL_WIDTH,
-    textAlign: 'right',
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  statGroup: {
-    gap: 6,
-    marginTop: Spacing.two,
-  },
-  statGroupLabel: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  statRow: {
+  // One tier group inside a (possibly two-group) card.
+  tierStatGroupBlock: { gap: Spacing.one },
+  // Second group in a paired card gets extra air above its header so
+  // the category boundary reads clearly.
+  tierStatGroupFollowing: { marginTop: Spacing.three },
+  tierStatBlock: { gap: 6 },
+  tierStatLabelRow: {
     flexDirection: 'row',
+    justifyContent: 'center',
     alignItems: 'baseline',
   },
-  statRowLabel: {
-    flex: 1,
+  tierStatLabel: {
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
+    textAlign: 'center',
+    fontWeight: TextWeight.regular,
   },
-  statCell: {
-    width: STAT_COL_WIDTH,
-    textAlign: 'right',
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
+  tierStatVariance: {
+    fontSize: TextSize.xs,
+    fontWeight: TextWeight.bold,
     fontVariant: ['tabular-nums'],
   },
-
+  tierStatBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  tierStatValueLeft: {
+    width: 44,
+    textAlign: 'left',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
+  },
+  tierStatValueRight: {
+    width: 44,
+    textAlign: 'right',
+    fontSize: TextSize.sm,
+    fontWeight: TextWeight.bold,
+    color: Colors.light.textSecondary,
+    fontVariant: ['tabular-nums'],
+  },
+  tierBarTrack: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  tierBarHalfLeft: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    height: 4,
+  },
+  tierBarHalfRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 4,
+  },
+  tierBarSeg: {
+    height: 4,
+    borderRadius: 2,
+  },
+  tierBarCentreGap: { width: 4 },
 
   // Modal
   modalBackdrop: {
@@ -746,5 +1068,9 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     color: Colors.light.text,
     lineHeight: 20,
+  },
+  modalStrong: {
+    fontWeight: TextWeight.bold,
+    color: Colors.light.text,
   },
 });

@@ -97,10 +97,10 @@ export function useMatchPreview(fixtureId: string): UseMatchPreviewResult {
   // PERSISTS after the match completes (pre-match vs match analysis is
   // an intentional compare-read), so every input must exclude the
   // match itself and anything after it.
-  const homeScored = useTeamPointsPattern(homeTeamId, 'scored', asOfDate);
-  const awayScored = useTeamPointsPattern(awayTeamId, 'scored', asOfDate);
-  const homeConceded = useTeamPointsPattern(homeTeamId, 'conceded', asOfDate);
-  const awayConceded = useTeamPointsPattern(awayTeamId, 'conceded', asOfDate);
+  const homeScored = useTeamPointsPattern(homeTeamId, 'scored', asOfDate, WINDOW);
+  const awayScored = useTeamPointsPattern(awayTeamId, 'scored', asOfDate, WINDOW);
+  const homeConceded = useTeamPointsPattern(homeTeamId, 'conceded', asOfDate, WINDOW);
+  const awayConceded = useTeamPointsPattern(awayTeamId, 'conceded', asOfDate, WINDOW);
 
   const data = useMemo<MatchPreview | null>(() => {
     if (!fixture.data || !teams.data) return null;

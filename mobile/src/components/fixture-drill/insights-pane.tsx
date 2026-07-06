@@ -2,7 +2,9 @@ import { StyleSheet, View } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
 
+import { CardCarousel } from '@/components/card-carousel';
 import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
+import { ControlConversion } from '@/components/insights/control-conversion';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
@@ -30,43 +32,56 @@ export function InsightsPane({
 }) {
   return (
     <View style={styles.insightsPaneStack}>
+      {/* Headline card — the head-to-head Profile radar stays static
+          (mirroring Home / team Preview, where the profile anchors and
+          the rest carousels). */}
       <InsightsCanvas
         primaryTeamId={homeTeamId}
         compareTeamId={awayTeamId}
         fixtureStatus={fixtureStatus}
       />
-      {/* Momentum — mirrored area chart. Home team lifts above the zero
-          baseline in light blue, away drops below in light purple.
-          Rolling 10-minute scoring density per side across the 80'
-          match canvas, with KO / HT / FT milestone verticals. Paired
-          adjacent to Scoring Progression below so the reader can compare
-          in-match INITIATIVE (this card) with in-match RESULT (below). */}
-      <CombinedPointsPattern
-        fixtureId={fixtureId}
-        homeTeamId={homeTeamId}
-        awayTeamId={awayTeamId}
-      />
-      {/* Scoring progression — broadcast-worm cumulative-points chart.
-          Both team lines overlaid so the story (leads, comebacks, lead
-          changes) reads directly from where the worms cross. Sits
-          directly after Momentum since both are temporal match-flow
-          cards on the same 0..80' axis. */}
-      <ScoringProgression
-        fixtureId={fixtureId}
-        homeTeamId={homeTeamId}
-        awayTeamId={awayTeamId}
-        fixtureStatus={fixtureStatus}
-      />
-      {/* Pitch heatmap — density of the active team's positional events
-          (carries + scoring) on a top-down pitch. Match-scoped. Closes
-          the Insights pane as the spatial detail card — the "where"
-          after the "who / when / result" story above. */}
-      <PitchHeatmap
-        fixtureId={fixtureId}
-        homeTeamId={homeTeamId}
-        awayTeamId={awayTeamId}
-        fixtureStatus={fixtureStatus}
-      />
+
+      {/* The match-flow cards carousel beneath: initiative (Momentum),
+          result (Progression), verdict (Control vs Conversion), and
+          where (Heatmap). Full-width pages bleed out of the pane's
+          24pt padding and re-apply the card column internally. */}
+      <View style={styles.carouselBleed}>
+        <CardCarousel
+          pages={[
+            <CombinedPointsPattern
+              key="momentum"
+              fixtureId={fixtureId}
+              homeTeamId={homeTeamId}
+              awayTeamId={awayTeamId}
+              style={styles.pageCard}
+            />,
+            <ScoringProgression
+              key="progression"
+              fixtureId={fixtureId}
+              homeTeamId={homeTeamId}
+              awayTeamId={awayTeamId}
+              fixtureStatus={fixtureStatus}
+              style={styles.pageCard}
+            />,
+            <ControlConversion
+              key="verdict"
+              fixtureId={fixtureId}
+              homeTeamId={homeTeamId}
+              awayTeamId={awayTeamId}
+              fixtureStatus={fixtureStatus}
+              style={styles.pageCard}
+            />,
+            <PitchHeatmap
+              key="heatmap"
+              fixtureId={fixtureId}
+              homeTeamId={homeTeamId}
+              awayTeamId={awayTeamId}
+              fixtureStatus={fixtureStatus}
+              style={styles.pageCard}
+            />,
+          ]}
+        />
+      </View>
     </View>
   );
 }
@@ -80,4 +95,6 @@ const styles = StyleSheet.create({
   // No paddingBottom — the drill screen's scroll container owns the
   // bottom inset (60pt), same as the team / player drills.
   insightsPaneStack: { gap: Spacing.three },
+  carouselBleed: { marginHorizontal: -Spacing.four },
+  pageCard: { flex: 1 },
 });

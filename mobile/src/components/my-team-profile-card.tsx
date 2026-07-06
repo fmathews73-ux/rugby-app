@@ -29,6 +29,12 @@ export function MyTeamProfileCard() {
   return <Populated teamId={myTeamId} />;
 }
 
+/** Team-scoped variant for the team drill — same card, caller-scoped
+ *  team id instead of the Home My Team selection. */
+export function TeamProfileCard({ teamId }: { teamId: string }) {
+  return <Populated teamId={teamId} />;
+}
+
 function Populated({ teamId }: { teamId: string }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);

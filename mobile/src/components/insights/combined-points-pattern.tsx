@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
 import { useFixture, useTeam } from '@/api/hooks';
@@ -39,10 +39,12 @@ export function CombinedPointsPattern({
   fixtureId,
   homeTeamId,
   awayTeamId,
+  style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const fixture = useFixture(fixtureId);
@@ -56,7 +58,7 @@ export function CombinedPointsPattern({
   const canRender = fixtureHasMomentum(fixture.data?.status);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Momentum</Text>
