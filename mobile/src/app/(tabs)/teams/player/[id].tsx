@@ -9,7 +9,7 @@ import { usePlayer, usePlayerPercentiles } from '@/api/hooks';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
@@ -72,7 +72,7 @@ export default function PlayerCardScreen() {
 
   if (player.isLoading) {
     return (
-      <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <SafeAreaView edges={['left', 'right']} style={styles.safe}>
         <PageGradient />
         <LoadingState />
       </SafeAreaView>
@@ -80,7 +80,7 @@ export default function PlayerCardScreen() {
   }
   if (player.isError || !player.data) {
     return (
-      <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <SafeAreaView edges={['left', 'right']} style={styles.safe}>
         <PageGradient />
         <ErrorState error={player.error ?? new Error(`player ${playerId} not found`)} />
       </SafeAreaView>
@@ -91,7 +91,7 @@ export default function PlayerCardScreen() {
   const isForward = FORWARD_POSITIONS.includes(p.primary_position);
 
   return (
-    <SafeAreaView edges={['bottom']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       {/* Identity + pills pinned OUTSIDE the ScrollView, mirroring the
           fixture drill's hero + sub-tab strip. */}
@@ -769,7 +769,7 @@ const styles = StyleSheet.create({
     // 16pt drop from the pill strip into the pane — matches the fixture
     // drill's pane paddingTop so all three drills share one rhythm.
     paddingTop: Spacing.three,
-    paddingBottom: 60,
+    paddingBottom: PAGE_BOTTOM_INSET,
     gap: Spacing.three,
   },
 

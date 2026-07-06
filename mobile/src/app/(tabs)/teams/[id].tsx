@@ -23,7 +23,7 @@ import { TeamAnalysisCard } from '@/components/team-analysis-card';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { TIER_1_IDS } from '@/lib/tiers';
 
@@ -165,7 +165,7 @@ export default function TeamHubScreen() {
 
   if (teams.isLoading) {
     return (
-      <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <SafeAreaView edges={['left', 'right']} style={styles.safe}>
         <PageGradient />
         <LoadingState />
       </SafeAreaView>
@@ -173,7 +173,7 @@ export default function TeamHubScreen() {
   }
   if (teams.isError || !team) {
     return (
-      <SafeAreaView edges={['bottom']} style={styles.safe}>
+      <SafeAreaView edges={['left', 'right']} style={styles.safe}>
         <PageGradient />
         <ErrorState error={teams.error ?? new Error(`team ${teamId} not found`)} />
       </SafeAreaView>
@@ -181,7 +181,7 @@ export default function TeamHubScreen() {
   }
 
   return (
-    <SafeAreaView edges={['bottom']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       {/* Identity + pills pinned OUTSIDE the ScrollView. Three centred
           bands mirroring the fixture hero's grammar (date line / flags
@@ -739,7 +739,7 @@ const styles = StyleSheet.create({
     // 16pt drop from the pill strip into the pane — matches the fixture
     // drill's pane paddingTop so all three drills share one rhythm.
     paddingTop: Spacing.three,
-    paddingBottom: 60,
+    paddingBottom: PAGE_BOTTOM_INSET,
     gap: Spacing.three,
   },
   // Carousel pages are full screen width — bleed out of the pane's

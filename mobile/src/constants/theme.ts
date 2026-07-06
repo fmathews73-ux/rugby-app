@@ -93,6 +93,10 @@ export const Spacing = {
  * centre their shorter content inside the same height so all three
  * drills measure identically from header to pill strip.
  */
+/** Bottom inset under the last card of every scrolling page — clears
+ *  the footer tab bar with consistent air app-wide. */
+export const PAGE_BOTTOM_INSET = 60;
+
 export const DRILL_HERO_MIN_HEIGHT = 140;
 
 export const PillStrip = {

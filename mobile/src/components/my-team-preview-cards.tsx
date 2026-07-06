@@ -1,4 +1,5 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
@@ -33,6 +34,17 @@ export function MyTeamPreviewCards() {
   // Single source of truth for the sync: taps in the analysis card and
   // swipes on the carousel both land here.
   const [section, setSection] = useState('__summary__');
+
+  // Returning to the Home tab always lands on the first chart (radar)
+  // with the accordion at its resting summary — a fresh read every
+  // visit, regardless of where the user left the carousel.
+  useFocusEffect(
+    useCallback(() => {
+      setSection('__summary__');
+      carouselRef.current?.scrollToPage(0, false);
+    }, []),
+  );
+
   if (!myTeamId) return null;
 
   return (

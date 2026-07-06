@@ -1,13 +1,13 @@
 import { useQueries } from '@tanstack/react-query';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   ScrollView,
   StyleSheet,
   useWindowDimensions,
-  View,
-} from 'react-native';
+  View, Pressable } from 'react-native';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -132,6 +132,7 @@ export function FixtureCarousel() {
   );
 
   const [activeIdx, setActiveIdx] = useState(centreIndexInWindow);
+  const router = useRouter();
   const scrollRef = useRef<ScrollView>(null);
   const didInitialScroll = useRef(false);
 
@@ -152,6 +153,17 @@ export function FixtureCarousel() {
     }
     return undefined;
   }, [windowFixtures.length, centreIndexInWindow, SNAP]);
+
+  // Re-centre on the next-up match every time the tab regains focus —
+  // the centre card is the carousel's home position.
+  useFocusEffect(
+    useCallback(() => {
+      if (didInitialScroll.current && windowFixtures.length > 0) {
+        scrollRef.current?.scrollTo({ x: centreIndexInWindow * SNAP, animated: false });
+        setActiveIdx(centreIndexInWindow);
+      }
+    }, [windowFixtures.length, centreIndexInWindow, SNAP]),
+  );
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
@@ -189,12 +201,18 @@ export function FixtureCarousel() {
           const comp = compById.get(fx.competition_id);
           const result = resultByFixture.get(fx.id) ?? null;
           return (
-            <View
+            <Pressable
               key={fx.id}
-              style={{
-                width: CARD_WIDTH,
-                marginRight: i === windowFixtures.length - 1 ? 0 : CARD_GAP,
-              }}>
+              onPress={() => router.push(`/fixtures/${fx.id}`)}
+              accessibilityRole="button"
+              accessibilityLabel="Open fixture"
+              style={({ pressed }) => [
+                {
+                  width: CARD_WIDTH,
+                  marginRight: i === windowFixtures.length - 1 ? 0 : CARD_GAP,
+                },
+                pressed && { opacity: 0.85 },
+              ]}>
               <FixtureCarouselCard
                 fixture={fx}
                 result={result}
@@ -204,7 +222,7 @@ export function FixtureCarousel() {
                 dayLabel={formatFixtureDate(fx)}
                 width={CARD_WIDTH}
               />
-            </View>
+            </Pressable>
           );
         })}
       </ScrollView>

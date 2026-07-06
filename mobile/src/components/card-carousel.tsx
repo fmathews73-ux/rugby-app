@@ -27,8 +27,9 @@ import { Colors, Spacing } from '@/constants/theme';
  * shorter cards stretch to match.
  */
 export interface CardCarouselHandle {
-  /** Animated scroll to a page index — the analysis-accordion sync hook. */
-  scrollToPage: (index: number) => void;
+  /** Scroll to a page index — animated for accordion sync taps,
+   *  instant (animated=false) for focus resets. */
+  scrollToPage: (index: number, animated?: boolean) => void;
 }
 
 export const CardCarousel = forwardRef<
@@ -44,9 +45,9 @@ export const CardCarousel = forwardRef<
   const scrollRef = useRef<ScrollView>(null);
 
   useImperativeHandle(ref, () => ({
-    scrollToPage: (index: number) => {
+    scrollToPage: (index: number, animated = true) => {
       const clamped = Math.max(0, Math.min(pages.length - 1, index));
-      scrollRef.current?.scrollTo({ x: clamped * screenWidth, animated: true });
+      scrollRef.current?.scrollTo({ x: clamped * screenWidth, animated });
       setActiveIdx(clamped);
     },
   }));

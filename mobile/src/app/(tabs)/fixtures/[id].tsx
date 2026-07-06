@@ -22,7 +22,7 @@ import { StatsPane } from '@/components/fixture-drill/stats-pane';
 import { SubTabBar, type SubTab } from '@/components/fixture-drill/sub-tab-bar';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { Spacing } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Spacing } from '@/constants/theme';
 
 /**
  * Fixture detail. Header shows the matchup (flag balls + team names + score
@@ -74,7 +74,7 @@ export default function FixtureDetailScreen() {
   }, [players.data]);
 
   return (
-    <SafeAreaView edges={['bottom']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       <Stack.Screen options={{ title: '' }} />
       {fixture.isLoading ? (
@@ -143,7 +143,7 @@ export default function FixtureDetailScreen() {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  scroll: { paddingBottom: 60 },
+  scroll: { paddingBottom: PAGE_BOTTOM_INSET },
   // gap matches the app-wide 16pt inter-card rhythm (each pane renders
   // one stack today, but any future sibling gets the standard gap).
   pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.three },

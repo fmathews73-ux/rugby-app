@@ -7,7 +7,7 @@ import { HomeRankingsCarousel } from '@/components/home-rankings-carousel';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 const UP = '#059669';
 const DOWN = '#DC2626';
@@ -28,7 +28,7 @@ export default function RankingsScreen() {
   }, [teams.data]);
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       <ScrollView contentContainerStyle={styles.scroll}>
         {/* Paged summary carousel — Men's + Women's top-5 view. Sits above
@@ -93,7 +93,7 @@ function MovementBadge({ movement }: { movement: number | null }) {
 
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
-  scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: 40 },
+  scroll: { padding: Spacing.four, gap: Spacing.three, paddingBottom: PAGE_BOTTOM_INSET },
 
   headerBlock: { gap: 4 },
   title: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text },

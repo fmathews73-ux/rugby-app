@@ -13,7 +13,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
 import { TIER_1_IDS } from '@/lib/tiers';
@@ -139,7 +139,7 @@ export default function TeamsScreen() {
   })();
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       <CompetitionPicker options={TEAM_FILTERS} selected={filter} onSelect={setFilter} />
       {query.isLoading ? (
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
     // 8pt drop from the pill strip's hairline — matches Home's
     // header-to-hero gap and the Fixtures / Standings pages.
     paddingTop: Spacing.two,
-    paddingBottom: 40,
+    paddingBottom: PAGE_BOTTOM_INSET,
     gap: Spacing.three,
   },
 

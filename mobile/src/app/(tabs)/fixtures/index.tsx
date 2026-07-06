@@ -13,7 +13,7 @@ import { LivePulseDot } from '@/components/live-pulse-dot';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
@@ -418,7 +418,8 @@ const styles = StyleSheet.create({
     // drop Home uses between the header and the hero carousel, applied
     // on every strip-topped page (Fixtures / Teams / Standings).
     paddingTop: Spacing.two,
-    // No paddingBottom — cards scroll cleanly under the tab bar, matching
+    paddingBottom: PAGE_BOTTOM_INSET,
+    // (Previously no paddingBottom — cards scrolled under the tab bar;
     // the Home page pattern.
     gap: Spacing.three,
   },

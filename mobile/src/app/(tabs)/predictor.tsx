@@ -32,7 +32,7 @@ import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants
  */
 export default function PredictorScreen() {
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       <View style={styles.body}>
         <View style={styles.iconWrap}>

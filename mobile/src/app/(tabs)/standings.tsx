@@ -7,7 +7,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * Standings. Picker at the top selects a competition; the query switches to
@@ -47,7 +47,7 @@ export default function StandingsScreen() {
   const info = SEASON_TITLE[seasonId];
 
   return (
-    <SafeAreaView edges={['bottom', 'left', 'right']} style={styles.safe}>
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
       <CompetitionPicker
         options={STANDINGS_OPTIONS}
@@ -136,7 +136,7 @@ const styles = StyleSheet.create({
     // 8pt drop from the pill strip's hairline — matches Home's
     // header-to-hero gap and the Fixtures / Teams pages.
     paddingTop: Spacing.two,
-    paddingBottom: 40,
+    paddingBottom: PAGE_BOTTOM_INSET,
     gap: Spacing.three,
   },
 

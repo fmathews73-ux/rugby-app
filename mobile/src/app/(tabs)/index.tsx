@@ -8,7 +8,7 @@ import { MyTeamMatchesCard } from '@/components/my-team-matches-card';
 import { MyTeamPreviewCards } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamSelectorCard } from '@/components/team-selector-card';
-import { Spacing } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Spacing } from '@/constants/theme';
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
 
 /**
@@ -83,7 +83,7 @@ const styles = StyleSheet.create({
     paddingTop: Spacing.two,
     // Breathing room between the last card and the tab bar when the
     // ScrollView is scrolled to the very bottom.
-    paddingBottom: Spacing.four,
+    paddingBottom: PAGE_BOTTOM_INSET,
     // Inter-card gap matches the `paddingTop` inside each carousel's dotsRow
     // (Spacing.three = 16pt) so dots feel equally padded above and below.
     // Changing this in one place keeps that symmetry consistent for all cards.
