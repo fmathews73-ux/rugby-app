@@ -43,17 +43,37 @@ export const CardCarousel = forwardRef<
   const { width: screenWidth } = useWindowDimensions();
   const [activeIdx, setActiveIdx] = useState(0);
   const scrollRef = useRef<ScrollView>(null);
+  // While a programmatic scroll is in flight, its intermediate frames
+  // still round to the ORIGIN page — reporting those through
+  // onPageChange let the landing overwrite the section the user just
+  // tapped (tap Keys → carousel animates → lands reporting "Shape").
+  // The target ref mutes onPageChange until the scroll lands; a user
+  // drag reclaims control immediately.
+  const programmaticTarget = useRef<number | null>(null);
 
   useImperativeHandle(ref, () => ({
     scrollToPage: (index: number, animated = true) => {
       const clamped = Math.max(0, Math.min(pages.length - 1, index));
+      programmaticTarget.current = clamped;
       scrollRef.current?.scrollTo({ x: clamped * screenWidth, animated });
       setActiveIdx(clamped);
     },
   }));
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-    const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
+    const x = e.nativeEvent.contentOffset.x;
+    const idx = Math.round(x / screenWidth);
+    if (programmaticTarget.current !== null) {
+      // In-flight programmatic scroll: swallow events (dots already
+      // show the target) until it lands on the target offset.
+      if (
+        idx === programmaticTarget.current &&
+        Math.abs(x - idx * screenWidth) < 2
+      ) {
+        programmaticTarget.current = null;
+      }
+      return;
+    }
     if (idx !== activeIdx && idx >= 0 && idx < pages.length) {
       setActiveIdx(idx);
       onPageChange?.(idx);
@@ -67,6 +87,9 @@ export const CardCarousel = forwardRef<
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
+        onScrollBeginDrag={() => {
+          programmaticTarget.current = null;
+        }}
         onScroll={handleScroll}
         scrollEventThrottle={16}>
         {pages.map((page, i) => (
