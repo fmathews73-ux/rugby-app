@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View , type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
 
@@ -33,17 +33,35 @@ export function InsightsCanvas({
   primaryTeamId,
   compareTeamId,
   fixtureStatus,
+  asOfDate,
+  lookback,
+  style,
 }: {
   primaryTeamId: string | null;
   compareTeamId?: string | null;
   fixtureStatus?: Fixture['status'];
+  /** Freeze the aggregates to fixtures before this ISO timestamp —
+   *  the pre-match pane passes kickoff so the radar reads as-of. */
+  asOfDate?: string;
+  /** Restrict the aggregate window (e.g. prev-10 on the pre-match
+   *  pane, matching the analysis engine's window). */
+  lookback?: number;
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
   const primaryTeam = useTeam(primaryTeamId ?? '');
   const compareTeam = useTeam(compareTeamId ?? '');
-  const { data: primaryAgg, isLoading: primaryLoading } = useTeamAggregate(primaryTeamId ?? '');
-  const { data: compareAgg, isLoading: compareLoading } = useTeamAggregate(compareTeamId ?? '');
+  const { data: primaryAgg, isLoading: primaryLoading } = useTeamAggregate(
+    primaryTeamId ?? '',
+    asOfDate,
+    lookback,
+  );
+  const { data: compareAgg, isLoading: compareLoading } = useTeamAggregate(
+    compareTeamId ?? '',
+    asOfDate,
+    lookback,
+  );
 
   const primaryAxes = useMemo(() => buildRadarAxes(primaryAgg), [primaryAgg]);
   const compareAxes = useMemo(() => buildRadarAxes(compareAgg), [compareAgg]);
@@ -58,7 +76,7 @@ export function InsightsCanvas({
   const compareShort = compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase();
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Profile</Text>

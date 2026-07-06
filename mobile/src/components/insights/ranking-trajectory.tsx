@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
@@ -182,6 +182,12 @@ function TrajectoryChart({
   const first = series[0];
   const last = series[series.length - 1];
 
+  // Step-path connector — rank moves are discrete jumps, so the trace
+  // runs flat then steps, never slopes. Drawn under the dots.
+  const stepPath = dots
+    .map((d, i) => (i === 0 ? `M ${d.x} ${d.y}` : `H ${d.x} V ${d.y}`))
+    .join(' ');
+
   return (
     <View
       style={styles.chartFill}
@@ -193,6 +199,19 @@ function TrajectoryChart({
       }>
       {width > 0 && height > 0 ? (
       <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+      {/* Faint vertical month columns — completes the lattice grid so
+          the canvas reads as a punch-card, not floating dots. */}
+      {dots.map((d, i) => (
+        <Line
+          key={`v${i}`}
+          x1={d.x}
+          y1={padTop}
+          x2={d.x}
+          y2={plotBottom - 4}
+          stroke="#F3F4F6"
+          strokeWidth={1}
+        />
+      ))}
       {/* Rung gridlines + rank labels. */}
       {rungs.map((r) => (
         <Line
@@ -222,9 +241,21 @@ function TrajectoryChart({
           </SvgText>
         ) : null,
       )}
-      {/* One dot per monthly snapshot, coloured by direction. */}
+      {/* Month-to-month step trace, under the dots — lighter than the
+          standard chart line; the coloured dots carry the story. */}
+      <Path d={stepPath} stroke="#9CA3AF" strokeWidth={1.2} fill="none" />
+      {/* One dot per monthly snapshot, coloured by direction; the
+          newest month is emphasised as the "you are here" marker. */}
       {dots.map((d, i) => (
-        <Circle key={i} cx={d.x} cy={d.y} r={3.5} fill={d.fill} />
+        <Circle
+          key={i}
+          cx={d.x}
+          cy={d.y}
+          r={i === dots.length - 1 ? 5 : 3.5}
+          fill={d.fill}
+          stroke={i === dots.length - 1 ? '#FFFFFF' : 'none'}
+          strokeWidth={i === dots.length - 1 ? 1.5 : 0}
+        />
       ))}
       {/* X-axis endpoints: month labels. */}
       {first ? (
@@ -281,7 +312,9 @@ function TrajectoryInfoModal({
             rank rung — the ladder only spans the ranks the team actually
             touched, so even a one-place move is a visible step.{' '}
             <Text style={styles.modalStrong}>Green means the rank improved
-            that month, red means it slipped, grey means it held.</Text>
+            that month, red means it slipped, grey means it held.</Text> The
+            grey step line traces the path between months, and the ringed
+            dot marks the current position.
           </Text>
           <View style={styles.modalDivider} />
           <Text style={styles.modalBody}>

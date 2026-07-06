@@ -174,27 +174,29 @@ function KpiRow({
 }) {
   return (
     <View style={styles.kpiRow}>
-      <View style={styles.kpiRowHead}>
-        <Text style={styles.kpiLabel}>{label}</Text>
+      <Text style={styles.kpiLabel}>{label}</Text>
+      {/* Bar and value share one line — track flexes, value sits in a
+          fixed right rail so every track ends at the same point. */}
+      <View style={styles.kpiLine}>
+        <View style={styles.kpiTrack}>
+          <View
+            style={[
+              styles.kpiFill,
+              {
+                width: `${bar * 100}%`,
+                backgroundColor: kpiBarColor(bar, avg, inverted),
+              },
+            ]}
+          />
+          {/* T1-average reference marker — small vertical black line sitting
+              slightly taller than the track, so it reads over the coloured
+              fill without competing with the value's dominant colour. */}
+          <View style={[styles.kpiAvgMarker, { left: `${avg * 100}%` }]} />
+        </View>
         <Text style={styles.kpiValue}>
           {value}
           <Text style={styles.kpiSuffix}>{suffix}</Text>
         </Text>
-      </View>
-      <View style={styles.kpiTrack}>
-        <View
-          style={[
-            styles.kpiFill,
-            {
-              width: `${bar * 100}%`,
-              backgroundColor: kpiBarColor(bar, avg, inverted),
-            },
-          ]}
-        />
-        {/* T1-average reference marker — small vertical black line sitting
-            slightly taller than the track, so it reads over the coloured
-            fill without competing with the value's dominant colour. */}
-        <View style={[styles.kpiAvgMarker, { left: `${avg * 100}%` }]} />
       </View>
     </View>
   );
@@ -326,12 +328,15 @@ const styles = StyleSheet.create({
   // there's a full Spacing.three (16pt) of breathing room between the
   // header row and the first KPI bar, matching the rhythm of the other
   // Preview cards.
-  kpiList: { gap: Spacing.two, marginTop: Spacing.two },
+  // flex + space-evenly so the rows spread through whatever height the
+  // carousel grants the card (tallest-sibling stretch) instead of
+  // top-packing above dead space.
+  kpiList: { flex: 1, justifyContent: 'space-evenly', marginTop: Spacing.one },
   kpiRow: { gap: 4 },
-  kpiRowHead: {
+  kpiLine: {
     flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    gap: Spacing.two,
   },
   kpiLabel: {
     fontSize: TextSize.sm,
@@ -339,6 +344,8 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   kpiValue: {
+    width: 52,
+    textAlign: 'right',
     fontSize: TextSize.sm,
     fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
@@ -350,6 +357,7 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   kpiTrack: {
+    flex: 1,
     height: 4,
     backgroundColor: '#F3F4F6',
     borderRadius: 2,

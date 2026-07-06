@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
 import { useRouter, useSegments } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
-import { Colors, TextSize } from '@/constants/theme';
+import { Colors } from '@/constants/theme';
 
 /**
  * Persistent header (PRD §4.1). Left: user profile avatar / entry point on
@@ -45,17 +46,16 @@ export function AppHeader() {
       )}
 
       <View style={styles.centreSlot}>
-        {/* Brand mark: "RUGBY" + superscripted "IQ". `alignItems: 'flex-start'`
-            on the row aligns top-edges, so the smaller IQ Text sits above
-            RUGBY's baseline — the superscript effect. Face is Anton
-            (loaded in the root layout) — the Impact stand-in, since
-            Impact isn't shipped on iOS/Android and can't be bundled
-            without a Monotype licence. Neither face has a true italic,
-            so the skew transform on the row supplies the slant. */}
-        <View style={styles.appNameRow}>
-          <Text style={styles.appName}>RUGBY</Text>
-          <Text style={styles.appNameSuperscript}>IQ</Text>
-        </View>
+        {/* Brand wordmark — owner-supplied image asset (transparent
+            PNG, 658×260). Replaces the earlier Anton text build of the
+            same mark; the source of truth is the asset now. */}
+        <Image
+          source={require('../../assets/images/rugby-iq-logo.png')}
+          style={styles.wordmark}
+          contentFit="contain"
+          accessible
+          accessibilityLabel="Rugby IQ"
+        />
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
       <View style={styles.rightSlot} />
@@ -86,38 +86,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  appNameRow: {
-    flexDirection: 'row',
-    // flex-start aligns the top edges of RUGBY and IQ — the IQ Text is
-    // smaller so its baseline sits above RUGBY's baseline, giving the
-    // superscript effect. Do NOT set alignItems: 'center' here.
-    alignItems: 'flex-start',
-    gap: 1,
-    // Synthetic italic: Anton ships upright-only, so the slant is a
-    // skew on the whole row (keeps RUGBY + IQ on the same angle).
-    // scaleY squashes Anton's tall condensed caps into a flatter,
-    // wider-reading mark without touching the letter widths.
-    transform: [{ skewX: '-10deg' }, { scaleY: 0.8 }],
-  },
-  appName: {
-    fontSize: TextSize.xl,
-    fontFamily: 'Anton_400Regular',
-    // Anton sets very tight by default; open the tracking so the
-    // condensed caps breathe.
-    letterSpacing: 1.5,
-    color: Colors.light.text,
-  },
-  appNameSuperscript: {
-    fontSize: 12, // ~55% of appName size, standard superscript ratio
-    // Superscript stays on the brand face but at reduced size, reading
-    // as the lighter descriptor against RUGBY's heft.
-    fontFamily: 'Anton_400Regular',
-    color: Colors.light.text,
-    // Line box must clear Anton's tall ascender or the glyph tops get
-    // clipped (Anton's cap height exceeds a lineHeight equal to the
-    // font size). 16 gives the caps room; the row's flex-start
-    // alignment still produces the superscript position.
-    lineHeight: 16,
+  // 658×260 source — height 28 keeps it crisp inside the 44pt header,
+  // width follows the source aspect ratio.
+  wordmark: {
+    height: 28,
+    width: 28 * (658 / 260),
   },
   rightSlot: {
     minWidth: 44,

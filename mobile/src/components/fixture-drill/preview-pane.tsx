@@ -1,23 +1,32 @@
+import { useMemo, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
 
-import { CardCarousel } from '@/components/card-carousel';
+import { useTeam } from '@/api/hooks';
+import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
 import { PreMatchAnalysisCard } from '@/components/fixture-drill/pre-match-analysis-card';
-import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
-import { ExtendedMomentum } from '@/components/insights/extended-momentum';
-import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
+import { AxisHeadToHead } from '@/components/insights/axis-head-to-head';
+import { DangerWindows } from '@/components/insights/danger-windows';
+import { GapLadder } from '@/components/insights/gap-ladder';
+import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import { Spacing } from '@/constants/theme';
+import { useMatchPreview, type PreviewAxisKey } from '@/hooks/use-match-preview';
+import { PRE_MATCH_AXIS_PAIRS } from '@/lib/analysis-section-info';
 
-// ─── Preview pane ────────────────────────────────────────────────────────────
+// ─── Preview (Pre-Match) pane ────────────────────────────────────────────────
+
+// Engine window — matches use-match-preview's WINDOW.
+const LOOKBACK = 10;
 
 /**
- * Pre-match team context — recent form, WR ranking, and prev-10 KPI
- * averages for both sides, in the same paged card carousel as the Home
- * my-team block (Form → World Ranking → KPIs, dot indicator, cards
- * height-normalised via flex). Each card's two-side toggle pill
- * switches between home and away; every card is frozen to the state as
- * of kickoff.
+ * Pre-Match pane — the app's surface grammar: ONE charting carousel +
+ * ONE analysis dropdown card, every analysis section mapped 1:1 to a
+ * carousel page (Keys shares the Gap Ladder with Shape — same
+ * evidence). Two-way sync: opening a section slides its chart in;
+ * swiping the carousel opens the matching section. Every page is
+ * frozen as of kickoff, so the pane persists as a true pre-match
+ * document after full-time.
  */
 export function PreviewPane({
   fixture,
@@ -29,11 +38,87 @@ export function PreviewPane({
   homeTeamId: string;
   awayTeamId: string;
   /** Freezes every card on this pane to the state it would have shown
-   *  the day of the fixture — Form / Ranking / KPIs all drop data
-   *  timestamped at or after this ISO string. Makes a fixture opened
-   *  in 2027 still read as the *pre-match* view from 2025. */
+   *  the day of the fixture. */
   asOfDate: string;
 }) {
+  const carouselRef = useRef<CardCarouselHandle>(null);
+  const [section, setSection] = useState('__summary__');
+  const { data } = useMatchPreview(fixture.id);
+  const homeTeam = useTeam(homeTeamId);
+  const awayTeam = useTeam(awayTeamId);
+  const homeCode = homeTeam.data?.short_name ?? homeTeamId.toUpperCase();
+  const awayCode = awayTeam.data?.short_name ?? awayTeamId.toUpperCase();
+
+  // Section ↔ page maps, built from the preview data so the axis order
+  // and the conditional Danger page always match the card's sections.
+  const { pages, sectionPage, pageSection } = useMemo(() => {
+    const pages: React.ReactNode[] = [
+      // No fixtureStatus here on purpose: that gate ("populates once
+      // under way") belongs to the Insights pane, where the radar is
+      // match-scoped. Pre-match reads the HISTORICAL prev-10 profile
+      // frozen at kickoff — it must render for scheduled fixtures;
+      // in-match reads live one pill over, on Analysis.
+      <InsightsCanvas
+        key="radar"
+        primaryTeamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        asOfDate={asOfDate}
+        lookback={LOOKBACK}
+        style={styles.pageCard}
+      />,
+      <GapLadder
+        key="ladder"
+        gaps={data?.gaps ?? []}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
+        homeCode={homeCode}
+        awayCode={awayCode}
+        asOfDate={asOfDate}
+        style={styles.pageCard}
+      />,
+    ];
+    const sectionPage: Record<string, number> = { __summary__: 0, Shape: 1, Keys: 1 };
+    const pageSection: string[] = ['__summary__', 'Shape'];
+
+    if (data) {
+      for (const pair of PRE_MATCH_AXIS_PAIRS) {
+        sectionPage[pair.title] = pages.length;
+        pageSection.push(pair.title);
+        pages.push(
+          <AxisHeadToHead
+            key={pair.title}
+            axisKeys={pair.keys as readonly PreviewAxisKey[]}
+            title={pair.title}
+            homeTeamId={homeTeamId}
+            awayTeamId={awayTeamId}
+            homeCode={homeCode}
+            awayCode={awayCode}
+            asOfDate={asOfDate}
+            style={styles.pageCard}
+          />,
+        );
+      }
+    }
+
+    if (data?.danger) {
+      sectionPage['Danger periods'] = pages.length;
+      pageSection.push('Danger periods');
+      pages.push(
+        <DangerWindows
+          key="danger"
+          homeTeamId={homeTeamId}
+          awayTeamId={awayTeamId}
+          homeCode={homeCode}
+          awayCode={awayCode}
+          asOfDate={asOfDate}
+          style={styles.pageCard}
+        />,
+      );
+    }
+
+    return { pages, sectionPage, pageSection };
+  }, [data, homeTeamId, awayTeamId, homeCode, awayCode, asOfDate]);
+
   return (
     <View style={styles.insightsPaneStack}>
       {/* Full-screen-width carousel pages need to escape the drill
@@ -42,35 +127,24 @@ export function PreviewPane({
           the card column inset internally. */}
       <View style={styles.carouselBleed}>
         <CardCarousel
-          pages={[
-            <ExtendedMomentum
-              key="form"
-              teamId={homeTeamId}
-              compareTeamId={awayTeamId}
-              asOfDate={asOfDate}
-              style={styles.pageCard}
-            />,
-            <RankingTrajectory
-              key="ranking"
-              teamId={homeTeamId}
-              compareTeamId={awayTeamId}
-              asOfDate={asOfDate}
-              style={styles.pageCard}
-            />,
-            <EfficiencyKpis
-              key="kpis"
-              teamId={homeTeamId}
-              compareTeamId={awayTeamId}
-              asOfDate={asOfDate}
-              style={styles.pageCard}
-            />,
-          ]}
+          ref={carouselRef}
+          onPageChange={(i) => setSection(pageSection[i] ?? '__summary__')}
+          pages={pages}
         />
       </View>
 
-      {/* The written pre-match read — what the numbers above amount to.
-          Scheduled fixtures only; collapses to a pointer once live. */}
-      <PreMatchAnalysisCard fixture={fixture} />
+      {/* The written pre-match read — what the charts above amount to.
+          Opening a section slides its evidence into view; swiping the
+          carousel opens the matching section. */}
+      <PreMatchAnalysisCard
+        fixture={fixture}
+        openSection={section}
+        onOpenSection={(next) => {
+          setSection(next);
+          const page = sectionPage[next];
+          if (page !== undefined) carouselRef.current?.scrollToPage(page);
+        }}
+      />
     </View>
   );
 }

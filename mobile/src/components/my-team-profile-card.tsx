@@ -1,10 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 
 const LOOKBACK = 10;
@@ -23,25 +22,31 @@ const LOOKBACK = 10;
  * Returns nothing until a team is selected — [[team-selector-card]]
  * handles the empty state.
  */
-export function MyTeamProfileCard() {
-  const [myTeamId] = useMyTeamId();
-  if (!myTeamId) return null;
-  return <Populated teamId={myTeamId} />;
-}
-
 /** Team-scoped variant for the team drill — same card, caller-scoped
  *  team id instead of the Home My Team selection. */
-export function TeamProfileCard({ teamId }: { teamId: string }) {
-  return <Populated teamId={teamId} />;
+export function TeamProfileCard({
+  teamId,
+  style,
+}: {
+  teamId: string;
+  style?: StyleProp<ViewStyle>;
+}) {
+  return <Populated teamId={teamId} style={style} />;
 }
 
-function Populated({ teamId }: { teamId: string }) {
+function Populated({
+  teamId,
+  style,
+}: {
+  teamId: string;
+  style?: StyleProp<ViewStyle>;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
   const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Team Profile</Text>

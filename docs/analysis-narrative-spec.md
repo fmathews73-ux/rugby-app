@@ -28,23 +28,27 @@ tone / structure / rules, change this doc in the same commit.
 
 The Analysis card renders 12 labeled prose sections, in this order:
 
-| # | Section | Icon | Content |
-|---|---|---|---|
-| 0 | *(Summary)* | — | 1 sentence: scoreline + high-level shape. Unlabeled. |
-| 1 | Coming in | `time-outline` | Pre-match backdrop: world-ranking framing (both sides' positions as of kickoff — gap ≥8 places reads as a mismatch, ≥3 an edge, else "little between them"; omitted if either side is unranked) + form (last-5 W/L/D) + season averages (points scored, points conceded) for both sides + contrast sentence. |
-| 2 | Commentary | `mic-outline` | 3-paragraph broadcast prose (shape / attack pattern / platform work) + a closing MATCH-FLOW paragraph from the scoring timeline: lead changes, when the (current) leader hit the front, and the largest unanswered run (named only at 10+ points). Flow paragraph is omitted when there are no scoring events. Paragraphs `\n\n` separated. |
-| 3 | Variance | `analytics-outline` | Names the 2–3 axes with biggest gaps as the deciding dimensions. |
-| 4 | Attack | `flash-outline` | Axis narrative. |
-| 5 | Defence | `shield-outline` | Axis narrative. |
-| 6 | Set-piece | `layers-outline` | Axis narrative. |
-| 7 | Discipline | `warning-outline` | Axis narrative. |
-| 8 | Kicking | `send-outline` | Axis narrative. |
-| 9 | Territory | `map-outline` | Axis narrative. |
-| 10 | Possession | `american-football-outline` | Axis narrative. |
-| 11 | Turnovers | `swap-horizontal-outline` | Axis narrative. |
-| 12 | Going forward | `compass-outline` | Closing outlook: what each side will want to sharpen. Mirrors Coming in as an opener/closer pair. |
+| # | Section | Content |
+|---|---|---|
+| 0 | *(Summary)* | 1 sentence: scoreline + high-level shape. Unlabeled. |
+| 1 | Coming in | Pre-match backdrop: world-ranking framing (both sides' positions as of kickoff — gap ≥8 places reads as a mismatch, ≥3 an edge, else "little between them"; omitted if either side is unranked) + form (last-5 W/L/D) + season averages (points scored, points conceded) for both sides + contrast sentence. |
+| 2 | Commentary | 3-paragraph broadcast prose (shape / attack pattern / platform work) + a closing MATCH-FLOW paragraph from the scoring timeline: lead changes, when the (current) leader hit the front, and the largest unanswered run (named only at 10+ points). Flow paragraph is omitted when there are no scoring events. Paragraphs `\n\n` separated. |
+| 3 | Variance | Names the 2–3 axes with biggest gaps as the deciding dimensions. |
+| 4 | Attack | Axis narrative. |
+| 5 | Defence | Axis narrative. |
+| 6 | Set-piece | Axis narrative. |
+| 7 | Discipline | Axis narrative. |
+| 8 | Kicking | Axis narrative. |
+| 9 | Territory | Axis narrative. |
+| 10 | Possession | Axis narrative. |
+| 11 | Turnovers | Axis narrative. |
+| 12 | Outlook | Closing outlook: what each side will want to sharpen. Mirrors Coming in as an opener/closer pair. |
 
-Icons are chosen and rendered by the card; the LLM does not need to
+Every section header renders the standard info icon (14pt,
+`information-circle-outline`) after its label, opening that section's
+explainer modal — copy lives in `mobile/src/lib/analysis-section-info.ts`
+(axis explainers shared by the match + pre-match cards). Decorative
+per-section glyphs were retired 2026-07-06. The LLM does not need to
 know about them.
 
 ## 2. Visual grammar (client-side, non-negotiable)
@@ -149,7 +153,7 @@ form (`"comfortably above their 22-per-game norm"`), not chip form.
 
 - **Coming in** sets the pre-match backdrop (form, coming-in season
   averages). It names each side once, then contrasts them.
-- **Going forward** names one growth area for each side, based on the
+- **Outlook** names one growth area for each side, based on the
   biggest weakness surfaced today, framed constructively (`"will want
   to sharpen X"`). If a side has no material weakness, gracefully
   fall back to `"a broadly balanced read, marginal gains only"`.
@@ -317,12 +321,12 @@ read-model, or the season aggregate. Never invent a number.
 
 ### 9.1 Card structure (fixed, in order)
 
-| # | Section | Icon | Content |
-|---|---|---|---|
-| 0 | *(Summary)* | — | 1–2 sentences: name, position, caps, appearance/start/minute record, points contribution if any. Unlabeled cold open. |
-| 1 | Scouting read | `analytics-outline` | Percentile profile vs positional peers (per-80 rates, prev.-10 window). Names strengths and the soft spot. |
-| 2 | Form read | `time-outline` | Recent-half vs earlier-half comparison across the appearance window: role key metric + minutes trend. |
-| 3 | Going forward | `compass-outline` | Closing outlook built from the profile: what to lift, what to hold. Mirrors the summary as an opener/closer pair. |
+| # | Section | Content |
+|---|---|---|
+| 0 | *(Summary)* | 1–2 sentences: name, position, caps, appearance/start/minute record, points contribution if any. Unlabeled cold open. |
+| 1 | Scouting | Percentile profile vs positional peers (per-80 rates, prev.-10 window). Names strengths and the soft spot. |
+| 2 | Form | Recent-half vs earlier-half comparison across the appearance window: role key metric + minutes trend. |
+| 3 | Outlook | Closing outlook built from the profile: what to lift, what to hold. Mirrors the summary as an opener/closer pair. |
 
 ### 9.2 Thresholds (must match the template / future prompt)
 
@@ -383,13 +387,13 @@ narrative lives in §9.
 
 ### 10.1 Card structure (fixed, in order)
 
-| # | Section | Icon | Content |
-|---|---|---|---|
-| 0 | *(Summary)* | — | 1 sentence: name, current world rank, W-L(-D) record over the window, points for/against per game. Unlabeled cold open. |
-| 1 | Form read | `time-outline` | Current streak (if it qualifies) + average margin framing. |
-| 2 | Ranking read | `podium-outline` | Trajectory across the monthly ranking snapshots: climbed / slipped / held, with start and end positions. |
-| 3 | Season read | `analytics-outline` | Per-game profile: attack (tries, carry metres, possession), defence (tries conceded, tackle %), then threshold-gated set-piece and discipline sentences. |
-| 4 | Going forward | `compass-outline` | Names the single most pressing repair job, in priority order: discipline → weaker set piece → defensive leakage → consolidation. Mirrors the summary as an opener/closer pair. |
+| # | Section | Content |
+|---|---|---|
+| 0 | *(Summary)* | 1 sentence: name, current world rank, W-L(-D) record over the window, points for/against per game. Unlabeled cold open. |
+| 1 | Form | Current streak (if it qualifies) + average margin framing. |
+| 2 | Ranking | Trajectory across the monthly ranking snapshots: climbed / slipped / held, with start and end positions. |
+| 3 | Season | Per-game profile: attack (tries, carry metres, possession), defence (tries conceded, tackle %), then threshold-gated set-piece and discipline sentences. |
+| 4 | Outlook | Names the single most pressing repair job, in priority order: discipline → weaker set piece → defensive leakage → consolidation. Mirrors the summary as an opener/closer pair. |
 
 ### 10.2 Thresholds (must match the template / future prompt)
 
@@ -406,7 +410,7 @@ narrative lives in §9.
 - **Ranking move:** ± 2 or more places across the snapshot span is a
   climb/slide; less holds steady. Fewer than 2 snapshots → say the
   history is insufficient, do not extrapolate.
-- **Window vs season baseline (Form read):** points scored / conceded
+- **Window vs season baseline (Form):** points scored / conceded
   per game in the window compared against the FULL-SEASON per-game
   baseline (the Stats pane's second column). Reported only when the
   divergence is ± 15% or more AND the season sample is larger than the
@@ -452,13 +456,13 @@ and must stay on the right side of it. Conditions, not outcomes.
 
 ### 11.1 Card structure (fixed, in order)
 
-| # | Section | Icon | Content |
-|---|---|---|---|
-| 0 | *(Summary)* | — | The billing: ranking framing (mismatch ≥8 places / edge ≥3 / meeting of equals) + both sides' last-5 win counts. |
-| 1 | The shape of it | `analytics-outline` | The 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds, values woven in. Balanced profiles are called balanced ("decided by execution"), never forced. |
+| # | Section | Content |
+|---|---|---|
+| 0 | *(Summary)* | The billing: ranking framing (mismatch ≥8 places / edge ≥3 / meeting of equals) + both sides' last-5 win counts. |
+| 1 | Shape | The 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds, values woven in. Balanced profiles are called balanced ("decided by execution"), never forced. |
 | 2–9 | Attack / Defence / Set-piece / Discipline / Kicking / Territory / Possession / Turnovers | same glyphs as §1's axes | Per-axis coming-in comparison — the SAME eight axes, order, and icons as the match analysis so the pre- and post-match reads line up section for section. Each axis compares one headline metric on fixed thresholds into three tiers: clear edge / shades it / even (see 11.2), with secondary metrics woven in for texture. "Edge" is a data statement about the coming-in numbers, never a result call. |
-| 10 | Danger periods | `time-outline` | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
-| 11 | Keys to the match | `key-outline` | One condition per side, ALWAYS derived from the signed axis gaps — the side ahead on the fixture's biggest gap gets the EXPLOIT framing (how to press it), the side behind gets the NEUTRALISE framing (the survival job), each with the numbers woven in. When the second-ranked gap is ≥70% of the top gap and favours the other side, that side keys off its own weapon instead — two battlegrounds beat two views of one. Dead-heat profiles (top gap < half threshold) still key off the largest gap, framed as the fine margin. NO generic filler, ever — if a key could be written without this fixture's data, it is wrong. |
+| 10 | Danger periods | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
+| 11 | Keys | One condition per side, ALWAYS derived from the signed axis gaps — the side ahead on the fixture's biggest gap gets the EXPLOIT framing (how to press it), the side behind gets the NEUTRALISE framing (the survival job), each with the numbers woven in. When the second-ranked gap is ≥70% of the top gap and favours the other side, that side keys off its own weapon instead — two battlegrounds beat two views of one. Dead-heat profiles (top gap < half threshold) still key off the largest gap, framed as the fine margin. NO generic filler, ever — if a key could be written without this fixture's data, it is wrong. |
 
 ### 11.2 Thresholds (must match the template / future prompt)
 
@@ -476,7 +480,7 @@ tier fires at half the threshold; inside that, the axis reads even):
 | Possession | average possession share | ± 6pp |
 | Turnovers | net turnovers (won − conceded) /game | ± 2 |
 
-- **The shape of it** ranks the qualifying gaps by normalised size and
+- **Shape** ranks the qualifying gaps by normalised size and
   names at most three.
 - **Timing skew:** a quarter carrying ≥ 35% of the relevant points
   across the prev-10 window (same threshold and window as §10.2).

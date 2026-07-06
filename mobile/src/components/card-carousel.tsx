@@ -1,4 +1,10 @@
-import { type ReactNode, useState } from 'react';
+import {
+  forwardRef,
+  type ReactNode,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -20,18 +26,43 @@ import { Colors, Spacing } from '@/constants/theme';
  * card `style={{ flex: 1 }}` (the insight cards' style prop) so
  * shorter cards stretch to match.
  */
-export function CardCarousel({ pages }: { pages: readonly ReactNode[] }) {
+export interface CardCarouselHandle {
+  /** Animated scroll to a page index — the analysis-accordion sync hook. */
+  scrollToPage: (index: number) => void;
+}
+
+export const CardCarousel = forwardRef<
+  CardCarouselHandle,
+  {
+    pages: readonly ReactNode[];
+    /** Fires when the visible page changes (swipe or programmatic). */
+    onPageChange?: (index: number) => void;
+  }
+>(function CardCarousel({ pages, onPageChange }, ref) {
   const { width: screenWidth } = useWindowDimensions();
   const [activeIdx, setActiveIdx] = useState(0);
+  const scrollRef = useRef<ScrollView>(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollToPage: (index: number) => {
+      const clamped = Math.max(0, Math.min(pages.length - 1, index));
+      scrollRef.current?.scrollTo({ x: clamped * screenWidth, animated: true });
+      setActiveIdx(clamped);
+    },
+  }));
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const idx = Math.round(e.nativeEvent.contentOffset.x / screenWidth);
-    if (idx !== activeIdx && idx >= 0 && idx < pages.length) setActiveIdx(idx);
+    if (idx !== activeIdx && idx >= 0 && idx < pages.length) {
+      setActiveIdx(idx);
+      onPageChange?.(idx);
+    }
   };
 
   return (
     <View>
       <ScrollView
+        ref={scrollRef}
         horizontal
         pagingEnabled
         showsHorizontalScrollIndicator={false}
@@ -54,7 +85,7 @@ export function CardCarousel({ pages }: { pages: readonly ReactNode[] }) {
       </View>
     </View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   page: {

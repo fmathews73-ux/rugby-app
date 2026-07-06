@@ -6,25 +6,19 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { type AxisKey, useMatchAnalysis } from '@/hooks/use-match-analysis';
+import { useMatchAnalysis } from '@/hooks/use-match-analysis';
+import {
+  AXIS_INFO,
+  MATCH_SECTION_INFO,
+  type SectionInfo,
+} from '@/lib/analysis-section-info';
 
-type IoniconName = React.ComponentProps<typeof Ionicons>['name'];
 
 /**
  * Icon per axis — each glyph aligns loosely with the axis it labels
  * (shield for defence, map for territory, ball for possession, etc.).
  * Kept as a stable map so the card stays deterministic across renders.
  */
-const AXIS_ICONS: Record<AxisKey, IoniconName> = {
-  attack: 'flash-outline',
-  defence: 'shield-outline',
-  setPiece: 'layers-outline',
-  discipline: 'warning-outline',
-  kicking: 'send-outline',
-  territory: 'map-outline',
-  possession: 'american-football-outline',
-  turnovers: 'swap-horizontal-outline',
-};
 
 /**
  * BI-style match analysis card. A written analyst read of the match,
@@ -59,6 +53,17 @@ const AXIS_ICONS: Record<AxisKey, IoniconName> = {
  */
 export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
+  // Accordion: exactly one section open at all times. The title row's
+  // summary is the resting state — it starts open, closes when a
+  // category dropdown opens, and reopens whenever the open dropdown is
+  // closed (closing never leaves the card empty).
+  const [openSection, setOpenSection] = useState<string>('__summary__');
+  const accordion = (label: string) => ({
+    open: openSection === label,
+    onToggle: () => setOpenSection((p) => (p === label ? '__summary__' : label)),
+  });
+
   const { data, isLoading } = useMatchAnalysis(fixture.id);
 
   const hasNarrative =
@@ -68,7 +73,13 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
 
   return (
     <View style={styles.card}>
-      <View style={styles.headerRow}>
+      {/* Card title doubles as the FIRST accordion section — it owns
+          the cold-open summary. */}
+      <Pressable
+        style={styles.headerRow}
+        onPress={accordion('__summary__').onToggle}
+        accessibilityRole="button"
+        accessibilityLabel="Toggle the match analysis summary">
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Match Analysis</Text>
           <Pressable
@@ -79,15 +90,22 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {data?.status === 'live' ? (
-          <View style={styles.livePill}>
-            <LivePulseDot color={Colors.light.background} />
-            <Text style={styles.livePillLabel}>LIVE · {data.generatedAtMinute}&apos;</Text>
-          </View>
-        ) : data?.status === 'completed' ? (
-          <Text style={styles.metaChip}>FULL-TIME</Text>
-        ) : null}
-      </View>
+        <View style={styles.headerRightGroup}>
+          {data?.status === 'live' ? (
+            <View style={styles.livePill}>
+              <LivePulseDot color={Colors.light.background} />
+              <Text style={styles.livePillLabel}>LIVE · {data.generatedAtMinute}&apos;</Text>
+            </View>
+          ) : data?.status === 'completed' ? (
+            <Text style={styles.metaChip}>FULL-TIME</Text>
+          ) : null}
+          <Ionicons
+            name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
+            size={14}
+            color={Colors.light.textSecondary}
+          />
+        </View>
+      </Pressable>
 
       {!hasNarrative ? (
         <Text style={styles.empty}>
@@ -97,19 +115,20 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
         <Text style={styles.empty}>Loading…</Text>
       ) : (
         <View style={styles.sectionsStack}>
-          {/* Opening summary — no label. Acts as the analyst's cold-open
-              sentence before the labeled sections take over. */}
-          <Text style={styles.summary}>{data.summary}</Text>
+          {/* Opening summary — body of the title section above. */}
+          {openSection === '__summary__' ? (
+            <Text style={styles.summary}>{data.summary}</Text>
+          ) : null}
 
           {/* Pre-match backdrop — form + coming-in season baseline. */}
-          <NarrativeSection label="Coming in" icon="time-outline">
+          <NarrativeSection label="Coming in" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Coming in']!)} {...accordion("Coming in")}>
             <Text style={styles.body}>{data.context}</Text>
           </NarrativeSection>
 
           {/* Broadcast prose — shape / attack / platform. Rendered as
               three tight paragraphs under a single Commentary label so
               the section reads as one continuous analyst passage. */}
-          <NarrativeSection label="Commentary" icon="mic-outline">
+          <NarrativeSection label="Commentary" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Commentary']!)} {...accordion("Commentary")}>
             {data.commentary.split('\n\n').map((paragraph, i) => (
               <Text key={i} style={styles.body}>
                 {paragraph}
@@ -118,7 +137,7 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
           </NarrativeSection>
 
           {/* Variance callout — the deciding axes. */}
-          <NarrativeSection label="Variance" icon="analytics-outline">
+          <NarrativeSection label="Variance" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Variance']!)} {...accordion("Variance")}>
             <Text style={styles.body}>{data.variance}</Text>
           </NarrativeSection>
 
@@ -129,19 +148,41 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             <NarrativeSection
               key={axis.key}
               label={axis.label}
-              icon={AXIS_ICONS[axis.key]}>
+              onInfo={() => setSectionInfo(AXIS_INFO[axis.key]!)}
+              {...accordion(axis.label)}>
               <Text style={styles.body}>{axis.narrative}</Text>
             </NarrativeSection>
           ))}
 
           {/* Closing forward-look — mirrors the "Coming in" opener. */}
-          <NarrativeSection label="Going forward" icon="compass-outline">
+          <NarrativeSection label="Outlook" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Outlook']!)} {...accordion("Outlook")}>
             <Text style={styles.body}>{data.outlook}</Text>
           </NarrativeSection>
         </View>
       )}
 
       <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
+      <Modal
+        visible={sectionInfo !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSectionInfo(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setSectionInfo(null)}>
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{sectionInfo?.title}</Text>
+              <Pressable onPress={() => setSectionInfo(null)} hitSlop={10} accessibilityLabel="Close">
+                <Ionicons name="close" size={20} color={Colors.light.text} />
+              </Pressable>
+            </View>
+            {sectionInfo?.paragraphs.map((para, i) => (
+              <Text key={i} style={styles.modalBody}>
+                {para}
+              </Text>
+            ))}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -153,20 +194,41 @@ export function MatchAnalysisCard({ fixture }: { fixture: Fixture }) {
  */
 function NarrativeSection({
   label,
-  icon,
+  onInfo,
   children,
+  open,
+  onToggle,
 }: {
   label: string;
-  icon: IoniconName;
+  onInfo: () => void;
   children: React.ReactNode;
+  open: boolean;
+  onToggle: () => void;
 }) {
   return (
     <View style={styles.section}>
-      <View style={styles.sectionMiniLabelRow}>
-        <Ionicons name={icon} size={12} color={Colors.light.textSecondary} />
-        <Text style={styles.sectionMiniLabel}>{label}</Text>
-      </View>
-      {children}
+      <Pressable
+        onPress={onToggle}
+        style={styles.sectionMiniLabelRow}
+        accessibilityRole="button"
+        accessibilityLabel={`${open ? 'Collapse' : 'Expand'} ${label}`}>
+        <View style={styles.sectionMiniLabelGroup}>
+          <Text style={styles.sectionMiniLabel}>{label}</Text>
+          <Pressable
+            onPress={onInfo}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={`Explain ${label}`}>
+            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          </Pressable>
+        </View>
+        <Ionicons
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={14}
+          color={Colors.light.textSecondary}
+        />
+      </Pressable>
+      {open ? children : null}
     </View>
   );
 }
@@ -221,6 +283,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   headerTitleGroup: {
     flexDirection: 'row',
@@ -281,7 +348,17 @@ const styles = StyleSheet.create({
   sectionMiniLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    // Label + icon left, expand chevron right — the squad card's
+    // dropdown-header grammar. Symmetric vertical padding keeps the
+    // text dead-centre in the row height.
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.two,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F3F4F6',
+  },
+  sectionMiniLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   sectionMiniLabel: {

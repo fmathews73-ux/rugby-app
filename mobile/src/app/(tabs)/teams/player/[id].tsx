@@ -13,7 +13,6 @@ import { Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTrac
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
-import { initialsOf } from '@/lib/initials';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import {
   BACK_SCOUT,
@@ -26,6 +25,7 @@ import {
   POSITION_LABELS,
   type ScoutMetric,
 } from '@/lib/player-roles';
+import { PLAYER_SECTION_INFO, type SectionInfo } from '@/lib/analysis-section-info';
 import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
 
 // Trend dot colours — same trio as the form circles / Form chart.
@@ -53,9 +53,9 @@ const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
 /**
  * Player card — the deepest level of the Teams drill, structured like
  * the fixture drill: pinned identity header + segmented sub-tabs, with
- * the pane content scrolling beneath. Identity uses a monogram in place
- * of a headshot (player photos are a Phase 6 image-rights licence tier
- * — the monogram is the deliberate placeholder, not a gap).
+ * the pane content scrolling beneath. Identity carries a portrait photo
+ * placeholder (player photos are a Phase 6 image-rights licence tier —
+ * the glyph placeholder is deliberate, not a gap).
  */
 export default function PlayerCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -96,25 +96,26 @@ export default function PlayerCardScreen() {
       {/* Identity + pills pinned OUTSIDE the ScrollView, mirroring the
           fixture drill's hero + sub-tab strip. */}
       <View style={styles.identityHeader}>
-        {/* Same hero treatment as the team drill: identity anchored
-            left (40pt monogram + name), quiet meta lines stacked
-            left-aligned in the right-hand space. */}
+        {/* Identity text column left (name + meta rows), generous
+            player-photo placeholder right. The placeholder is the
+            future image slot — real headshots are a Phase 6
+            image-rights item (register #5/#28), so a large person
+            glyph holds the space until then. */}
         <View style={styles.heroRow}>
-          <View style={styles.heroIdentityGroup}>
-            <View style={styles.monogram}>
-              <Text style={styles.monogramText}>{initialsOf(p.name)}</Text>
-            </View>
+          <View style={styles.heroTextStack}>
             <Text style={styles.heroName} numberOfLines={2}>
               {p.name}
             </Text>
-          </View>
-          <View style={styles.heroMetaStack}>
             <Text style={styles.heroMetaText}>
               {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
             </Text>
             <Text style={styles.heroMetaText}>
-              {p.height_cm} cm · {p.weight_kg} kg · {p.cap_count} caps
+              {p.height_cm} cm · {p.weight_kg} kg
             </Text>
+            <Text style={styles.heroMetaText}>{p.cap_count} caps</Text>
+          </View>
+          <View style={styles.heroPhotoPlaceholder}>
+            <Ionicons name="person-outline" size={44} color={Colors.light.textSecondary} />
           </View>
         </View>
       </View>
@@ -153,6 +154,7 @@ function ScoutingCard({
   metrics: readonly ScoutMetric[];
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+
   const percentiles = usePlayerPercentiles(playerId, LOOKBACK);
 
   const byField = useMemo(() => {
@@ -592,11 +594,25 @@ function round1(v: number): number {
  */
 function PlayerAnalysisCard({ playerId }: { playerId: string }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  // Accordion: exactly one section open at all times. The title row's
+  // summary is the resting state — it starts open, closes when a
+  // category dropdown opens, and reopens whenever the open dropdown is
+  // closed (closing never leaves the card empty).
+  const [openSection, setOpenSection] = useState<string>('__summary__');
+  const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
+  const accordion = (label: string) => ({
+    open: openSection === label,
+    onToggle: () => setOpenSection((p) => (p === label ? '__summary__' : label)),
+  });
   const { data, isLoading } = usePlayerAnalysis(playerId);
 
   return (
     <View style={styles.card}>
-      <View style={styles.headerRow}>
+      <Pressable
+        style={styles.headerRow}
+        onPress={accordion('__summary__').onToggle}
+        accessibilityRole="button"
+        accessibilityLabel="Toggle the player analysis summary">
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Player Analysis</Text>
           <Pressable
@@ -607,7 +623,12 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-      </View>
+        <Ionicons
+          name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
+          size={14}
+          color={Colors.light.textSecondary}
+        />
+      </Pressable>
 
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -615,16 +636,18 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
         <Text style={styles.empty}>Analysis populates once the player has made an appearance.</Text>
       ) : (
         <View style={styles.narrativeStack}>
-          {/* Cold-open summary — no label, mirroring the match card. */}
-          <Text style={styles.narrativeSummary}>{data.summary}</Text>
+          {/* Cold-open summary — body of the title section above. */}
+          {openSection === '__summary__' ? (
+            <Text style={styles.narrativeSummary}>{data.summary}</Text>
+          ) : null}
 
-          <PlayerNarrativeSection label="Scouting read" icon="analytics-outline">
+          <PlayerNarrativeSection label="Scouting" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Scouting']!)} {...accordion("Scouting")}>
             {data.scouting}
           </PlayerNarrativeSection>
-          <PlayerNarrativeSection label="Form read" icon="time-outline">
+          <PlayerNarrativeSection label="Form" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Form']!)} {...accordion("Form")}>
             {data.form}
           </PlayerNarrativeSection>
-          <PlayerNarrativeSection label="Going forward" icon="compass-outline">
+          <PlayerNarrativeSection label="Outlook" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Outlook']!)} {...accordion("Outlook")}>
             {data.outlook}
           </PlayerNarrativeSection>
         </View>
@@ -639,26 +662,53 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
           'The scouting read names genuine strengths (70th percentile or better against positional peers) and soft spots (30th or below). The form read compares the recent half of the appearance window against the earlier half; moves under 15% are reported as steady.',
         ]}
       />
+      <InfoModal
+        visible={sectionInfo !== null}
+        onClose={() => setSectionInfo(null)}
+        title={sectionInfo?.title ?? ''}
+        paragraphs={sectionInfo?.paragraphs ?? []}
+      />
     </View>
   );
 }
 
 function PlayerNarrativeSection({
   label,
-  icon,
+  onInfo,
   children,
+  open,
+  onToggle,
 }: {
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  onInfo: () => void;
   children: string;
+  open: boolean;
+  onToggle: () => void;
 }) {
   return (
     <View style={styles.narrativeSection}>
-      <View style={styles.narrativeMiniLabelRow}>
-        <Ionicons name={icon} size={12} color={Colors.light.textSecondary} />
-        <Text style={styles.narrativeMiniLabel}>{label}</Text>
-      </View>
-      <Text style={styles.narrativeBody}>{children}</Text>
+      <Pressable
+        onPress={onToggle}
+        style={styles.narrativeMiniLabelRow}
+        accessibilityRole="button"
+        accessibilityLabel={`${open ? 'Collapse' : 'Expand'} ${label}`}>
+        <View style={styles.narrativeMiniLabelGroup}>
+          <Text style={styles.narrativeMiniLabel}>{label}</Text>
+          <Pressable
+            onPress={onInfo}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={`Explain ${label}`}>
+            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          </Pressable>
+        </View>
+        <Ionicons
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={14}
+          color={Colors.light.textSecondary}
+        />
+      </Pressable>
+      {open ? <Text style={styles.narrativeBody}>{children}</Text> : null}
     </View>
   );
 }
@@ -788,45 +838,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.three,
   },
-  heroIdentityGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    flexShrink: 1,
+  heroTextStack: {
+    flex: 1,
+    gap: 2,
   },
-  // 40pt monogram — matches the hero flag scale on the team drill
-  // (player photos are a Phase 6 image-rights tier; the monogram is
-  // the deliberate placeholder).
-  monogram: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  // Portrait photo slot — sized to carry visual weight in the 140pt
+  // hero rather than reading as an afterthought chip.
+  heroPhotoPlaceholder: {
+    width: 88,
+    height: 104,
+    borderRadius: 12,
     backgroundColor: '#F3F4F6',
     borderWidth: StyleSheet.hairlineWidth,
     borderColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'center',
   },
-  monogramText: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-  },
   heroName: {
-    fontSize: TextSize.lg,
+    // Same scale as the nation code on the team hero.
+    fontSize: TextSize.xl,
     fontWeight: TextWeight.bold,
     color: Colors.light.text,
     flexShrink: 1,
   },
   // Meta stack — quiet lines (position · age, measurables · caps,
   // team) left-aligned in the right-hand space.
-  heroMetaStack: {
-    flex: 1,
-    alignItems: 'flex-start',
-    gap: Spacing.one,
-    paddingLeft: Spacing.four,
-  },
   heroMetaText: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
@@ -963,7 +999,17 @@ const styles = StyleSheet.create({
   narrativeMiniLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    // Label + icon left, expand chevron right — the squad card's
+    // dropdown-header grammar. Symmetric vertical padding keeps the
+    // text dead-centre in the row height.
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.two,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F3F4F6',
+  },
+  narrativeMiniLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   narrativeMiniLabel: {

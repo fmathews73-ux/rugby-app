@@ -1,4 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Colors, PillStrip, TextWeight } from '@/constants/theme';
 
@@ -22,11 +32,28 @@ export function SegmentedTabs<T extends string>({
   active: T;
   onSelect: (id: T) => void;
 }) {
+  // Right-edge fade: a clean clip reads as "the row ends here", hiding
+  // any pill that's scrolled out of view (users were missing Analysis).
+  // The white gradient signals more content; it drops away once the
+  // strip is scrolled to the end (or never overflows).
+  const [viewportW, setViewportW] = useState(0);
+  const [contentW, setContentW] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
+  const showEndFade = contentW > viewportW && scrollX < contentW - viewportW - 4;
+  const showStartFade = contentW > viewportW && scrollX > 4;
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
+    setScrollX(e.nativeEvent.contentOffset.x);
+
   return (
     <View style={styles.wrap}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        onLayout={(e) => setViewportW(Math.round(e.nativeEvent.layout.width))}
+        onContentSizeChange={(w) => setContentW(Math.round(w))}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={styles.inner}>
         {tabs.map((t) => {
           const isActive = active === t.id;
@@ -47,6 +74,24 @@ export function SegmentedTabs<T extends string>({
           );
         })}
       </ScrollView>
+      {showEndFade ? (
+        <LinearGradient
+          colors={['rgba(255,255,255,0)', '#FFFFFF']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.endFade}
+          pointerEvents="none"
+        />
+      ) : null}
+      {showStartFade ? (
+        <LinearGradient
+          colors={['#FFFFFF', 'rgba(255,255,255,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.startFade}
+          pointerEvents="none"
+        />
+      ) : null}
     </View>
   );
 }
@@ -55,18 +100,35 @@ const styles = StyleSheet.create({
   wrap: {
     // White strip continues the header card into the tab-bar row so the
     // top of the screen reads as one bonded surface; the grey page
-    // background starts BELOW the pills. Horizontal padding sits on the
-    // WRAP so the ScrollView clip-bounds are inset (pills vanish at the
-    // padded edge, not the screen edge) — same trick as
-    // CompetitionPicker.
+    // background starts BELOW the pills. Horizontal padding lives on the
+    // CONTENT (not the wrap) so pills stay visible right up to the
+    // screen edge and dissolve under the edge fades — clipping at a
+    // padded bound gave a hard cut the gradient couldn't hide.
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
-    paddingHorizontal: PillStrip.stripPadH,
   },
   inner: {
+    paddingHorizontal: PillStrip.stripPadH,
     paddingVertical: PillStrip.stripPadV,
     gap: PillStrip.gap,
+  },
+  // Edge fades — dissolve the overflowing pill into the surface white
+  // so the eye reads "more that way". Pills scroll beneath them to the
+  // screen edge; the gradient reaches solid white at the edge itself.
+  endFade: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: PillStrip.stripPadH + 20,
+  },
+  startFade: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: PillStrip.stripPadH + 20,
   },
   pill: {
     paddingHorizontal: PillStrip.padH,

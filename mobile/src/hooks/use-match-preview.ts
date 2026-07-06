@@ -47,6 +47,26 @@ export interface PreviewAxis {
   narrative: string;
 }
 
+/** Signed, threshold-normalised axis gap for chart surfaces (the Gap
+ *  Ladder). norm > 0 = home ahead; |norm| ≥ 1 = clear edge, ≥ 0.5 =
+ *  slight — the same tiers the narrative uses. */
+export interface SignedGapView {
+  key: PreviewAxisKey;
+  label: string;
+  norm: number;
+}
+
+export const AXIS_LABELS: Record<PreviewAxisKey, string> = {
+  attack: 'Attack',
+  defence: 'Defence',
+  'set-piece': 'Set-piece',
+  discipline: 'Discipline',
+  kicking: 'Kicking',
+  territory: 'Territory',
+  possession: 'Possession',
+  turnovers: 'Turnovers',
+};
+
 export interface MatchPreview {
   /** Unlabeled cold open — the billing (rankings + form collision). */
   summary: string;
@@ -60,6 +80,9 @@ export interface MatchPreview {
   danger: string | null;
   /** "Keys to the match" — one condition per side, never a winner call. */
   keys: string;
+  /** All 8 signed axis gaps, largest first — chart feed for the Gap
+   *  Ladder so the visual and the narrative come off one engine. */
+  gaps: SignedGapView[];
 }
 
 interface UseMatchPreviewResult {
@@ -127,6 +150,9 @@ export function useMatchPreview(fixtureId: string): UseMatchPreviewResult {
         awayConceded: awayConceded.data,
       }),
       keys: buildKeys(home, away, hAgg, aAgg),
+      gaps: computeSignedGaps(hAgg, aAgg)
+        .map((g) => ({ ...g, label: AXIS_LABELS[g.key] }))
+        .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm)),
     };
   }, [
     fixture.data,

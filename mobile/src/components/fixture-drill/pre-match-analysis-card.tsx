@@ -5,20 +5,16 @@ import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Fixture } from '@rugby-app/shared';
 
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useMatchPreview, type PreviewAxisKey } from '@/hooks/use-match-preview';
+import { useMatchPreview } from '@/hooks/use-match-preview';
+import {
+  PRE_MATCH_AXIS_PAIRS,
+  PRE_MATCH_SECTION_INFO,
+  pairInfo,
+  type SectionInfo,
+} from '@/lib/analysis-section-info';
 
 // Same glyph per axis as the match analysis card, so the pre-match and
 // post-match reads line up section for section.
-const AXIS_ICONS: Record<PreviewAxisKey, keyof typeof Ionicons.glyphMap> = {
-  attack: 'flash-outline',
-  defence: 'shield-outline',
-  'set-piece': 'layers-outline',
-  discipline: 'warning-outline',
-  kicking: 'send-outline',
-  territory: 'map-outline',
-  possession: 'american-football-outline',
-  turnovers: 'swap-horizontal-outline',
-};
 
 /**
  * Pre-Match Analysis — the broadcast-style read BEFORE kickoff: what
@@ -35,14 +31,47 @@ const AXIS_ICONS: Record<PreviewAxisKey, keyof typeof Ionicons.glyphMap> = {
  * client-side template implementation pending the Phase 6 LLM cutover.
  * Never predicts a winner — conditions, not outcomes.
  */
-export function PreMatchAnalysisCard({ fixture }: { fixture: Fixture }) {
+export function PreMatchAnalysisCard({
+  fixture,
+  openSection: controlledSection,
+  onOpenSection,
+}: {
+  fixture: Fixture;
+  /** When provided, the accordion is CONTROLLED — the parent owns the
+   *  open section (two-way carousel sync). Omit for standalone use. */
+  openSection?: string;
+  /** Fires with the newly-open section key. */
+  onOpenSection?: (section: string) => void;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
+  // Accordion: exactly one section open at all times. The title row's
+  // summary is the resting state — it starts open, closes when a
+  // category dropdown opens, and reopens whenever the open dropdown is
+  // closed (closing never leaves the card empty).
+  const [internalSection, setInternalSection] = useState<string>('__summary__');
+  const openSection = controlledSection ?? internalSection;
+  const accordion = (label: string) => ({
+    open: openSection === label,
+    onToggle: () => {
+      const next = openSection === label ? '__summary__' : label;
+      setInternalSection(next);
+      onOpenSection?.(next);
+    },
+  });
+
   const { data, isLoading } = useMatchPreview(fixture.id);
   const isScheduled = fixture.status === 'scheduled';
 
   return (
     <View style={styles.card}>
-      <View style={styles.headerRow}>
+      {/* Card title doubles as the FIRST accordion section — it owns
+          the cold-open summary. */}
+      <Pressable
+        style={styles.headerRow}
+        onPress={accordion('__summary__').onToggle}
+        accessibilityRole="button"
+        accessibilityLabel="Toggle the pre-match summary">
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Pre-Match Analysis</Text>
           <Pressable
@@ -53,8 +82,15 @@ export function PreMatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {!isScheduled ? <Text style={styles.metaChip}>AS OF KICKOFF</Text> : null}
-      </View>
+        <View style={styles.headerRightGroup}>
+          {!isScheduled ? <Text style={styles.metaChip}>AS OF KICKOFF</Text> : null}
+          <Ionicons
+            name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
+            size={14}
+            color={Colors.light.textSecondary}
+          />
+        </View>
+      </Pressable>
 
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -64,25 +100,38 @@ export function PreMatchAnalysisCard({ fixture }: { fixture: Fixture }) {
         </Text>
       ) : (
         <View style={styles.narrativeStack}>
-          {/* Cold-open billing — no label, mirroring the other cards. */}
-          <Text style={styles.narrativeBody}>{data.summary}</Text>
+          {/* Cold-open billing — body of the title section above. */}
+          {openSection === '__summary__' ? (
+            <Text style={styles.narrativeBody}>{data.summary}</Text>
+          ) : null}
 
-          <Section label="The shape of it" icon="analytics-outline">
+          <Section label="Shape" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Shape']!)} {...accordion("Shape")}>
             {data.shape}
           </Section>
-          {/* Per-axis coming-in comparison — same taxonomy and order as
-              the match analysis, so readers can line the two up. */}
-          {data.axes.map((axis) => (
-            <Section key={axis.key} label={axis.label} icon={AXIS_ICONS[axis.key]}>
-              {axis.narrative}
-            </Section>
-          ))}
+          {/* Paired coming-in comparisons — two axes per section for a
+              denser read (both narratives, paragraph-separated), same
+              pairings as the H2H chart pages above. */}
+          {PRE_MATCH_AXIS_PAIRS.map((pair) => {
+            const narratives = pair.keys
+              .map((k) => data.axes.find((ax) => ax.key === k)?.narrative)
+              .filter((n): n is string => Boolean(n));
+            if (narratives.length === 0) return null;
+            return (
+              <Section
+                key={pair.title}
+                label={pair.title}
+                onInfo={() => setSectionInfo(pairInfo(pair))}
+                {...accordion(pair.title)}>
+                {narratives.join('\n\n')}
+              </Section>
+            );
+          })}
           {data.danger ? (
-            <Section label="Danger periods" icon="time-outline">
+            <Section label="Danger periods" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Danger periods']!)} {...accordion("Danger periods")}>
               {data.danger}
             </Section>
           ) : null}
-          <Section label="Keys to the match" icon="key-outline">
+          <Section label="Keys" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Keys']!)} {...accordion("Keys")}>
             {data.keys}
           </Section>
         </View>
@@ -105,9 +154,31 @@ export function PreMatchAnalysisCard({ fixture }: { fixture: Fixture }) {
             </Text>
             <Text style={styles.modalBody}>
               Battlegrounds are only named where the two profiles genuinely diverge,
-              and the card never predicts a result: Keys to the match are the
+              and the card never predicts a result: the Keys are the
               conditions each side needs to meet, not a call on who wins.
             </Text>
+          </Pressable>
+        </Pressable>
+      </Modal>
+
+      <Modal
+        visible={sectionInfo !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSectionInfo(null)}>
+        <Pressable style={styles.modalBackdrop} onPress={() => setSectionInfo(null)}>
+          <Pressable style={styles.modalCard} onPress={() => {}}>
+            <View style={styles.modalHeader}>
+              <Text style={styles.modalTitle}>{sectionInfo?.title}</Text>
+              <Pressable onPress={() => setSectionInfo(null)} hitSlop={10} accessibilityLabel="Close">
+                <Ionicons name="close" size={20} color={Colors.light.text} />
+              </Pressable>
+            </View>
+            {sectionInfo?.paragraphs.map((para, i) => (
+              <Text key={i} style={styles.modalBody}>
+                {para}
+              </Text>
+            ))}
           </Pressable>
         </Pressable>
       </Modal>
@@ -117,20 +188,41 @@ export function PreMatchAnalysisCard({ fixture }: { fixture: Fixture }) {
 
 function Section({
   label,
-  icon,
+  onInfo,
   children,
+  open,
+  onToggle,
 }: {
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
+  onInfo: () => void;
   children: string;
+  open: boolean;
+  onToggle: () => void;
 }) {
   return (
     <View style={styles.narrativeSection}>
-      <View style={styles.narrativeMiniLabelRow}>
-        <Ionicons name={icon} size={12} color={Colors.light.textSecondary} />
-        <Text style={styles.narrativeMiniLabel}>{label}</Text>
-      </View>
-      <Text style={styles.narrativeBody}>{children}</Text>
+      <Pressable
+        onPress={onToggle}
+        style={styles.narrativeMiniLabelRow}
+        accessibilityRole="button"
+        accessibilityLabel={`${open ? 'Collapse' : 'Expand'} ${label}`}>
+        <View style={styles.narrativeMiniLabelGroup}>
+          <Text style={styles.narrativeMiniLabel}>{label}</Text>
+          <Pressable
+            onPress={onInfo}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={`Explain ${label}`}>
+            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          </Pressable>
+        </View>
+        <Ionicons
+          name={open ? 'chevron-up' : 'chevron-down'}
+          size={14}
+          color={Colors.light.textSecondary}
+        />
+      </Pressable>
+      {open ? <Text style={styles.narrativeBody}>{children}</Text> : null}
     </View>
   );
 }
@@ -153,6 +245,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
   },
   headerTitleGroup: {
     flexDirection: 'row',
@@ -190,7 +287,17 @@ const styles = StyleSheet.create({
   narrativeMiniLabelRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    // Label + icon left, expand chevron right — the squad card's
+    // dropdown-header grammar. Symmetric vertical padding keeps the
+    // text dead-centre in the row height.
+    justifyContent: 'space-between',
+    paddingVertical: Spacing.two,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#F3F4F6',
+  },
+  narrativeMiniLabelGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: 4,
   },
   narrativeMiniLabel: {

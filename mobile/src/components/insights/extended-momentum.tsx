@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -164,11 +164,17 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
   const zeroY = height / 2;
   const halfBand = height / 2 - padY;
 
+  // Gridline step: a round number giving 2-3 rules per half.
+  const gridStep = maxAbs <= 12 ? 5 : maxAbs <= 30 ? 10 : 20;
+  const gridValues: number[] = [];
+  for (let g = gridStep; g <= maxAbs; g += gridStep) gridValues.push(g, -g);
+
   const bars = useMemo(() => {
     const n = points.length;
     if (n === 0 || width === 0 || height === 0) return [];
     const slotW = (width - 2 * padX) / n;
-    const barW = Math.min(14, Math.max(6, slotW * 0.55));
+    // Fill the slot — thin bars in wide slots read as dead space.
+    const barW = Math.min(26, Math.max(6, slotW * 0.62));
     return points.map((p, i) => {
       const x = padX + i * slotW + (slotW - barW) / 2;
       const cx = x + barW / 2;
@@ -204,6 +210,36 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
       }>
       {width > 0 && height > 0 ? (
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          {/* Margin gridlines — quiet dashed rules at ±step intervals
+              with bare flush-left numerals, so the empty regions of the
+              canvas still carry the scale (same grammar as the
+              Discipline Trend bands / Ranking rungs). Drawn first so
+              bars sit on top. */}
+          {gridValues.map((g) => {
+            const gy = zeroY - (g / maxAbs) * halfBand;
+            return (
+              <G key={`g${g}`}>
+                <Line
+                  x1={padX + 10}
+                  y1={gy}
+                  x2={width - padX}
+                  y2={gy}
+                  stroke="#E5E7EB"
+                  strokeWidth={1}
+                  strokeDasharray="3 3"
+                />
+                <SvgText
+                  x={0}
+                  y={gy + 3}
+                  fill={Colors.light.textSecondary}
+                  fontSize={8}
+                  fontWeight="700"
+                  textAnchor="start">
+                  {g > 0 ? `+${g}` : String(g)}
+                </SvgText>
+              </G>
+            );
+          })}
           {bars.map((b, i) => (
             <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
           ))}
