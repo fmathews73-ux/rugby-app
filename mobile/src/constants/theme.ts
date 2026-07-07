@@ -114,7 +114,7 @@ export const PillStrip = {
 } as const;
 
 /**
- * Canonical sizes for `TeamFlagBall2D`. Three steps — medium / row / xs —
+ * Canonical widths for `TeamFlagShield`. Three steps — medium / row / xs —
  * so hierarchy is legible without near-duplicate sizes creeping in.
  * `medium` is the HERO scale: every drill hero (fixture matchup, team,
  * player) tops out at 40pt. The old hero (96) and header (56) steps were

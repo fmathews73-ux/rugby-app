@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
@@ -128,7 +128,7 @@ export function EfficiencyKpis({
             onSelect={setActiveSide}
           />
         ) : showCornerFlag && primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
+          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
         ) : null}
       </View>
 

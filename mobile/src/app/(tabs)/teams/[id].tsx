@@ -12,9 +12,11 @@ import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
+import { JerseyAvatar } from '@/components/jersey-avatar';
+import { TEAM_JERSEY } from '@/lib/team-colors';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
@@ -184,7 +186,7 @@ export default function TeamHubScreen() {
             remaining right-hand space. */}
         <View style={styles.heroRow}>
           <View style={styles.heroIdentityGroup}>
-            <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
+            <TeamFlagShield flagCode={team.flag_code} width={FlagSize.medium} />
             <Text style={styles.heroName}>{team.short_name}</Text>
           </View>
           <View style={styles.heroMetaStack}>
@@ -312,7 +314,7 @@ export default function TeamHubScreen() {
                       landing's MY TEAM / TIER cards. */}
                   <View style={styles.cardHeaderRow}>
                     <View style={styles.squadTitleGroup}>
-                      <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
+                      <Ionicons name="list-outline" size={14} color={Colors.light.textSecondary} />
                       <Text style={styles.sectionLabel}>{section.label}</Text>
                     </View>
                     {/* Same fixed column as the player-row meta below,
@@ -333,6 +335,7 @@ export default function TeamHubScreen() {
                     <PlayerRow
                       key={p.id}
                       player={p}
+                      teamId={teamId}
                       onPress={() => router.push(`/teams/player/${p.id}`)}
                     />
                   ))}
@@ -601,17 +604,26 @@ function formatStat(v: number, percent?: boolean): string {
   return percent ? `${s}%` : s;
 }
 
-function PlayerRow({ player, onPress }: { player: Player; onPress: () => void }) {
+function PlayerRow({
+  player,
+  teamId,
+  onPress,
+}: {
+  player: Player;
+  teamId: string;
+  onPress: () => void;
+}) {
   const age = ageFrom(player.date_of_birth);
+  const jersey = TEAM_JERSEY[teamId];
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.playerRow, pressed && styles.playerRowPressed]}>
-      {/* Teams-landing row grammar: 40pt glyph where the flag ball
-          sits, bold name where the CODE sits, two quiet meta lines in
-          the right-hand space, no chevron. Glyph stays the anonymous
-          placeholder until the image-rights tier (register #5/#28). */}
-      <Ionicons name="person-circle-outline" size={40} color={Colors.light.textSecondary} />
+      {/* Teams-landing row grammar: 40pt avatar where the flag ball
+          sits. Teams with a jersey-colour entry get the coloured shirt
+          badge (colours are factual — no crests, register #28);
+          everyone else keeps the anonymous grey glyph. */}
+      <JerseyAvatar jersey={jersey} size={40} />
       <Text style={styles.playerName} numberOfLines={1}>
         {player.name}
       </Text>

@@ -8,7 +8,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -125,7 +125,7 @@ export function ExtendedMomentum({
           // Single-team mode — anchor the header with the team's flag
           // so the card identifies its subject at a glance (Home's
           // my-team stack opts out; its scope is already explicit).
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
+          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
         ) : null}
       </View>
 

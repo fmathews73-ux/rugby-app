@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { Team } from '@rugby-app/shared';
 
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 
@@ -38,7 +38,7 @@ export function TeamHeroRow({
   return (
     <View style={styles.row}>
       <View style={styles.identityGroup}>
-        <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.medium} />
+        <TeamFlagShield flagCode={team.flag_code} width={FlagSize.medium} />
         <Text style={styles.code}>{team.short_name}</Text>
       </View>
       <View style={styles.metaStack}>

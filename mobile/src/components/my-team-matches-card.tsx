@@ -8,7 +8,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
 import { useCompetitions, useTeam, useTeams } from '@/api/hooks';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { formatFixtureDate } from '@/lib/format-fixture-date';
@@ -226,13 +226,13 @@ function FixtureLine({
     <View style={styles.fixtureBlock}>
       <View style={styles.fixtureRow}>
         <View style={styles.fixtureSide}>
-          <TeamFlagBall2D flagCode={myTeam.flag_code} size={FlagSize.row} />
+          <TeamFlagShield flagCode={myTeam.flag_code} width={FlagSize.row} />
           <Text style={styles.fixtureCode}>{myTeam.short_name}</Text>
         </View>
         {middle}
         <View style={[styles.fixtureSide, styles.fixtureSideRight]}>
           <Text style={styles.fixtureCode}>{oppShort}</Text>
-          {oppTeam ? <TeamFlagBall2D flagCode={oppTeam.flag_code} size={FlagSize.row} /> : null}
+          {oppTeam ? <TeamFlagShield flagCode={oppTeam.flag_code} width={FlagSize.row} /> : null}
         </View>
       </View>
       <Text style={styles.fixtureMeta} numberOfLines={1}>

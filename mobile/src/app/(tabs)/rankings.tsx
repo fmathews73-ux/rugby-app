@@ -6,7 +6,7 @@ import { useLatestRanking, useTeams } from '@/api/hooks';
 import { HomeRankingsCarousel } from '@/components/home-rankings-carousel';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 const UP = '#059669';
@@ -60,7 +60,7 @@ export default function RankingsScreen() {
                   <Text style={styles.rank}>{row.rank}</Text>
                   <View style={styles.flagWrap}>
                     {team ? (
-                      <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} />
+                      <TeamFlagShield flagCode={team.flag_code} width={FlagSize.row} />
                     ) : (
                       <View style={styles.flagFallback} />
                     )}

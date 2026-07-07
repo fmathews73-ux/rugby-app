@@ -14,7 +14,7 @@ import {
 
 import { useLatestRanking, useLatestWomensRanking, useTeams } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextWeight } from '@/constants/theme';
 
 const UP = '#059669';
@@ -107,7 +107,7 @@ function RankingsCard({ gender }: { gender: 'mens' | 'womens' }) {
               <View key={row.team_id} style={styles.row}>
                 <Text style={styles.rank}>{row.rank}</Text>
                 {team ? (
-                  <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} />
+                  <TeamFlagShield flagCode={team.flag_code} width={FlagSize.row} />
                 ) : (
                   <View style={styles.flagFallback} />
                 )}

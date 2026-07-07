@@ -6,7 +6,7 @@ import { useSeasonStandings, useTeams } from '@/api/hooks';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
@@ -111,7 +111,7 @@ function StandingsTable({
           <View key={r.team_id} style={[styles.row, isLast && styles.rowLast]}>
             <Text style={styles.cellRank}>{r.rank}</Text>
             <View style={styles.cellFlag}>
-              {team ? <TeamFlagBall2D flagCode={team.flag_code} size={FlagSize.row} /> : null}
+              {team ? <TeamFlagShield flagCode={team.flag_code} width={FlagSize.row} /> : null}
             </View>
             <Text style={styles.cellTeam}>{team?.short_name ?? r.team_id.toUpperCase()}</Text>
             <Text style={styles.cellStat}>{r.played}</Text>

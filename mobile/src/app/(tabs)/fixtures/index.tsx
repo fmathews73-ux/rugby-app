@@ -12,7 +12,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
@@ -302,7 +302,7 @@ export default function FixturesScreen() {
                   ]}>
                   <View style={styles.matchupRow}>
                     <View style={styles.flagWrap}>
-                      {home ? <TeamFlagBall2D flagCode={home.flag_code} size={FlagSize.row} /> : null}
+                      {home ? <TeamFlagShield flagCode={home.flag_code} width={FlagSize.row} /> : null}
                     </View>
                     <Text style={styles.teamCode}>
                       {home?.short_name ?? fx.home_team_id.toUpperCase()}
@@ -366,7 +366,7 @@ export default function FixturesScreen() {
                       {away?.short_name ?? fx.away_team_id.toUpperCase()}
                     </Text>
                     <View style={styles.flagWrap}>
-                      {away ? <TeamFlagBall2D flagCode={away.flag_code} size={FlagSize.row} /> : null}
+                      {away ? <TeamFlagShield flagCode={away.flag_code} width={FlagSize.row} /> : null}
                     </View>
                   </View>
                   <Text style={styles.metaText}>

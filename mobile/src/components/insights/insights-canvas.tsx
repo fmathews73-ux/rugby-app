@@ -5,7 +5,7 @@ import { Modal, Pressable, StyleSheet, Text, View , type StyleProp, type ViewSty
 import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import {
@@ -104,7 +104,7 @@ export function InsightsCanvas({
             <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
           </View>
         ) : primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
+          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
         ) : null}
       </View>
 

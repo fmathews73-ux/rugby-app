@@ -3,7 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
 import { LivePulseDot } from '@/components/live-pulse-dot';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
@@ -58,7 +58,7 @@ export function FixtureCarouselCard({
           as symmetrically centred. */}
       <View style={styles.matchupRow}>
         {homeTeam ? (
-          <TeamFlagBall2D flagCode={homeTeam.flag_code} size={FlagSize.medium} />
+          <TeamFlagShield flagCode={homeTeam.flag_code} width={FlagSize.medium} />
         ) : null}
         <Text style={styles.teamShort}>
           {homeTeam?.short_name ?? fixture.home_team_id.toUpperCase()}
@@ -73,7 +73,7 @@ export function FixtureCarouselCard({
           {awayTeam?.short_name ?? fixture.away_team_id.toUpperCase()}
         </Text>
         {awayTeam ? (
-          <TeamFlagBall2D flagCode={awayTeam.flag_code} size={FlagSize.medium} />
+          <TeamFlagShield flagCode={awayTeam.flag_code} width={FlagSize.medium} />
         ) : null}
       </View>
 

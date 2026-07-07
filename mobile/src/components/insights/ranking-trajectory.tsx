@@ -4,7 +4,7 @@ import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyl
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
-import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
@@ -95,7 +95,7 @@ export function RankingTrajectory({
             onSelect={setActiveSide}
           />
         ) : showCornerFlag && primaryTeam.data ? (
-          <TeamFlagBall2D flagCode={primaryTeam.data.flag_code} size={FlagSize.xs} />
+          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
         ) : null}
       </View>
 
