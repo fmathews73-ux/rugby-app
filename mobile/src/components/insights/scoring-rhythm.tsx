@@ -106,6 +106,12 @@ function RhythmChart({
   const zeroY = plotH / 2;
   const halfBand = plotH / 2 - padY;
 
+  // Same gridline system as Danger Windows — the two charts tell the
+  // same per-quarter story, so they share one scale grammar.
+  const gridStep = maxAbs <= 6 ? 2 : maxAbs <= 12 ? 5 : 10;
+  const gridValues: number[] = [];
+  for (let g = gridStep; g <= maxAbs; g += gridStep) gridValues.push(g, -g);
+
   const bars = useMemo(() => {
     if (width === 0 || height === 0) return [];
     const slotW = (width - 2 * padX) / 4;
@@ -134,6 +140,34 @@ function RhythmChart({
       }>
       {width > 0 && height > 0 ? (
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          {/* Dashed scale gridlines + flush-left numerals — shared
+              grammar with Danger Windows. Drawn first so bars sit on
+              top. */}
+          {gridValues.map((g) => {
+            const gy = zeroY - (g / maxAbs) * halfBand;
+            return (
+              <G key={`g${g}`}>
+                <Line
+                  x1={padX + 10}
+                  y1={gy}
+                  x2={width - padX}
+                  y2={gy}
+                  stroke="#E5E7EB"
+                  strokeWidth={1}
+                  strokeDasharray="3 3"
+                />
+                <SvgText
+                  x={0}
+                  y={gy + 3}
+                  fill={Colors.light.textSecondary}
+                  fontFamily="Barlow_500Medium"
+                  fontSize={9}
+                  textAnchor="start">
+                  {g > 0 ? `+${g}` : String(g)}
+                </SvgText>
+              </G>
+            );
+          })}
           {/* Light hairlines between the four quarter slots. */}
           {[1, 2, 3].map((q) => {
             const x = padX + q * ((width - 2 * padX) / 4);
@@ -229,6 +263,9 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row so charts never creep
+    // into the header (with the card gap: 16pt total).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

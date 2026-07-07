@@ -6,6 +6,7 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import {
@@ -36,6 +37,7 @@ export function InsightsCanvas({
   asOfDate,
   lookback,
   style,
+  read,
 }: {
   primaryTeamId: string | null;
   compareTeamId?: string | null;
@@ -47,6 +49,10 @@ export function InsightsCanvas({
    *  pane, matching the analysis engine's window). */
   lookback?: number;
   style?: StyleProp<ViewStyle>;
+  /** Live narrative for the flip back. When provided the reader icon
+      FLIPS the card (pre-match grammar); when omitted it opens the
+      legacy explainer modal (Match Analysis pane — migrates later). */
+  read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -75,37 +81,28 @@ export function InsightsCanvas({
   const primaryShort = primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—';
   const compareShort = compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase();
 
-  return (
-    <View style={[styles.card, style]}>
+  const flipMode = read !== undefined;
+
+  const front = (
+    <View style={flipMode ? [styles.card, styles.cardFill] : [styles.card, style]}>
+      {/* Title left; accessory then the reader icon pinned right —
+          same corner slot as the Home carousel cards. */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Profile</Text>
+        <Text style={styles.sectionLabel}>Profile</Text>
+        <View style={styles.headerRightGroup}>
+          {/* Single-team mode anchors the header with the team's xs
+              flag; compare mode's colour legend sits under the chart. */}
+          {!hasCompare && primaryTeam.data ? (
+          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
+        ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the Profile radar">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {/* Legend replaces the old team toggle. Two colour-swatch chips
-            identify which polygon belongs to which side, matching the
-            treatment used on the Momentum card so the team-colour
-            convention is consistent across the Insights tab. */}
-        {/* Legend swatches use the polygon FILL tokens (light shades)
-            so the chip colour reads as the polygon body colour rather
-            than the darker stroke — matches what the eye actually sees
-            in the chart. Single-team mode anchors the header with the
-            team's xs flag instead — same treatment as the Form /
-            Trajectory / KPI cards. */}
-        {hasCompare ? (
-          <View style={styles.legend}>
-            <LegendChip label={primaryShort} color={RADAR_FILL} />
-            <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
-          </View>
-        ) : primaryTeam.data ? (
-          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
-        ) : null}
       </View>
 
       {fixtureStatus === 'scheduled' ? (
@@ -117,18 +114,53 @@ export function InsightsCanvas({
         // toggle needed. Home page single-team mode (no compareTeamId)
         // renders the primary polygon only against the 50%-reference
         // hexagon.
-        <RadarChart
-          axes={primaryReady ? primaryAxes : compareAxes}
-          compareAxes={hasCompare && primaryReady && compareReady ? compareAxes : null}
-        />
+        // Legend overlays the canvas's empty bottom band (absolute) so
+        // the card's height stays identical to Home's Team Profile.
+        <View style={styles.chartWrap}>
+          <RadarChart
+            axes={primaryReady ? primaryAxes : compareAxes}
+            compareAxes={hasCompare && primaryReady && compareReady ? compareAxes : null}
+          />
+          {hasCompare ? (
+            <View style={styles.legend}>
+              <LegendChip label={primaryShort} color={RADAR_FILL} />
+              <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
+            </View>
+          ) : null}
+        </View>
       ) : (
         <Text style={styles.empty}>
           {isLoading ? 'Loading…' : 'No completed matches to profile yet.'}
         </Text>
       )}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} hasCompare={hasCompare} />
+      {!flipMode ? (
+        <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} hasCompare={hasCompare} />
+      ) : null}
     </View>
+  );
+
+  if (!flipMode) return front;
+  return (
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      front={front}
+      back={
+        <NarrativeBack
+          title="Profile"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={
+            <>
+              Both sides' eight-dimension shapes from their last 10 matches,
+              overlaid — where the polygons separate is where this match
+              will most likely be decided.
+            </>
+          }
+        />
+      }
+    />
   );
 }
 
@@ -195,6 +227,8 @@ function InfoModal({
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -209,26 +243,38 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row so charts never creep
+    // into the header (with the card gap: 16pt total).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
+  chartWrap: { position: 'relative' },
+  // One row below the canvas, centred — the card's minHeight slack
+  // absorbs the row, so this costs no card height.
   legend: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: -Spacing.four,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    justifyContent: 'center',
+    gap: Spacing.three,
   },
   legendChip: {
     flexDirection: 'row',
@@ -236,9 +282,9 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   legendSwatch: {
-    width: 10,
-    height: 10,
-    borderRadius: 2,
+    width: 8,
+    height: 8,
+    borderRadius: 999,
   },
   legendLabel: {
     fontSize: TextSize.xs,

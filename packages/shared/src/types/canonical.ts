@@ -276,6 +276,16 @@ export interface Result {
   away_kicks_to_touch: number;
   home_kick_meters: number;
   away_kick_meters: number;
+  /** Contestable kicks PUT UP by each side (box kicks, bombs,
+   * cross-kicks contested in the air). A kick delivered by one side is
+   * received by the other, so reception numbers derive: home
+   * receptions = away_contestable_kicks; home receptions won =
+   * away_contestable_kicks − away_contestable_kicks_won. */
+  home_contestable_kicks: number;
+  away_contestable_kicks: number;
+  /** Of the side's OWN contestable kicks, how many it regathered. */
+  home_contestable_kicks_won: number;
+  away_contestable_kicks_won: number;
 
   // Set piece
   home_scrums_won: number;

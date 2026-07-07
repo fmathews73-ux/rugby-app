@@ -244,6 +244,8 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
   // keep their invariants (post-contact ≤ metres, dominant ≤ tackles,
   // penalty causes ≤ penalties conceded).
   const home_meters = rng.int(300, 700);
+  const home_contestable_kicks = rng.int(4, 9);
+  const away_contestable_kicks = rng.int(4, 9);
   const away_meters = rng.int(300, 700);
   const home_tackles_made = rng.int(100, 200);
   const away_tackles_made = rng.int(100, 200);
@@ -314,6 +316,18 @@ export function generateResult(rng: Rng, fixture: Fixture): Result {
     away_kicks_to_touch: rng.int(5, 20),
     home_kick_meters: rng.int(300, 700),
     away_kick_meters: rng.int(300, 700),
+    home_contestable_kicks,
+    away_contestable_kicks,
+    // Kicking sides regather roughly a third to sixty percent of their
+    // own contestables — the realistic aerial-contest band.
+    home_contestable_kicks_won: rng.int(
+      Math.round(home_contestable_kicks * 0.25),
+      Math.round(home_contestable_kicks * 0.6),
+    ),
+    away_contestable_kicks_won: rng.int(
+      Math.round(away_contestable_kicks * 0.25),
+      Math.round(away_contestable_kicks * 0.6),
+    ),
 
     home_scrums_won: rng.int(4, 11),
     away_scrums_won: rng.int(4, 11),

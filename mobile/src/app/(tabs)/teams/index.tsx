@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { Fragment, useMemo, useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueries } from '@tanstack/react-query';
@@ -13,7 +13,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
 import { TIER_1_IDS } from '@/lib/tiers';
@@ -46,7 +46,6 @@ const FILTER_CARD_TITLES: Record<string, string> = {
 
 interface TeamGroup {
   label: string;
-  icon: keyof typeof Ionicons.glyphMap;
   teams: Team[];
 }
 
@@ -112,11 +111,7 @@ export default function TeamsScreen() {
     if (filter !== ALL_FILTER) {
       const members = query.data.filter((t) => competitionTeamIds.has(t.id)).sort(byRank);
       return [
-        {
-          label: FILTER_CARD_TITLES[filter] ?? 'Competition',
-          icon: 'trophy-outline',
-          teams: members,
-        },
+        { label: FILTER_CARD_TITLES[filter] ?? 'Competition', teams: members },
       ];
     }
 
@@ -132,9 +127,9 @@ export default function TeamsScreen() {
 
     const myTeam = query.data.find((t) => t.id === myTeamId);
     const out: TeamGroup[] = [];
-    if (myTeam) out.push({ label: 'My Team', icon: 'heart-outline', teams: [myTeam] });
-    out.push({ label: 'Tier 1 Nations', icon: 'list-outline', teams: tier1 });
-    out.push({ label: 'Tier 2 Nations', icon: 'list-outline', teams: tier2 });
+    if (myTeam) out.push({ label: 'My Team', teams: [myTeam] });
+    out.push({ label: 'Tier 1 Nations', teams: tier1 });
+    out.push({ label: 'Tier 2 Nations', teams: tier2 });
     return out;
   })();
 
@@ -156,28 +151,24 @@ export default function TeamsScreen() {
               {/* Title sits INSIDE the card — same header treatment as
                   the Fixtures day cards. */}
               <View style={styles.cardHeader}>
-                <View style={styles.cardHeaderTitle}>
-                  <Ionicons name={group.icon} size={12} color={Colors.light.textSecondary} />
-                  <Text style={styles.cardHeaderText}>{group.label}</Text>
-                </View>
+                <Text style={styles.cardHeaderText}>{group.label}</Text>
               </View>
+              <View style={styles.insetDivider} />
               {/* Every row carries the shared hero-row grammar — same
                   layout as the Home Team Selector and picker rows. */}
               {group.teams.map((t, i) => (
+                <Fragment key={t.id}>
                 <Pressable
-                  key={t.id}
                   onPress={() => router.push(`/teams/${t.id}`)}
-                  style={({ pressed }) => [
-                    styles.teamRow,
-                    i < group.teams.length - 1 && styles.teamRowDivider,
-                    pressed && styles.teamRowPressed,
-                  ]}>
+                  style={({ pressed }) => [styles.teamRow, pressed && styles.teamRowPressed]}>
                   <TeamHeroRow
                     team={t}
                     rankRow={rankRowByTeam.get(t.id)}
                     right={<Ionicons name="chevron-forward" size={16} color="#C7CBD1" />}
                   />
                 </Pressable>
+                {i < group.teams.length - 1 ? <View style={styles.insetDivider} /> : null}
+                </Fragment>
               ))}
             </View>
           )}
@@ -213,24 +204,24 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cardHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.two,
   },
-  cardHeaderTitle: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
+  // Standalone inset divider — chevron-chrome grey, 16pt side inset
+  // (same as the picker / fixtures day cards).
+  insetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
   },
   cardHeaderText: {
-    fontFamily: 'Barlow_700Bold',
+    // List-group header, not a chart-card title — meta register, title
+    // case (same as the picker group headers and day-card dates).
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
 
   teamRow: {
@@ -239,10 +230,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two + 4,
     gap: Spacing.three,
-  },
-  teamRowDivider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
   },
   teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
 });

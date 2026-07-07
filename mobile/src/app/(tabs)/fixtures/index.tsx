@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useFocusEffect, useNavigation, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FlatList, Pressable, RefreshControl, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -278,13 +278,9 @@ export default function FixturesScreen() {
         renderItem={({ item: dayGroup }) => (
           <View style={styles.card}>
             <View style={styles.cardHeader}>
-              <Ionicons
-                name="calendar-outline"
-                size={12}
-                color={Colors.light.textSecondary}
-              />
               <Text style={styles.cardHeaderText}>{dayGroup.title}</Text>
             </View>
+            <View style={styles.insetDivider} />
             {dayGroup.data.map((fx, i) => {
               const comp = dayGroup.compById.get(fx.competition_id);
               const home = dayGroup.teamById.get(fx.home_team_id);
@@ -293,14 +289,10 @@ export default function FixturesScreen() {
               const result = isCompleted ? resultByFixture.get(fx.id) : undefined;
               const isLast = i === dayGroup.data.length - 1;
               return (
+                <Fragment key={fx.id}>
                 <Pressable
-                  key={fx.id}
                   onPress={() => router.push(`/fixtures/${fx.id}`)}
-                  style={({ pressed }) => [
-                    styles.row,
-                    !isLast && styles.rowDivider,
-                    pressed && styles.rowPressed,
-                  ]}>
+                  style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
                   <View style={styles.matchupRow}>
                     <View style={styles.flagWrap}>
                       {home ? <TeamFlagShield flagCode={home.flag_code} width={FlagSize.row} /> : null}
@@ -380,6 +372,8 @@ export default function FixturesScreen() {
                     {comp?.short_name ?? fx.competition_id} · {fx.venue}
                   </Text>
                 </Pressable>
+                {!isLast ? <View style={styles.insetDivider} /> : null}
+                </Fragment>
               );
             })}
           </View>
@@ -392,7 +386,9 @@ export default function FixturesScreen() {
 function formatDay(iso: string): string {
   const [y, m, d] = iso.split('-').map(Number) as [number, number, number];
   const date = new Date(Date.UTC(y, m - 1, d));
-  return date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  const weekday = date.toLocaleDateString('en-GB', { weekday: 'short', timeZone: 'UTC' });
+  const day = date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' });
+  return `${weekday} · ${day}`;
 }
 
 /** Text shown in the middle slot for live / half-time / postponed / cancelled
@@ -445,28 +441,30 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   cardHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     paddingHorizontal: Spacing.four,
     paddingTop: Spacing.three,
     paddingBottom: Spacing.two,
   },
   cardHeaderText: {
+    // Date header, not a chart-card title — Barlow Bold is reserved
+    // for chart/graph cards; dates sit in the meta register, title
+    // case ("Saturday · 4 Jul 2026").
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
-    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   row: {
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
     gap: 4,
   },
-  rowDivider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+  // Standalone inset divider — chevron-chrome grey with the 16pt side
+  // inset used by the picker and Next/Last Match cards.
+  insetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   rowChevron: {
@@ -544,5 +542,5 @@ const styles = StyleSheet.create({
   statusMidLive: { color: StatusColor.live, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   statusMidHalfTime: { color: StatusColor.warning, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   metaText: {
-    fontFamily: 'Barlow_500Medium', fontSize: TextSize.xs, color: Colors.light.textSecondary, textAlign: 'center' },
+    fontFamily: 'Barlow_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 });

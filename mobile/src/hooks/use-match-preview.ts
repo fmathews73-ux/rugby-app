@@ -26,6 +26,7 @@ const GAP_SET_PIECE = 4; // combined scrum+lineout success, pp
 const GAP_DISCIPLINE = 2.5; // penalties conceded per game
 const GAP_SHARE = 6; // possession / territory, pp
 const GAP_TURNOVERS = 2; // net turnovers per game
+const GAP_AERIAL = 12; // contestable-kick win rate, pp
 // Quarter share (%) that reads as a real scoring-timing skew.
 const TIMING_SKEW = 35;
 
@@ -39,7 +40,9 @@ export type PreviewAxisKey =
   | 'kicking'
   | 'territory'
   | 'possession'
-  | 'turnovers';
+  | 'turnovers'
+  | 'aerial-delivered'
+  | 'aerial-received';
 
 export interface PreviewAxis {
   key: PreviewAxisKey;
@@ -65,6 +68,8 @@ export const AXIS_LABELS: Record<PreviewAxisKey, string> = {
   territory: 'Territory',
   possession: 'Possession',
   turnovers: 'Turnovers',
+  'aerial-delivered': 'Aerial (kicked)',
+  'aerial-received': 'Aerial (received)',
 };
 
 export interface MatchPreview {
@@ -281,6 +286,8 @@ function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate):
       case 'set-piece': return `a set-piece contest that leans ${lead.short_name}'s way`;
       case 'discipline': return `${trail.short_name}'s penalty habit`;
       case 'kicking': return `the kicking exchanges ${lead.short_name} usually win`;
+      case 'aerial-delivered': return `${lead.short_name}'s contestable-kick game`;
+      case 'aerial-received': return `${trail.short_name}'s security under the high ball`;
       case 'territory': return `${lead.short_name}'s habit of living in the right half of the pitch`;
       case 'possession': return `the fight for the ball itself`;
       case 'turnovers': return `the breakdown scraps`;
@@ -491,6 +498,48 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
     });
   }
 
+  {
+    // AERIAL (DELIVERED) — the kicking side of the contest: when a
+    // team puts the ball up, does it come back?
+    const gap = hg.deliveredWonPercent - ag.deliveredWonPercent;
+    const t = tierOf(gap, GAP_AERIAL);
+    const lead = pick(gap);
+    const trail = other(gap);
+    const leadG = lead === home ? hg : ag;
+    const trailG = lead === home ? ag : hg;
+    axes.push({
+      key: 'aerial-delivered',
+      label: 'Aerial (kicked)',
+      narrative:
+        t === 0
+          ? `Neither side owns its own bombs: ${Math.round(hg.deliveredWonPercent)}% and ${Math.round(ag.deliveredWonPercent)}% of contestables regathered. Kicking to compete is a coin-flip here, which usually means less of it.`
+          : t === 1
+            ? `${lead.short_name} get slightly more back from the boot, regathering ${Math.round(leadG.deliveredWonPercent)}% of their contestables to ${Math.round(trailG.deliveredWonPercent)}%. Enough to keep bombing; not enough to build a game on.`
+            : `The contestable kick is a genuine ${lead.short_name} weapon: ${Math.round(leadG.deliveredWonPercent)}% of their own bombs come back against ${trail.short_name}'s ${Math.round(trailG.deliveredWonPercent)}%. Expect the ball in the air early and often.`,
+    });
+  }
+
+  {
+    // AERIAL (RECEIVED) — the back-field side: when the ball comes
+    // down on you, do you secure it?
+    const gap = hg.receivedWonPercent - ag.receivedWonPercent;
+    const t = tierOf(gap, GAP_AERIAL);
+    const lead = pick(gap);
+    const trail = other(gap);
+    const leadG = lead === home ? hg : ag;
+    const trailG = lead === home ? ag : hg;
+    axes.push({
+      key: 'aerial-received',
+      label: 'Aerial (received)',
+      narrative:
+        t === 0
+          ? `Both back fields hold up under the high ball, securing ${Math.round(hg.receivedWonPercent)}% and ${Math.round(ag.receivedWonPercent)}% of what comes down on them. Kicking at either is donating possession.`
+          : t === 1
+            ? `${lead.short_name}'s back field is the calmer one, securing ${Math.round(leadG.receivedWonPercent)}% of received contestables to ${Math.round(trailG.receivedWonPercent)}%. A modest edge that decides a handful of fifty-fifties.`
+            : `There is a soft spot under the high ball: ${trail.short_name} secure only ${Math.round(trailG.receivedWonPercent)}% of received contestables while ${lead.short_name} claim ${Math.round(leadG.receivedWonPercent)}%. ${lead.short_name}'s exit strategy writes itself.`,
+    });
+  }
+
   return axes;
 }
 
@@ -585,6 +634,14 @@ function computeSignedGaps(h: TeamAggregate, a: TeamAggregate): SignedGap[] {
         (hg.turnoversWon - hg.turnoversConceded - (ag.turnoversWon - ag.turnoversConceded)) /
         GAP_TURNOVERS,
     },
+    {
+      key: 'aerial-delivered',
+      norm: (hg.deliveredWonPercent - ag.deliveredWonPercent) / GAP_AERIAL,
+    },
+    {
+      key: 'aerial-received',
+      norm: (hg.receivedWonPercent - ag.receivedWonPercent) / GAP_AERIAL,
+    },
   ];
 }
 
@@ -651,6 +708,10 @@ function exploitText(axis: PreviewAxisKey, opp: Team, s: PerGame, o: PerGame): s
       return `starve ${opp.short_name} of the ball. At ${Math.round(s.possessionPercent)}% average possession the opposition tackles for long stretches, and tired tacklers give away penalties`;
     case 'turnovers':
       return `hunt the breakdown: a net plus-${fmt(s.turnoversWon - s.turnoversConceded)} turnover game is free possession against a side that coughs it up ${fmt(o.turnoversConceded)} times a match`;
+    case 'aerial-delivered':
+      return `put the ball in the air: regathering ${Math.round(s.deliveredWonPercent)}% of their own contestables against a back field securing only ${Math.round(o.receivedWonPercent)}% is repeatable free possession`;
+    case 'aerial-received':
+      return `invite the bombs and keep them: a ${Math.round(s.receivedWonPercent)}% security rate under the high ball turns ${opp.short_name}'s kicking game into a hand-back`;
   }
 }
 
@@ -673,6 +734,10 @@ function neutraliseText(axis: PreviewAxisKey, opp: Team, s: PerGame, o: PerGame)
       return `make every tackle count and force the turnover: ${Math.round(o.possessionPercent)}% ${opp.short_name} possession means living off scraps, so each scrap has to become something`;
     case 'turnovers':
       return `protect the ruck. A net ${fmt(s.turnoversWon - s.turnoversConceded)} turnover game feeds a side that scores off loose ball, and this opposition scores off loose ball`;
+    case 'aerial-delivered':
+      return `stop kicking away cheap ball: regathering only ${Math.round(s.deliveredWonPercent)}% of their own contestables, every hopeful bomb is a possession handed to ${opp.short_name}`;
+    case 'aerial-received':
+      return `fix the back field first. Securing just ${Math.round(s.receivedWonPercent)}% under the high ball is an invitation ${opp.short_name} will RSVP to all afternoon`;
   }
 }
 

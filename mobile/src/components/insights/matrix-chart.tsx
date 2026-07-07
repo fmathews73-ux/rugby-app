@@ -52,12 +52,18 @@ export function MatrixChart({
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
-  const xMin = Math.min(...xs) - 2;
-  const xMax = Math.max(...xs) + 2;
-  const yMin = Math.min(...ys) - 2;
-  const yMax = Math.max(...ys) + 2;
   const midXVal = median(xs);
   const midYVal = median(ys);
+  // Symmetric range around the median so the crosshair intersects at
+  // the exact CENTRE of the plot — a skewed pool otherwise drags the
+  // dashed cross off-centre. Dots keep their true quadrants; only the
+  // scale is centred.
+  const xHalf = Math.max(...xs.map((v) => Math.abs(v - midXVal)), 0) + 2;
+  const yHalf = Math.max(...ys.map((v) => Math.abs(v - midYVal)), 0) + 2;
+  const xMin = midXVal - xHalf;
+  const xMax = midXVal + xHalf;
+  const yMin = midYVal - yHalf;
+  const yMax = midYVal + yHalf;
 
   const plotBottom = height - padBottom;
   const xOf = (v: number) =>

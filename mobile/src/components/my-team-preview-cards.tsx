@@ -3,6 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { AerialContest } from '@/components/insights/aerial-contest';
 import { DisciplineTrend } from '@/components/insights/discipline-trend';
 import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
 import { ExtendedMomentum } from '@/components/insights/extended-momentum';
@@ -79,6 +80,7 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
         />,
         <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
         <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
+        <AerialContest key="aerial" teamId={teamId} style={styles.pageCard} showCornerFlag={false} />,
         <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
         <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
       ]}

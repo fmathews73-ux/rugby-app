@@ -68,6 +68,18 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
       'Turnover ball is the most dangerous attacking platform in rugby: the defence is unset and broken-field space opens up. A negative turnover ledger bleeds momentum.',
     ],
   },
+  'aerial-delivered': {
+    title: 'Aerial (kicked)',
+    paragraphs: [
+      'Contestable kicks the team puts up (box kicks, bombs, cross-kicks) and the share it regathers. A high regather rate makes kicking a possession weapon rather than a giveaway.',
+    ],
+  },
+  'aerial-received': {
+    title: 'Aerial (received)',
+    paragraphs: [
+      'Contestable kicks that come down on the team and the share it secures. A calm back field turns the opposition kicking game into a free exit.',
+    ],
+  },
 };
 
 export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
@@ -108,22 +120,6 @@ export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
   },
 };
 
-export const PRE_MATCH_SECTION_INFO: Record<string, SectionInfo> = {
-  'Profile H2H': {
-    title: 'Profile H2H',
-    paragraphs: [
-      'The two last-10 profiles compared axis by axis, biggest gap first — the chart above ranks them, and this read names the battlegrounds and then each side\u2019s key: the exploit for the side ahead, the survival job for the side behind.',
-      'Keys are conditions, never predictions: what each side must make true to win, not a call on who will. When the profiles refuse to separate, the preview says so — balanced fixtures are decided by execution.',
-    ],
-  },
-  'Danger Windows': {
-    title: 'Danger Windows',
-    paragraphs: [
-      'Quarters where one side has historically scored or conceded well above its share — the windows where swings are most likely, drawn side by side in the chart above.',
-      'Teams have scoring habits: fast starters, second-half sides, closers. Knowing the danger windows tells you when a lead is safe and when it isn\u2019t.',
-    ],
-  },
-};
 
 
 export const PLAYER_SECTION_INFO: Record<string, SectionInfo> = {
@@ -153,17 +149,9 @@ export const PRE_MATCH_AXIS_PAIRS: readonly {
   { title: 'Attack & Defence', keys: ['attack', 'defence'] },
   { title: 'Set Piece & Discipline', keys: ['set-piece', 'discipline'] },
   { title: 'Kicking & Territory', keys: ['kicking', 'territory'] },
+  // Aerial rides directly behind Kicking & Territory — it is that
+  // card's detail view (the contestable slice of the kicking game).
+  { title: 'Aerial Contest', keys: ['aerial-delivered', 'aerial-received'] },
   { title: 'Possession & Turnovers', keys: ['possession', 'turnovers'] },
 ];
 
-/** Combined explainer for a paired section: both axes' paragraphs
- *  under the pair title. */
-export function pairInfo(pair: { title: string; keys: readonly [string, string] }): SectionInfo {
-  return {
-    title: pair.title,
-    paragraphs: [
-      ...(AXIS_INFO[pair.keys[0]]?.paragraphs ?? []),
-      ...(AXIS_INFO[pair.keys[1]]?.paragraphs ?? []),
-    ],
-  };
-}

@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { G, Line, Rect, Text as SvgText } from 'react-native-svg';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
 
@@ -30,6 +31,7 @@ export function DangerWindows({
   homeCode,
   awayCode,
   asOfDate,
+  read,
   style,
 }: {
   homeTeamId: string;
@@ -37,6 +39,8 @@ export function DangerWindows({
   homeCode: string;
   awayCode: string;
   asOfDate?: string;
+  /** Live narrative for the flip back (pre-match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -50,24 +54,40 @@ export function DangerWindows({
     (scored.data?.gamesUsed ?? 0) > 0 && (conceded.data?.gamesUsed ?? 0) > 0;
 
   return (
-    <View style={[styles.card, style]}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Danger Windows</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the danger windows chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <TeamToggle
-          primaryLabel={homeCode}
-          compareLabel={awayCode}
-          activeSide={activeSide}
-          onSelect={setActiveSide}
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Danger Windows"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>Each side's average points scored (up, green) and conceded (down, red) per 20-minute window — where one team's strong quarter lands on the other's weak one is where the match can swing.</>}
         />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+      {/* Title left; toggle then the reader icon pinned right —
+          same corner slot as the Home carousel cards. */}
+      {/* Three slots: title left, toggle centred between title and
+          icon, reader icon pinned right. */}
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionLabel}>Danger Windows</Text>
+        <View style={styles.headerCentre}>
+          <TeamToggle
+            primaryLabel={homeCode}
+            compareLabel={awayCode}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+            />
+        </View>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the danger windows chart">
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {scored.isLoading || conceded.isLoading ? (
@@ -81,33 +101,9 @@ export function DangerWindows({
         />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Danger Windows</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              The toggled team&apos;s match split into its four 20-minute
-              quarters, averaged over its last {LOOKBACK} matches before
-              kickoff. <Text style={styles.modalStrong}>Green above the line is
-              points scored</Text> in that quarter,{' '}
-              <Text style={styles.modalStrong}>red below is points
-              conceded</Text>; the dashed gridlines carry the scale.
-            </Text>
-            <Text style={styles.modalBody}>
-              Flip the toggle and look for collisions: one side&apos;s tall
-              green quarter landing on the other&apos;s deep red quarter is the
-              window the match can swing — exactly what the Danger periods
-              narrative below names.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -122,7 +118,8 @@ function WindowsChart({
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
-  const padY = 16;
+  // Badge room above / below the extreme bars.
+  const padY = 22;
   const padBottom = 18;
 
   const maxAbs = Math.max(5, ...scored, ...conceded);
@@ -163,6 +160,22 @@ function WindowsChart({
       }>
       {width > 0 && height > 0 ? (
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          {/* Light hairlines between the four quarter slots — shared
+              grammar with Scoring Rhythm. */}
+          {[1, 2, 3].map((q) => {
+            const x = padX + q * ((width - 2 * padX) / 4);
+            return (
+              <Line
+                key={`sep${q}`}
+                x1={x}
+                y1={2}
+                x2={x}
+                y2={plotH}
+                stroke="#E5E7EB"
+                strokeWidth={1}
+              />
+            );
+          })}
           {/* Scale gridlines — quiet dashed rules at ±step with bare
               flush-left numerals (same grammar as the Form chart),
               drawn first so bars sit on top. */}
@@ -183,8 +196,8 @@ function WindowsChart({
                   x={0}
                   y={gy + 3}
                   fill={Colors.light.textSecondary}
-                  fontSize={8}
-                  fontWeight="700"
+                  fontFamily="Barlow_500Medium"
+                  fontSize={9}
                   textAnchor="start">
                   {g > 0 ? `+${g}` : String(g)}
                 </SvgText>
@@ -197,30 +210,36 @@ function WindowsChart({
           {bars.map((b) => (
             <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
           ))}
-          {/* Value labels — scored above its bar, conceded below its bar. */}
+          {/* Value badges — scored above its bar, conceded below its
+              bar; same quiet circular badge as the Form / Scoring
+              Rhythm values. */}
           {bars.map((b) => (
-            <SvgText
-              key={`ul${b.label}`}
-              x={b.up.x + b.up.w / 2}
-              y={b.up.y - 4}
-              fill={Colors.light.textSecondary}
-              fontSize={8}
-              fontWeight="700"
-              textAnchor="middle">
-              {fmt(b.up.v)}
-            </SvgText>
+            <G key={`ul${b.label}`}>
+              <Circle cx={b.up.x + b.up.w / 2} cy={b.up.y - 11} r={9} fill="#F3F4F6" />
+              <SvgText
+                x={b.up.x + b.up.w / 2}
+                y={b.up.y - 8}
+                fill={Colors.light.textSecondary}
+                fontFamily="Barlow_500Medium"
+                fontSize={9}
+                textAnchor="middle">
+                {fmt(b.up.v)}
+              </SvgText>
+            </G>
           ))}
           {bars.map((b) => (
-            <SvgText
-              key={`dl${b.label}`}
-              x={b.down.x + b.down.w / 2}
-              y={b.down.y + b.down.h + 11}
-              fill={Colors.light.textSecondary}
-              fontSize={8}
-              fontWeight="700"
-              textAnchor="middle">
-              {fmt(b.down.v)}
-            </SvgText>
+            <G key={`dl${b.label}`}>
+              <Circle cx={b.down.x + b.down.w / 2} cy={b.down.y + b.down.h + 11} r={9} fill="#F3F4F6" />
+              <SvgText
+                x={b.down.x + b.down.w / 2}
+                y={b.down.y + b.down.h + 14}
+                fill={Colors.light.textSecondary}
+                fontFamily="Barlow_500Medium"
+                fontSize={9}
+                textAnchor="middle">
+                {fmt(b.down.v)}
+              </SvgText>
+            </G>
           ))}
           {/* Baseline on top so the zero line stays crisp. */}
           <Line x1={padX} y1={zeroY} x2={width - padX} y2={zeroY} stroke="#D1D5DB" strokeWidth={1.2} />
@@ -231,6 +250,7 @@ function WindowsChart({
               x={b.cx}
               y={height - 4}
               fill={Colors.light.textSecondary}
+              fontFamily="Barlow_500Medium"
               fontSize={9}
               textAnchor="middle">
               {b.label}
@@ -248,6 +268,8 @@ function fmt(v: number): string {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -262,18 +284,21 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row so charts never creep
+    // into the header (with the card gap: 16pt total).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
+  headerCentre: {
+    flex: 1,
     alignItems: 'center',
-    gap: 4,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -288,43 +313,5 @@ const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
     minHeight: 150,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

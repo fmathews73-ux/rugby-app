@@ -1,9 +1,10 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -68,6 +69,14 @@ const AXIS_ROWS: Record<
     // The giveaway component of the ledger — how most possession dies.
     { field: 'handlingErrors', label: 'Handling errors', inverted: true },
   ],
+  'aerial-delivered': [
+    { field: 'contestablesDelivered', label: 'Contestables kicked' },
+    { field: 'deliveredWonPercent', label: 'Own kicks regathered', percent: true },
+  ],
+  'aerial-received': [
+    { field: 'contestablesReceived', label: 'Contestables received' },
+    { field: 'receivedWonPercent', label: 'Receptions secured', percent: true },
+  ],
 };
 
 /**
@@ -85,6 +94,7 @@ export function AxisHeadToHead({
   homeCode,
   awayCode,
   asOfDate,
+  read,
   style,
 }: {
   /** One or more preview axes — paired axes render as one dense card. */
@@ -95,6 +105,8 @@ export function AxisHeadToHead({
   homeCode: string;
   awayCode: string;
   asOfDate?: string;
+  /** Live narrative for the flip back (pre-match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -116,24 +128,40 @@ export function AxisHeadToHead({
     (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
 
   return (
-    <View style={[styles.card, style]}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>{title}</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={`Explain ${info.title}`}>
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <TeamToggle
-          primaryLabel={homeCode}
-          compareLabel={awayCode}
-          activeSide={activeSide}
-          onSelect={setActiveSide}
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title={title}
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>How the two sides come into this match in these departments — per-game averages from the last 10, each bar against its rival's tick.</>}
         />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+      {/* Title left; toggle then the reader icon pinned right —
+          same corner slot as the Home carousel cards. */}
+      {/* Three slots: title left, toggle centred between title and
+          icon, reader icon pinned right. */}
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionLabel}>{title}</Text>
+        <View style={styles.headerCentre}>
+          <TeamToggle
+            primaryLabel={homeCode}
+            compareLabel={awayCode}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+            />
+        </View>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={`Explain ${info.title}`}>
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {home.isLoading || away.isLoading ? (
@@ -161,31 +189,9 @@ export function AxisHeadToHead({
         </View>
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{info.title}</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            {info.paragraphs.map((para, i) => (
-              <Text key={i} style={styles.modalBody}>
-                {para}
-              </Text>
-            ))}
-            <Text style={styles.modalBody}>
-              Values are per-game averages over each side&apos;s last {LOOKBACK}{' '}
-              completed matches before kickoff. The bar is the toggled
-              team&apos;s number — green when it has the better of the read,
-              red when not (lower-is-better rows flip) — and the dark tick
-              marks the other side&apos;s number on the same scale.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -227,7 +233,9 @@ function PerspectiveRow({
           {/* Other side's value — the comparison tick. */}
           <View style={[styles.rowOtherTick, { left: `${tickFrac * 100}%` }]} />
         </View>
-        <Text style={styles.rowValue}>{fmt(active, percent)}</Text>
+        <View style={styles.rowValueBox}>
+          <Text style={styles.rowValue}>{fmt(active, percent)}</Text>
+        </View>
       </View>
     </View>
   );
@@ -240,6 +248,8 @@ function fmt(v: number, percent?: boolean): string {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -254,18 +264,21 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row so charts never creep
+    // into the header (with the card gap: 16pt total).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
+  headerCentre: {
+    flex: 1,
     alignItems: 'center',
-    gap: 4,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -291,18 +304,25 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   rowLabel: {
-    fontSize: TextSize.xs,
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
   // Matches the Efficiency KPIs value register (bold, secondary grey,
   // tabular) — the app-wide standard for bar-row values.
-  rowValue: {
+  // Mini score tile in the fixed right rail — the quiet losing-score
+  // pairing, matching the Efficiency KPIs card.
+  rowValueBox: {
     width: 52,
-    textAlign: 'right',
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowValue: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   // overflow visible so the comparison tick can stand taller than the
   // 4pt track — it's a reference mark, not part of the fill.
@@ -327,39 +347,5 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: '#111827',
     marginLeft: -1,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
   },
 });

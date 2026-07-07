@@ -282,6 +282,9 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row so charts never creep
+    // into the header (with the card gap: 16pt total).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -317,7 +320,7 @@ const styles = StyleSheet.create({
   // flex + space-evenly so the rows spread through whatever height the
   // carousel grants the card (tallest-sibling stretch) instead of
   // top-packing above dead space.
-  kpiList: { flex: 1, justifyContent: 'space-evenly', marginTop: Spacing.one },
+  kpiList: { flex: 1, justifyContent: 'space-evenly' },
   kpiRow: { gap: 4 },
   kpiLine: {
     flexDirection: 'row',

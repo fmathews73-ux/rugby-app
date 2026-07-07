@@ -246,12 +246,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
   },
   groupHeaderText: {
-    // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_700Bold',
+    // List-group header, not a chart-card title — meta register, title
+    // case (same as the Fixtures day-card date headers).
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   row: {
     flexDirection: 'row',

@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
  * Flip-card container — the card's info icon flips it to a narrative
@@ -120,7 +120,8 @@ const styles = StyleSheet.create({
   },
   backCard: {
     flex: 1,
-    backgroundColor: '#111827',
+    // Winning-score grey — the back face shares the score tiles' fill.
+    backgroundColor: Colors.light.textSecondary,
     borderRadius: 12,
     padding: Spacing.three,
   },

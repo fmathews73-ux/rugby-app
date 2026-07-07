@@ -1,4 +1,14 @@
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useState } from 'react';
+import {
+  type NativeScrollEvent,
+  type NativeSyntheticEvent,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 
 import { Colors, PillStrip } from '@/constants/theme';
 
@@ -7,10 +17,16 @@ export interface PickerOption {
   label: string;
 }
 
+// Page background (PageGradient's flat #FAFAFA) — the fades dissolve
+// overflowing pills into it, same grammar as SegmentedTabs' white
+// fades on drill strips.
+const PAGE_BG = '#FAFAFA';
+
 /**
  * Horizontal scrollable pill picker. Used at the top of Standings and
  * Fixtures to switch competition. Consistent with the sub-tab strip on
- * fixture detail — same visual language across the app.
+ * fixture detail — same visual language across the app, including the
+ * scroll-aware edge fades.
  */
 export function CompetitionPicker({
   options,
@@ -21,11 +37,24 @@ export function CompetitionPicker({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const [viewportW, setViewportW] = useState(0);
+  const [contentW, setContentW] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
+  const showEndFade = contentW > viewportW && scrollX < contentW - viewportW - 4;
+  const showStartFade = contentW > viewportW && scrollX > 4;
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
+    setScrollX(e.nativeEvent.contentOffset.x);
+
   return (
     <View style={styles.wrap}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        onLayout={(e) => setViewportW(Math.round(e.nativeEvent.layout.width))}
+        onContentSizeChange={(w) => setContentW(Math.round(w))}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
         contentContainerStyle={styles.inner}>
         {options.map((opt) => {
           const active = opt.id === selected;
@@ -42,6 +71,24 @@ export function CompetitionPicker({
           );
         })}
       </ScrollView>
+      {showEndFade ? (
+        <LinearGradient
+          colors={['rgba(250,250,250,0)', PAGE_BG]}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.endFade}
+          pointerEvents="none"
+        />
+      ) : null}
+      {showStartFade ? (
+        <LinearGradient
+          colors={[PAGE_BG, 'rgba(250,250,250,0)']}
+          start={{ x: 0, y: 0.5 }}
+          end={{ x: 1, y: 0.5 }}
+          style={styles.startFade}
+          pointerEvents="none"
+        />
+      ) : null}
     </View>
   );
 }
@@ -50,16 +97,29 @@ const styles = StyleSheet.create({
   wrap: {
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
-    // Horizontal padding sits on the WRAP (not inside the ScrollView) so
-    // the ScrollView clip-bounds are actually inset — pills disappear at
-    // the padded edge on the right, not at the screen edge. Result: the
-    // scrollable strip visually spans the same column as any content
-    // rendered below it, symmetric on both sides.
-    paddingHorizontal: PillStrip.stripPadH,
   },
+  // Horizontal padding lives on the CONTENT (not the wrap) so pills
+  // stay visible to the screen edge and dissolve under the edge fades —
+  // clipping at a padded bound gives a hard cut the gradient can't hide
+  // (same fix as SegmentedTabs).
   inner: {
+    paddingHorizontal: PillStrip.stripPadH,
     paddingVertical: PillStrip.stripPadV,
     gap: PillStrip.gap,
+  },
+  endFade: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: PillStrip.stripPadH + 20,
+  },
+  startFade: {
+    position: 'absolute',
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: PillStrip.stripPadH + 20,
   },
   // Borderless — fills alone carry the active/inactive contrast (dark for
   // active, white for inactive against the grey page bg). Matches the

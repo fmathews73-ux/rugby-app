@@ -59,6 +59,9 @@ export interface TeamAnalysis {
   setPieceDiscipline: string;
   /** "Discipline Trend" — the per-match penalty habit and direction. */
   disciplineTrend: string;
+  /** "Aerial Contest" — contestable kicks delivered/received won-rates
+   *  against the Tier-1 baselines. */
+  aerial: string;
 }
 
 interface UseTeamAnalysisResult {
@@ -109,6 +112,7 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
       possession: buildPossession(team.name, series.data),
       setPieceDiscipline: buildSetPieceDiscipline(team.name, agg),
       disciplineTrend: buildDisciplineTrend(team.name, series.data),
+      aerial: buildAerial(team.name, agg),
     };
   }, [
     teams.data,
@@ -258,6 +262,35 @@ function buildKpis(agg: Agg): string {
     `Those are the baselines every match performance gets measured against.`,
   );
   return parts.join(' ');
+}
+
+/** Tier-1 aerial baselines — mirror the synthetic generator's band
+ *  (regather 25-60% of own contestables). Replace with live pool
+ *  averages at real-data cutover, same as the KPI card's T1 marks. */
+const T1_AERIAL = { deliveredWonPercent: 43, receivedWonPercent: 57 };
+
+function buildAerial(teamName: string, agg: Agg): string {
+  const g = agg.perGame;
+  const del = Math.round(g.deliveredWonPercent);
+  const rec = Math.round(g.receivedWonPercent);
+  const volume = `${fmt(g.contestablesDelivered)} contestables kicked and ${fmt(g.contestablesReceived)} received a game`;
+  const delStrong = del >= T1_AERIAL.deliveredWonPercent + 5;
+  const delWeak = del <= T1_AERIAL.deliveredWonPercent - 5;
+  const recStrong = rec >= T1_AERIAL.receivedWonPercent + 5;
+  const recWeak = rec <= T1_AERIAL.receivedWonPercent - 5;
+
+  const delRead = delStrong
+    ? `Regathering ${del}% of their own kicks makes the bomb a genuine possession weapon`
+    : delWeak
+      ? `Regathering just ${del}% of their own kicks, every hopeful bomb is a possession donated`
+      : `A ${del}% regather rate on their own kicks is par for this level`;
+  const recRead = recStrong
+    ? `under the high ball the back field is a strength, securing ${rec}% of what comes down`
+    : recWeak
+      ? `the back field is the soft spot — only ${rec}% of received contestables are secured, and opponents will have noticed`
+      : `the back field holds its own at ${rec}% security on receptions`;
+
+  return `${teamName} live an average aerial life by volume — ${volume}. ${delRead}; ${recRead}.`;
 }
 
 /** "Scoring Rhythm" — the quarter-timing read; explicit when even. */

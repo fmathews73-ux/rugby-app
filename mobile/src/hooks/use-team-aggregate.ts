@@ -44,6 +44,14 @@ export interface TeamAggregate {
     twentyTwoEntries: number;
     pointsPerTwentyTwoEntry: number;
     goalKickingPercent: number;
+    /** Contestable kicks put up per game. */
+    contestablesDelivered: number;
+    /** % of the team's own contestable kicks it regathered. */
+    deliveredWonPercent: number;
+    /** Opposition contestable kicks received per game. */
+    contestablesReceived: number;
+    /** % of received contestable kicks the team secured. */
+    receivedWonPercent: number;
   };
 }
 
@@ -115,6 +123,7 @@ export function useTeamAggregate(
     let turnoversWon = 0, turnoversConceded = 0;
     let pensConceded = 0, handlingErrors = 0, yellows = 0, reds = 0;
     let entries22 = 0, pointsFrom22 = 0, goalKicksMade = 0, goalKicksAttempted = 0;
+    let aerialDelivered = 0, aerialDeliveredWon = 0, aerialReceived = 0, aerialReceivedWon = 0;
 
     for (const { result, fixture } of results) {
       const isHome = fixture.home_team_id === teamId;
@@ -157,6 +166,16 @@ export function useTeamAggregate(
       goalKicksAttempted += isHome
         ? result.home_conversion_attempts + result.home_penalty_goal_attempts
         : result.away_conversion_attempts + result.away_penalty_goal_attempts;
+      // Aerial contest — receptions derive from the OPPONENT's delivered
+      // contestables (a kick one side puts up, the other receives).
+      aerialDelivered += isHome ? result.home_contestable_kicks : result.away_contestable_kicks;
+      aerialDeliveredWon += isHome
+        ? result.home_contestable_kicks_won
+        : result.away_contestable_kicks_won;
+      aerialReceived += isHome ? result.away_contestable_kicks : result.home_contestable_kicks;
+      aerialReceivedWon += isHome
+        ? result.away_contestable_kicks - result.away_contestable_kicks_won
+        : result.home_contestable_kicks - result.home_contestable_kicks_won;
     }
 
     const n = results.length;
@@ -191,6 +210,13 @@ export function useTeamAggregate(
         pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
         goalKickingPercent:
           goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
+        contestablesDelivered: aerialDelivered / n,
+        // Ratio-of-sums so low-volume games don't overweigh.
+        deliveredWonPercent:
+          aerialDelivered > 0 ? (aerialDeliveredWon / aerialDelivered) * 100 : 0,
+        contestablesReceived: aerialReceived / n,
+        receivedWonPercent:
+          aerialReceived > 0 ? (aerialReceivedWon / aerialReceived) * 100 : 0,
       },
     };
   }, [team.data, resultQueries, completedFixtures, teamId]);
@@ -221,6 +247,10 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   twentyTwoEntries: 0,
   pointsPerTwentyTwoEntry: 0,
   goalKickingPercent: 0,
+  contestablesDelivered: 0,
+  deliveredWonPercent: 0,
+  contestablesReceived: 0,
+  receivedWonPercent: 0,
 };
 
 /**
