@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
@@ -39,17 +39,16 @@ export function ScoringRhythm({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Scoring Rhythm</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the scoring rhythm chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Scoring Rhythm</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the scoring rhythm chart">
+          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {scored.isLoading || conceded.isLoading ? (
@@ -103,9 +102,9 @@ function RhythmChart({
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
-  // Label room above / below the extreme bars + quarter labels at the
+  // Badge room above / below the extreme bars + quarter labels at the
   // bottom band.
-  const padY = 16;
+  const padY = 22;
   const padBottom = 18;
 
   const maxAbs = Math.max(5, ...scored, ...conceded);
@@ -141,36 +140,56 @@ function RhythmChart({
       }>
       {width > 0 && height > 0 ? (
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+          {/* Light hairlines between the four quarter slots. */}
+          {[1, 2, 3].map((q) => {
+            const x = padX + q * ((width - 2 * padX) / 4);
+            return (
+              <Line
+                key={`sep${q}`}
+                x1={x}
+                y1={2}
+                x2={x}
+                y2={plotH}
+                stroke="#E5E7EB"
+                strokeWidth={1}
+              />
+            );
+          })}
           {bars.map((b) => (
             <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill={SCORED_COLOR} />
           ))}
           {bars.map((b) => (
             <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
           ))}
-          {/* Value labels — scored above its bar, conceded below its bar. */}
+          {/* Value badges — scored above its bar, conceded below its
+              bar; same quiet circular badge as the Form margin values. */}
           {bars.map((b) => (
-            <SvgText
-              key={`ul${b.label}`}
-              x={b.up.x + b.up.w / 2}
-              y={b.up.y - 4}
-              fill={Colors.light.textSecondary}
-              fontSize={8}
-              fontWeight="700"
-              textAnchor="middle">
-              {fmt(b.up.v)}
-            </SvgText>
+            <G key={`ul${b.label}`}>
+              <Circle cx={b.up.x + b.up.w / 2} cy={b.up.y - 11} r={9} fill="#F3F4F6" />
+              <SvgText
+                x={b.up.x + b.up.w / 2}
+                y={b.up.y - 8}
+                fill={Colors.light.textSecondary}
+                fontFamily="Barlow_500Medium"
+                fontSize={9}
+                textAnchor="middle">
+                {fmt(b.up.v)}
+              </SvgText>
+            </G>
           ))}
           {bars.map((b) => (
-            <SvgText
-              key={`dl${b.label}`}
-              x={b.down.x + b.down.w / 2}
-              y={b.down.y + b.down.h + 11}
-              fill={Colors.light.textSecondary}
-              fontSize={8}
-              fontWeight="700"
-              textAnchor="middle">
-              {fmt(b.down.v)}
-            </SvgText>
+            <G key={`dl${b.label}`}>
+              <Circle cx={b.down.x + b.down.w / 2} cy={b.down.y + b.down.h + 11} r={9} fill="#F3F4F6" />
+              <SvgText
+                x={b.down.x + b.down.w / 2}
+                y={b.down.y + b.down.h + 14}
+                fill={Colors.light.textSecondary}
+                fontFamily="Barlow_500Medium"
+                fontSize={9}
+                textAnchor="middle">
+                {fmt(b.down.v)}
+              </SvgText>
+            </G>
           ))}
           {/* Baseline on top so the zero line stays crisp. */}
           <Line x1={padX} y1={zeroY} x2={width - padX} y2={zeroY} stroke="#D1D5DB" strokeWidth={1.2} />
@@ -181,6 +200,7 @@ function RhythmChart({
               x={b.cx}
               y={height - 4}
               fill={Colors.light.textSecondary}
+              fontFamily="Barlow_500Medium"
               fontSize={9}
               textAnchor="middle">
               {b.label}
@@ -216,14 +236,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

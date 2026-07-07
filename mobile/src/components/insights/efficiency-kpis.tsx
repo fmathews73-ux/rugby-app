@@ -109,9 +109,21 @@ export function EfficiencyKpis({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left; toggle/flag then the utility info icon pinned
+          right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>{title ?? 'Efficiency KPIs'}</Text>
+        <Text style={styles.sectionLabel}>{title ?? 'Efficiency KPIs'}</Text>
+        <View style={styles.headerRightGroup}>
+          {hasCompare ? (
+            <TeamToggle
+              primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+              compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+              activeSide={activeSide}
+              onSelect={setActiveSide}
+            />
+          ) : showCornerFlag && primaryTeam.data ? (
+            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
+          ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -120,16 +132,6 @@ export function EfficiencyKpis({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
-        ) : showCornerFlag && primaryTeam.data ? (
-          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
-        ) : null}
       </View>
 
       {isLoading && !data ? (
@@ -193,10 +195,15 @@ function KpiRow({
               fill without competing with the value's dominant colour. */}
           <View style={[styles.kpiAvgMarker, { left: `${avg * 100}%` }]} />
         </View>
-        <Text style={styles.kpiValue}>
-          {value}
-          <Text style={styles.kpiSuffix}>{suffix}</Text>
-        </Text>
+        {/* Value as a mini score tile — the quiet losing-score
+            treatment on every row (the solid winner fill read too
+            harsh here); the bar colour alone carries the verdict. */}
+        <View style={styles.kpiValueBox}>
+          <Text style={styles.kpiValueText}>
+            {value}
+            <Text style={styles.kpiSuffix}>{suffix}</Text>
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -231,10 +238,13 @@ const T1_AVERAGES = {
  * metrics (points conceded, penalties conceded — higher is worse) flip
  * the comparison — at or below average is good.
  */
-function kpiBarColor(bar: number, avg: number, inverted: boolean | undefined): string {
+function kpiIsGood(bar: number, avg: number, inverted: boolean | undefined): boolean {
   const atOrAbove = bar >= avg;
-  const isGood = inverted ? !atOrAbove : atOrAbove;
-  return isGood ? GOOD_COLOR : BAD_COLOR;
+  return inverted ? !atOrAbove : atOrAbove;
+}
+
+function kpiBarColor(bar: number, avg: number, inverted: boolean | undefined): string {
+  return kpiIsGood(bar, avg, inverted) ? GOOD_COLOR : BAD_COLOR;
 }
 
 function KpiInfoModal({
@@ -301,14 +311,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -343,17 +354,24 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
-  kpiValue: {
+  // Mini score tile in the fixed right rail — the quiet losing-score
+  // pairing (light fill, grey digits) on every row.
+  kpiValueBox: {
     width: 52,
-    textAlign: 'right',
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  kpiValueText: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   kpiSuffix: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   kpiTrack: {

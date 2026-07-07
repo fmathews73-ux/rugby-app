@@ -226,7 +226,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeaderText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'Barlow_700Bold',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

@@ -32,17 +32,16 @@ export function PossessionOutcome({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Possession vs Outcome</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the possession versus outcome chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Possession vs Outcome</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the possession versus outcome chart">
+          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {isLoading && data.length === 0 ? (
@@ -126,16 +125,16 @@ function ScatterChart({
           <Line x1={midX} y1={padTop} x2={midX} y2={plotBottom} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
 
           {/* Quadrant labels — whisper-grey, centred in each quadrant. */}
-          <SvgText x={(midX + width - padRight) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padRight) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             WON WITH BALL
           </SvgText>
-          <SvgText x={(padLeft + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(padLeft + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             WON WITHOUT
           </SvgText>
-          <SvgText x={(midX + width - padRight) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padRight) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             WASTED BALL
           </SvgText>
-          <SvgText x={(padLeft + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(padLeft + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             OUTPLAYED
           </SvgText>
           {/* Match dots. */}
@@ -153,8 +152,8 @@ function ScatterChart({
             x={8}
             y={(padTop + plotBottom) / 2}
             fill={Colors.light.textSecondary}
-            fontSize={8}
-            fontWeight="700"
+            fontFamily="Barlow_500Medium"
+            fontSize={9}
             letterSpacing={0.4}
             textAnchor="middle"
             transform={`rotate(-90, 8, ${(padTop + plotBottom) / 2})`}>
@@ -162,7 +161,7 @@ function ScatterChart({
           </SvgText>
           {/* X-axis caption — matrix grammar (the vertical crosshair is
               the 50% possession line). */}
-          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontSize={8} fontWeight="700" letterSpacing={0.4} textAnchor="middle">
+          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             POSSESSION % →
           </SvgText>
         </Svg>
@@ -190,14 +189,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

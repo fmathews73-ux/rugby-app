@@ -41,17 +41,16 @@ export function TeamLandscape({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Team Landscape</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the team landscape matrix">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Team Landscape</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the team landscape matrix">
+          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {summary.isLoading && points.length === 0 ? (
@@ -119,14 +118,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
-import Svg, { G, Line, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
@@ -103,9 +103,25 @@ export function ExtendedMomentum({
   );
   return (
     <View style={[styles.card, style]}>
+      {/* Title left; toggle/flag then the utility info icon pinned
+          right on the same line (icon outermost — same corner slot as
+          the Team Profile card). */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>{title ?? 'Form'}</Text>
+        <Text style={styles.sectionLabel}>{title ?? 'Form'}</Text>
+        <View style={styles.headerRightGroup}>
+          {hasCompare ? (
+            <TeamToggle
+              primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+              compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+              activeSide={activeSide}
+              onSelect={setActiveSide}
+            />
+          ) : showCornerFlag && primaryTeam.data ? (
+            // Single-team mode — anchor the header with the team's flag
+            // so the card identifies its subject at a glance (Home's
+            // my-team stack opts out; its scope is already explicit).
+            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
+          ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -114,19 +130,6 @@ export function ExtendedMomentum({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
-        ) : showCornerFlag && primaryTeam.data ? (
-          // Single-team mode — anchor the header with the team's flag
-          // so the card identifies its subject at a glance (Home's
-          // my-team stack opts out; its scope is already explicit).
-          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
-        ) : null}
       </View>
 
       {points.length === 0 ? (
@@ -157,9 +160,9 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
-  // Vertical padding reserves room for the margin value labels above
+  // Vertical padding reserves room for the margin value badges above
   // the tallest win bar and below the deepest loss bar.
-  const padY = 16;
+  const padY = 20;
   const maxAbs = Math.max(20, ...points.map((p) => Math.abs(p.diff)));
   const zeroY = height / 2;
   const halfBand = height / 2 - padY;
@@ -191,9 +194,9 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
         w: barW,
         h: barH,
         fill: isWin ? WIN_COLOR : LOSS_COLOR,
-        // Margin value: above the bar for wins, below for losses.
+        // Margin value badge: above the bar for wins, below for losses.
         label: String(Math.abs(p.diff)),
-        labelY: isWin ? zeroY - barH - 4 : zeroY + barH + 11,
+        labelY: isWin ? zeroY - barH - 11 : zeroY + barH + 11,
         cx,
       };
     });
@@ -232,8 +235,8 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
                   x={0}
                   y={gy + 3}
                   fill={Colors.light.textSecondary}
-                  fontSize={8}
-                  fontWeight="700"
+                  fontFamily="Barlow_500Medium"
+                  fontSize={9}
                   textAnchor="start">
                   {g > 0 ? `+${g}` : String(g)}
                 </SvgText>
@@ -245,16 +248,20 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
           ))}
           {bars.map((b, i) =>
             b.label ? (
-              <SvgText
-                key={`l${i}`}
-                x={b.cx}
-                y={b.labelY}
-                fill={Colors.light.textSecondary}
-                fontSize={8}
-                fontWeight="700"
-                textAnchor="middle">
-                {b.label}
-              </SvgText>
+              // Value badge — the quiet score-tile pairing (light fill,
+              // grey digits) in circular form.
+              <G key={`l${i}`}>
+                <Circle cx={b.cx} cy={b.labelY} r={8} fill="#F3F4F6" />
+                <SvgText
+                  x={b.cx}
+                  y={b.labelY + 3}
+                  fill={Colors.light.textSecondary}
+                  fontFamily="Barlow_500Medium"
+                  fontSize={9}
+                  textAnchor="middle">
+                  {b.label}
+                </SvgText>
+              </G>
             ) : null,
           )}
           {/* Baseline ON TOP of the bars so the zero line stays crisp
@@ -328,14 +335,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

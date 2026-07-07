@@ -247,7 +247,7 @@ const styles = StyleSheet.create({
   },
   groupHeaderText: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'Barlow_700Bold',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

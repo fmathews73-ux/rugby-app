@@ -86,16 +86,16 @@ export function MatrixChart({
 
           {/* Quadrant labels — whisper-grey, CENTRED in each quadrant
               (rendered beneath the dots). */}
-          <SvgText x={(midX + width - padRight) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padRight) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             {quadrants.tr}
           </SvgText>
-          <SvgText x={(padLeft + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(padLeft + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             {quadrants.tl}
           </SvgText>
-          <SvgText x={(midX + width - padRight) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padRight) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             {quadrants.br}
           </SvgText>
-          <SvgText x={(padLeft + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(padLeft + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             {quadrants.bl}
           </SvgText>
 
@@ -112,8 +112,8 @@ export function MatrixChart({
                 x={xOf(subject.x)}
                 y={yOf(subject.y) >= padTop + 18 ? yOf(subject.y) - 8 : yOf(subject.y) + 14}
                 fill={Colors.light.text}
-                fontSize={9}
-                fontWeight="700"
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {subject.code}
               </SvgText>
@@ -121,7 +121,7 @@ export function MatrixChart({
           ) : null}
 
           {/* X-axis caption. */}
-          <SvgText x={(padLeft + width - padRight) / 2} y={height - 4} fill={Colors.light.textSecondary} fontSize={8} fontWeight="700" letterSpacing={0.4} textAnchor="middle">
+          <SvgText x={(padLeft + width - padRight) / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             {xCaption}
           </SvgText>
           {/* Y-axis caption — rotated, reading upward along the left
@@ -130,8 +130,8 @@ export function MatrixChart({
             x={8}
             y={(padTop + plotBottom) / 2}
             fill={Colors.light.textSecondary}
-            fontSize={8}
-            fontWeight="700"
+            fontFamily="Barlow_500Medium"
+            fontSize={9}
             letterSpacing={0.4}
             textAnchor="middle"
             transform={`rotate(-90, 8, ${(padTop + plotBottom) / 2})`}>

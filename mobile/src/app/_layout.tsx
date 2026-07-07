@@ -1,4 +1,4 @@
-import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
+import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold, Barlow_700Bold } from '@expo-google-fonts/barlow';
 import { BarlowCondensed_700Bold_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
@@ -32,6 +32,7 @@ export default function RootLayout() {
     Barlow_400Regular,
     Barlow_500Medium,
     Barlow_600SemiBold,
+    Barlow_700Bold,
   });
 
   // Splash-screen hide. `preventAutoHideAsync()` above holds the splash

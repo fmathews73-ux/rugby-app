@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { Line, Rect, Text as SvgText } from 'react-native-svg';
+import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
@@ -34,17 +34,16 @@ export function DisciplineTrend({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Discipline Trend</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the discipline trend chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Discipline Trend</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the discipline trend chart">
+          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {isLoading && data.length === 0 ? (
@@ -89,7 +88,8 @@ function TrendChart({ values }: { values: readonly number[] }) {
   const height = canvas.h;
   const padLeft = 18;
   const padRight = 8;
-  const padTop = 14;
+  // Room for the value badges above the tallest bar.
+  const padTop = 22;
   const padBottom = 6;
 
   const maxVal = Math.max(PENS_HIGH + 2, ...values);
@@ -133,24 +133,27 @@ function TrendChart({ values }: { values: readonly number[] }) {
           {/* Band reference lines + flush-left labels. */}
           <Line x1={padLeft} y1={yOf(PENS_LOW)} x2={width - padRight} y2={yOf(PENS_LOW)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
           <Line x1={padLeft} y1={yOf(PENS_HIGH)} x2={width - padRight} y2={yOf(PENS_HIGH)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
-          <SvgText x={0} y={yOf(PENS_LOW) + 3} fill={Colors.light.textSecondary} fontSize={9} fontWeight="700" textAnchor="start">
+          <SvgText x={0} y={yOf(PENS_LOW) + 3} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} textAnchor="start">
             {PENS_LOW}
           </SvgText>
-          <SvgText x={0} y={yOf(PENS_HIGH) + 3} fill={Colors.light.textSecondary} fontSize={9} fontWeight="700" textAnchor="start">
+          <SvgText x={0} y={yOf(PENS_HIGH) + 3} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} textAnchor="start">
             {PENS_HIGH}
           </SvgText>
-          {/* Value labels above each bar. */}
+          {/* Value badges above each bar — same quiet circular badge
+              as the Form / Scoring Rhythm values. */}
           {bars.map((b, i) => (
-            <SvgText
-              key={`l${i}`}
-              x={b.cx}
-              y={b.y - 4}
-              fill={Colors.light.textSecondary}
-              fontSize={8}
-              fontWeight="700"
-              textAnchor="middle">
-              {b.v}
-            </SvgText>
+            <G key={`l${i}`}>
+              <Circle cx={b.cx} cy={b.y - 11} r={8} fill="#F3F4F6" />
+              <SvgText
+                x={b.cx}
+                y={b.y - 8}
+                fill={Colors.light.textSecondary}
+                fontFamily="Barlow_500Medium"
+                fontSize={9}
+                textAnchor="middle">
+                {b.v}
+              </SvgText>
+            </G>
           ))}
         </Svg>
       ) : null}
@@ -177,14 +180,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

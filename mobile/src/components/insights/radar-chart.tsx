@@ -318,8 +318,8 @@ export function RadarChart({
             x={labelP.x}
             y={labelP.y + 3}
             fill={Colors.light.textSecondary}
-            fontSize={12}
-            fontWeight="400"
+              fontFamily="Barlow_500Medium"
+              fontSize={12}
             textAnchor="middle">
             {ax.label}
           </SvgText>

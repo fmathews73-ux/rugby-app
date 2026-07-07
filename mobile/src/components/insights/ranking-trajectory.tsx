@@ -76,9 +76,21 @@ export function RankingTrajectory({
 
   return (
     <View style={[styles.card, style]}>
+      {/* Title left; toggle/flag then the utility info icon pinned
+          right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>{title ?? 'World Ranking'}</Text>
+        <Text style={styles.sectionLabel}>{title ?? 'World Ranking'}</Text>
+        <View style={styles.headerRightGroup}>
+          {hasCompare ? (
+            <TeamToggle
+              primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
+              compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
+              activeSide={activeSide}
+              onSelect={setActiveSide}
+            />
+          ) : showCornerFlag && primaryTeam.data ? (
+            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
+          ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -87,16 +99,6 @@ export function RankingTrajectory({
             <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
-        {hasCompare ? (
-          <TeamToggle
-            primaryLabel={primaryTeam.data?.short_name ?? teamId.toUpperCase()}
-            compareLabel={compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase()}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
-        ) : showCornerFlag && primaryTeam.data ? (
-          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
-        ) : null}
       </View>
 
       {history.isLoading && series.length === 0 ? (
@@ -234,8 +236,8 @@ function TrajectoryChart({
             x={0}
             y={rankToY(r) + 3}
             fill={Colors.light.textSecondary}
+            fontFamily="Barlow_500Medium"
             fontSize={9}
-            fontWeight="700"
             textAnchor="start">
             {r}
           </SvgText>
@@ -263,6 +265,7 @@ function TrajectoryChart({
           x={plotLeft}
           y={height - 4}
           fill={Colors.light.textSecondary}
+          fontFamily="Barlow_500Medium"
           fontSize={9}
           textAnchor="start">
           {formatMonth(first.date)}
@@ -273,6 +276,7 @@ function TrajectoryChart({
           x={plotRight}
           y={height - 4}
           fill={Colors.light.textSecondary}
+          fontFamily="Barlow_500Medium"
           fontSize={9}
           textAnchor="end">
           {formatMonth(last.date)}
@@ -349,14 +353,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_700Bold',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
