@@ -7,19 +7,9 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import type { Player, Position } from '@rugby-app/shared';
 
 import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
-import { CardCarousel } from '@/components/card-carousel';
 import { TeamMatchesCard } from '@/components/my-team-matches-card';
-import { TeamProfileCard } from '@/components/my-team-profile-card';
-import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
-import { ExtendedMomentum } from '@/components/insights/extended-momentum';
-import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
-import { DisciplineTrend } from '@/components/insights/discipline-trend';
-import { PossessionOutcome } from '@/components/insights/possession-outcome';
-import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
-import { SetPieceDiscipline } from '@/components/insights/set-piece-discipline';
-import { TeamLandscape } from '@/components/insights/team-landscape';
+import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
-import { TeamAnalysisCard } from '@/components/team-analysis-card';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagBall2D } from '@/components/team-flag-ball-2d';
@@ -28,20 +18,18 @@ import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
-type TeamTab = 'preview' | 'squad' | 'stats' | 'insights' | 'analysis';
+type TeamTab = 'preview' | 'squad' | 'stats';
 
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
-  // Same arc as the fixture drill, team-scoped, with context-aware
-  // pane contents: Preview = team performance to date (the SAME card
-  // set as the fixture drill's Preview, single-team scoped), Squad =
-  // the cast, Stats = the numeric record (per-game averages), Insights
-  // = TEAM-specific analytics (profile radar + scoring patterns),
-  // Analysis = the written synthesis.
+  // Preview IS the team read — the synced chart carousel + Team
+  // Analysis accordion (identical to Home's My Team block), so the
+  // separate Insights and Analysis pills were retired 2026-07-07:
+  // their charts live in the Preview carousel as evidence pages and
+  // the narrative lives in the accordion. Squad = the cast, Stats =
+  // the dense reference table (premium surface).
   { id: 'preview', label: 'Preview' },
   { id: 'squad', label: 'Squad' },
   { id: 'stats', label: 'Stats' },
-  { id: 'insights', label: 'Insights' },
-  { id: 'analysis', label: 'Analysis' },
 ];
 
 // Hero outcome-dot colours — same trio as FormCircles.
@@ -230,40 +218,15 @@ export default function TeamHubScreen() {
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <>
-            {/* Home's My Team stack, hub-scoped — the hero above stands
-                in for Home's team card, so the pane opens with next /
-                last match, then Profile, then the chart carousel.
-                Analysis stays on its own pill one tap away. */}
+            {/* THE team read, identical to Home's My Team experience,
+                hub-scoped: next/last match, then the synced chart
+                carousel + Team Analysis accordion. The bleed unwraps
+                the pane's 24pt padding; the block re-applies the card
+                column internally (carousel full-width, analysis
+                padded). */}
             <TeamMatchesCard teamId={teamId} />
-            <TeamProfileCard teamId={teamId} />
-            <View style={styles.carouselBleed}>
-              {/* Same titles + no corner flag as Home's carousel — the
-                  page is already scoped to this team by the hero. */}
-              <CardCarousel
-                pages={[
-                  <ExtendedMomentum
-                    key="form"
-                    teamId={teamId}
-                    style={styles.pageCard}
-                    title="Team Form"
-                    showCornerFlag={false}
-                  />,
-                  <RankingTrajectory
-                    key="ranking"
-                    teamId={teamId}
-                    style={styles.pageCard}
-                    title="Team World Ranking"
-                    showCornerFlag={false}
-                  />,
-                  <EfficiencyKpis
-                    key="kpis"
-                    teamId={teamId}
-                    style={styles.pageCard}
-                    title="Team Efficiency KPIs"
-                    showCornerFlag={false}
-                  />,
-                ]}
-              />
+            <View style={styles.previewBleed}>
+              <TeamPreviewBlock teamId={teamId} />
             </View>
           </>
         )}
@@ -413,36 +376,6 @@ export default function TeamHubScreen() {
 
         {tab === 'stats' && <TeamStatsTable teamId={teamId} />}
 
-        {tab === 'insights' && (
-          <>
-            {/* TEAM-specific analytics. The three 2x2 quadrant reads
-                share one carousel (output landscape, control matrix,
-                per-match possession scatter); the stacked cards below
-                read the per-match record: when they score and leak,
-                and the penalty habit against the narrative's bands. */}
-            <View style={styles.carouselBleed}>
-              <CardCarousel
-                pages={[
-                  <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
-                  <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
-                  <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
-                ]}
-              />
-            </View>
-            {/* Per-match record pair in its own carousel beneath the
-                2x2 trio. */}
-            <View style={styles.carouselBleed}>
-              <CardCarousel
-                pages={[
-                  <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
-                  <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
-                ]}
-              />
-            </View>
-          </>
-        )}
-
-        {tab === 'analysis' && <TeamAnalysisCard teamId={teamId} />}
       </ScrollView>
     </SafeAreaView>
   );
@@ -744,8 +677,9 @@ const styles = StyleSheet.create({
   },
   // Carousel pages are full screen width — bleed out of the pane's
   // 24pt padding; pages re-apply the card column internally.
-  carouselBleed: { marginHorizontal: -Spacing.four },
-  pageCard: { flex: 1 },
+  // Preview-block bleed: unwraps the pane padding AND carries the
+  // 16pt inter-card rhythm the block's children expect from Home.
+  previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
 
   card: {
     backgroundColor: '#FFFFFF',

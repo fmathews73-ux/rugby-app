@@ -20,13 +20,12 @@ import { PRE_MATCH_AXIS_PAIRS } from '@/lib/analysis-section-info';
 const LOOKBACK = 10;
 
 /**
- * Pre-Match pane — the app's surface grammar: ONE charting carousel +
- * ONE analysis dropdown card, every analysis section mapped 1:1 to a
- * carousel page (Keys shares the Gap Ladder with Shape — same
- * evidence). Two-way sync: opening a section slides its chart in;
- * swiping the carousel opens the matching section. Every page is
- * frozen as of kickoff, so the pane persists as a true pre-match
- * document after full-time.
+ * Pre-Match pane — the app's surface grammar, STRICT 1:1: one section
+ * per carousel card, labels identical to card titles (Shape + Keys
+ * write one 'Profile H2H' section — they always read the same chart).
+ * Two-way sync: opening a section slides its chart in; swiping opens
+ * the matching section. Every page is frozen as of kickoff, so the
+ * pane persists as a true pre-match document after full-time.
  */
 export function PreviewPane({
   fixture,
@@ -77,8 +76,10 @@ export function PreviewPane({
         style={styles.pageCard}
       />,
     ];
-    const sectionPage: Record<string, number> = { __summary__: 0, Shape: 1, Keys: 1 };
-    const pageSection: string[] = ['__summary__', 'Shape'];
+    // STRICT 1:1 — Shape/Keys merged into the 'Profile H2H' section
+    // (the card's own title); Danger relabelled to its card title.
+    const sectionPage: Record<string, number> = { __summary__: 0, 'Profile H2H': 1 };
+    const pageSection: string[] = ['__summary__', 'Profile H2H'];
 
     if (data) {
       for (const pair of PRE_MATCH_AXIS_PAIRS) {
@@ -101,8 +102,8 @@ export function PreviewPane({
     }
 
     if (data?.danger) {
-      sectionPage['Danger periods'] = pages.length;
-      pageSection.push('Danger periods');
+      sectionPage['Danger Windows'] = pages.length;
+      pageSection.push('Danger Windows');
       pages.push(
         <DangerWindows
           key="danger"

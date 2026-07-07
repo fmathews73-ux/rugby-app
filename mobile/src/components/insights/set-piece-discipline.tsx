@@ -7,7 +7,7 @@ import { MatrixChart } from '@/components/insights/matrix-chart';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
- * Set-Piece & Discipline matrix — the CONTROL read to the Landscape's
+ * Set Piece & Discipline matrix — the CONTROL read to the Landscape's
  * OUTPUT read. x = combined scrum + lineout success (the platform),
  * y = penalties conceded per game inverted (up = cleaner). A side in
  * the top-right owns its own ball and gives nothing away; bottom-left
@@ -42,7 +42,7 @@ export function SetPieceDiscipline({
     <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Set-Piece & Discipline</Text>
+          <Text style={styles.sectionLabel}>Set Piece & Discipline</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -71,7 +71,7 @@ export function SetPieceDiscipline({
         <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
           <Pressable style={styles.modalCard} onPress={() => {}}>
             <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Set-Piece & Discipline</Text>
+              <Text style={styles.modalTitle}>Set Piece & Discipline</Text>
               <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
                 <Ionicons name="close" size={20} color={Colors.light.text} />
               </Pressable>

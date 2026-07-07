@@ -3,10 +3,14 @@ import { useFocusEffect } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { DisciplineTrend } from '@/components/insights/discipline-trend';
 import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
 import { ExtendedMomentum } from '@/components/insights/extended-momentum';
+import { PossessionOutcome } from '@/components/insights/possession-outcome';
 import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
+import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
 import { SetPieceDiscipline } from '@/components/insights/set-piece-discipline';
+import { TeamLandscape } from '@/components/insights/team-landscape';
 import { TeamProfileCard } from '@/components/my-team-profile-card';
 import { TeamAnalysisCard } from '@/components/team-analysis-card';
 import { Spacing } from '@/constants/theme';
@@ -19,23 +23,52 @@ import { useMyTeamId } from '@/hooks/use-my-team-id';
  * section scrolls its evidence into view (insight ↔ chart). The radar
  * lives inside the carousel as the summary's page — no static chart.
  */
+// STRICT 1:1 section ↔ page maps — one narrative per card, labels
+// identical to the card titles (owner rule 2026-07-07). No ride-along
+// pages: every swipe lands on a section, every section owns one chart.
 const SECTION_PAGE: Record<string, number> = {
-  __summary__: 0, // Team Profile radar — the summary's evidence
-  Form: 1,
-  Ranking: 2,
-  Season: 3, // per-game profile → Efficiency KPIs
-  Outlook: 4, // repair jobs → Set-Piece & Discipline 2×2
+  __summary__: 0, // Team Profile — the title row's evidence
+  'Team Form': 1,
+  'Team World Ranking': 2,
+  'Team Landscape': 3,
+  'Team Efficiency KPIs': 4,
+  'Scoring Rhythm': 5,
+  'Possession vs Outcome': 6,
+  'Set Piece & Discipline': 7,
+  'Discipline Trend': 8,
 };
-const PAGE_SECTION: readonly string[] = ['__summary__', 'Form', 'Ranking', 'Season', 'Outlook'];
+const PAGE_SECTION: readonly string[] = [
+  '__summary__',
+  'Team Form',
+  'Team World Ranking',
+  'Team Landscape',
+  'Team Efficiency KPIs',
+  'Scoring Rhythm',
+  'Possession vs Outcome',
+  'Set Piece & Discipline',
+  'Discipline Trend',
+];
 
+/** Home wrapper — the same block scoped to the selected My Team. */
 export function MyTeamPreviewCards() {
   const [myTeamId] = useMyTeamId();
+  if (!myTeamId) return null;
+  return <TeamPreviewBlock teamId={myTeamId} />;
+}
+
+/**
+ * Team-scoped preview block — the app's team read: synced chart
+ * carousel (radar · Form · Ranking · KPIs · Set-Piece 2×2) + Team
+ * Analysis accordion. Used by Home (My Team) and every team hub's
+ * Preview pane, so reviewing ANY team is the exact My Team experience.
+ */
+export function TeamPreviewBlock({ teamId }: { teamId: string }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
   // Single source of truth for the sync: taps in the analysis card and
   // swipes on the carousel both land here.
   const [section, setSection] = useState('__summary__');
 
-  // Returning to the Home tab always lands on the first chart (radar)
+  // (Re)entering the surface always lands on the first chart (radar)
   // with the accordion at its resting summary — a fresh read every
   // visit, regardless of where the user left the carousel.
   useFocusEffect(
@@ -45,8 +78,6 @@ export function MyTeamPreviewCards() {
     }, []),
   );
 
-  if (!myTeamId) return null;
-
   return (
     <>
       {/* "Team ..." titles + no corner flag — the whole stack is
@@ -55,29 +86,33 @@ export function MyTeamPreviewCards() {
         ref={carouselRef}
         onPageChange={(i) => setSection(PAGE_SECTION[i] ?? '__summary__')}
         pages={[
-          <TeamProfileCard key="profile" teamId={myTeamId} style={styles.pageCard} />,
+          <TeamProfileCard key="profile" teamId={teamId} style={styles.pageCard} />,
           <ExtendedMomentum
             key="form"
-            teamId={myTeamId}
+            teamId={teamId}
             style={styles.pageCard}
             title="Team Form"
             showCornerFlag={false}
           />,
           <RankingTrajectory
             key="ranking"
-            teamId={myTeamId}
+            teamId={teamId}
             style={styles.pageCard}
             title="Team World Ranking"
             showCornerFlag={false}
           />,
+          <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
           <EfficiencyKpis
             key="kpis"
-            teamId={myTeamId}
+            teamId={teamId}
             style={styles.pageCard}
             title="Team Efficiency KPIs"
             showCornerFlag={false}
           />,
-          <SetPieceDiscipline key="setpiece" teamId={myTeamId} style={styles.pageCard} />,
+          <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
+          <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
+          <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
+          <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
         ]}
       />
 
@@ -86,7 +121,7 @@ export function MyTeamPreviewCards() {
           carousel shows the evidence. */}
       <View style={styles.wrap}>
         <TeamAnalysisCard
-          teamId={myTeamId}
+          teamId={teamId}
           openSection={section}
           onOpenSection={(next) => {
             setSection(next);

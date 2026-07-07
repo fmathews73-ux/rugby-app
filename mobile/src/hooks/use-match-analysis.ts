@@ -31,20 +31,29 @@ export interface MatchGapView {
 export interface MatchAnalysis {
   /** Scoreline + high-level narrative shape. 1 paragraph. */
   summary: string;
-  /** Broadcast-style prose commentary. Weaves the deeper stats not
-   *  covered by the 8 profile axes (attacking shape detail, kicking
-   *  strategy, breakdown work, half-time turning-point, cards) into a
-   *  paced 3-paragraph analyst read. Paragraphs are `\n\n` separated. */
-  commentary: string;
-  /** Variance story — biggest 2-3 gaps between the sides, named as the
+  /** "Momentum" — the initiative/shape read (was commentary ¶1). */
+  momentum: string;
+  /** Attack-pattern paragraph — opens the "Attack & Defence" section
+   *  (was commentary ¶2). */
+  attackPattern: string;
+  /** Platform paragraph — opens the "Set Piece & Discipline" section
+   *  (was commentary ¶3). */
+  platform: string;
+  /** "Scoring Progression" — the scoreboard-flow read: lead changes,
+   *  taken-for-good minute, decisive runs (was the flow paragraph). */
+  progression: string;
+  /** "Match Gaps" — biggest 2-3 gaps between the sides, named as the
    *  deciding dimensions of the match. 1 paragraph. */
   variance: string;
   /** 8 per-axis narrative reads, in the same order as the Profile
    *  radar. Each axis is a mini-section rendered under its own
    *  small-caps label — full prose with metrics woven in, no table. */
   axes: AxisAnalysis[];
+  /** "Pitch Heatmap" — where the match has been played: the territory
+   *  + red-zone read behind the heat map. */
+  heatmap: string;
   /** All 8 in-match gaps, biggest first — chart feed for Match Gaps so
-   *  the visual and the Variance prose come off one engine. */
+   *  the visual and the Match Gaps prose come off one engine. */
   gaps: MatchGapView[];
   /** Closing verdict — the match summarised through the control-vs-
    *  conversion lens (matches the pane's closing chart). NOT forward-
@@ -219,15 +228,21 @@ function buildAnalysis(
 
   const axes = buildAxes(result, home, away, ctx);
 
-  // Match-flow read (lead changes, decisive run) appends to Commentary
-  // as its closing paragraph — the narrative counterpart of the
-  // Scoring Progression / momentum charts on the Insights pane.
+  // Match-flow read (lead changes, decisive run) IS the "Scoring
+  // Progression" narrative — the scoreboard story its chart draws.
   const flow = buildMatchFlow(ctx.events, home, away, isLive);
-  const commentary = buildCommentary(result, home, away, isLive, generatedAtMinute, ctx);
 
   return {
     summary: buildSummary(result, home, away, isLive, generatedAtMinute),
-    commentary: flow ? `${commentary}\n\n${flow}` : commentary,
+    momentum: shapeParagraph(result, home, away, isLive, generatedAtMinute),
+    attackPattern: attackParagraph(result, home, away, ctx),
+    platform: platformParagraph(result, home, away, isLive, generatedAtMinute),
+    heatmap: buildHeatmapRead(result, home, away, isLive),
+    progression:
+      flow ??
+      (isLive
+        ? `No scoring swings to chart yet — the progression read opens with the first score.`
+        : `The scoreboard never produced a swing worth charting: no lead changes, no decisive run — a match that moved in inches.`),
     variance: buildVariance(result, home, away, isLive, ctx),
     gaps: computeAxisGaps(result)
       .map((g) => ({
@@ -249,6 +264,26 @@ function buildAnalysis(
  * Returns '' when there are no scoring events yet — the paragraph is
  * simply omitted rather than padded.
  */
+/** "Pitch Heatmap" — where the match has been played: territory share
+ *  and what the visits produced (the heat map in words). */
+function buildHeatmapRead(result: Result, home: Team, away: Team, isLive: boolean): string {
+  const ht = result.home_territory_percent;
+  const leader = ht >= 50 ? home : away;
+  const share = Math.round(Math.max(ht, 100 - ht));
+  const lEntries = leader === home ? result.home_twenty_two_entries : result.away_twenty_two_entries;
+  const lPts = leader === home ? result.home_points_from_twenty_two_entries : result.away_points_from_twenty_two_entries;
+  const ppe = lEntries > 0 ? (lPts / lEntries).toFixed(1) : null;
+  const tense = isLive ? 'has been played' : 'was played';
+  if (share <= 53) {
+    return `The map splits close to even: neither side ${isLive ? 'has owned' : 'owned'} the ground, and the heat sits through the middle third — a field-position stalemate that ${isLive ? 'is pushing' : 'pushed'} the contest onto execution instead.`;
+  }
+  const base = `Most of this match ${tense} in ${leader === home ? away.short_name : home.short_name}'s half: ${leader.short_name} ${isLive ? 'have carried' : 'carried'} ${share}% of the territory read.`;
+  if (ppe !== null) {
+    return `${base} The heat tells the value of it — ${lEntries} visits to the 22 at ${ppe} points a visit is ${Number(ppe) >= 2.5 ? 'pressure being cashed in' : 'pressure going unconverted, which keeps the door open'}.`;
+  }
+  return base;
+}
+
 function buildMatchFlow(
   events: readonly MatchEvent[],
   home: Team,
@@ -412,32 +447,6 @@ function buildSummary(
 }
 
 // ─── Broadcast commentary ───────────────────────────────────────────────────
-
-/**
- * 3-paragraph broadcast-style prose commentary. Weaves stats not
- * necessarily covered by the primary 8 profile axes — half-time turning
- * point, attacking shape detail (line breaks, metres, offloads), kicking
- * strategy (kicks to touch, kick metres), handling errors, sub windows —
- * into a paced analyst read.
- *
- * Structure:
- *   ¶1 Match shape and turning points (half-time story)
- *   ¶2 Attacking pattern (carries, line breaks, offloads, tries)
- *   ¶3 Kicking, set-piece and breakdown work (with a closing thought)
- */
-function buildCommentary(
-  result: Result,
-  home: Team,
-  away: Team,
-  isLive: boolean,
-  currentMinute: number,
-  ctx: PreMatchContext,
-): string {
-  const shape = shapeParagraph(result, home, away, isLive, currentMinute);
-  const attack = attackParagraph(result, home, away, ctx);
-  const platform = platformParagraph(result, home, away, isLive, currentMinute);
-  return [shape, attack, platform].join('\n\n');
-}
 
 function shapeParagraph(
   result: Result,

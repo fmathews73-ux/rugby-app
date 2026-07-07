@@ -31,17 +31,12 @@ The Analysis card renders 12 labeled prose sections, in this order:
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | 1 sentence: scoreline + high-level shape. Unlabeled. |
-| 2 | Commentary | 3-paragraph broadcast prose (shape / attack pattern / platform work) + a closing MATCH-FLOW paragraph from the scoring timeline: lead changes, when the (current) leader hit the front, and the largest unanswered run (named only at 10+ points). Flow paragraph is omitted when there are no scoring events. Paragraphs `\n\n` separated. |
-| 3 | Variance | Names the 2–3 axes with biggest gaps as the deciding dimensions. |
-| 4 | Attack | Axis narrative. |
-| 5 | Defence | Axis narrative. |
-| 6 | Set-piece | Axis narrative. |
-| 7 | Discipline | Axis narrative. |
-| 8 | Kicking | Axis narrative. |
-| 9 | Territory | Axis narrative. |
-| 10 | Possession | Axis narrative. |
-| 11 | Turnovers | Axis narrative. |
-| 12 | Verdict | Closing verdict — the match read back through the control-vs-conversion lens (who held ball + ground, who converted, which settled it). Seals the story; NEVER forward-looking (renamed from Outlook 2026-07-06 — its evidence chart is Control vs Conversion, a this-match verdict, so the prose matches). Team/player cards keep their forward-looking Outlook. |
+| 2 | Momentum | The initiative/shape read (Commentary ¶1 before the 2026-07-07 strict-1:1 split): halves compared, swings named. Evidence card: Momentum curve. |
+| 3 | Scoring Progression | The MATCH-FLOW read: lead changes, when the (current) leader hit the front, the largest unanswered run (named only at 10+ points). When there are no scoring swings, says so explicitly. Evidence: the progression worms. |
+| 3b | Match Gaps | Names the 2–3 axes with biggest gaps as the deciding dimensions (was "Variance"; relabelled to its evidence card). |
+| 4-7 | Axis pairs | Four paired sections matching the H2H cards — Attack & Defence (OPENS with the attack-pattern paragraph, ex-Commentary ¶2), Set Piece & Discipline (OPENS with the platform paragraph, ex-Commentary ¶3), Kicking & Territory, Possession & Turnovers — each carrying its two axis narratives. |
+| 7b | Pitch Heatmap | Where the match has been played: territory share + what the 22 visits produced (pressure cashed vs unconverted); slots after Kicking & Territory, matching the carousel. |
+| 12 | Control vs Conversion | Closing verdict — the match read back through the control-vs-conversion lens (who held ball + ground, who converted, which settled it). Seals the story; NEVER forward-looking. (Was "Outlook" → "Verdict" → relabelled 2026-07-07 to its evidence card's title under the strict-1:1 rule.) |
 
 "Coming in" was RETIRED from the match analysis (2026-07-06): the
 kickoff backdrop belongs to the Pre-Match surface (§11 Shape now opens
@@ -396,10 +391,19 @@ narrative lives in §9.
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | 1 sentence: name, current world rank, W-L(-D) record over the window, points for/against per game. Unlabeled cold open. |
-| 1 | Form | Current streak (if it qualifies) + average margin framing. |
-| 2 | Ranking | Trajectory across the monthly ranking snapshots: climbed / slipped / held, with start and end positions. |
-| 3 | Season | Per-game profile: attack (tries, carry metres, possession), defence (tries conceded, tackle %), then threshold-gated set-piece and discipline sentences. |
-| 4 | Outlook | Names the single most pressing repair job, in priority order: discipline → weaker set piece → defensive leakage → consolidation. Mirrors the summary as an opener/closer pair. |
+| 1 | Team Form | Current streak (if it qualifies) + average margin framing. Evidence card: Team Form margin bars. |
+| 2 | Team World Ranking | Trajectory across the monthly ranking snapshots: climbed / slipped / held, with start and end positions. Evidence: World Ranking lattice. |
+| 3 | Team Landscape | Pool-relative standing: points for/against per game vs the POOL MEDIANS (the chart's crosshairs), quadrant named in the chart's vocabulary — complete / grinders / entertainers / exposed. |
+| 4 | Team Efficiency KPIs | The per-game profile: attack (possession→tries), carry game, defensive ledger (tries conceded, tackle %), closed as "the baselines every match is measured against". |
+| 5 | Scoring Rhythm | Quarter-timing read: a lopsided quarter (≥35% share) named at either end; when both stories share a quarter, that collision is called; when NOTHING qualifies the narrative says so explicitly ("no quarter habit stands out"). |
+| 6 | Possession vs Outcome | How the wins arrive: last-10 possession/margin pairs — wins with the majority of ball vs counter-punching, plus the wasted-ball warning when defeats come WITH the ball. |
+| 7 | Set Piece & Discipline | Platform + whistle status sentences, closed by the single most pressing repair job in priority order: discipline → weaker set piece → defensive leakage → consolidation. |
+| 8 | Discipline Trend | The penalty habit: window average against the bands (≤9 disciplined / ≥12 problem) AND direction (recent half vs earlier half, ±1.5/game = trending). |
+
+STRICT 1:1 RULE (owner, 2026-07-07): the team accordion carries ONE
+narrative per carousel card, section labels IDENTICAL to card titles.
+No ride-along pages, no sections without a card. Season and Outlook
+were dissolved into the card-scoped sections above.
 
 ### 10.2 Thresholds (must match the template / future prompt)
 
@@ -465,10 +469,9 @@ and must stay on the right side of it. Conditions, not outcomes.
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | The billing: ranking framing (mismatch ≥8 places / edge ≥3 / meeting of equals) + both sides' last-5 win counts. |
-| 1 | Shape | OPENS with the coming-in backdrop (both sides' prev-10 points for/against per game — moved here from the match analysis 2026-07-06), then the 2–3 axes where the prev-10 profiles genuinely diverge, named as the likely battlegrounds. Balanced profiles are called balanced ("decided by execution"), never forced. |
+| 1 | Profile H2H | ONE section for the Profile H2H card (Shape + Keys merged 2026-07-07, strict 1:1 — they always read the same chart). ¶1 = Shape: the coming-in backdrop (both sides' prev-10 points for/against), then the 2–3 diverging axes named as battlegrounds; balanced profiles called balanced, never forced. ¶2 = Keys: one condition per side from the signed gaps — exploit for the side ahead, neutralise for the side behind; NO generic filler, never a winner call. |
 | 2–9 | Attack / Defence / Set-piece / Discipline / Kicking / Territory / Possession / Turnovers | same glyphs as §1's axes | Per-axis coming-in comparison — the SAME eight axes, order, and icons as the match analysis so the pre- and post-match reads line up section for section. Each axis compares one headline metric on fixed thresholds into three tiers: clear edge / shades it / even (see 11.2), with secondary metrics woven in for texture. "Edge" is a data statement about the coming-in numbers, never a result call. |
-| 10 | Danger periods | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
-| 11 | Keys | One condition per side, ALWAYS derived from the signed axis gaps — the side ahead on the fixture's biggest gap gets the EXPLOIT framing (how to press it), the side behind gets the NEUTRALISE framing (the survival job), each with the numbers woven in. When the second-ranked gap is ≥70% of the top gap and favours the other side, that side keys off its own weapon instead — two battlegrounds beat two views of one. Dead-heat profiles (top gap < half threshold) still key off the largest gap, framed as the fine margin. NO generic filler, ever — if a key could be written without this fixture's data, it is wrong. |
+| 10 | Danger Windows | Quarter-timing collisions: one side's scoring skew landing in the other's leakiest quarter. Lone skews named if no collision; SECTION OMITTED when neither side skews. |
 
 ### 11.2 Thresholds (must match the template / future prompt)
 

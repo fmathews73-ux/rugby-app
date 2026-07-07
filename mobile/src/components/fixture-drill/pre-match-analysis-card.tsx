@@ -105,8 +105,11 @@ export function PreMatchAnalysisCard({
             <Text style={styles.narrativeBody}>{data.summary}</Text>
           ) : null}
 
-          <Section label="Shape" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Shape']!)} {...accordion("Shape")}>
-            {data.shape}
+          {/* STRICT 1:1 — Shape and Keys merged under the evidence
+              card's own title (they always shared the Profile H2H
+              chart): battlegrounds first, then each side's key. */}
+          <Section label="Profile H2H" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Profile H2H']!)} {...accordion("Profile H2H")}>
+            {`${data.shape}\n\n${data.keys}`}
           </Section>
           {/* Paired coming-in comparisons — two axes per section for a
               denser read (both narratives, paragraph-separated), same
@@ -127,13 +130,10 @@ export function PreMatchAnalysisCard({
             );
           })}
           {data.danger ? (
-            <Section label="Danger periods" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Danger periods']!)} {...accordion("Danger periods")}>
+            <Section label="Danger Windows" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Danger Windows']!)} {...accordion("Danger Windows")}>
               {data.danger}
             </Section>
           ) : null}
-          <Section label="Keys" onInfo={() => setSectionInfo(PRE_MATCH_SECTION_INFO['Keys']!)} {...accordion("Keys")}>
-            {data.keys}
-          </Section>
         </View>
       )}
 

@@ -80,14 +80,15 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         style={styles.pageCard}
       />,
     ];
+    // STRICT 1:1 — every page owns exactly one section, labels match
+    // card titles.
     const sectionPage: Record<string, number> = {
       __summary__: 0,
-      Commentary: 1,
-      Variance: 3,
+      Momentum: 1,
+      'Scoring Progression': 2,
+      'Match Gaps': 3,
     };
-    // Progression (page 2) belongs to Commentary too — swiping onto it
-    // keeps the Commentary section open.
-    const pageSection: string[] = ['__summary__', 'Commentary', 'Commentary', 'Variance'];
+    const pageSection: string[] = ['__summary__', 'Momentum', 'Scoring Progression', 'Match Gaps'];
 
     for (const pair of MATCH_AXIS_PAIRS) {
       sectionPage[pair.title] = pages.length;
@@ -104,10 +105,10 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         />,
       );
       if (pair.title === 'Kicking & Territory') {
-        // The heatmap is territory made visible — it rides as this
-        // section's second page (rehomed from the retired Insights
-        // pill), same pattern as Progression riding with Commentary.
-        pageSection.push(pair.title);
+        // The heatmap is territory made visible — its OWN section now
+        // (strict 1:1), slotted straight after Kicking & Territory.
+        sectionPage['Pitch Heatmap'] = pages.length;
+        pageSection.push('Pitch Heatmap');
         pages.push(
           <PitchHeatmap
             key="heatmap"
@@ -121,9 +122,9 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
       }
     }
 
-    // Verdict — the closing chart: control into points.
-    sectionPage.Verdict = pages.length;
-    pageSection.push('Verdict');
+    // Control vs Conversion — the closing verdict chart.
+    sectionPage['Control vs Conversion'] = pages.length;
+    pageSection.push('Control vs Conversion');
     pages.push(
       <ControlConversion
         key="verdict"

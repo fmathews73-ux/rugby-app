@@ -84,17 +84,29 @@ export function TeamAnalysisCard({
             <Text style={styles.narrativeBody}>{data.summary}</Text>
           ) : null}
 
-          <NarrativeSection label="Form" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Form']!)} {...accordion("Form")}>
+          <NarrativeSection label="Team Form" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Team Form']!)} {...accordion("Team Form")}>
             {data.form}
           </NarrativeSection>
-          <NarrativeSection label="Ranking" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Ranking']!)} {...accordion("Ranking")}>
+          <NarrativeSection label="Team World Ranking" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Team World Ranking']!)} {...accordion("Team World Ranking")}>
             {data.ranking}
           </NarrativeSection>
-          <NarrativeSection label="Season" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Season']!)} {...accordion("Season")}>
-            {data.season}
+          <NarrativeSection label="Team Landscape" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Team Landscape']!)} {...accordion("Team Landscape")}>
+            {data.landscape}
           </NarrativeSection>
-          <NarrativeSection label="Outlook" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Outlook']!)} {...accordion("Outlook")}>
-            {data.outlook}
+          <NarrativeSection label="Team Efficiency KPIs" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Team Efficiency KPIs']!)} {...accordion("Team Efficiency KPIs")}>
+            {data.kpis}
+          </NarrativeSection>
+          <NarrativeSection label="Scoring Rhythm" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Scoring Rhythm']!)} {...accordion("Scoring Rhythm")}>
+            {data.rhythm}
+          </NarrativeSection>
+          <NarrativeSection label="Possession vs Outcome" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Possession vs Outcome']!)} {...accordion("Possession vs Outcome")}>
+            {data.possession}
+          </NarrativeSection>
+          <NarrativeSection label="Set Piece & Discipline" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Set Piece & Discipline']!)} {...accordion("Set Piece & Discipline")}>
+            {data.setPieceDiscipline}
+          </NarrativeSection>
+          <NarrativeSection label="Discipline Trend" onInfo={() => setSectionInfo(TEAM_SECTION_INFO['Discipline Trend']!)} {...accordion("Discipline Trend")}>
+            {data.disciplineTrend}
           </NarrativeSection>
         </View>
       )}

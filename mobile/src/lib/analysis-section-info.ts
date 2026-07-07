@@ -71,80 +71,115 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
 };
 
 export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
-  Commentary: {
-    title: 'Commentary',
+  Momentum: {
+    title: 'Momentum',
     paragraphs: [
-      'The analyst’s read of how the match actually unfolded — its shape, the attacking edge, and the platform battle — written from the live data and settled at full-time.',
-      'This is the narrative spine of the card: the numbers elsewhere are evidence, the commentary is what they add up to.',
+      'The initiative read: who has held the whip hand and when, written from the match shape — halves compared, swings named. Its chart is the zero-sum momentum curve above.',
+      'Momentum is the story between the scores: a side can trail on the scoreboard while the curve says the match is turning.',
     ],
   },
-  Variance: {
-    title: 'Variance',
+  'Scoring Progression': {
+    title: 'Scoring Progression',
     paragraphs: [
-      'The axes where the two performances genuinely separated — the two or three dimensions that decided the contest, ranked by the size of the gap.',
-      'Most matches are level on most numbers. The variance read filters the noise down to where the match was actually won and lost.',
+      'The scoreboard story: lead changes, the minute the lead was taken for good, and the largest unanswered run — the worm chart above in words.',
+      'Matches are remembered by their swings; this read names them, or says plainly when there were none.',
     ],
   },
-  Verdict: {
-    title: 'Verdict',
+  'Match Gaps': {
+    title: 'Match Gaps',
+    paragraphs: [
+      'The axes where the two performances genuinely separated, biggest gap first — the same ranking the chart draws, so the prose and the bars cannot disagree.',
+      'Most matches are level on most numbers. This read filters the noise down to where the match was actually won and lost.',
+    ],
+  },
+  'Pitch Heatmap': {
+    title: 'Pitch Heatmap',
+    paragraphs: [
+      'Where the match has been played: the territory share behind the heat map, and what the pressure produced in the 22.',
+      'Territory is pressure made visible — but only converted pressure wins matches, so the read always pairs the ground held with the points it yielded.',
+    ],
+  },
+  'Control vs Conversion': {
+    title: 'Control vs Conversion',
     paragraphs: [
       'The match sealed in one read: who held the ball and the ground, who turned that control into points, and which of the two settled it.',
-      'Control and conversion are the two ways to win a rugby match — most are won by converting control, and the memorable upsets by conversion beating it. The Control vs Conversion chart above is this section’s picture.',
+      'Control and conversion are the two ways to win a rugby match — most are won by converting control, and the memorable upsets by conversion beating it.',
     ],
   },
 };
 
 export const PRE_MATCH_SECTION_INFO: Record<string, SectionInfo> = {
-  Shape: {
-    title: 'Shape',
+  'Profile H2H': {
+    title: 'Profile H2H',
     paragraphs: [
-      'The two or three axes where the sides’ recent profiles genuinely diverge — the likely battlegrounds of this fixture, named with the numbers behind them.',
-      'When profiles don’t meaningfully diverge, the preview says so: a match between balanced sides is decided by execution, and pretending otherwise would be filler.',
+      'The two last-10 profiles compared axis by axis, biggest gap first — the chart above ranks them, and this read names the battlegrounds and then each side\u2019s key: the exploit for the side ahead, the survival job for the side behind.',
+      'Keys are conditions, never predictions: what each side must make true to win, not a call on who will. When the profiles refuse to separate, the preview says so — balanced fixtures are decided by execution.',
     ],
   },
-  'Danger periods': {
-    title: 'Danger periods',
+  'Danger Windows': {
+    title: 'Danger Windows',
     paragraphs: [
-      'Quarters of the match where one side has historically scored or conceded well above its share — the windows where swings are most likely.',
-      'Teams have scoring habits: fast starters, second-half sides, closers. Knowing the danger windows tells you when a lead is safe and when it isn’t.',
-    ],
-  },
-  Keys: {
-    title: 'Keys',
-    paragraphs: [
-      'One condition per side, derived from this fixture’s biggest profile gaps: the side ahead on an axis gets the exploit — how to press its weapon — and the side behind gets the neutralise — the survival job.',
-      'Keys are conditions, never predictions: what each side must make true to win, not a call on who will.',
+      'Quarters where one side has historically scored or conceded well above its share — the windows where swings are most likely, drawn side by side in the chart above.',
+      'Teams have scoring habits: fast starters, second-half sides, closers. Knowing the danger windows tells you when a lead is safe and when it isn\u2019t.',
     ],
   },
 };
 
 export const TEAM_SECTION_INFO: Record<string, SectionInfo> = {
-  Form: {
-    title: 'Form',
+  'Team Form': {
+    title: 'Team Form',
     paragraphs: [
-      'The recent results read: streaks and the average points margin across the last ten completed matches.',
+      'The recent results read: streaks and the average points margin across the last ten completed matches — the margin bars above are its picture.',
       'Margins carry more information than results — a run of one-score wins and a run of thirty-point wins are both "five from five", but they are not the same team.',
     ],
   },
-  Ranking: {
-    title: 'Ranking',
+  'Team World Ranking': {
+    title: 'Team World Ranking',
     paragraphs: [
       'The trajectory across the last twelve monthly World Rugby ranking snapshots: climbed, slipped, or held.',
-      'World Rugby’s rankings weight results by opponent strength, so sustained movement reflects genuine trajectory — beating better sides moves you further than beating up on weaker ones.',
+      'World Rugby\u2019s rankings weight results by opponent strength, so sustained movement reflects genuine trajectory — beating better sides moves you further than beating up on weaker ones.',
     ],
   },
-  Season: {
-    title: 'Season',
+  'Team Landscape': {
+    title: 'Team Landscape',
     paragraphs: [
-      'The per-game statistical profile across the analytical window: attack output, defensive record, then set piece and discipline where they cross reporting thresholds.',
-      'This is the team’s statistical identity — the baseline every match performance gets measured against.',
+      'Where the team sits on the pool map: points scored and conceded per game measured against the medians of every side in the competition set — the crosshairs on the chart.',
+      'The quadrants carry the verdict: complete sides beat the median at both ends, grinders defend without scoring, entertainers score without defending, and exposed sides trail on both.',
     ],
   },
-  Outlook: {
-    title: 'Outlook',
+  'Team Efficiency KPIs': {
+    title: 'Team Efficiency KPIs',
     paragraphs: [
-      'The single most pressing repair job in the profile, picked in priority order: discipline first, then the weaker set piece, then defensive leakage.',
-      'That order follows cost: penalties are the cheapest points given away, set-piece leaks surrender platform, and defensive gaps are the most expensive to fix mid-season.',
+      'The per-game statistical profile across the analytical window: attack output, carry game, and the defensive ledger — the KPI bars above with their tier-average ticks.',
+      'This is the team\u2019s statistical identity: the baseline every match performance gets measured against.',
+    ],
+  },
+  'Scoring Rhythm': {
+    title: 'Scoring Rhythm',
+    paragraphs: [
+      'The match split into its four 20-minute quarters: when the points arrive (green, above the line) and when they leak (red, below), averaged across the window.',
+      'Teams have scoring habits — fast starters, second-half sides, closers. A quarter carrying 35% or more of the points is a habit worth planning around; an even spread is consistency.',
+    ],
+  },
+  'Possession vs Outcome': {
+    title: 'Possession vs Outcome',
+    paragraphs: [
+      'How the wins have actually arrived: each of the last ten matches plotted by possession share against the points margin.',
+      'Winning with the ball is control; winning without it is counter-punching; losing with the ball is the warning sign — possession that doesn\u2019t convert is the most fixable failure mode in rugby.',
+    ],
+  },
+  'Set Piece & Discipline': {
+    title: 'Set Piece & Discipline',
+    paragraphs: [
+      'The platform and the whistle in one read: scrum and lineout success against penalties conceded — the quadrant chart above places the team against the pool on both.',
+      'The narrative closes with the most pressing repair job, in priority order: discipline first (the cheapest points given away), then the weaker set piece, then defensive leakage.',
+    ],
+  },
+  'Discipline Trend': {
+    title: 'Discipline Trend',
+    paragraphs: [
+      'Penalties conceded in each match of the window against the bands the analysis judges by: 9 or fewer a game is disciplined, 12 or more is a problem.',
+      'The read is level AND direction — a rising count usually reaches the scoreboard within a match or two, while a falling one is a side cleaning its game up.',
     ],
   },
 };

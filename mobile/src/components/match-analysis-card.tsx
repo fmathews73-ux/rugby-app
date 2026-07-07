@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { Fragment, useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
@@ -136,48 +136,66 @@ export function MatchAnalysisCard({
             <Text style={styles.summary}>{data.summary}</Text>
           ) : null}
 
-          {/* Broadcast prose — shape / attack / platform. Rendered as
-              three tight paragraphs under a single Commentary label so
-              the section reads as one continuous analyst passage. */}
-          <NarrativeSection label="Commentary" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Commentary']!)} {...accordion("Commentary")}>
-            {data.commentary.split('\n\n').map((paragraph, i) => (
-              <Text key={i} style={styles.body}>
-                {paragraph}
-              </Text>
-            ))}
+          {/* STRICT 1:1 — one section per carousel card, labels
+              identical to card titles. Commentary was dissolved
+              2026-07-07: its shape ¶ became Momentum, its flow ¶
+              Scoring Progression, its attack/platform ¶s open the
+              matching pair sections. */}
+          <NarrativeSection label="Momentum" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Momentum']!)} {...accordion("Momentum")}>
+            <Text style={styles.body}>{data.momentum}</Text>
           </NarrativeSection>
 
-          {/* Variance callout — the deciding axes. */}
-          <NarrativeSection label="Variance" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Variance']!)} {...accordion("Variance")}>
+          <NarrativeSection label="Scoring Progression" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Scoring Progression']!)} {...accordion("Scoring Progression")}>
+            <Text style={styles.body}>{data.progression}</Text>
+          </NarrativeSection>
+
+          <NarrativeSection label="Match Gaps" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Match Gaps']!)} {...accordion("Match Gaps")}>
             <Text style={styles.body}>{data.variance}</Text>
           </NarrativeSection>
 
-          {/* Paired axis narratives — two axes per section for a denser
-              read, same pairings as the evidence carousel and the
-              pre-match card. */}
+          {/* Paired axis sections; Attack & Defence opens with the
+              attack-pattern paragraph, Set Piece & Discipline with the
+              platform paragraph. Pitch Heatmap slots after Kicking &
+              Territory, matching the carousel order. */}
           {MATCH_AXIS_PAIRS.map((pair) => {
             const narratives = pair.keys
               .map((k) => data.axes.find((ax) => ax.key === k)?.narrative)
               .filter((n): n is string => Boolean(n));
             if (narratives.length === 0) return null;
+            const opener =
+              pair.title === 'Attack & Defence'
+                ? data.attackPattern
+                : pair.title === 'Set Piece & Discipline'
+                  ? data.platform
+                  : null;
+            const paragraphs = opener ? [opener, ...narratives] : narratives;
             return (
-              <NarrativeSection
-                key={pair.title}
-                label={pair.title}
-                onInfo={() => setSectionInfo(matchPairInfo(pair))}
-                {...accordion(pair.title)}>
-                {narratives.map((n, i) => (
-                  <Text key={i} style={styles.body}>
-                    {n}
-                  </Text>
-                ))}
-              </NarrativeSection>
+              <Fragment key={pair.title}>
+                <NarrativeSection
+                  label={pair.title}
+                  onInfo={() => setSectionInfo(matchPairInfo(pair))}
+                  {...accordion(pair.title)}>
+                  {paragraphs.map((n, i) => (
+                    <Text key={i} style={styles.body}>
+                      {n}
+                    </Text>
+                  ))}
+                </NarrativeSection>
+                {pair.title === 'Kicking & Territory' ? (
+                  <NarrativeSection
+                    label="Pitch Heatmap"
+                    onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Pitch Heatmap']!)}
+                    {...accordion("Pitch Heatmap")}>
+                    <Text style={styles.body}>{data.heatmap}</Text>
+                  </NarrativeSection>
+                ) : null}
+              </Fragment>
             );
           })}
 
           {/* Closing verdict — seals the story; the pane's Control vs
               Conversion chart is its picture. */}
-          <NarrativeSection label="Verdict" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Verdict']!)} {...accordion("Verdict")}>
+          <NarrativeSection label="Control vs Conversion" onInfo={() => setSectionInfo(MATCH_SECTION_INFO['Control vs Conversion']!)} {...accordion("Control vs Conversion")}>
             <Text style={styles.body}>{data.verdict}</Text>
           </NarrativeSection>
         </View>

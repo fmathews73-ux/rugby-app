@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 
-import { useLatestRanking, useRankingHistory, useTeams } from '@/api/hooks';
+import { useLatestRanking, useRankingHistory, useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamPointsPattern, type TeamPointsPattern } from '@/hooks/use-team-points-pattern';
+import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
 import { useTeamRecentForm, type FormOutcome } from '@/hooks/use-team-recent-form';
 
 /**
@@ -32,17 +33,32 @@ const TIMING_SKEW = 35;
 // Recent-window vs season-baseline divergence worth reporting.
 const BASELINE_DELTA = 0.15;
 
+/**
+ * STRICT 1:1 with the Team Preview carousel: one narrative per card,
+ * section labels identical to card titles (owner rule 2026-07-07 —
+ * consistency, never "reading between the lines"). Field order = card
+ * order.
+ */
 export interface TeamAnalysis {
-  /** Unlabeled cold-open, mirrors the match / player cards. */
+  /** Unlabeled cold-open (title-row body; evidence = Team Profile). */
   summary: string;
-  /** Recent results read: record, streak, margin. */
+  /** "Team Form" — recent results: record, streak, margin. */
   form: string;
-  /** World-ranking trajectory over the snapshot span. */
+  /** "Team World Ranking" — trajectory over the snapshot span. */
   ranking: string;
-  /** Per-game season profile: attack, defence, set piece, discipline. */
-  season: string;
-  /** Closing outlook. */
-  outlook: string;
+  /** "Team Landscape" — pool-relative standing, quadrant named. */
+  landscape: string;
+  /** "Team Efficiency KPIs" — the per-game profile: attack, defence. */
+  kpis: string;
+  /** "Scoring Rhythm" — quarter-timing read (explicit when even). */
+  rhythm: string;
+  /** "Possession vs Outcome" — how the wins arrive. */
+  possession: string;
+  /** "Set Piece & Discipline" — platform + whistle status, then the
+   *  most pressing repair job. */
+  setPieceDiscipline: string;
+  /** "Discipline Trend" — the per-match penalty habit and direction. */
+  disciplineTrend: string;
 }
 
 interface UseTeamAnalysisResult {
@@ -62,6 +78,10 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
   // Quarter-timing patterns — same prev-10 window as every other read.
   const scoredPattern = useTeamPointsPattern(teamId, 'scored', undefined, WINDOW);
   const concededPattern = useTeamPointsPattern(teamId, 'conceded', undefined, WINDOW);
+  // Pool context for the Landscape read + per-match possession/margin
+  // pairs for the Possession read — same windows as their charts.
+  const pool = useTeamsFormSummary();
+  const series = useTeamMatchSeries(teamId, WINDOW);
 
   const data = useMemo<TeamAnalysis | undefined>(() => {
     const team = teams.data?.find((t) => t.id === teamId);
@@ -83,8 +103,12 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
       summary: buildSummary(team.name, rank, form.outcomes, agg),
       form: buildForm(team.name, form.outcomes, agg, seasonAggregate.data),
       ranking: buildRanking(team.name, rankSeries),
-      season: buildSeason(team.name, agg, scoredPattern.data, concededPattern.data),
-      outlook: buildOutlook(team.name, agg),
+      landscape: buildLandscape(team.name, teamId, agg, pool.data ?? []),
+      kpis: buildKpis(agg),
+      rhythm: buildRhythm(scoredPattern.data, concededPattern.data),
+      possession: buildPossession(team.name, series.data),
+      setPieceDiscipline: buildSetPieceDiscipline(team.name, agg),
+      disciplineTrend: buildDisciplineTrend(team.name, series.data),
     };
   }, [
     teams.data,
@@ -95,6 +119,8 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
     seasonAggregate.data,
     scoredPattern.data,
     concededPattern.data,
+    pool.data,
+    series.data,
     teamId,
   ]);
 
@@ -217,12 +243,8 @@ function buildRanking(name: string, series: readonly number[]): string {
 
 const QUARTER_LABELS = ['first quarter', 'second quarter', 'third quarter', 'final quarter'] as const;
 
-function buildSeason(
-  name: string,
-  agg: Agg,
-  scored: TeamPointsPattern | undefined,
-  conceded: TeamPointsPattern | undefined,
-): string {
+/** "Team Efficiency KPIs" — the per-game statistical profile. */
+function buildKpis(agg: Agg): string {
   const g = agg.perGame;
   const parts: string[] = [];
   parts.push(
@@ -232,41 +254,35 @@ function buildSeason(
   parts.push(
     `The defensive ledger reads ${fmt(g.triesConceded)} tries conceded a game behind a ${Math.round(g.tackleSuccessPercent)}% tackle completion.`,
   );
-  const scrum = g.scrumSuccessPercent;
-  const lineout = g.lineoutSuccessPercent;
-  if (scrum >= SET_PIECE_SOLID && lineout >= SET_PIECE_SOLID) {
-    parts.push(
-      `The set piece is a platform rather than a worry: ${Math.round(scrum)}% at the scrum, ${Math.round(lineout)}% at the lineout.`,
-    );
-  } else if (scrum < SET_PIECE_CONCERN || lineout < SET_PIECE_CONCERN) {
-    const weakerIsScrum = scrum <= lineout;
-    parts.push(
-      `The ${weakerIsScrum ? 'scrum' : 'lineout'} is the leak: at ${Math.round(weakerIsScrum ? scrum : lineout)}%, it hands back possession that opponents will have circled.`,
-    );
-  }
-  if (g.penaltiesConceded >= PENS_HIGH) {
-    parts.push(
-      `Discipline bleeds into everything else, because ${fmt(g.penaltiesConceded)} penalties a game is a steady feed of territory and shots at goal for the opposition.`,
-    );
-  } else if (g.penaltiesConceded <= PENS_LOW) {
-    parts.push(
-      `Discipline underpins the whole operation: just ${fmt(g.penaltiesConceded)} penalties conceded a game, and with them almost nothing given away for free.`,
-    );
-  }
+  parts.push(
+    `Those are the baselines every match performance gets measured against.`,
+  );
+  return parts.join(' ');
+}
 
-  // Scoring-timing skews — the Points Pattern cards reduced to prose.
-  // Only a genuinely lopsided quarter (≥35% share) gets named.
+/** "Scoring Rhythm" — the quarter-timing read; explicit when even. */
+function buildRhythm(
+  scored: TeamPointsPattern | undefined,
+  conceded: TeamPointsPattern | undefined,
+): string {
   const scoredSkew = timingSkew(scored);
+  const concededSkew = timingSkew(conceded);
+  const parts: string[] = [];
   if (scoredSkew) {
     parts.push(
       `The scoring carries a clock, with ${scoredSkew.pct}% of the points arriving in the ${QUARTER_LABELS[scoredSkew.quarter]}.`,
     );
   }
-  const concededSkew = timingSkew(conceded);
   if (concededSkew) {
     parts.push(
       `The soft period sits in the ${QUARTER_LABELS[concededSkew.quarter]}, which absorbs ${concededSkew.pct}% of the points conceded.`,
     );
+  }
+  if (parts.length === 0) {
+    return `No quarter habit stands out at either end — the points have arrived and leaked evenly across the eighty, which reads as consistency rather than a window to attack.`;
+  }
+  if (scoredSkew && concededSkew && scoredSkew.quarter === concededSkew.quarter) {
+    parts.push(`The same window carries both stories, which makes it the quarter the match lives or dies in.`);
   }
   return parts.join(' ');
 }
@@ -283,23 +299,158 @@ function timingSkew(
   return pct >= TIMING_SKEW ? { quarter, pct } : null;
 }
 
-function buildOutlook(name: string, agg: Agg): string {
+/**
+ * Pool-relative standing — the Team Landscape 2×2 in prose. Attack and
+ * defence measured against the POOL MEDIANS (the chart's crosshairs),
+ * quadrant named in the chart's own vocabulary so the two readings
+ * can't drift.
+ */
+function buildLandscape(
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+): string {
+  const peers = pool.filter((r) => r.games_played > 0);
+  if (peers.length < 4) {
+    return `The pool picture is still forming — too few sides have a meaningful sample to place ${teamName} against.`;
+  }
+  const median = (xs: number[]): number => {
+    const sorted = [...xs].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+  };
+  const medFor = median(peers.map((r) => r.per_game.pointsScored ?? 0));
+  const medAgainst = median(peers.map((r) => r.per_game.pointsConceded ?? 0));
+  const attack = agg.perGame.pointsScored;
+  const defence = agg.perGame.pointsConceded;
+  const attackAbove = attack > medFor;
+  const defenceTight = defence < medAgainst;
+
+  if (attackAbove && defenceTight) {
+    return `Set against the whole pool, ${teamName} have held the complete quadrant: ${attack.toFixed(1)} a game scored against a median of ${medFor.toFixed(1)}, with the defence also inside the pool line. Owning both halves of the map is rare, and it is what separates contenders from good sides.`;
+  }
+  if (!attackAbove && defenceTight) {
+    return `${teamName} have lived in the grinders' quadrant: the defence has stayed tighter than the pool median while the attack has run at ${attack.toFixed(1)} a game, short of the median ${medFor.toFixed(1)}. Sides shaped like this stay in matches — the question has been finding the points to win them.`;
+  }
+  if (attackAbove && !defenceTight) {
+    return `The map places ${teamName} with the entertainers: ${attack.toFixed(1)} a game scored, clear of the pool median, but ${defence.toFixed(1)} shipped the other way. Matches like theirs have been decided by whichever end of the pitch blinks first.`;
+  }
+  return `Against the pool ${teamName} have sat in the exposed quadrant — below the median with the ball and leakier than it without: ${attack.toFixed(1)} for, ${defence.toFixed(1)} against. Every route out of that corner starts with the defence.`;
+}
+
+/**
+ * How the team wins — the Possession vs Outcome scatter in prose:
+ * whether wins have come with the majority of the ball or without it,
+ * and whether possession has been converting at all.
+ */
+function buildPossession(
+  teamName: string,
+  series: readonly { outcome: 'W' | 'L' | 'D'; margin: number; possessionPercent: number }[] | undefined,
+): string {
+  const rows = series ?? [];
+  if (rows.length === 0) {
+    return `Not enough completed matches yet to read how ${teamName} use the ball.`;
+  }
+  const wins = rows.filter((r) => r.outcome === 'W');
+  const losses = rows.filter((r) => r.outcome === 'L');
+  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+
+  if (wins.length === 0) {
+    const avgPoss = avg(rows.map((r) => r.possessionPercent));
+    return avgPoss >= 50
+      ? `No wins in the window, and not for lack of ball: ${teamName} have averaged ${avgPoss.toFixed(0)}% possession across the run. That is the wasted-ball corner of the map — control without conversion — and it is the most fixable failure mode in rugby.`
+      : `No wins in the window, and the shape of the map says why: ${teamName} have been outplayed for ball (${avgPoss.toFixed(0)}% on average) and outscored with it. Until the possession share recovers, everything else is patching.`;
+  }
+
+  const winsWithBall = wins.filter((r) => r.possessionPercent >= 50).length;
+  const avgPossWins = avg(wins.map((r) => r.possessionPercent));
+  const lossesWithBall = losses.filter((r) => r.possessionPercent >= 50);
+  const wastedBall =
+    losses.length > 0 && lossesWithBall.length >= Math.ceil(losses.length / 2);
+
+  let core: string;
+  if (winsWithBall === wins.length) {
+    core = `Every win in the window has come with the majority of the ball (${avgPossWins.toFixed(0)}% on average) — ${teamName} have won by taking control first and asking questions after.`;
+  } else if (winsWithBall === 0) {
+    core = `The wins have all come WITHOUT the ball — ${avgPossWins.toFixed(0)}% possession on average in victory. ${teamName} have been a counter-punching side: soak, strike, scoreboard.`;
+  } else {
+    core = `${winsWithBall} of ${wins.length} wins have come with the majority of the ball, the rest on the counter — ${teamName} have shown they can win the match both ways, which is the hardest profile to plan against.`;
+  }
+  if (wastedBall) {
+    return `${core} The warning sits on the other side of the map: most of the defeats have come WITH the ball, and possession that doesn't convert is an invitation.`;
+  }
+  return core;
+}
+
+/** "Set Piece & Discipline" — platform + whistle status, closed by
+ *  the single most pressing repair job (priority: discipline → weaker
+ *  set piece → defensive leakage → consolidation). */
+function buildSetPieceDiscipline(name: string, agg: Agg): string {
   const g = agg.perGame;
-  // Name the single most pressing repair job, in priority order:
-  // discipline, then the weaker set piece, then defensive leakage.
+  const scrum = g.scrumSuccessPercent;
+  const lineout = g.lineoutSuccessPercent;
+
+  const status: string[] = [];
+  if (scrum >= SET_PIECE_SOLID && lineout >= SET_PIECE_SOLID) {
+    status.push(
+      `The set piece is a platform rather than a worry: ${Math.round(scrum)}% at the scrum, ${Math.round(lineout)}% at the lineout.`,
+    );
+  }
+  if (g.penaltiesConceded <= PENS_LOW) {
+    status.push(
+      `Discipline underpins the whole operation: just ${fmt(g.penaltiesConceded)} penalties conceded a game.`,
+    );
+  }
+  const opener = status.length > 0 ? `${status.join(' ')} ` : '';
+
   if (g.penaltiesConceded >= PENS_HIGH) {
     return `The repair job starts at the whistle. ${name} are conceding ${fmt(g.penaltiesConceded)} penalties a game, and no other improvement pays off while territory and easy points are handed over at that rate.`;
   }
-  const scrum = g.scrumSuccessPercent;
-  const lineout = g.lineoutSuccessPercent;
   if (scrum < SET_PIECE_CONCERN || lineout < SET_PIECE_CONCERN) {
     const weaker = scrum <= lineout ? 'scrum' : 'lineout';
-    return `The priority is the ${weaker}. Until that platform steadies, good field position will keep dissolving at the moment it should pay off.`;
+    const weakerPct = Math.round(scrum <= lineout ? scrum : lineout);
+    return `${opener}The priority is the ${weaker}: at ${weakerPct}%, it hands back possession that opponents will have circled, and until that platform steadies good field position will keep dissolving at the moment it should pay off.`;
   }
   if (g.pointsConceded > g.pointsScored) {
-    return `The balance has to shift first: ${name} concede more than they score (${fmt(g.pointsConceded)} points a game against them), and that arithmetic forces the attack to chase every contest.`;
+    return `${opener}The balance has to shift first: ${name} concede more than they score (${fmt(g.pointsConceded)} points a game against them), and that arithmetic forces the attack to chase every contest.`;
   }
-  return `No single repair job stands out for ${name}; the profile holds across every dimension measured here. The task now is repetition, holding this standard long enough for a good stretch to become an identity.`;
+  return `${opener}No single repair job stands out beyond that for ${name}; the profile holds across every dimension measured here. The task now is repetition, holding this standard long enough for a good stretch to become an identity.`;
+}
+
+/** "Discipline Trend" — the per-match penalty habit: level against
+ *  the narrative bands (≤9 disciplined, ≥12 a problem) and direction
+ *  across the window (recent half vs earlier half). */
+function buildDisciplineTrend(
+  name: string,
+  series: readonly { penaltiesConceded: number }[] | undefined,
+): string {
+  const rows = series ?? [];
+  if (rows.length < 4) {
+    return `Not enough completed matches yet to read ${name}'s penalty habit.`;
+  }
+  const pens = rows.map((r) => r.penaltiesConceded);
+  const avg = pens.reduce((a, b) => a + b, 0) / pens.length;
+  const half = Math.floor(pens.length / 2);
+  const earlier = pens.slice(0, half);
+  const recent = pens.slice(half);
+  const avgOf = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
+  const drift = avgOf(recent) - avgOf(earlier);
+
+  const level =
+    avg >= PENS_HIGH
+      ? `${name} have run at ${fmt(avg)} penalties a game across the window — above the line where the whistle becomes a scoreboard problem.`
+      : avg <= PENS_LOW
+        ? `${name} have kept the count at ${fmt(avg)} penalties a game — inside the disciplined band, and almost nothing has been given away for free.`
+        : `${name} have sat at ${fmt(avg)} penalties a game — between the bands, liveable but with no margin for a bad night.`;
+
+  if (drift >= 1.5) {
+    return `${level} The direction is the worry: the recent half of the run has been ${fmt(drift)} a game worse than the earlier half, and that trend usually reaches the scoreboard within a match or two.`;
+  }
+  if (drift <= -1.5) {
+    return `${level} The direction is the encouraging part — the recent half of the run has been ${fmt(Math.abs(drift))} a game cleaner than the earlier half.`;
+  }
+  return `${level} The count has held steady across the run, so it reads as a habit rather than a phase.`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
