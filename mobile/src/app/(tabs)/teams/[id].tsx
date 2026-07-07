@@ -16,22 +16,12 @@ import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { JerseyAvatar } from '@/components/jersey-avatar';
+import { WORLD_CUP_WINS, TROPHY_COLOR } from '@/lib/honours';
 import { TEAM_JERSEY } from '@/lib/team-colors';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
-type TeamTab = 'preview' | 'squad' | 'stats';
-
-const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
-  // Team performance first, people second: Preview (the synced chart
-  // carousel + Team Analysis accordion — Insights/Analysis pills
-  // retired 2026-07-07) flows into Stats (the dense numeric record of
-  // the same performance), THEN Squad drills into the people behind
-  // it. Preview the team → see their stats → meet the squad.
-  { id: 'preview', label: 'Preview' },
-  { id: 'stats', label: 'Stats' },
-  { id: 'squad', label: 'Squad' },
-];
+type TeamTab = string;
 
 // Hero outcome-dot colours — same trio as FormCircles.
 const HERO_WIN = '#059669';
@@ -46,6 +36,17 @@ const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] 
   { label: 'Half-Backs', positions: ['scrum-half', 'fly-half'] },
   { label: 'Centres', positions: ['inside-centre', 'outside-centre'] },
   { label: 'Back Three', positions: ['left-wing', 'right-wing', 'fullback'] },
+];
+
+// ONE flat pill bar (owner call 2026-07-07): Preview and Stats, then
+// Squad and its six positional units as SIBLING pills — a unit pill
+// is simply the squad view filtered to that unit; Squad shows all.
+// Declared after POSITION_GROUPS, which it spreads.
+const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
+  { id: 'preview', label: 'Preview' },
+  { id: 'stats', label: 'Stats' },
+  { id: 'squad', label: 'Squad' },
+  ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
 ];
 
 /** Human position labels for the player rows. */
@@ -87,9 +88,9 @@ export default function TeamHubScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
   const [squadInfoOpen, setSquadInfoOpen] = useState(false);
-  // Squad unit filter — the landing pages' pill grammar applied to the
-  // positional groups. 'all' shows every unit's card.
-  const [squadUnit, setSquadUnit] = useState('all');
+  // Squad view when the Squad pill OR any unit pill is active; a unit
+  // pill filters to that unit, Squad shows all.
+  const isSquadView = tab === 'squad' || POSITION_GROUPS.some((g) => g.label === tab);
 
   const teams = useTeams();
   const team = useMemo(
@@ -134,22 +135,15 @@ export default function TeamHubScreen() {
     }).filter((s) => s.players.length > 0);
   }, [players.data]);
 
-  const squadUnitOptions = useMemo(
-    () => [
-      { id: 'all', label: 'All' },
-      ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
-    ],
-    [],
-  );
   const visibleSections =
-    squadUnit === 'all'
+    tab === 'squad'
       ? squadSections
-      : squadSections.filter((sec) => sec.label === squadUnit);
+      : squadSections.filter((sec) => sec.label === tab);
 
   const squadTotals = useMemo(
     () => ({
-      players: squadSections.reduce((sum, s) => sum + s.players.length, 0),
-      caps: squadSections.reduce((sum, s) => sum + s.caps, 0),
+      players: squadSections.reduce((sum, sec) => sum + sec.players.length, 0),
+      caps: squadSections.reduce((sum, sec) => sum + sec.caps, 0),
     }),
     [squadSections],
   );
@@ -196,6 +190,21 @@ export default function TeamHubScreen() {
             <Text style={styles.heroMetaText}>
               {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
             </Text>
+            {WORLD_CUP_WINS[teamId] ? (
+              <View style={styles.heroTrophyRow}>
+                <Text style={styles.heroMetaText}>World Champions · </Text>
+                {Array.from({ length: WORLD_CUP_WINS[teamId]! }).map((_, i) => (
+                  <Ionicons key={i} name="trophy" size={12} color={TROPHY_COLOR} />
+                ))}
+              </View>
+            ) : null}
+            {squadTotals.players > 0 ? (
+              <View style={styles.heroRecordRow}>
+                <Text style={styles.heroMetaText}>
+                  {squadTotals.caps.toLocaleString('en-GB')} Caps · {squadTotals.players} Players
+                </Text>
+              </View>
+            ) : null}
             {outcomes.length > 0 ? (
               <View style={styles.heroRecordRow}>
                 <Text style={styles.heroMetaText}>Last {outcomes.length} · </Text>
@@ -216,39 +225,7 @@ export default function TeamHubScreen() {
           </View>
         </View>
       </View>
-      <SegmentedTabs
-        tabs={TEAM_TABS}
-        active={tab}
-        onSelect={handleTabSelect}
-        rightAccessory={
-          (
-            <View style={styles.squadMetaRow}>
-              <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
-              <Text style={styles.statLegendText}>
-                {squadTotals.caps.toLocaleString('en-GB')}
-              </Text>
-              <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
-              <Text style={styles.statLegendText}>{squadTotals.players}</Text>
-              <Pressable
-                onPress={() => setSquadInfoOpen(true)}
-                hitSlop={10}
-                accessibilityRole="button"
-                accessibilityLabel="Explain the squad"
-                style={styles.squadMetaSecondIcon}>
-                <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-              </Pressable>
-            </View>
-          )
-        }
-      />
-
-      {/* Unit pill strip — PINNED outside the ScrollView so it
-          persists while the squad cards scroll, bonded directly under
-          the drill tabs (two strips, one white surface, hairline
-          divided). Same SegmentedTabs component as everywhere else. */}
-      {tab === 'squad' ? (
-        <SegmentedTabs tabs={squadUnitOptions} active={squadUnit} onSelect={setSquadUnit} />
-      ) : null}
+      <SegmentedTabs tabs={TEAM_TABS} active={tab} onSelect={handleTabSelect} />
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <>
@@ -265,7 +242,7 @@ export default function TeamHubScreen() {
           </>
         )}
 
-        {tab === 'squad' && (
+        {isSquadView && (
           <>
             <Modal
               visible={squadInfoOpen}
@@ -624,17 +601,35 @@ function PlayerRow({
           badge (colours are factual — no crests, register #28);
           everyone else keeps the anonymous grey glyph. */}
       <JerseyAvatar jersey={jersey} size={40} />
-      <Text style={styles.playerName} numberOfLines={1}>
-        {player.name}
-      </Text>
+      {/* First name over surname — two short lines instead of one
+          truncated one now the chevron shares the row. */}
+      <View style={styles.playerNameStack}>
+        <Text style={styles.playerName} numberOfLines={1}>
+          {givenNames(player.name)}
+        </Text>
+        <Text style={styles.playerName} numberOfLines={1}>
+          {surname(player.name)}
+        </Text>
+      </View>
       <View style={styles.playerMetaStack}>
         <Text style={styles.playerMeta}>
           {POSITION_LABELS[player.primary_position]} · {age}
         </Text>
         <Text style={styles.playerMeta}>{player.cap_count} caps</Text>
       </View>
+      <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
     </Pressable>
   );
+}
+
+function givenNames(full: string): string {
+  const i = full.lastIndexOf(' ');
+  return i === -1 ? full : full.slice(0, i);
+}
+
+function surname(full: string): string {
+  const i = full.lastIndexOf(' ');
+  return i === -1 ? '' : full.slice(i + 1);
 }
 
 function ageFrom(dobIso: string): number {
@@ -708,8 +703,10 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   heroName: {
+    // 40pt-shield rule: nation codes beside a medium shield use the
+    // sport-display face at xl.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
-    fontWeight: TextWeight.bold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
   },
@@ -720,6 +717,11 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     gap: Spacing.one,
     paddingLeft: Spacing.four,
+  },
+  heroTrophyRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
   },
   heroRecordRow: {
     flexDirection: 'row',
@@ -780,11 +782,13 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   playerRowPressed: { opacity: 0.6 },
-  playerName: {
-    // Flexible column so the fixed-width meta stack below always
+  playerNameStack: {
+    // Flexible column so the fixed-width meta stack beside it always
     // starts at the same x — meta text forms one left-aligned column
     // down the card regardless of name length.
     flex: 1,
+  },
+  playerName: {
     fontSize: TextSize.md,
     fontWeight: TextWeight.bold,
     color: Colors.light.text,

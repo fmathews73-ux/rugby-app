@@ -32,9 +32,20 @@ export function SegmentedTabs<T extends string>({
   tabs: readonly { id: T; label: string }[];
   active: T;
   onSelect: (id: T) => void;
+  /** Centre the pills in the strip when they fit (short fixed sets
+   *  like the team hub's three tabs); overflowing strips scroll as
+   *  normal either way. */
   /** Optional content pinned at the strip's right edge, outside the
    *  scrolling pill area (e.g. the team hub's squad totals). */
   rightAccessory?: React.ReactNode;
+  /** Optional second pill group rendered in the SAME strip after a
+   *  thin divider, with its own selection — the team hub merges its
+   *  squad unit filter into the drill bar this way. */
+  secondary?: {
+    tabs: readonly { id: string; label: string }[];
+    active: string;
+    onSelect: (id: string) => void;
+  };
 }) {
   // Right-edge fade: a clean clip reads as "the row ends here", hiding
   // any pill that's scrolled out of view (users were missing Analysis).
@@ -150,7 +161,7 @@ const styles = StyleSheet.create({
     borderRadius: PillStrip.radius,
   },
   pillActive: {
-    backgroundColor: Colors.light.text,
+    backgroundColor: Colors.light.textSecondary,
   },
   pillInactive: {
     backgroundColor: '#F3F4F6',
@@ -160,6 +171,6 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.bold,
     letterSpacing: PillStrip.labelTracking,
   },
-  pillLabelActive: { color: Colors.light.background },
+  pillLabelActive: { color: '#FFFFFF' },
   pillLabelInactive: { color: Colors.light.textSecondary },
 });

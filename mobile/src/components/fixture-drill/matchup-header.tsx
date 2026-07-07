@@ -214,7 +214,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
   },
-  teamShort: { fontSize: TextSize.sm, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide, color: Colors.light.textSecondary },
+  teamShort: {
+    // 40pt-shield rule: sport-display face at xl beside medium shields.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.text,
+  },
   // scoreSlot is used twice: once wrapping the score row (top) and once as an
   // invisible spacer beneath it — same width both times so the labels sit
   // symmetric around the score column.
@@ -228,8 +234,8 @@ const styles = StyleSheet.create({
   // Mirrors the row-scale FT (10pt bold wide) at the card tier — both
   // muted to read as informational annotation, not decoration.
   ftLabel: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
+    fontSize: TextSize.md,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },
@@ -253,8 +259,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  detailScoreBoxWinner: { backgroundColor: Colors.light.text },
-  detailScoreText: { fontSize: TextSize.xl, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  detailScoreBoxWinner: { backgroundColor: Colors.light.textSecondary },
+  detailScoreText: { fontSize: TextSize.xl, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary },
   detailScoreTextWinner: { color: Colors.light.textInverse },
   pill: {
     paddingHorizontal: 10,

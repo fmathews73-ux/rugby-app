@@ -138,8 +138,10 @@ export const FlagSize = {
  * Docs: `docs/design-system.md` §6.
  */
 export const ScoreBoxSize = {
-  row: { width: 30, height: 24, borderRadius: 4 },
-  card: { width: 52, height: 44, borderRadius: 8 },
+  // Tuned to the Barlow Condensed score digits — tiles hug the numerals
+  // broadcast-bug style instead of floating them in air.
+  row: { width: 26, height: 22, borderRadius: 4 },
+  card: { width: 40, height: 34, borderRadius: 8 },
 } as const;
 
 /**

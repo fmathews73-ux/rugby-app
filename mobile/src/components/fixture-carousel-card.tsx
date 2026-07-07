@@ -226,10 +226,11 @@ const styles = StyleSheet.create({
     marginTop: Spacing.three,
   },
   teamShort: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
+    // Same sport-display face as the hero-row nation codes.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
     letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
+    color: Colors.light.text,
   },
   scoreBox: {
     ...ScoreBoxSize.card,
@@ -238,20 +239,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   scoreBoxWinner: {
-    backgroundColor: Colors.light.text,
+    backgroundColor: Colors.light.textSecondary,
   },
   scoreText: {
     fontSize: TextSize.xl,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    color: Colors.light.textSecondary,
   },
   scoreTextWinner: { color: Colors.light.textInverse },
   // Card-scale FT annotation between the two completed scores. Same 12pt
   // bold wide textSecondary spec used in the drill hero.
   ftLabel: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
+    fontSize: TextSize.md,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     marginHorizontal: 2,
@@ -271,10 +271,9 @@ const styles = StyleSheet.create({
   },
 
   kickoffTime: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
+    color: Colors.light.textSecondary,
     marginTop: 2,
-    fontVariant: ['tabular-nums'],
   },
 });

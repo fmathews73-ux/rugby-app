@@ -17,22 +17,20 @@ Living reference for the rugby app's UI tokens. This document is the single sour
 
 ---
 
-## 2. Flag / avatar sizes
+## 2. Flag shield sizes
 
-Circle-clipped country flags rendered by `TeamFlagBall2D`. Four steps only, all multiples of 8. Constants live in `mobile/src/constants/theme.ts` as `FlagSize`; the component's `size` prop is typed to `FlagSizeValue`, so raw numbers won't compile.
+Nation flags render as **shields** via `TeamFlagShield` — the exact silhouette extracted from the owner-licensed reference vector (see PRD register #32), flag imagery clipped to the inner boundary. The `width` prop scales the whole artwork. Constants live in `mobile/src/constants/theme.ts` as `FlagSize`.
+
+**Two working sizes (owner decision 2026-07-07):**
 
 | Token | Value | Role | Where it appears |
 |---|---|---|---|
-| `FlagSize.hero` | 96 pt | Hero avatar | Team detail page top block |
-| `FlagSize.header` | 56 pt | Section / fixture header pair | Fixture detail header (home + away) |
-| `FlagSize.medium` | 40 pt | Card-scale identifier | Home fixture carousel cards, Teams tab list rows, Fixture detail line-up |
-| `FlagSize.row` | 24 pt | Table / list row badge | Standings, Fixtures list, Rankings tab, home mini-rankings, Team detail recent form |
+| `FlagSize.medium` | 40 pt | **Identity** — "this is the subject" | Drill heroes (team hub, fixture matchup header), hero rows (Home My Team, Teams directory, picker), Home fixture carousel cards |
+| `FlagSize.row` | 24 pt | **Annotation** — identifies a row or corner | Standings, Fixtures list rows, Rankings tables, mini-carousels, Next/Last Match lines |
 
-**Ratios:** 24 → 40 (1.67×) → 56 (1.4×) → 96 (1.71×). Every step is visibly larger than the previous without needing side-by-side comparison.
+`FlagSize.xs` (16 pt, insight chart-card corner flags) still exists in code but is scheduled for consolidation into `row` — at 16pt the shield silhouette doesn't read. Do not add new `xs` call sites.
 
-**Anchor to industry:** matches Material Design's canonical avatar scale (24 / 40 / 56 / 96) exactly. This isn't a coincidence — Material derived it from the same reasoning (8pt grid + geometric progression + capped step count) and there's no reason to invent our own numbers.
-
-**Adding a new size:** don't. If a call site "needs" 48pt, that means either (a) the design brief is wrong, or (b) the token family needs re-thinking as a whole. Adding an ad-hoc value reintroduces the drift we just removed.
+**Adding a new size:** don't. If a call site "needs" 48pt, that means either (a) the design brief is wrong, or (b) the token family needs re-thinking as a whole. Two roles — identity vs. annotation — is the entire system.
 
 ---
 
@@ -78,8 +76,24 @@ Any value between `0` and `1.0` is indistinguishable — collapse to the two abo
 ### Font family
 
 - **Default:** system UI (`Fonts.sans` → San Francisco on iOS, Roboto on Android). Set once at the root, not per-style.
-- **Numbers (scores, points, table stats):** every text style that renders numeric data MUST include `fontVariant: ['tabular-nums']`. This keeps digits at monospaced widths inside a proportional font — "29 · 21" and "18 · 31" render at the same width, avoiding jitter on live updates and misaligned table columns. This is the FIFA / Sky Sports pattern.
-- **Monospace (`Fonts.mono`):** currently unused in production screens. If needed, reserve for full-monospaced text (code blocks, terminal-style displays) — not for score digits, which use tabular-nums.
+- **Sport-display face:** `BarlowCondensed_700Bold_Italic` (`@expo-google-fonts/barlow-condensed`, SIL OFL — app-embedding safe; loaded at runtime in `src/app/_layout.tsx`, splash-gated so no fallback flash). This is the "broadcast bug" voice: nation codes, match scores, kickoff times, FT/HT annotations. The file carries the weight — **never add `fontWeight` beside it** (RN would fake-bold the face).
+- **Numbers in the system font (points, table stats):** every *system-font* style that renders numeric data MUST include `fontVariant: ['tabular-nums']` — "29 · 21" and "18 · 31" render at the same width. Barlow Condensed styles drop `tabular-nums` (not guaranteed by the font); they only ever render centred single values inside fixed tiles, where digit alignment is moot.
+- **Monospace (`Fonts.mono`):** currently unused in production screens. If needed, reserve for full-monospaced text (code blocks, terminal-style displays) — not for score digits.
+
+### The matchup strip (broadcast-bug grammar)
+
+Every surface that renders `shield · CODE · score/time · CODE · shield` follows one typographic system, tiered by shield size:
+
+| Element | With `FlagSize.medium` (40pt) | With `FlagSize.row` (24pt) | Colour |
+|---|---|---|---|
+| Nation code | Barlow `TextSize.xl` (22) | Barlow `TextSize.lg` (16) | `Colors.light.text` (black — identity) |
+| Kickoff time | Barlow `TextSize.xl` | Barlow `TextSize.lg` | `Colors.light.textSecondary` |
+| Score digits | Barlow `TextSize.xl` | Barlow `TextSize.lg` | winner `textInverse`, loser `textSecondary` |
+| FT annotation | Barlow `TextSize.md` (14) | Barlow `TextSize.sm` (12) | `Colors.light.textSecondary` |
+
+The rule in one line: **code = same size, black; time/score = same size, grey register; FT = two steps down, grey.** Colour alone separates identity from data — the whole strip shares the face.
+
+Nation codes only: surfaces that render *full team names* next to a shield (Rankings, home rankings mini-carousel) stay in the system font — the display face is for codes and numerals, not sentences.
 
 ### Applied convention
 
@@ -131,6 +145,18 @@ For anything neutral (titles, meta, body, badges), pick one of these:
 Dark-mode counterparts live in `Colors.dark.*` — same semantic names, appropriate light values.
 
 **Anchor:** two neutral text tiers matches Apple HIG (`label` / `secondaryLabel` / `tertiaryLabel`) — we compress to two because a data app rarely needs three levels of muted body text. Add `textTertiary` only when a real use-case appears; do not preemptively.
+
+### 5.1a The three registers (owner decision 2026-07-07)
+
+Every interactive/identity element sits in exactly one of three registers:
+
+| Register | Colour | What lives here |
+|---|---|---|
+| **Identity** | `Colors.light.text` (black) | Nation codes, winning-score treatment, titles, the *active* footer tab |
+| **Functional** | `Colors.light.textSecondary` | Nav icons (footer inactive, header avatar), header back disc fill, meta text, kickoff times, losing scores, FT labels, *selected* pill fills (white label on top), accordion expand chevrons |
+| **Chrome** | `#C7CBD1` | Pure pressability affordances: `chevron-forward` disclosure cues (16pt), Team-Selector list icon |
+
+The disclosure chevron spec: `Ionicons chevron-forward, size 16, #C7CBD1`, pinned to the right edge of every navigational row (team rows, player rows, fixture rows, Next/Last Match cards) and vertically centred **on the shield/matchup line**, not on the whole row — absolute-positioned in the row's right gutter so centred clusters keep their symmetry.
 
 ### 5.2 Status tokens (semantic)
 
@@ -192,16 +218,18 @@ Small dark-and-light score tiles used to display paired scores and hero stats. E
 
 | Token | Dimensions | Radius | Role | Where it appears |
 |---|---|---|---|---|
-| `ScoreBoxSize.row` | 30 × 24 pt | 4 pt | List / table row cell | Fixtures list score cells, My Team Last Match scores, World Rugby Rankings points tile |
-| `ScoreBoxSize.card` | 52 × 44 pt | 8 pt | Hero / card-scale | Home fixture carousel scores, Fixture detail header scores |
+| `ScoreBoxSize.row` | 26 × 22 pt | 4 pt | List / table row cell | Fixtures list score cells, My Team Last Match scores |
+| `ScoreBoxSize.card` | 40 × 34 pt | 8 pt | Hero / card-scale | Home fixture carousel scores, Fixture detail header scores |
 
-**Aspect ratios:** `row` is 1.25:1 (near-square), `card` is 1.18:1 (near-square). Both intentionally close-to-square so the "score tile" visual language is consistent — the difference is scale, not shape.
+Dimensions are tuned to the Barlow Condensed digits — tiles hug the numerals broadcast-bug style rather than floating them in air (re-tuned 2026-07-07 when the display face landed; condensed digits are ~30% narrower than system digits).
 
 **Fill / text pairing:**
-- Winner box: `Colors.light.text` fill (black) + `Colors.light.textInverse` (white) text.
-- Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.text` (black) text.
-- Text weight: `TextWeight.bold`, `fontVariant: ['tabular-nums']` always.
-- Text size: `TextSize.md` for `row`, `TextSize.xl` for `card`.
+- Winner box: `Colors.light.textSecondary` fill + `Colors.light.textInverse` (white) text.
+- Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.textSecondary` text.
+- Face: `BarlowCondensed_700Bold_Italic` (no `fontWeight`, no `tabular-nums` — see §3).
+- Text size: `TextSize.lg` for `row`, `TextSize.xl` for `card` — same size as the neighbouring nation codes.
+
+**Not match scores, not this token:** the rankings points tile ("93.9") self-sizes on `paddingHorizontal` with the token's height/radius only — the fixed widths are now digit-hugging and too narrow for rating values.
 
 **Usage — spread the token so all three dimensions stay locked:**
 
@@ -230,12 +258,12 @@ The little label between the two score boxes ("FT" for completed, "LIVE" or a mi
 
 | Context | FT-annotation spec |
 |---|---|
-| Row (with `ScoreBoxSize.row`) | `TextSize.xs` (10pt), `TextWeight.bold`, `TextTracking.wide`, `Colors.light.textSecondary` |
-| Card (with `ScoreBoxSize.card`) | `TextSize.sm` (12pt), `TextWeight.bold`, `TextTracking.wide`, `Colors.light.textSecondary` |
+| Row (with `ScoreBoxSize.row`) | `TextSize.sm` (12pt), Barlow face, `TextTracking.wide`, `Colors.light.textSecondary` |
+| Card (with `ScoreBoxSize.card`) | `TextSize.md` (14pt), Barlow face, `TextTracking.wide`, `Colors.light.textSecondary` |
 
-Both intentionally muted and small — the annotation is *informational*, not decorative. It should never compete visually with the scores it sits between.
+Roughly 60–65% of the neighbouring code size — muted, but legible in the condensed face (10pt condensed turns to lint). The annotation is *informational*, not decorative; it should never compete visually with the scores it sits between.
 
-**Live / HT variants** carry the same size/weight but swap the colour token: `StatusColor.live` for a red live indicator, `StatusColor.warning` for HT amber. **KO / kickoff-time variants** use the same font size but `Colors.light.text` (primary) + `fontVariant: ['tabular-nums']` — treated as data, not annotation.
+**Live / HT variants** carry the same size but swap the colour token: `StatusColor.live` for a red live indicator, `StatusColor.warning` for HT amber. **KO / kickoff-time variants** are Barlow at the *code* size of their tier (see §3 matchup strip), `Colors.light.textSecondary` — the clock is data-in-waiting, one register below the codes.
 
 ---
 

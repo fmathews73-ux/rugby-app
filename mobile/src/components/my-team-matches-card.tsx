@@ -112,6 +112,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
                   nextMatch.home_team_id === teamId ? nextMatch.away_team_id : nextMatch.home_team_id,
                 )}
                 competition={compById.get(nextMatch.competition_id)}
+                chevron
               />
             </>
           ) : (
@@ -134,6 +135,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
                 )}
                 competition={compById.get(lastMatch.competition_id)}
                 result={lastResult}
+                chevron
               />
             </>
           ) : (
@@ -159,21 +161,15 @@ function NavSection({
     <Pressable
       onPress={onPress}
       disabled={inert}
-      style={({ pressed }) => [styles.section, pressed && !inert && { opacity: 0.75 }]}>
+      style={({ pressed }) => [
+        styles.section,
+        !inert && styles.sectionWithChevron,
+        pressed && !inert && { opacity: 0.75 },
+      ]}>
       <View style={styles.navSectionHeader}>
         <Text style={styles.sectionLabel}>{label}</Text>
       </View>
       {children}
-      {!inert ? (
-        <View style={styles.navSectionFooter}>
-          {/* 32×32 slot mirrors the Team-Selector filterButton dimensions
-              so the arrow's centre lands on the same vertical gridline as
-              the filter icon above. */}
-          <View style={styles.navSectionFooterSlot}>
-            <Ionicons name="arrow-forward" size={20} color={Colors.light.textSecondary} />
-          </View>
-        </View>
-      ) : null}
     </Pressable>
   );
 }
@@ -185,6 +181,7 @@ function FixtureLine({
   oppTeam,
   competition,
   result,
+  chevron,
 }: {
   fixture: Fixture;
   teamId: string;
@@ -192,6 +189,9 @@ function FixtureLine({
   oppTeam: { flag_code: string; short_name: string } | undefined;
   competition: { short_name: string } | undefined;
   result?: Result;
+  /** Pressability cue — rendered inside the matchup row so it centres
+      on the shields, not the whole section. */
+  chevron?: boolean;
 }) {
   const isHome = fixture.home_team_id === teamId;
   const oppId = isHome ? fixture.away_team_id : fixture.home_team_id;
@@ -234,6 +234,13 @@ function FixtureLine({
           <Text style={styles.fixtureCode}>{oppShort}</Text>
           {oppTeam ? <TeamFlagShield flagCode={oppTeam.flag_code} width={FlagSize.row} /> : null}
         </View>
+        {chevron ? (
+          // Sits in the section's right-padding gutter (absolute, so
+          // the centred clusters don't shift) at the row's mid-height.
+          <View style={styles.rowChevron}>
+            <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
+          </View>
+        ) : null}
       </View>
       <Text style={styles.fixtureMeta} numberOfLines={1}>
         {competition?.short_name ?? fixture.competition_id} · {fixture.venue}
@@ -282,16 +289,16 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
-  navSectionFooter: {
-    alignItems: 'flex-end',
+  // Row content stops short of the right edge so the away flag never
+  // collides with the pinned chevron.
+  sectionWithChevron: {
+    paddingRight: 24,
   },
-  navSectionFooterSlot: {
-    // 24×24 matches the FlagSize.row diameter used by the away flag on
-    // this same row's FixtureLine — so the arrow's centre lines up on
-    // the same vertical gridline as the away flag centre above.
-    width: 24,
-    height: 24,
-    alignItems: 'center',
+  rowChevron: {
+    position: 'absolute',
+    right: -24,
+    top: 0,
+    bottom: 0,
     justifyContent: 'center',
   },
   mutedRow: {
@@ -322,16 +329,16 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   fixtureCode: {
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.bold,
+    // 24pt-shield rule: sport-display face at lg beside row shields.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.text,
     letterSpacing: TextTracking.wide,
   },
   fixtureTime: {
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.textSecondary,
   },
   fixtureMeta: {
     fontSize: TextSize.xs,
@@ -350,17 +357,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
+  scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
   scoreBoxSmallText: {
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontSize: TextSize.lg,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    color: Colors.light.textSecondary,
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   ftLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },

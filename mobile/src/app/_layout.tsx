@@ -1,3 +1,4 @@
+import { BarlowCondensed_700Bold_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -21,17 +22,21 @@ SplashScreen.preventAutoHideAsync();
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  // Display font (Barlow Condensed Bold Italic — nation codes and
+  // other sport-display moments) loads at runtime; the brand wordmark
+  // font (Anton) is embedded natively via the expo-font config plugin
+  // (app.json).
+  const [fontsLoaded] = useFonts({ BarlowCondensed_700Bold_Italic });
+
   // Splash-screen hide. `preventAutoHideAsync()` above holds the splash
   // until React has mounted; without a matching `hideAsync()` the app
   // shows the launch screen forever. `AnimatedSplashOverlay` was
   // intended to own this handoff but isn't rendered anywhere in the
-  // tree, so we hide directly here after the first render. The brand
-  // wordmark font (Anton) is embedded natively via the expo-font
-  // config plugin (app.json), so there's no runtime font load to gate
-  // on.
+  // tree, so we hide directly here — gated on the font so text never
+  // flashes from the fallback face.
   useEffect(() => {
-    SplashScreen.hideAsync().catch(() => {});
-  }, []);
+    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded]);
 
   const queryClient = useMemo(
     () =>

@@ -172,7 +172,11 @@ export default function TeamsScreen() {
                     i < group.teams.length - 1 && styles.teamRowDivider,
                     pressed && styles.teamRowPressed,
                   ]}>
-                  <TeamHeroRow team={t} rankRow={rankRowByTeam.get(t.id)} />
+                  <TeamHeroRow
+                    team={t}
+                    rankRow={rankRowByTeam.get(t.id)}
+                    right={<Ionicons name="chevron-forward" size={16} color="#C7CBD1" />}
+                  />
                 </Pressable>
               ))}
             </View>

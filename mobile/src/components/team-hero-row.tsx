@@ -3,9 +3,12 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { Team } from '@rugby-app/shared';
 
+import { Ionicons } from '@expo/vector-icons';
+
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
+import { TROPHY_COLOR, WORLD_CUP_WINS } from '@/lib/honours';
 
 const FORM_LOOKBACK = 5;
 
@@ -45,6 +48,14 @@ export function TeamHeroRow({
         <Text style={styles.metaText}>
           {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
         </Text>
+        {WORLD_CUP_WINS[team.id] ? (
+          <View style={styles.recordRow}>
+            <Text style={styles.metaText}>World Champions · </Text>
+            {Array.from({ length: WORLD_CUP_WINS[team.id]! }).map((_, i) => (
+              <Ionicons key={i} name="trophy" size={10} color={TROPHY_COLOR} />
+            ))}
+          </View>
+        ) : null}
         {outcomes.length > 0 ? (
           // Result sequence as bare colour dots (newest first, matching
           // the old FormCircles convention) — sized to sit inside the
@@ -83,10 +94,12 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   code: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
+    // Sport-display moment: Barlow Condensed Bold Italic — the family
+    // file carries the weight, so no fontWeight (RN would fake-bold it).
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
     letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
+    color: Colors.light.text,
   },
   metaStack: {
     flex: 1,

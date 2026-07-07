@@ -69,7 +69,7 @@ export function TeamAnalysisCard({
         <Ionicons
           name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={Colors.light.textSecondary}
+          color="#C7CBD1"
         />
       </Pressable>
 
@@ -193,7 +193,7 @@ function NarrativeSection({
         <Ionicons
           name={open ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={Colors.light.textSecondary}
+          color="#C7CBD1"
         />
       </Pressable>
       {open ? <Text style={styles.narrativeBody}>{children}</Text> : null}

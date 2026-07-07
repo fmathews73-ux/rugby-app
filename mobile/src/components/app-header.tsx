@@ -31,7 +31,9 @@ export function AppHeader() {
           accessibilityRole="button"
           accessibilityLabel="Back"
           style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-          <Ionicons name="chevron-back" size={28} color={Colors.light.text} />
+          <View style={styles.backCircle}>
+            <Ionicons name="chevron-back" size={18} color="#FFFFFF" />
+          </View>
         </Pressable>
       ) : (
         <Pressable
@@ -41,7 +43,9 @@ export function AppHeader() {
           }}
           hitSlop={8}
           style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-          <Ionicons name="person-circle-outline" size={32} color={Colors.light.text} />
+          {/* Same register as the footer menu icons: bare outline
+              glyph in textSecondary. */}
+          <Ionicons name="person-circle-outline" size={28} color={Colors.light.textSecondary} />
         </Pressable>
       )}
 
@@ -97,4 +101,14 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   slotPressed: { opacity: 0.5 },
+  // Grey disc + white glyph — the header's back chevron (28pt disc
+  // inside the 44pt slot).
+  backCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: Colors.light.textSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
 });

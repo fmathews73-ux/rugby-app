@@ -44,7 +44,7 @@ export function TeamSelectorCard() {
       style={({ pressed }) => [styles.filterButton, pressed && styles.filterButtonPressed]}
       accessibilityRole="button"
       accessibilityLabel="Change favourite team">
-      <Ionicons name="list-outline" size={20} color={Colors.light.text} />
+      <Ionicons name="list-outline" size={20} color="#C7CBD1" />
     </Pressable>
   );
 

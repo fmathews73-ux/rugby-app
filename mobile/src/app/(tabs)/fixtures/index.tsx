@@ -368,6 +368,12 @@ export default function FixturesScreen() {
                     <View style={styles.flagWrap}>
                       {away ? <TeamFlagShield flagCode={away.flag_code} width={FlagSize.row} /> : null}
                     </View>
+                    {/* Pressability cue — absolute inside the matchup
+                        row so it centres on the flag line and the
+                        centred cluster keeps its symmetry. */}
+                    <View style={styles.rowChevron}>
+                      <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
+                    </View>
                   </View>
                   <Text style={styles.metaText}>
                     {comp?.short_name ?? fx.competition_id} · {fx.venue}
@@ -462,6 +468,15 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowChevron: {
+    // Inside matchupRow: -8 reaches into the row's 16pt side padding,
+    // landing 8pt off the card edge, centred on the flag line.
+    position: 'absolute',
+    right: -Spacing.two,
+    top: 0,
+    bottom: 0,
+    justifyContent: 'center',
+  },
   matchupRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -470,10 +485,11 @@ const styles = StyleSheet.create({
   },
   flagWrap: { width: FlagSize.row, height: FlagSize.row, alignItems: 'center', justifyContent: 'center' },
   teamCode: {
+    // 24pt-shield rule: sport-display face at lg beside row shields.
     width: 40,
     textAlign: 'center',
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.semibold,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.text,
   },
   // Fixed-width middle slot so the flags on either side stay at the same
@@ -492,22 +508,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  scoreBoxSmallWinner: { backgroundColor: Colors.light.text },
-  scoreBoxSmallText: { fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
+  scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
+  scoreBoxSmallText: { fontSize: TextSize.lg, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   ftLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },
   timeMid: {
     width: 96,
     textAlign: 'center',
-    fontSize: TextSize.md,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.textSecondary,
   },
   statusMid: {
     width: 96,

@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
     borderRadius: PillStrip.radius,
   },
   pillActive: {
-    backgroundColor: Colors.light.text,
+    backgroundColor: Colors.light.textSecondary,
   },
   pillInactive: {
     backgroundColor: '#FFFFFF',
@@ -80,6 +80,6 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: PillStrip.labelTracking,
   },
-  pillLabelActive: { color: Colors.light.background },
+  pillLabelActive: { color: '#FFFFFF' },
   pillLabelInactive: { color: Colors.light.textSecondary },
 });

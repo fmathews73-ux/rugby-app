@@ -193,7 +193,13 @@ const styles = StyleSheet.create({
   },
   cellRank: { width: 22, fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   cellFlag: { width: 26, alignItems: 'center', justifyContent: 'center' },
-  cellTeam: { flex: 1, fontSize: TextSize.sm, fontWeight: TextWeight.bold, color: Colors.light.text },
+  cellTeam: {
+    // 24pt-shield rule: sport-display face at lg beside row shields.
+    flex: 1,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.text,
+  },
   cellStat: { width: 24, textAlign: 'center', fontSize: TextSize.sm, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   cellPts: { width: 32, textAlign: 'right', fontSize: TextSize.md, fontWeight: TextWeight.bold, color: Colors.light.text, fontVariant: ['tabular-nums'] },
   cellPtsValue: { color: Colors.light.text },

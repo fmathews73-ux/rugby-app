@@ -118,7 +118,7 @@ export function MatchAnalysisCard({
           <Ionicons
             name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
             size={14}
-            color={Colors.light.textSecondary}
+            color="#C7CBD1"
           />
         </View>
       </Pressable>
@@ -265,7 +265,7 @@ function NarrativeSection({
         <Ionicons
           name={open ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={Colors.light.textSecondary}
+          color="#C7CBD1"
         />
       </Pressable>
       {open ? children : null}

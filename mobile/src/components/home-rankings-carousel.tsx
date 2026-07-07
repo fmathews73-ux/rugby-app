@@ -201,7 +201,11 @@ const styles = StyleSheet.create({
   // number in the row, consistent with the "winning score" affordance
   // elsewhere in the app.
   pointsBox: {
-    ...ScoreBoxSize.row,
+    // Not a match score — self-sizing tile (the ScoreBoxSize tokens are
+    // now digit-hugging and too narrow for "93.9").
+    height: ScoreBoxSize.row.height,
+    borderRadius: ScoreBoxSize.row.borderRadius,
+    paddingHorizontal: 6,
     backgroundColor: Colors.light.text,
     alignItems: 'center',
     justifyContent: 'center',

@@ -87,7 +87,7 @@ export function PreMatchAnalysisCard({
           <Ionicons
             name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
             size={14}
-            color={Colors.light.textSecondary}
+            color="#C7CBD1"
           />
         </View>
       </Pressable>
@@ -219,7 +219,7 @@ function Section({
         <Ionicons
           name={open ? 'chevron-up' : 'chevron-down'}
           size={14}
-          color={Colors.light.textSecondary}
+          color="#C7CBD1"
         />
       </Pressable>
       {open ? <Text style={styles.narrativeBody}>{children}</Text> : null}
