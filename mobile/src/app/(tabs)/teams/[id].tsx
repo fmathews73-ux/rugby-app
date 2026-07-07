@@ -240,6 +240,13 @@ export default function TeamHubScreen() {
         }
       />
 
+      {/* Unit pill strip — PINNED outside the ScrollView so it
+          persists while the squad cards scroll, bonded directly under
+          the drill tabs (two strips, one white surface, hairline
+          divided). Same SegmentedTabs component as everywhere else. */}
+      {tab === 'squad' ? (
+        <SegmentedTabs tabs={squadUnitOptions} active={squadUnit} onSelect={setSquadUnit} />
+      ) : null}
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <>
@@ -293,17 +300,6 @@ export default function TeamHubScreen() {
                 </Pressable>
               </Pressable>
             </Modal>
-            {/* Unit pill strip — the SAME strip component as the drill
-                tabs (white surface, grey inactive pills, edge fades),
-                full-bleed out of the pane padding. */}
-            <View style={styles.squadPillBleed}>
-              <SegmentedTabs
-                tabs={squadUnitOptions}
-                active={squadUnit}
-                onSelect={setSquadUnit}
-              />
-            </View>
-
             {players.isLoading ? (
               <Text style={styles.empty}>Loading…</Text>
             ) : visibleSections.length === 0 ? (
@@ -655,10 +651,6 @@ const styles = StyleSheet.create({
   // Preview-block bleed: unwraps the pane padding AND carries the
   // 16pt inter-card rhythm the block's children expect from Home.
   previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
-  // Squad unit pills bleed to the screen edge AND pull up over the
-  // pane's top padding so the strip bonds directly under the drill
-  // tabs — one white pill surface, hairline-divided, no grey band.
-  squadPillBleed: { marginHorizontal: -Spacing.four, marginTop: -Spacing.three },
 
   card: {
     backgroundColor: '#FFFFFF',
