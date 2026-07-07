@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, {
   Circle,
   ClipPath,
@@ -16,7 +16,9 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers } from '@/lib/scoring-markers';
 
 // Match-scoped team-colour convention shared with the Momentum card and
 // the Profile radar: home = blue family, away = purple family. Strokes
@@ -33,8 +35,11 @@ const HALF_TIME_MIN = 40;
 
 // SVG viewBox — matches Form / Trajectory / Momentum chart dims so the
 // three cards stack visually consistently.
-const PAD_TOP = 16;
-const PAD_BOTTOM = 26;
+// Top band: HT period label then the home scoring-marker strip;
+// bottom band: the away marker strip then the minute labels — same
+// bands as the Momentum chart.
+const PAD_TOP = 34;
+const PAD_BOTTOM = 44;
 // Symmetric 8pt horizontal padding — matches Preview's Form / Ranking
 // Trajectory `padX` so all four line charts on the fixture drill share
 // one plot-area rhythm. Y-axis point labels have been dropped to fit;
@@ -61,12 +66,15 @@ export function ScoringProgression({
   homeTeamId,
   awayTeamId,
   fixtureStatus,
+  read,
   style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
   fixtureStatus?: Fixture['status'];
+  /** Live narrative for the flip back (match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -77,6 +85,12 @@ export function ScoringProgression({
   const series = useMemo(
     () => buildSeries(events.data ?? [], homeTeamId, awayTeamId),
     [events.data, homeTeamId, awayTeamId],
+  );
+
+  // Scoring-event icon markers — same strips as the Momentum chart.
+  const scoringMarkers = useMemo(
+    () => buildScoringMarkers(events.data ?? [], homeTeamId),
+    [events.data, homeTeamId],
   );
 
   // Measured canvas — geometry in real pixels (no viewBox stretching),
@@ -110,31 +124,29 @@ export function ScoringProgression({
   const hasScoring = series.home.length > 1 || series.away.length > 1;
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Scoring Progression"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>The scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Scoring Progression</Text>
+        <Text style={styles.sectionLabel}>Scoring Progression</Text>
+        <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Explain Scoring Progression">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            accessibilityLabel="Read the scoring progression analysis">
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
-        </View>
-        <View style={styles.legend}>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: HOME_FILL }]} />
-            <Text style={styles.legendText}>
-              {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
-            </Text>
-          </View>
-          <View style={styles.legendItem}>
-            <View style={[styles.legendSwatch, { backgroundColor: AWAY_FILL }]} />
-            <Text style={styles.legendText}>
-              {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
-            </Text>
-          </View>
         </View>
       </View>
 
@@ -152,6 +164,7 @@ export function ScoringProgression({
             })
           }>
           {CHART_W > 0 && CHART_H > 0 ? (
+        <>
         <Svg width={CHART_W} height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
           <Defs>
             <ClipPath id="progression-plot-clip">
@@ -197,7 +210,7 @@ export function ScoringProgression({
           />
           <SvgText
             x={scaleX(HALF_TIME_MIN)}
-            y={PAD_TOP - 4}
+            y={12}
             fontSize={8}
             fontWeight="700"
             fill={Colors.light.textSecondary}
@@ -212,7 +225,7 @@ export function ScoringProgression({
             <SvgText
               key={`xl-${t}`}
               x={scaleX(t)}
-              y={CHART_H - PAD_BOTTOM + 14}
+              y={CHART_H - 8}
               fontSize={9}
               fontWeight="500"
               fill="#9CA3AF"
@@ -234,12 +247,42 @@ export function ScoringProgression({
             <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
           ) : null}
         </Svg>
+          {/* Scoring-event icon markers overlaid on the measured
+              canvas — home below the HT label, away above the minute
+              labels. */}
+          {placeScoringMarkers(scoringMarkers, scaleX, 18, CHART_H - PAD_BOTTOM + 4).map((mk, i) => (
+            <View key={i} style={{ position: 'absolute', left: mk.x, top: mk.y }} pointerEvents="none">
+              <Ionicons
+                name={MARKER_ICON[mk.type]}
+                size={MARKER_ICON_SIZE}
+                color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
+              />
+            </View>
+          ))}
+        </>
           ) : null}
         </View>
       )}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
+      {/* Bottom-centred colour legend — same spot and dot grammar as
+          the Profile radar's. */}
+      <View style={styles.legend}>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendSwatch, { backgroundColor: HOME_FILL }]} />
+          <Text style={styles.legendText}>
+            {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
+          </Text>
+        </View>
+        <View style={styles.legendItem}>
+          <View style={[styles.legendSwatch, { backgroundColor: AWAY_FILL }]} />
+          <Text style={styles.legendText}>
+            {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
+          </Text>
+        </View>
+      </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -359,40 +402,9 @@ function buildYTicks(yMax: number): number[] {
 
 // ─── Info modal ──────────────────────────────────────────────────────────────
 
-function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Scoring Progression</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            Cumulative points over the 80-minute clock, one step-line per
-            team. Every try / conversion / penalty / drop-goal drives a
-            vertical jump at that minute; the line is otherwise flat.
-            The story lives in <Text style={styles.modalStrong}>where the
-            worms cross</Text> — the lead-changes and comeback moments of
-            the match.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            The dashed <Text style={styles.modalStrong}>HT</Text> line
-            marks half-time. Dots at the right edge show each team's
-            full-time total. The dark-grey line is the home team; the
-            blue line is the away team — same team-colour convention as
-            the Profile radar.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -407,26 +419,28 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row (16pt total with gap).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
     gap: Spacing.two,
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   legend: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.three,
   },
   legendItem: {
@@ -435,9 +449,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   legendSwatch: {
-    width: 10,
-    height: 3,
-    borderRadius: 1,
+    width: 8,
+    height: 8,
+    borderRadius: 999,
   },
   legendText: {
     fontSize: TextSize.xs,
@@ -460,47 +474,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });

@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react';
+import { useMemo, useRef } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
@@ -15,30 +15,32 @@ import {
   MatchGaps,
 } from '@/components/insights/match-h2h';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
-import { MatchAnalysisCard } from '@/components/match-analysis-card';
 import { Spacing } from '@/constants/theme';
 import { useMatchAnalysis } from '@/hooks/use-match-analysis';
 
 // ─── Analysis (Match Analysis) pane ──────────────────────────────────────────
 
 /**
- * Match Analysis pane — same surface grammar as Pre-Match (ONE chart
- * carousel + ONE analysis accordion, two-way synced), but the evidence
- * is THIS match's own data: live while the game runs, settled at
- * full-time as the permanent record. Nothing here reads history — the
- * kickoff backdrop lives entirely on the Pre-Match pill, keeping the
- * two surfaces cleanly split: known-at-kickoff vs the match itself.
+ * Match Analysis pane — flip-card grammar (owner call 2026-07-07),
+ * matching Home and Pre-Match: ONE chart carousel where every card
+ * carries its narrative on its flip side, fed by the match engine:
+ *   Profile → summary · Momentum → momentum · Scoring Progression →
+ *   progression · Match Gaps → variance · pairs → their openers
+ *   (attackPattern / platform) + axis ¶s · Pitch Heatmap → heatmap ·
+ *   Control vs Conversion → verdict.
+ * The evidence is THIS match's own data: live while the game runs,
+ * settled at full-time as the permanent record. The kickoff backdrop
+ * lives entirely on Pre-Match.
  */
 export function AnalysisPane({ fixture }: { fixture: Fixture }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
-  const [section, setSection] = useState('__summary__');
   const { data: analysis } = useMatchAnalysis(fixture.id);
   const homeTeam = useTeam(fixture.home_team_id);
   const awayTeam = useTeam(fixture.away_team_id);
   const homeCode = homeTeam.data?.short_name ?? fixture.home_team_id.toUpperCase();
   const awayCode = awayTeam.data?.short_name ?? fixture.away_team_id.toUpperCase();
 
-  const { pages, sectionPage, pageSection } = useMemo(() => {
+  const pages = useMemo(() => {
     const homeTeamId = fixture.home_team_id;
     const awayTeamId = fixture.away_team_id;
 
@@ -50,17 +52,16 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         compareTeamId={awayTeamId}
         fixtureStatus={fixture.status}
         style={styles.pageCard}
+        read={analysis?.summary ?? null}
       />,
-      // Commentary — the match story: initiative, then result. The
-      // Insights trio (Profile, Momentum, Progression) opens the deck
-      // back to back; the kickoff backdrop lives on Pre-Match, where it
-      // belongs — this pane is strictly the match itself.
+      // The match story: initiative, then result.
       <CombinedPointsPattern
         key="momentum"
         fixtureId={fixture.id}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}
         style={styles.pageCard}
+        read={analysis?.momentum ?? null}
       />,
       <ScoringProgression
         key="progression"
@@ -69,6 +70,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         awayTeamId={awayTeamId}
         fixtureStatus={fixture.status}
         style={styles.pageCard}
+        read={analysis?.progression ?? null}
       />,
       // Variance — where the match is being won.
       <MatchGaps
@@ -76,23 +78,29 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         fixture={fixture}
         homeCode={homeCode}
         awayCode={awayCode}
-        gaps={analysis?.gaps ?? []}
+        // Top SEVEN gaps — same cap as the pre-match ladder, so no page
+        // outgrows the shared 400pt floor (every axis still renders in
+        // full inside its pair card).
+        gaps={(analysis?.gaps ?? []).slice(0, 7)}
         style={styles.pageCard}
+        read={analysis?.variance ?? null}
       />,
     ];
-    // STRICT 1:1 — every page owns exactly one section, labels match
-    // card titles.
-    const sectionPage: Record<string, number> = {
-      __summary__: 0,
-      Momentum: 1,
-      'Scoring Progression': 2,
-      'Match Gaps': 3,
-    };
-    const pageSection: string[] = ['__summary__', 'Momentum', 'Scoring Progression', 'Match Gaps'];
 
     for (const pair of MATCH_AXIS_PAIRS) {
-      sectionPage[pair.title] = pages.length;
-      pageSection.push(pair.title);
+      // Pair reads: the pair's opener paragraph (attack-pattern for
+      // Attack & Defence, platform for Set Piece & Discipline) ahead of
+      // its two axis narratives — same assembly the accordion used.
+      const narratives = (analysis?.axes ?? [])
+        .filter((ax) => pair.keys.includes(ax.key))
+        .map((ax) => ax.narrative);
+      const opener =
+        pair.title === 'Attack & Defence'
+          ? analysis?.attackPattern
+          : pair.title === 'Set Piece & Discipline'
+            ? analysis?.platform
+            : null;
+      const paragraphs = [...(opener ? [opener] : []), ...narratives];
       pages.push(
         <MatchAxisH2H
           key={pair.title}
@@ -102,13 +110,12 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
           homeCode={homeCode}
           awayCode={awayCode}
           style={styles.pageCard}
+          read={paragraphs.length > 0 ? paragraphs.join('\n\n') : null}
         />,
       );
       if (pair.title === 'Kicking & Territory') {
-        // The heatmap is territory made visible — its OWN section now
-        // (strict 1:1), slotted straight after Kicking & Territory.
-        sectionPage['Pitch Heatmap'] = pages.length;
-        pageSection.push('Pitch Heatmap');
+        // The heatmap is territory made visible — slotted straight
+        // after Kicking & Territory.
         pages.push(
           <PitchHeatmap
             key="heatmap"
@@ -117,14 +124,13 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
             awayTeamId={awayTeamId}
             fixtureStatus={fixture.status}
             style={styles.pageCard}
+            read={analysis?.heatmap ?? null}
           />,
         );
       }
     }
 
     // Control vs Conversion — the closing verdict chart.
-    sectionPage['Control vs Conversion'] = pages.length;
-    pageSection.push('Control vs Conversion');
     pages.push(
       <ControlConversion
         key="verdict"
@@ -133,11 +139,12 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         awayTeamId={awayTeamId}
         fixtureStatus={fixture.status}
         style={styles.pageCard}
+        read={analysis?.verdict ?? null}
       />,
     );
 
-    return { pages, sectionPage, pageSection };
-  }, [fixture, homeCode, awayCode, analysis?.gaps]);
+    return pages;
+  }, [fixture, homeCode, awayCode, analysis]);
 
   return (
     <View style={styles.analysisPaneStack}>
@@ -145,25 +152,8 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
           padding via the negative margin; each page re-applies the card
           column inset internally. */}
       <View style={styles.carouselBleed}>
-        <CardCarousel
-          ref={carouselRef}
-          onPageChange={(i) => setSection(pageSection[i] ?? '__summary__')}
-          pages={pages}
-        />
+        <CardCarousel ref={carouselRef} pages={pages} />
       </View>
-
-      {/* The written match read — what the charts above amount to.
-          Opening a section slides its evidence into view; swiping the
-          carousel opens the matching section. */}
-      <MatchAnalysisCard
-        fixture={fixture}
-        openSection={section}
-        onOpenSection={(next) => {
-          setSection(next);
-          const page = sectionPage[next];
-          if (page !== undefined) carouselRef.current?.scrollToPage(page);
-        }}
-      />
     </View>
   );
 }
@@ -173,5 +163,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
 const styles = StyleSheet.create({
   analysisPaneStack: { gap: Spacing.three },
   carouselBleed: { marginHorizontal: -Spacing.four },
-  pageCard: { flex: 1 },
+  // Same viewport-filling floor as the Pre-Match pane — the dots land
+  // just above the tab bar, mirroring Home's resting position.
+  pageCard: { flex: 1, minHeight: 400 },
 });

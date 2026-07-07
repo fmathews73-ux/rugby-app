@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import type { Fixture, Team } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeams } from '@/api/hooks';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Same two-team palette as the Scoring Progression worms.
@@ -26,12 +27,15 @@ export function ControlConversion({
   homeTeamId,
   awayTeamId,
   fixtureStatus,
+  read,
   style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
   fixtureStatus: Fixture['status'];
+  /** Live narrative for the flip back (match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -44,18 +48,28 @@ export function ControlConversion({
   const away = teams.data?.find((t) => t.id === awayTeamId);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Control vs Conversion"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>Territory and possession control set against points per 22 entry — did the side that ran the match actually bank it on the scoreboard?</>}
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Control vs Conversion</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the control versus conversion chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Control vs Conversion</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Read the control versus conversion analysis">
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {!hasMatch ? (
@@ -79,35 +93,9 @@ export function ControlConversion({
         />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Control vs Conversion</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              Each side plotted by how much ball it had in THIS match (left to
-              right) against the points it scored (bottom to top). Crosshairs sit
-              at 50% possession and the midpoint of the two scores, so the
-              quadrant a team lands in is the story of its match.
-            </Text>
-            <Text style={styles.modalBody}>
-              <Text style={styles.modalStrong}>Dominant</Text> (top right): had the
-              ball and turned it into points. <Text style={styles.modalStrong}>
-              Clinical</Text> (top left): outscored the opposition WITHOUT the ball,
-              the counterpuncher's corner. <Text style={styles.modalStrong}>Sterile</Text>{' '}
-              (bottom right): all that possession, nothing to show for it.{' '}
-              <Text style={styles.modalStrong}>Outclassed</Text> (bottom left):
-              second-best at both ends. On live matches the dots migrate as the
-              score grows.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -213,6 +201,8 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -227,21 +217,17 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row (16pt total with gap).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,
@@ -253,43 +239,5 @@ const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
     minHeight: 190,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

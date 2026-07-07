@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 
 import { useFixtureEvents } from '@/api/hooks';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { LoadingState } from '@/components/state-views';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
@@ -18,8 +19,9 @@ export function StatsPane({
   result: Result | null;
   resultLoading: boolean;
 }) {
-  // Track which category's info modal is open; null when nothing is open.
-  const [openInfoTitle, setOpenInfoTitle] = useState<string | null>(null);
+  // Which category's card is FLIPPED to its narrative back; null when
+  // every card shows its front.
+  const [flippedTitle, setFlippedTitle] = useState<string | null>(null);
   const events = useFixtureEvents(fixture.id, fixture.status);
   if (fixture.status === 'scheduled') {
     return (
@@ -119,12 +121,22 @@ export function StatsPane({
     {
       title: 'Kicking',
       description:
-        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. 50/22s = kicks from your own half bouncing into touch inside the opposition 22, winning your own lineout throw — rare, and a momentum event every time. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
+        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. 50/22s = kicks from your own half bouncing into touch inside the opposition 22, winning your own lineout throw — rare, and a momentum event every time. Contestables kicked = kicks put up to be fought for in the air; own kicks regathered = the ones the kicking side won back; receptions secured = high balls safely claimed when the OTHER side kicked. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
       stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
         { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
         { label: 'Kick metres gained', home: result.home_kick_meters, away: result.away_kick_meters, premium: true },
         { label: '50/22 kicks', home: result.home_fifty_twenty_twos, away: result.away_fifty_twenty_twos, premium: true },
+        // Aerial contest — a side's receptions derive from the
+        // OPPONENT's delivered contestables (register #33).
+        { label: 'Contestables kicked', home: result.home_contestable_kicks, away: result.away_contestable_kicks, premium: true },
+        { label: 'Own kicks regathered', home: result.home_contestable_kicks_won, away: result.away_contestable_kicks_won, premium: true },
+        {
+          label: 'Receptions secured',
+          home: result.away_contestable_kicks - result.away_contestable_kicks_won,
+          away: result.home_contestable_kicks - result.home_contestable_kicks_won,
+          premium: true,
+        },
       ],
     },
     {
@@ -178,7 +190,7 @@ export function StatsPane({
     },
   ];
 
-  const activeSection = sections.find((s) => s.title === openInfoTitle) ?? null;
+  const flippedSection = sections.find((s) => s.title === flippedTitle) ?? null;
 
   // Category pairings — natural rugby couples: points then their
   // timing, with-the-ball, the possession contests, without-the-ball.
@@ -198,15 +210,11 @@ export function StatsPane({
       <View style={styles.categoryHeaderRow}>
         <Text style={styles.categoryLabel}>{section.title}</Text>
         <Pressable
-          onPress={() => setOpenInfoTitle(section.title)}
+          onPress={() => setFlippedTitle(section.title)}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel={`Explain ${section.title}`}>
-          <Ionicons
-            name="information-circle-outline"
-            size={14}
-            color={Colors.light.textSecondary}
-          />
+          accessibilityLabel={`Read about ${section.title}`}>
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
       {section.stats.map((s) => (
@@ -221,50 +229,34 @@ export function StatsPane({
     </View>
   );
 
+  // A card flips when the tapped section lives on it; the back shows
+  // that section's narrative (two-section cards flip to whichever
+  // section's reader icon was tapped).
+  const renderCard = (cardSections: (typeof sections)[number][]) => {
+    const flipped =
+      flippedSection !== null &&
+      cardSections.some((sec) => sec.title === flippedSection.title);
+    return (
+      <FlipCard
+        key={cardSections[0]!.title}
+        flipped={flipped}
+        back={
+          <NarrativeBack
+            title={flipped ? flippedSection!.title : cardSections[0]!.title}
+            onClose={() => setFlippedTitle(null)}
+            purpose={flipped ? flippedSection!.description : ''}
+          />
+        }
+        front={<View style={styles.statsCard}>{cardSections.map(renderSection)}</View>}
+      />
+    );
+  };
+
   return (
     <View style={styles.statsPaneStack}>
-      <View style={styles.statsCard}>{renderSection(headline)}</View>
-
-      {pages.map((pair) => (
-        <View key={pair[0]!.title} style={styles.statsCard}>
-          {pair.map(renderSection)}
-        </View>
-      ))}
-      <CategoryInfoModal
-        title={activeSection?.title ?? ''}
-        description={activeSection?.description ?? ''}
-        visible={activeSection !== null}
-        onClose={() => setOpenInfoTitle(null)}
-      />
+      {renderCard([headline])}
+      {pages.map((pair) => renderCard(pair))}
     </View>
-  );
-}
-
-function CategoryInfoModal({
-  title,
-  description,
-  visible,
-  onClose,
-}: {
-  title: string;
-  description: string;
-  visible: boolean;
-  onClose: () => void;
-}) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.categoryModalBackdrop} onPress={onClose}>
-        <Pressable style={styles.categoryModalCard} onPress={() => {}}>
-          <View style={styles.categoryModalHeader}>
-            <Text style={styles.categoryModalTitle}>{title}</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.categoryModalBody}>{description}</Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
   );
 }
 
@@ -325,10 +317,14 @@ function StatBar({
   // scroll-triggered reveal) and rejected as jittery; if fill animation
   // ever returns, it needs a UI-thread driver (reanimated), not
   // Animated-with-JS-driver on a layout prop.
-  const homeSegFlex = Math.max(0.001, home / maxValue);
-  const homeSpacerFlex = Math.max(0.001, 1 - home / maxValue);
-  const awaySegFlex = Math.max(0.001, away / maxValue);
-  const awaySpacerFlex = Math.max(0.001, 1 - away / maxValue);
+  // 15% grey headroom (MAX_FILL 0.85) — even the max value leaves
+  // visible track at the outer edge, so bars read against a scale
+  // instead of slamming the ends.
+  const MAX_FILL = 0.85;
+  const homeSegFlex = Math.max(0.001, MAX_FILL * (home / maxValue));
+  const homeSpacerFlex = Math.max(0.001, 1 - MAX_FILL * (home / maxValue));
+  const awaySegFlex = Math.max(0.001, MAX_FILL * (away / maxValue));
+  const awaySpacerFlex = Math.max(0.001, 1 - MAX_FILL * (away / maxValue));
 
   // Leading / lagging colouring: the higher value wins the green bar, the
   // lower gets the red. Ties render both bars in the neutral secondary text
@@ -345,7 +341,9 @@ function StatBar({
       <Text style={styles.statLabel}>{label}</Text>
       <View style={styles.statBarRowWrap}>
         <View style={styles.statBarRow}>
-          <Text style={styles.statValueLeft}>{home}</Text>
+          <View style={styles.statValueBox}>
+            <Text style={styles.statValue}>{home}</Text>
+          </View>
           <View style={styles.barTrack}>
             <View style={styles.barHalfLeft}>
               <View
@@ -361,7 +359,9 @@ function StatBar({
               <View style={{ flex: awaySpacerFlex }} />
             </View>
           </View>
-          <Text style={styles.statValueRight}>{away}</Text>
+          <View style={styles.statValueBox}>
+            <Text style={styles.statValue}>{away}</Text>
+          </View>
         </View>
         {locked ? (
           <BlurView
@@ -390,53 +390,19 @@ const styles = StyleSheet.create({
   // same internal rhythm the standalone category cards had.
   sectionBlock: { gap: Spacing.two },
   categoryLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   // Header row of each Stats category card: the label sits at the top-left
   // with a small info icon immediately next to it. Same pattern as the
   // Form / Momentum / KPI card headers on the Preview and Insights panes.
+  // Title left, reader icon pinned to the right edge — the app-wide
+  // card-header slot.
   categoryHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
-  },
-  categoryModalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  categoryModalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  categoryModalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-  },
-  categoryModalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  categoryModalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
   },
   statsCard: {
     backgroundColor: '#FFFFFF',
@@ -453,12 +419,12 @@ const styles = StyleSheet.create({
   },
   statBlock: { gap: 6 },
   statLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     // Muted — the label is context, the numbers on either side are the
     // read. Lets the values pop visually without shouting.
     color: Colors.light.textSecondary,
     textAlign: 'center',
-    fontWeight: TextWeight.regular,
   },
   statBarRow: {
     flexDirection: 'row',
@@ -469,22 +435,22 @@ const styles = StyleSheet.create({
   // weight used across the app (score boxes, rankings tile). Home / away
   // colour split mirrors the bar-segment token pair per design-system §5.4:
   // home = primary text, away = secondary text.
-  statValueLeft: {
-    width: 32,
-    textAlign: 'left',
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
+  // Value tiles — the quiet losing-score pairing (light fill, grey
+  // Barlow digits), matching every other bar chart's value rail.
+  statValueBox: {
+    width: 40,
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  statValueRight: {
-    width: 32,
-    textAlign: 'right',
+  statValue: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
+
   // Track matches the Efficiency KPI row: 4pt-tall grey slab, small
   // corner radius (not pill), tight breathing room from the flanking
   // values. Diverging halves are preserved so each side still grows out

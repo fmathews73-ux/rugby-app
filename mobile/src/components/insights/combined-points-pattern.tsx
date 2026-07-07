@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { useState, useMemo } from 'react';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
-import { useFixture, useTeam } from '@/api/hooks';
+import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers, type ScoringMarker } from '@/lib/scoring-markers';
 import {
   fixtureHasMomentum,
   momentumTotalMinutes,
@@ -39,11 +41,14 @@ export function CombinedPointsPattern({
   fixtureId,
   homeTeamId,
   awayTeamId,
+  read,
   style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
+  /** Live narrative for the flip back (match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -52,31 +57,42 @@ export function CombinedPointsPattern({
   const awayTeam = useTeam(awayTeamId);
   const { samples, maxAbs, effectiveMinute, isLoading, hasData } =
     useMatchMomentumTimeline(fixtureId, homeTeamId, awayTeamId);
+  // Scoring events off the same timeline feed — rendered as icon
+  // markers on the curve (tries, conversions, penalty goals).
+  const events = useFixtureEvents(fixtureId, fixture.data?.status);
+  const scoringMarkers = useMemo(
+    () => buildScoringMarkers(events.data ?? [], homeTeamId),
+    [events.data, homeTeamId],
+  );
 
   const homeShort = homeTeam.data?.short_name ?? homeTeamId.toUpperCase();
   const awayShort = awayTeam.data?.short_name ?? awayTeamId.toUpperCase();
   const canRender = fixtureHasMomentum(fixture.data?.status);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Momentum"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>Both sides' weighted attacking activity as ONE net curve — above the line the home side has the match by the throat, below it the away side does.</>}
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Momentum</Text>
+        <Text style={styles.sectionLabel}>Momentum</Text>
+        <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Explain Momentum">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            accessibilityLabel="Read the momentum analysis">
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
-        </View>
-        {/* Colour-swatch legend takes the place of the old toggle pill.
-            Swatches use the light FILL tokens so the chip colour reads
-            as the polygon body — matches what the eye sees on the
-            chart, not the darker stroke. */}
-        <View style={styles.legend}>
-          <LegendChip label={homeShort} color={HOME_FILL} />
-          <LegendChip label={awayShort} color={AWAY_FILL} />
         </View>
       </View>
 
@@ -89,11 +105,21 @@ export function CombinedPointsPattern({
           samples={samples}
           maxAbs={maxAbs}
           effectiveMinute={effectiveMinute}
+          markers={scoringMarkers}
         />
       )}
+      {/* Bottom-centred colour legend — same spot and dot grammar as
+          the Profile radar's. */}
+      {canRender ? (
+        <View style={styles.legend}>
+          <LegendChip label={homeShort} color={HOME_FILL} />
+          <LegendChip label={awayShort} color={AWAY_FILL} />
+        </View>
+      ) : null}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -127,10 +153,12 @@ function MomentumMirror({
   samples,
   maxAbs,
   effectiveMinute,
+  markers,
 }: {
   samples: readonly MomentumSample[];
   maxAbs: number;
   effectiveMinute: number;
+  markers: readonly ScoringMarker[];
 }) {
   // Measured canvas — geometry in real pixels (no viewBox stretching),
   // filling whatever height the carousel grants the card.
@@ -141,16 +169,30 @@ function MomentumMirror({
   // sparklines, Scoring Progression) so all match-scoped charts share
   // one plot-area rhythm.
   const padX = 8;
-  const padTop = 20;
-  const padBottom = 24;
+  // Top band: period labels (KO/HT/FT) then the home scoring-marker
+  // strip; bottom band: the away marker strip then the minute labels.
+  const padTop = 34;
+  const padBottom = 44;
   const plotHeight = height - padTop - padBottom;
   const midY = padTop + plotHeight / 2;
-  const halfChart = plotHeight / 2;
+  // 0.8 amplitude — peaks stop short of the marker bands instead of
+  // slamming the plot edges (owner: curves were too tall).
+  const halfChart = (plotHeight / 2) * 0.8;
 
   const total = momentumTotalMinutes();
 
   const xForMinute = (m: number) =>
     padX + (m / total) * (width - 2 * padX);
+
+  // Scoring-event icon strips — home below the period labels, away
+  // above the minute labels (shared lib handles same-minute sidesteps).
+  const placed = placeScoringMarkers(
+    markers,
+    xForMinute,
+    18,
+    height - padBottom + 4,
+    effectiveMinute,
+  );
 
   const drawable = samples.filter((p) => p.minute <= effectiveMinute);
 
@@ -193,6 +235,7 @@ function MomentumMirror({
         })
       }>
       {width > 0 && height > 0 ? (
+        <>
     <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       <Defs>
         {/* Home fill (upper half) — strong colour at the peak, fading
@@ -316,7 +359,7 @@ function MomentumMirror({
         <SvgText
           key={`msl-${m.minute}`}
           x={xForMinute(m.minute)}
-          y={padTop - 6}
+          y={12}
           fill={Colors.light.textSecondary}
           fontSize={10}
           fontWeight="700"
@@ -342,6 +385,18 @@ function MomentumMirror({
         </SvgText>
       ))}
     </Svg>
+          {/* Scoring-event icon markers overlaid on the measured
+              canvas — home above the plot, away below. */}
+          {placed.map((mk, i) => (
+            <View key={i} style={{ position: 'absolute', left: mk.x, top: mk.y }} pointerEvents="none">
+              <Ionicons
+                name={MARKER_ICON[mk.type]}
+                size={MARKER_ICON_SIZE}
+                color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
+              />
+            </View>
+          ))}
+        </>
       ) : null}
     </View>
   );
@@ -349,45 +404,9 @@ function MomentumMirror({
 
 // ─── Info modal ─────────────────────────────────────────────────────────────
 
-function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  const window = momentumWindowMinutes();
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Momentum</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            Momentum is a zero-sum read: at any moment one side has the
-            initiative and the other doesn't. For each match minute we
-            weight each team's attacking events in the trailing {window}
-            -minute window (carries, line breaks, turnovers won, try
-            assists, tries, conversions, penalty and drop goals) and
-            plot the signed difference (home minus away).
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            When the curve lifts above the baseline in light blue, the{' '}
-            <Text style={styles.modalStrong}>home side</Text> is on top
-            in that window. When it dips below in light purple, the{' '}
-            <Text style={styles.modalStrong}>away side</Text> owns the
-            phase. Bigger swings mean bigger momentum shifts. Vertical
-            guides mark KO, HT and FT with quarter markers at 20' and
-            60'.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
-// ─── Styles ─────────────────────────────────────────────────────────────────
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -402,27 +421,29 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row (16pt total with gap).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
+  headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: Spacing.two,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   // Legend styling matches the Scoring Progression card so the two
   // temporal cards on the Insights pane share one grammar.
   legend: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.three,
   },
   legendItem: {
@@ -431,9 +452,9 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   legendSwatch: {
-    width: 10,
-    height: 3,
-    borderRadius: 1,
+    width: 8,
+    height: 8,
+    borderRadius: 999,
   },
   legendText: {
     fontSize: TextSize.xs,
@@ -456,47 +477,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });

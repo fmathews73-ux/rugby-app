@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View , type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View , type StyleProp, type ViewStyle } from 'react-native';
 
 import type { Fixture } from '@rugby-app/shared';
 
@@ -49,9 +49,7 @@ export function InsightsCanvas({
    *  pane, matching the analysis engine's window). */
   lookback?: number;
   style?: StyleProp<ViewStyle>;
-  /** Live narrative for the flip back. When provided the reader icon
-      FLIPS the card (pre-match grammar); when omitted it opens the
-      legacy explainer modal (Match Analysis pane — migrates later). */
+  /** Live narrative for the flip back. */
   read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -81,10 +79,8 @@ export function InsightsCanvas({
   const primaryShort = primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—';
   const compareShort = compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase();
 
-  const flipMode = read !== undefined;
-
   const front = (
-    <View style={flipMode ? [styles.card, styles.cardFill] : [styles.card, style]}>
+    <View style={[styles.card, styles.cardFill]}>
       {/* Title left; accessory then the reader icon pinned right —
           same corner slot as the Home carousel cards. */}
       <View style={styles.headerRow}>
@@ -134,13 +130,9 @@ export function InsightsCanvas({
         </Text>
       )}
 
-      {!flipMode ? (
-        <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} hasCompare={hasCompare} />
-      ) : null}
     </View>
   );
 
-  if (!flipMode) return front;
   return (
     <FlipCard
       style={style}
@@ -170,59 +162,6 @@ function LegendChip({ label, color }: { label: string; color: string }) {
       <View style={[styles.legendSwatch, { backgroundColor: color }]} />
       <Text style={styles.legendLabel}>{label}</Text>
     </View>
-  );
-}
-
-function InfoModal({
-  visible,
-  onClose,
-  hasCompare,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  hasCompare: boolean;
-}) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Profile</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            Eight-axis rugby analytics radar. Axes cover
-            {' '}<Text style={styles.modalStrong}>Attack</Text>,
-            {' '}<Text style={styles.modalStrong}>Defence</Text>,
-            {' '}<Text style={styles.modalStrong}>Set-piece</Text>,
-            {' '}<Text style={styles.modalStrong}>Discipline</Text>,
-            {' '}<Text style={styles.modalStrong}>Kicking</Text>,
-            {' '}<Text style={styles.modalStrong}>Territory</Text>,
-            {' '}<Text style={styles.modalStrong}>Possession</Text>, and
-            {' '}<Text style={styles.modalStrong}>Turnovers</Text>.
-          </Text>
-          {hasCompare ? (
-            <Text style={styles.modalBody}>
-              Both team polygons are drawn on the same axes:
-              {' '}<Text style={styles.modalStrong}>home</Text> in blue,
-              {' '}<Text style={styles.modalStrong}>away</Text> in purple.
-              Overlap regions naturally darken through blending, so the
-              shape gaps between the two sides (the axes where one team's
-              polygon reaches further than the other's) tell the profile
-              story at a glance.
-            </Text>
-          ) : (
-            <Text style={styles.modalBody}>
-              The dashed octagon at 50% radius is the notional
-              international average — the team's polygon reaching outside
-              means above average on that axis, inside means below.
-            </Text>
-          )}
-        </Pressable>
-      </Pressable>
-    </Modal>
   );
 }
 
@@ -257,11 +196,9 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_700Bold',
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   chartWrap: { position: 'relative' },
   // One row below the canvas, centred — the card's minHeight slack
@@ -300,42 +237,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
 });

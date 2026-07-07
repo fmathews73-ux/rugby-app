@@ -52,13 +52,14 @@ export function OverviewPane({
 
   // Reverse-chronological order — most recent event at the top, kick-off at
   // the bottom. Matches the FIFA / ESPN convention for match timelines.
-  const ordered = [...all].reverse();
+  // 'second-half-start' is dropped outright — Half Time already marks
+  // the break, and a second bar two rows later reads as noise.
+  const ordered = [...all].reverse().filter((e) => e.type !== 'second-half-start');
   const visible = collapsed
     ? ordered.filter(
         (e) =>
           e.type === 'kick-off' ||
           e.type === 'half-time' ||
-          e.type === 'second-half-start' ||
           e.type === 'full-time' ||
           e.type === 'try' ||
           e.type === 'penalty-goal' ||
@@ -112,7 +113,6 @@ function TimelineRow({
   const isMilestone =
     event.type === 'kick-off' ||
     event.type === 'half-time' ||
-    event.type === 'second-half-start' ||
     event.type === 'full-time';
   if (isMilestone) return <MilestoneBar type={event.type} />;
   const isHome = event.team_id === fixture.home_team_id;
@@ -131,14 +131,18 @@ function MilestoneBar({ type }: { type: MatchEvent['type'] }) {
   const labels: Partial<Record<MatchEvent['type'], string>> = {
     'kick-off': 'Match Start',
     'half-time': 'Half Time',
-    'second-half-start': 'Start Second Half',
     'full-time': 'Full Time',
   };
   return (
-    <View style={styles.milestoneRow}>
-      <Ionicons name="stopwatch-outline" size={14} color={Colors.light.textSecondary} />
-      <Text style={styles.categoryLabel}>{labels[type] ?? type}</Text>
-    </View>
+    <>
+      {/* Half Time gets a hairline ABOVE too — bracketing the break
+          off from the last first-half event. */}
+      {type === 'half-time' ? <View style={[styles.insetDivider, styles.insetDividerAbove]} /> : null}
+      <View style={styles.milestoneRow}>
+        <Text style={styles.categoryLabel}>{labels[type] ?? type}</Text>
+      </View>
+      <View style={styles.insetDivider} />
+    </>
   );
 }
 
@@ -314,18 +318,17 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   eventMinute: {
+    fontFamily: 'Barlow_500Medium',
     width: 48,
     textAlign: 'center',
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
     letterSpacing: TextTracking.wide,
   },
   eventLabel: {
+    fontFamily: 'Barlow_500Medium',
     flexShrink: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   eventLabelRight: { textAlign: 'right' },
@@ -334,8 +337,8 @@ const styles = StyleSheet.create({
   subLabelWrap: { gap: 2, flexShrink: 1 },
   subLabelWrapRight: { alignItems: 'flex-end' },
   subLabelLine: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
 
@@ -359,18 +362,28 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   timelineToggleText: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
     color: Colors.light.text,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
   },
 
+  // Standalone inset divider under each milestone header — chevron-
+  // chrome grey, same grammar as the Line-Up section headers.
+  insetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+  },
+  insetDividerAbove: {
+    marginBottom: 0,
+    marginTop: Spacing.two,
+  },
   categoryLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
 });

@@ -87,8 +87,14 @@ export function NarrativeBack({
       <View style={styles.backBody}>
         <Text style={styles.eyebrow}>What this shows</Text>
         <Text style={styles.body}>{purpose}</Text>
-        <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>The read</Text>
-        <Text style={styles.body}>{read ?? 'Analysing…'}</Text>
+        {/* Read block only renders when a narrative feed exists —
+            explainer-only backs (Stats categories) omit it. */}
+        {read !== undefined ? (
+          <>
+            <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>The read</Text>
+            <Text style={styles.body}>{read ?? 'Analysing…'}</Text>
+          </>
+        ) : null}
       </View>
     </View>
   );
@@ -132,7 +138,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   title: {
-    fontFamily: 'Barlow_700Bold',
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
@@ -140,7 +146,7 @@ const styles = StyleSheet.create({
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {
-    fontFamily: 'Barlow_700Bold',
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',

@@ -57,15 +57,25 @@ export function LineUpPane({
   );
   const benchRows = pairEntries(homeLineup?.bench ?? [], awayLineup?.bench ?? []);
 
+  // Cumulative Test caps per side — the same jersey badge the rows
+  // carry, summed for the header (home left of the title, away right).
+  const totalCaps = (
+    rows: readonly { home: LineUpEntry | null; away: LineUpEntry | null }[],
+    side: 'home' | 'away',
+  ) =>
+    rows.reduce((t, r) => {
+      const e = r[side];
+      return t + (e ? playerById.get(e.player_id)?.cap_count ?? 0 : 0);
+    }, 0);
+
   return (
     <View style={styles.lineupContainer}>
-      {/* Section pills carry an inline people-icon inside — same treatment
-          as the Overview timeline's MilestoneBar so the two panes share
-          one section-header pattern across the app. */}
-      <View style={styles.lineupSectionHeader}>
-        <Ionicons name="american-football-outline" size={14} color={Colors.light.textSecondary} />
+      <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
+        <CapsJersey caps={totalCaps(startingRows, 'home')} />
         <Text style={styles.categoryLabel}>Starting XV</Text>
+        <CapsJersey caps={totalCaps(startingRows, 'away')} mirrored />
       </View>
+      <View style={styles.insetDivider} />
       {startingRows.map(({ home, away }, i) => (
         <LineUpCompareRow
           key={`start-${i}`}
@@ -76,10 +86,12 @@ export function LineUpPane({
         />
       ))}
 
-      <View style={styles.lineupSectionHeader}>
-        <Ionicons name="american-football-outline" size={14} color={Colors.light.textSecondary} />
+      <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
+        <CapsJersey caps={totalCaps(benchRows, 'home')} />
         <Text style={styles.categoryLabel}>Bench</Text>
+        <CapsJersey caps={totalCaps(benchRows, 'away')} mirrored />
       </View>
+      <View style={styles.insetDivider} />
       {benchRows.map(({ home, away }, i) => (
         <LineUpCompareRow
           key={`bench-${i}`}
@@ -96,9 +108,9 @@ export function LineUpPane({
       {(homeCoaches.data?.length ?? 0) + (awayCoaches.data?.length ?? 0) > 0 ? (
         <>
           <View style={styles.lineupSectionHeader}>
-            <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
             <Text style={styles.categoryLabel}>Coaching Staff</Text>
           </View>
+      <View style={styles.insetDivider} />
           {pairCoachesByRole(homeCoaches.data ?? [], awayCoaches.data ?? []).map(
             ({ role, home, away }) => (
               <CoachingCompareRow key={role} role={role} home={home} away={away} />
@@ -112,9 +124,9 @@ export function LineUpPane({
       {(officials.data?.length ?? 0) > 0 ? (
         <>
           <View style={styles.lineupSectionHeader}>
-            <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
             <Text style={styles.categoryLabel}>Match Officials</Text>
           </View>
+      <View style={styles.insetDivider} />
           {sortOfficialsByRole(officials.data ?? []).map((o) => (
             <OfficialRow key={o.id} official={o} />
           ))}
@@ -123,7 +135,7 @@ export function LineUpPane({
 
       {/* Match-scoped player stat sheet — opened by tapping any XV or
           bench player name above. */}
-      <PlayerMatchSheet
+            <PlayerMatchSheet
         fixture={fixture}
         playerId={sheetPlayerId}
         onClose={() => setSheetPlayerId(null)}
@@ -259,6 +271,19 @@ function formatPosition(pos: string): string {
     .join(' ');
 }
 
+/** Small jersey glyph + caps count as a side-by-side pair; `mirrored`
+ *  flips the order so the away edge reads value-then-shirt. */
+function CapsJersey({ caps, mirrored = false }: { caps: number; mirrored?: boolean }) {
+  const icon = <Ionicons name="shirt-outline" size={14} color={Colors.light.textSecondary} />;
+  const value = <Text style={styles.lineupCaps}>{caps}</Text>;
+  return (
+    <View style={styles.lineupCapsPair}>
+      {mirrored ? value : icon}
+      {mirrored ? icon : value}
+    </View>
+  );
+}
+
 function LineUpCompareRow({
   home,
   away,
@@ -270,40 +295,50 @@ function LineUpCompareRow({
   playerById: Map<string, Player>;
   onPressPlayer: (playerId: string) => void;
 }) {
-  // Each side renders `[shirt#] [player name]` on the home side and its
-  // mirror `[player name] [shirt#]` on the away side. Falls back to the
-  // canonical position label if the player lookup misses (shouldn't
-  // happen when the API resolves properly). Each side is independently
-  // tappable and opens that player's match stat sheet.
+  // ONE shared shirt-number badge in the centre — both sides of a
+  // compare row wear the same number, so it applies to both names
+  // (home name reads toward it from the left, away from the right).
+  // Each side is independently tappable and opens that player's match
+  // stat sheet.
   const homeLabel = home
     ? playerById.get(home.player_id)?.name ?? formatPosition(home.position)
     : '';
   const awayLabel = away
     ? playerById.get(away.player_id)?.name ?? formatPosition(away.position)
     : '';
+  const shirtNumber = home?.shirt_number ?? away?.shirt_number ?? '·';
+  // Caps ride the OUTER edge of each side — a quiet experience read
+  // bracketing the matchup (caps · name · Nº · name · caps).
+  const homeCaps = home ? playerById.get(home.player_id)?.cap_count : undefined;
+  const awayCaps = away ? playerById.get(away.player_id)?.cap_count : undefined;
   return (
     <View style={styles.lineupCompareRow}>
       <Pressable
         onPress={home ? () => onPressPlayer(home.player_id) : undefined}
         disabled={!home}
         style={({ pressed }) => [styles.lineupSideLeft, pressed && { opacity: 0.6 }]}>
-        <View style={styles.lineupNumberBadge}>
-          <Text style={styles.lineupNumberText}>{home?.shirt_number ?? '·'}</Text>
-        </View>
-        <Text style={styles.lineupPosPlayer} numberOfLines={1}>
+        {homeCaps !== undefined ? (
+          <CapsJersey caps={homeCaps} />
+        ) : null}
+        <Text
+          style={[styles.lineupPosPlayer, styles.lineupNameFlex, styles.lineupPosPlayerRight]}
+          numberOfLines={1}>
           {homeLabel}
         </Text>
       </Pressable>
+      <View style={styles.lineupNumberBadge}>
+        <Text style={styles.lineupNumberText}>{shirtNumber}</Text>
+      </View>
       <Pressable
         onPress={away ? () => onPressPlayer(away.player_id) : undefined}
         disabled={!away}
         style={({ pressed }) => [styles.lineupSideRight, pressed && { opacity: 0.6 }]}>
-        <Text style={[styles.lineupPosPlayer, styles.lineupPosPlayerRight]} numberOfLines={1}>
+        <Text style={[styles.lineupPosPlayer, styles.lineupNameFlex]} numberOfLines={1}>
           {awayLabel}
         </Text>
-        <View style={styles.lineupNumberBadge}>
-          <Text style={styles.lineupNumberText}>{away?.shirt_number ?? '·'}</Text>
-        </View>
+        {awayCaps !== undefined ? (
+          <CapsJersey caps={awayCaps} mirrored />
+        ) : null}
       </Pressable>
     </View>
   );
@@ -315,17 +350,27 @@ const styles = StyleSheet.create({
   paneEmpty: { paddingVertical: Spacing.four, alignItems: 'center' },
   paneEmptyText: { color: Colors.light.textSecondary, fontSize: TextSize.sm, textAlign: 'center', lineHeight: 20, maxWidth: 320 },
 
+  // Standalone inset divider under each section header — chevron-
+  // chrome grey, same grammar as the list cards.
+  insetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+  },
   categoryLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
 
   // Line-Up section header — icon + uppercase label centred. Same
   // treatment as milestoneRow so the two panes share one section-header
   // pattern.
+  lineupSectionHeaderSpread: {
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.three,
+  },
   lineupSectionHeader: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -363,9 +408,9 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   coachingRole: {
+    fontFamily: 'Barlow_500Medium',
     textAlign: 'center',
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -377,9 +422,9 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   coachingName: {
+    fontFamily: 'Barlow_500Medium',
     flex: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   coachingNameRight: { textAlign: 'right' },
@@ -396,26 +441,24 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   officialRole: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
   officialName: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
     flexShrink: 1,
     textAlign: 'right',
   },
 
   lineupSectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
     paddingTop: Spacing.three,
     paddingBottom: 4,
     textAlign: 'center',
@@ -431,17 +474,19 @@ const styles = StyleSheet.create({
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
+  // Names hug the shared centre badge — home reads toward it from the
+  // left (right-aligned), away from the right (left-aligned).
   lineupSideLeft: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: Spacing.two,
   },
   lineupSideRight: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'flex-end',
     gap: Spacing.two,
   },
   // Shirt-number badge — small grey circle wrapping the tabular-nums
@@ -449,6 +494,19 @@ const styles = StyleSheet.create({
   // tracks so all "muted-fill" surfaces in the fixture drill share one
   // token. Fixed 22 × 22 keeps a clean 11pt radius regardless of digit
   // count (single-digit numbers still centre inside a full circle).
+  // Caps as an icon+value pair — small jersey glyph beside the count
+  // (shirt = caps; the filled centre circle = shirt number).
+  lineupCapsPair: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
+  },
+  lineupCaps: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.xs,
+    color: Colors.light.textSecondary,
+  },
+  lineupNameFlex: { flex: 1 },
   lineupNumberBadge: {
     width: 22,
     height: 22,
@@ -456,20 +514,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    marginHorizontal: Spacing.three,
   },
   lineupNumberText: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   lineupPosPlayer: {
+    fontFamily: 'Barlow_500Medium',
     // Row text matches the Stats card label pattern: sm regular
     // textSecondary. Bold weight is reserved for the numeric read (shirt
     // number) so numbers pop and names sit as legible context around them.
     flexShrink: 1,
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   lineupPosPlayerRight: {

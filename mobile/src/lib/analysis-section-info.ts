@@ -82,43 +82,6 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
   },
 };
 
-export const MATCH_SECTION_INFO: Record<string, SectionInfo> = {
-  Momentum: {
-    title: 'Momentum',
-    paragraphs: [
-      'The initiative read: who has held the whip hand and when, written from the match shape — halves compared, swings named. Its chart is the zero-sum momentum curve above.',
-      'Momentum is the story between the scores: a side can trail on the scoreboard while the curve says the match is turning.',
-    ],
-  },
-  'Scoring Progression': {
-    title: 'Scoring Progression',
-    paragraphs: [
-      'The scoreboard story: lead changes, the minute the lead was taken for good, and the largest unanswered run — the worm chart above in words.',
-      'Matches are remembered by their swings; this read names them, or says plainly when there were none.',
-    ],
-  },
-  'Match Gaps': {
-    title: 'Match Gaps',
-    paragraphs: [
-      'The axes where the two performances genuinely separated, biggest gap first — the same ranking the chart draws, so the prose and the bars cannot disagree.',
-      'Most matches are level on most numbers. This read filters the noise down to where the match was actually won and lost.',
-    ],
-  },
-  'Pitch Heatmap': {
-    title: 'Pitch Heatmap',
-    paragraphs: [
-      'Where the match has been played: the territory share behind the heat map, and what the pressure produced in the 22.',
-      'Territory is pressure made visible — but only converted pressure wins matches, so the read always pairs the ground held with the points it yielded.',
-    ],
-  },
-  'Control vs Conversion': {
-    title: 'Control vs Conversion',
-    paragraphs: [
-      'The match sealed in one read: who held the ball and the ground, who turned that control into points, and which of the two settled it.',
-      'Control and conversion are the two ways to win a rugby match — most are won by converting control, and the memorable upsets by conversion beating it.',
-    ],
-  },
-};
 
 
 

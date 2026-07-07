@@ -50,13 +50,11 @@ export function AppHeader() {
 
       <View style={styles.centreSlot}>
         {/* Brand wordmark — text build in the app's sport-display face
-            (Barlow Condensed 700 Italic), replacing the image asset so
-            the mark and the matchup strips share one voice. Same mark:
-            black RUGBY, red superscript IQ. */}
-        <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby IQ">
-          <Text style={styles.wordmarkMain}>RUGBY</Text>
-          <Text style={styles.wordmarkSup}>IQ</Text>
-        </View>
+            (Barlow Condensed 700 Italic). Name trial: RUGBY.METRICS
+            (register #23 still open). */}
+        <Text style={styles.wordmarkMain} accessible accessibilityLabel="Rugby Metrics">
+          RUGBY.METRICS
+        </Text>
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
       <View style={styles.rightSlot} />
@@ -87,21 +85,10 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  wordmarkRow: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-  },
   wordmarkMain: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: 26,
     color: Colors.light.text,
-  },
-  wordmarkSup: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: 13,
-    color: Colors.light.text,
-    marginTop: 2,
-    marginLeft: 1,
   },
   rightSlot: {
     minWidth: 44,

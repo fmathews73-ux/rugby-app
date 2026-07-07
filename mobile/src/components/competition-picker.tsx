@@ -17,10 +17,10 @@ export interface PickerOption {
   label: string;
 }
 
-// Page background (PageGradient's flat #FAFAFA) — the fades dissolve
-// overflowing pills into it, same grammar as SegmentedTabs' white
-// fades on drill strips.
-const PAGE_BG = '#FAFAFA';
+// Strip surface — white, matching SegmentedTabs so every pill strip
+// in the app sits on the same bonded white band; fades dissolve
+// overflowing pills into it.
+const STRIP_BG = '#FFFFFF';
 
 /**
  * Horizontal scrollable pill picker. Used at the top of Standings and
@@ -73,7 +73,7 @@ export function CompetitionPicker({
       </ScrollView>
       {showEndFade ? (
         <LinearGradient
-          colors={['rgba(250,250,250,0)', PAGE_BG]}
+          colors={['rgba(255,255,255,0)', STRIP_BG]}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={styles.endFade}
@@ -82,7 +82,7 @@ export function CompetitionPicker({
       ) : null}
       {showStartFade ? (
         <LinearGradient
-          colors={[PAGE_BG, 'rgba(250,250,250,0)']}
+          colors={[STRIP_BG, 'rgba(255,255,255,0)']}
           start={{ x: 0, y: 0.5 }}
           end={{ x: 1, y: 0.5 }}
           style={styles.startFade}
@@ -95,6 +95,7 @@ export function CompetitionPicker({
 
 const styles = StyleSheet.create({
   wrap: {
+    backgroundColor: STRIP_BG,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
@@ -121,9 +122,9 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: PillStrip.stripPadH + 20,
   },
-  // Borderless — fills alone carry the active/inactive contrast (dark for
-  // active, white for inactive against the grey page bg). Matches the
-  // sub-tab + TeamToggle pill treatment across the app.
+  // Borderless — fills alone carry the active/inactive contrast (grey
+  // fill for active, light grey for inactive on the white strip).
+  // Identical treatment to SegmentedTabs.
   pill: {
     paddingHorizontal: PillStrip.padH,
     paddingVertical: PillStrip.padV,
@@ -133,7 +134,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.textSecondary,
   },
   pillInactive: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F3F4F6',
   },
   pillLabel: {
     fontFamily: 'Barlow_500Medium',

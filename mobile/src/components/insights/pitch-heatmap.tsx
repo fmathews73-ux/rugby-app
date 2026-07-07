@@ -1,12 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Line, Rect } from 'react-native-svg';
 
 import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Rugby playing field is 100m × 70m; using a 10:7 viewBox so measurements
@@ -44,12 +45,15 @@ export function PitchHeatmap({
   homeTeamId,
   awayTeamId,
   fixtureStatus,
+  read,
   style,
 }: {
   fixtureId: string;
   homeTeamId: string;
   awayTeamId: string;
   fixtureStatus?: Fixture['status'];
+  /** Live narrative for the flip back (match engine field). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -95,27 +99,39 @@ export function PitchHeatmap({
   const hasData = homeEvents.length > 0 || awayEvents.length > 0;
 
   return (
-    <View style={[styles.card, style]}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Pitch Heatmap</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the Pitch Heatmap">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        {/* One side at a time — overlapping dual heat muddied both
-            reads; the toggle isolates each side's focus areas
-            (toggle on/off to compare). */}
-        <TeamToggle
-          primaryLabel={homeShort}
-          compareLabel={awayShort}
-          activeSide={activeSide}
-          onSelect={setActiveSide}
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Pitch Heatmap"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>Where the toggled side lived on the pitch — the deeper the shade, the more of the match happened there. Territory only counts when it is cashed.</>}
         />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+      <View style={styles.headerRow}>
+        {/* Three slots: title left, toggle centred, reader icon right. */}
+        <Text style={styles.sectionLabel}>Pitch Heatmap</Text>
+        <View style={styles.headerCentre}>
+          {/* One side at a time — overlapping dual heat muddied both
+              reads; the toggle isolates each side's focus areas. */}
+          <TeamToggle
+            primaryLabel={homeShort}
+            compareLabel={awayShort}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
+        </View>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Read the pitch heatmap analysis">
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {isLoading ? (
@@ -313,8 +329,9 @@ export function PitchHeatmap({
         </View>
       )}
 
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -360,40 +377,9 @@ function buildSmoothedGrid(events: readonly MatchEvent[]): number[][] {
   return smoothed;
 }
 
-function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Pitch Heatmap</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            Top-down view of the pitch showing where each team's positional
-            events landed (carries and scoring events with recorded
-            coordinates). Home heat lifts in light blue, away heat lifts in
-            light purple; where the two contested the same zone the
-            colours blend into a deeper composite.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            Home attacks left-to-right by convention, away right-to-left.
-            Heat concentrated in a team's attacking 22 (the far try-line
-            end) signals a match spent camped in opposition territory;
-            heat clustered in the team's own half reads as defensive
-            absorption. The two 22-metre lines and the halfway (dashed)
-            are marked as reference stripes on the pitch.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -408,21 +394,21 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row (16pt total with gap).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
+  headerCentre: {
+    flex: 1,
     alignItems: 'center',
-    gap: 4,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   // Legend styling matches Momentum, Progression and Profile — one
   // grammar across every Insights card.
@@ -440,43 +426,4 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
 
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });

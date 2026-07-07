@@ -305,14 +305,14 @@ const styles = StyleSheet.create({
   avatar: { alignSelf: 'center' },
   headerText: { gap: 2, flexShrink: 1, flex: 1 },
   playerName: {
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
     color: Colors.light.text,
   },
   minutes: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   empty: {
     fontSize: TextSize.sm,
@@ -341,8 +341,8 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   sectionMiniLabel: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -359,6 +359,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#F3F4F6',
   },
   statLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
@@ -368,19 +369,17 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   statValue: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
     minWidth: 32,
     textAlign: 'right',
   },
   // Fixed-width variance slot so values align in a column whether or
   // not a row carries a chip.
   varianceChip: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    fontVariant: ['tabular-nums'],
     width: 74,
   },
   varianceSpacer: { width: 74 },
@@ -394,8 +393,8 @@ const styles = StyleSheet.create({
     marginTop: Spacing.one,
   },
   profilePillText: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.background,
     letterSpacing: TextTracking.wide,
   },
@@ -424,8 +423,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   infoTitle: {
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
     color: Colors.light.text,
   },
   infoBody: {

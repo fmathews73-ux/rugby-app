@@ -297,11 +297,9 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_700Bold',
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,

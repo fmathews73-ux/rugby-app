@@ -1,14 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
 import { useFixtureResult } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
-import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
 
 // Standard bar-row tokens (same as Profile H2H / Axis H2H / KPIs).
 const AHEAD_COLOR = '#059669';
@@ -140,13 +140,6 @@ export const MATCH_AXIS_PAIRS: readonly {
   { title: 'Possession & Turnovers', keys: ['possession', 'turnovers'] },
 ];
 
-/** Combined explainer for a match axis pair (shared AXIS_INFO copy). */
-export function matchPairInfo(pair: { title: string; keys: readonly [AxisKey, AxisKey] }): SectionInfo {
-  return {
-    title: pair.title,
-    paragraphs: pair.keys.flatMap((k) => AXIS_INFO[INFO_KEY[k]]?.paragraphs ?? []),
-  };
-}
 
 // ─── Match Gaps (Variance evidence) ─────────────────────────────────────────
 
@@ -162,6 +155,7 @@ export function MatchGaps({
   homeCode,
   awayCode,
   gaps,
+  read,
   style,
 }: {
   fixture: Fixture;
@@ -169,6 +163,8 @@ export function MatchGaps({
   awayCode: string;
   /** Engine gap ranking (biggest first) from useMatchAnalysis. */
   gaps: readonly MatchGapView[];
+  /** Live narrative for the flip back (match engine `variance`). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const rows = gaps.map((g) => MATCH_HEADLINE[g.key]);
@@ -179,13 +175,8 @@ export function MatchGaps({
       homeCode={homeCode}
       awayCode={awayCode}
       rows={rows}
-      info={{
-        title: 'Match Gaps',
-        paragraphs: [
-          'One headline read per axis from this match’s numbers, ordered with the biggest gap at the top — the same ranking the Variance section is written from. The bar is the toggled team’s number, the dark tick the other side’s on the same scale.',
-          'Green means the toggled side has the better of the read, red the worse (lower-is-better rows flip). While the match is live the order re-ranks as gaps open and close; at full-time it settles as the record of where the match was won.',
-        ],
-      }}
+      read={read}
+      purpose="One headline read per axis from this match, biggest gap first — the bar is the toggled side's number, the dark tick the other side's. Live it re-ranks as gaps open; at full-time it is the record of where the match was won."
       style={style}
     />
   );
@@ -204,6 +195,7 @@ export function MatchAxisH2H({
   fixture,
   homeCode,
   awayCode,
+  read,
   style,
 }: {
   pairTitle: string;
@@ -211,6 +203,8 @@ export function MatchAxisH2H({
   fixture: Fixture;
   homeCode: string;
   awayCode: string;
+  /** Live narrative for the flip back (pair opener + axis ¶s). */
+  read?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const rows = MATCH_PAIR_ROWS[pairTitle] ?? [];
@@ -221,13 +215,8 @@ export function MatchAxisH2H({
       homeCode={homeCode}
       awayCode={awayCode}
       rows={rows}
-      info={{
-        title: pairTitle,
-        paragraphs: [
-          ...axisKeys.flatMap((k) => AXIS_INFO[INFO_KEY[k]]?.paragraphs ?? []),
-          'These are this match’s numbers — live while the game runs, final at full-time. The bar is the toggled team’s number and the dark tick the other side’s on the same scale.',
-        ],
-      }}
+      read={read}
+      purpose="This match's numbers for the pair — live while the game runs, final at full-time. Each bar is the toggled side's read against the other side's dark tick."
       style={style}
     />
   );
@@ -241,7 +230,8 @@ function MatchH2HCard({
   homeCode,
   awayCode,
   rows,
-  info,
+  read,
+  purpose,
   style,
 }: {
   title: string;
@@ -249,7 +239,8 @@ function MatchH2HCard({
   homeCode: string;
   awayCode: string;
   rows: readonly RowDef[];
-  info: SectionInfo;
+  read?: string | null;
+  purpose: string;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -259,24 +250,37 @@ function MatchH2HCard({
   const notStarted = fixture.status === 'scheduled';
 
   return (
-    <View style={[styles.card, style]}>
-      <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>{title}</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={`Explain ${title}`}>
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <TeamToggle
-          primaryLabel={homeCode}
-          compareLabel={awayCode}
-          activeSide={activeSide}
-          onSelect={setActiveSide}
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title={title}
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={<>{purpose}</>}
         />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+      {/* Three slots: title left, toggle centred, reader icon right. */}
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionLabel}>{title}</Text>
+        <View style={styles.headerCentre}>
+          <TeamToggle
+            primaryLabel={homeCode}
+            compareLabel={awayCode}
+            activeSide={activeSide}
+            onSelect={setActiveSide}
+          />
+        </View>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel={`Read the ${title} analysis`}>
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+        </Pressable>
       </View>
 
       {notStarted ? (
@@ -313,7 +317,9 @@ function MatchH2HCard({
                     {/* Other side's value — the comparison tick. */}
                     <View style={[styles.rowOtherTick, { left: `${tickFrac * 100}%` }]} />
                   </View>
-                  <Text style={styles.rowValue}>{fmt(active, row.percent)}</Text>
+                  <View style={styles.rowValueBox}>
+                    <Text style={styles.rowValue}>{fmt(active, row.percent)}</Text>
+                  </View>
                 </View>
               </View>
             );
@@ -321,24 +327,9 @@ function MatchH2HCard({
         </View>
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>{info.title}</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            {info.paragraphs.map((para, i) => (
-              <Text key={i} style={styles.modalBody}>
-                {para}
-              </Text>
-            ))}
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -349,6 +340,12 @@ function fmt(v: number, percent?: boolean): string {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
+  headerCentre: {
+    flex: 1,
+    alignItems: 'center',
+  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -363,21 +360,17 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    // Standard air below the title/icon row (16pt total with gap).
+    marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  headerTitleGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
+    // Chart-card title rule — same as the Home carousel cards.
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,
@@ -401,13 +394,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: Spacing.two,
   },
-  rowValue: {
+  // Mini score tile in the fixed right rail — the quiet losing-score
+  // pairing, matching the Efficiency KPIs card.
+  rowValueBox: {
     width: 52,
-    textAlign: 'right',
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rowValue: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
   rowTrack: {
     flex: 1,
@@ -430,39 +430,5 @@ const styles = StyleSheet.create({
     borderRadius: 1,
     backgroundColor: '#111827',
     marginLeft: -1,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
   },
 });

@@ -15,6 +15,7 @@ import {
 } from '@/api/hooks';
 import { AnalysisPane } from '@/components/fixture-drill/analysis-pane';
 import { LineUpPane } from '@/components/fixture-drill/lineup-pane';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { MatchupHeader } from '@/components/fixture-drill/matchup-header';
 import { OverviewPane } from '@/components/fixture-drill/overview-pane';
 import { PreviewPane } from '@/components/fixture-drill/preview-pane';
@@ -95,7 +96,15 @@ export default function FixtureDetailScreen() {
             competitionName={compById.get(fixture.data.competition_id)?.short_name}
           />
           <SubTabBar tab={tab} onSelect={handleSubTabSelect} />
-          <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
+          <FadingScrollView
+            ref={scrollRef}
+            contentContainerStyle={[
+              styles.scroll,
+              // Carousel panes are viewport-fitted by design — dropping
+              // the big bottom inset means they no longer "overflow" by
+              // padding alone, so the edge fades stay off their dots.
+              (tab === 'preview' || tab === 'analysis') && styles.scrollCarouselPane,
+            ]}>
             <View style={styles.pane}>
               {tab === 'preview' && (
                 <PreviewPane
@@ -132,7 +141,7 @@ export default function FixtureDetailScreen() {
                 <AnalysisPane fixture={fixture.data} />
               )}
             </View>
-          </ScrollView>
+          </FadingScrollView>
         </>
       ) : null}
     </SafeAreaView>
@@ -144,6 +153,7 @@ export default function FixtureDetailScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingBottom: PAGE_BOTTOM_INSET },
+  scrollCarouselPane: { paddingBottom: Spacing.two },
   // gap matches the app-wide 16pt inter-card rhythm (each pane renders
   // one stack today, but any future sibling gets the standard gap).
   pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.three },

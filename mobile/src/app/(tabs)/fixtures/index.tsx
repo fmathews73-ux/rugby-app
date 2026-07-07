@@ -9,6 +9,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
+import { FadingFlatList } from '@/components/fading-scroll-view';
 import { formatKickoffTime } from '@/lib/format-fixture-date';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { PageGradient } from '@/components/page-gradient';
@@ -249,7 +250,7 @@ export default function FixturesScreen() {
         selected={competitionFilter}
         onSelect={setCompetitionFilter}
       />
-      <FlatList<DayGroup>
+      <FadingFlatList<DayGroup>
         ref={listRef}
         data={sections}
         keyExtractor={(item) => item.title}

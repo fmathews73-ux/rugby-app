@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { FixtureCarousel } from '@/components/fixture-carousel';
 import { MyTeamMatchesCard } from '@/components/my-team-matches-card';
 import { MyTeamPreviewCards } from '@/components/my-team-preview-cards';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamSelectorCard } from '@/components/team-selector-card';
 import { PAGE_BOTTOM_INSET, Spacing } from '@/constants/theme';
@@ -50,7 +51,7 @@ export default function HomeScreen() {
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
 
-      <ScrollView
+      <FadingScrollView
         ref={scrollRef}
         style={styles.scrollView}
         contentContainerStyle={styles.scrollContent}
@@ -66,7 +67,7 @@ export default function HomeScreen() {
         <TeamSelectorCard />
         <MyTeamMatchesCard />
         <MyTeamPreviewCards />
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
