@@ -87,10 +87,12 @@ export function TeamPickerModal({
             hitSlop={12}
             accessibilityRole="button"
             accessibilityLabel="Cancel">
+            {/* Same circle-outline treatment as the app header's back
+                button. */}
             <Ionicons
-              name="chevron-back"
-              size={26}
-              color={Colors.light.text}
+              name="chevron-back-circle-outline"
+              size={28}
+              color={Colors.light.textSecondary}
             />
           </Pressable>
           <Text style={styles.headerTitle}>{title}</Text>
@@ -103,9 +105,9 @@ export function TeamPickerModal({
               accessibilityRole="button"
               accessibilityLabel="Clear selection">
               <Ionicons
-                name="refresh"
-                size={26}
-                color={Colors.light.text}
+                name="refresh-circle-outline"
+                size={28}
+                color={Colors.light.textSecondary}
               />
             </Pressable>
           ) : (
@@ -124,6 +126,7 @@ export function TeamPickerModal({
               <View style={styles.groupHeader}>
                 <Text style={styles.groupHeaderText}>{group.label}</Text>
               </View>
+              <View style={styles.rowDivider} />
               {group.teams.map((t, i) => (
                 <TeamRow
                   key={t.id}
@@ -183,11 +186,9 @@ function TeamRow({
           team={team}
           rankRow={rankRow}
           right={
-            selected ? (
-              <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
-            ) : (
-              <View style={styles.tickPlaceholder} />
-            )
+            // Radio affordance on every row — chrome-grey ring that
+            // fills solid on selection (ring and fill share one size).
+            <View style={[styles.radio, selected && styles.radioSelected]} />
           }
         />
       </Pressable>
@@ -238,16 +239,16 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   groupHeader: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
     paddingHorizontal: Spacing.four,
-    paddingTop: Spacing.three,
-    paddingBottom: Spacing.two,
+    // Symmetric air above and below the centred title; the inset
+    // hairline below is rendered as a rowDivider sibling.
+    paddingVertical: Spacing.three,
   },
   groupHeaderText: {
+    // Same card-header treatment as the Teams landing cards.
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -266,7 +267,17 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.three,
   },
   rowPressed: { backgroundColor: '#F3F4F6' },
-  tickPlaceholder: { width: 26, height: 26 },
+  radio: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 1.5,
+    borderColor: '#C7CBD1',
+  },
+  radioSelected: {
+    backgroundColor: Colors.light.textSecondary,
+    borderColor: Colors.light.textSecondary,
+  },
 
   footer: {
     paddingHorizontal: Spacing.four,
