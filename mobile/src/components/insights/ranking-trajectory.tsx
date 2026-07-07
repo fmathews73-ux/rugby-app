@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 // Rank-move dot colours — green when the month's rank improved, red
@@ -46,6 +48,7 @@ export function RankingTrajectory({
 }) {
   const history = useRankingHistory();
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
 
   // Reset toggle back to primary whenever the compare team changes.
@@ -75,7 +78,21 @@ export function RankingTrajectory({
   }, [history.data, activeTeamId, asOfDate]);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title={title ?? 'World Ranking'}
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.ranking}
+          purpose={
+            <>The team's World Rugby ranking week by week — climbing the lattice means overtaking rivals; drops mark ground lost.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
@@ -96,7 +113,7 @@ export function RankingTrajectory({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the World Ranking chart">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -108,9 +125,9 @@ export function RankingTrajectory({
       ) : (
         <TrajectoryChart series={series} />
       )}
-
-      <TrajectoryInfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -293,48 +310,10 @@ function formatMonth(isoDate: string): string {
   return d.toLocaleDateString('en-GB', { month: 'short', year: '2-digit' });
 }
 
-function TrajectoryInfoModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>World Ranking (12 mo)</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            The team's official World Rugby rank across the last 12 monthly
-            snapshots, oldest (left) to newest (right). Each dot sits on its
-            rank rung — the ladder only spans the ranks the team actually
-            touched, so even a one-place move is a visible step.{' '}
-            <Text style={styles.modalStrong}>Green means the rank improved
-            that month, red means it slipped, grey means it held.</Text> The
-            grey step line traces the path between months, and the ringed
-            dot marks the current position.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            The gridline numbers mark world-ranking landmarks (1, 5, 10)
-            where they fall inside the ladder. World Rugby's algorithm is a
-            rolling-weighted Elo variant, so movement is a function of
-            recent results plus opponent strength — beating a higher-ranked
-            side moves you further than beating a lower-ranked one.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -382,47 +361,4 @@ const styles = StyleSheet.create({
   },
 
   // Modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });

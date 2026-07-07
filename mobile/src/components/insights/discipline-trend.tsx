@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
 
 const LOOKBACK = 10;
@@ -30,10 +32,25 @@ export function DisciplineTrend({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const { data, isLoading } = useTeamMatchSeries(teamId, LOOKBACK);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Discipline Trend"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.disciplineTrend}
+          purpose={
+            <>Penalties conceded match by match, banded at 9 (tidy) and 12 (trouble) — the read is the drift, not any single game.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <Text style={styles.sectionLabel}>Discipline Trend</Text>
@@ -42,7 +59,7 @@ export function DisciplineTrend({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the discipline trend chart">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
 
@@ -54,31 +71,9 @@ export function DisciplineTrend({
         <TrendChart values={data.map((d) => d.penaltiesConceded)} />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Discipline Trend</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              Penalties conceded in each of the last {LOOKBACK} matches, oldest (left)
-              to most recent (right). The dashed lines mark the bands the analysis
-              judges by: <Text style={styles.modalStrong}>9 or fewer a game is
-              disciplined</Text>, <Text style={styles.modalStrong}>12 or more is a
-              problem</Text> — bars colour green, grey, or red against those bands.
-            </Text>
-            <Text style={styles.modalBody}>
-              Penalties are the cheapest points and territory a side can give away, so
-              a rising trend here usually shows up on the scoreboard within a match or
-              two.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -162,6 +157,9 @@ function TrendChart({ values }: { values: readonly number[] }) {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -198,43 +196,5 @@ const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
     minHeight: 130,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

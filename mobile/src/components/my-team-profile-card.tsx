@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
+import { BackStrong, FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
 const LOOKBACK = 10;
 
@@ -42,74 +44,64 @@ function Populated({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
   const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
 
   return (
-    <View style={[styles.card, style]}>
-      {/* Title left, utility info icon pinned right on the same line. */}
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Team Profile</Text>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel="Explain the Profile radar">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-        </Pressable>
-      </View>
-
-      {aggregate && aggregate.gamesPlayed > 0 ? (
-        <RadarChart axes={axes} />
-      ) : (
-        <Text style={styles.empty}>
-          {isLoading ? 'Loading…' : 'Not enough completed matches yet.'}
-        </Text>
-      )}
-
-      <InfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
-  );
-}
-
-function InfoModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Profile (prev. {LOOKBACK})</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
+    // Flip-card pilot (owner call 2026-07-07): the info icon flips the
+    // card to its narrative back face — purpose + live read — instead
+    // of opening a modal. The overall team summary narrative lives on
+    // this card's back; the radar is the app's overall-shape card.
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+          {/* Title left, utility info icon pinned right on the same line. */}
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionLabel}>Team Profile</Text>
+            <Pressable
+              onPress={() => setInfoOpen(true)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Explain the Profile radar">
+              <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
             </Pressable>
           </View>
-          <Text style={styles.modalBody}>
-            Eight-axis rugby analytics radar aggregating the team's most
-            recent {LOOKBACK} completed matches. Axes cover
-            {' '}<Text style={styles.modalStrong}>Attack</Text>,
-            {' '}<Text style={styles.modalStrong}>Defence</Text>,
-            {' '}<Text style={styles.modalStrong}>Set-piece</Text>,
-            {' '}<Text style={styles.modalStrong}>Discipline</Text>,
-            {' '}<Text style={styles.modalStrong}>Kicking</Text>,
-            {' '}<Text style={styles.modalStrong}>Territory</Text>,
-            {' '}<Text style={styles.modalStrong}>Possession</Text>, and
-            {' '}<Text style={styles.modalStrong}>Turnovers</Text>. The
-            dashed octagon at 50% radius is the notional international
-            average.
-          </Text>
-          <Text style={styles.modalBody}>
-            The window matches the Form and Efficiency KPI cards in the
-            carousel below — Form shows the sequence of results, the KPIs
-            the headline numbers, and Profile the shape of those results
-            across the eight playing dimensions.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
+
+          {aggregate && aggregate.gamesPlayed > 0 ? (
+            <RadarChart axes={axes} />
+          ) : (
+            <Text style={styles.empty}>
+              {isLoading ? 'Loading…' : 'Not enough completed matches yet.'}
+            </Text>
+          )}
+        </View>
+      }
+      back={
+        <NarrativeBack
+          title="Team Profile"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.summary}
+          purpose={
+            <>
+              The team's playing shape over the last {LOOKBACK} matches,
+              across eight dimensions from <BackStrong>Attack</BackStrong> to{' '}
+              <BackStrong>Turnovers</BackStrong>. The dashed octagon marks the
+              international average — outside it is above par.
+            </>
+          }
+        />
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
+  // Front face must fill the flip container so front and back share
+  // one footprint — grow-only, natural height stays content-driven.
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -142,44 +134,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
-  },
-
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

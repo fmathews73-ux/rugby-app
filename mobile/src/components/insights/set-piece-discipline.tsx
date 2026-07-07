@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
 /**
  * Set Piece & Discipline matrix — the CONTROL read to the Landscape's
@@ -23,6 +25,7 @@ export function SetPieceDiscipline({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -39,7 +42,21 @@ export function SetPieceDiscipline({
   }, [summary.data, teams.data]);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Set Piece & Discipline"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.setPieceDiscipline}
+          purpose={
+            <>Nations plotted by set-piece success against penalties conceded — four quadrants from Controlled to Under Siege.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <Text style={styles.sectionLabel}>Set Piece & Discipline</Text>
@@ -48,7 +65,7 @@ export function SetPieceDiscipline({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the set-piece and discipline matrix">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
 
@@ -66,40 +83,16 @@ export function SetPieceDiscipline({
         />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Set Piece & Discipline</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              The control matrix: <Text style={styles.modalStrong}>combined scrum and
-              lineout success</Text> left to right, <Text style={styles.modalStrong}>
-              penalties conceded per game</Text> bottom to top (higher on the chart =
-              cleaner). Crosshairs at the pool medians; this team is the green dot.
-              Last-10 window, like every read in the app.
-            </Text>
-            <Text style={styles.modalBody}>
-              <Text style={styles.modalStrong}>Controlled</Text> sides (top right) own
-              their platform and give nothing away: Test rugby's blueprint.{' '}
-              <Text style={styles.modalStrong}>Tidy</Text> sides stay clean but can't
-              rely on their own ball. <Text style={styles.modalStrong}>Heavy-Handed</Text>{' '}
-              packs win the platform but bleed penalties doing it.{' '}
-              <Text style={styles.modalStrong}>Under Siege</Text> means feeding
-              opponents both possession and position, and the scoreboard usually
-              follows.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -132,43 +125,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

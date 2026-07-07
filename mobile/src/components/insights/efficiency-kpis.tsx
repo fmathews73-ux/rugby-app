@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -41,6 +43,7 @@ export function EfficiencyKpis({
   showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
 
   // Reset toggle back to primary whenever the compare team changes.
@@ -108,7 +111,21 @@ export function EfficiencyKpis({
   }, [data]);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title={title ?? 'Efficiency KPIs'}
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.kpis}
+          purpose={
+            <>Six per-game averages from the last 10 matches, barred against a Tier-1 ceiling; the dark tick marks the Tier-1 average for each metric.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
@@ -129,7 +146,7 @@ export function EfficiencyKpis({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain Efficiency KPIs">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -153,9 +170,9 @@ export function EfficiencyKpis({
       ) : (
         <Text style={styles.empty}>No completed matches yet.</Text>
       )}
-
-      <KpiInfoModal visible={infoOpen} onClose={() => setInfoOpen(false)} />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -247,52 +264,10 @@ function kpiBarColor(bar: number, avg: number, inverted: boolean | undefined): s
   return kpiIsGood(bar, avg, inverted) ? GOOD_COLOR : BAD_COLOR;
 }
 
-function KpiInfoModal({
-  visible,
-  onClose,
-}: {
-  visible: boolean;
-  onClose: () => void;
-}) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Efficiency KPIs</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            Per-game averages across the team's last 10 completed matches —
-            the same window as Form and Profile — over the six most-scanned
-            rugby metrics. Each bar shows the value relative to a plausible
-            Tier-1 ceiling, giving a quick "how good is this number,
-            really?" read without needing to memorise benchmarks.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            The small dark tick on each bar marks the{' '}
-            <Text style={styles.modalStrong}>Tier-1 average</Text> for that
-            metric — a bar ending past the tick is running ahead of the
-            typical top-tier side, and the fill turns green or red by how
-            the value compares to it.
-          </Text>
-          <View style={styles.modalDivider} />
-          <Text style={styles.modalBody}>
-            Two rows are <Text style={styles.modalStrong}>inverted</Text>{' '}
-            (Points conceded, Penalties conceded) — a longer bar means the team
-            is giving away more, which is worse, so their colours flip: staying
-            UNDER the tick is the good side.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -399,47 +374,4 @@ const styles = StyleSheet.create({
   },
 
   // Modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });

@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
 
 const WIN_COLOR = '#059669';
@@ -28,10 +30,25 @@ export function PossessionOutcome({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const { data, isLoading } = useTeamMatchSeries(teamId, LOOKBACK);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Possession vs Outcome"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.possession}
+          purpose={
+            <>Recent matches plotted by possession share against the result — whether having more of the ball actually buys this team more points.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <Text style={styles.sectionLabel}>Possession vs Outcome</Text>
@@ -40,7 +57,7 @@ export function PossessionOutcome({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the possession versus outcome chart">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
 
@@ -52,32 +69,9 @@ export function PossessionOutcome({
         <ScatterChart points={data} />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Possession vs Outcome</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              One dot per match across the last {LOOKBACK}: how much ball the team
-              had (left to right) against the final margin (up for wins, down for
-              losses). <Text style={styles.modalStrong}>Green won, red lost, grey
-              drew.</Text>
-            </Text>
-            <Text style={styles.modalBody}>
-              The crosshairs at 50% possession and zero margin make four quadrants.
-              Top-right: dominated the ball and won. Top-left: won WITHOUT the ball
-              (defence and counter-attack travel well). Bottom-right is the one
-              analysts circle: plenty of possession, still lost — a side that keeps
-              the ball without hurting anyone.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -171,6 +165,9 @@ function ScatterChart({
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -207,43 +204,5 @@ const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
     minHeight: 170,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

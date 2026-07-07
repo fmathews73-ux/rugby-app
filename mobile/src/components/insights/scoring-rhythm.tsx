@@ -1,9 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
 
 // Same outcome trio as the Form margin bars.
@@ -31,6 +33,7 @@ export function ScoringRhythm({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const scored = useTeamPointsPattern(teamId, 'scored', undefined, LOOKBACK);
   const conceded = useTeamPointsPattern(teamId, 'conceded', undefined, LOOKBACK);
 
@@ -38,7 +41,21 @@ export function ScoringRhythm({
     (scored.data?.gamesUsed ?? 0) > 0 && (conceded.data?.gamesUsed ?? 0) > 0;
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Scoring Rhythm"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.rhythm}
+          purpose={
+            <>Average points scored (up) and conceded (down) in each quarter of the match — where the team's scoring lives, and where it leaks.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <Text style={styles.sectionLabel}>Scoring Rhythm</Text>
@@ -47,7 +64,7 @@ export function ScoringRhythm({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the scoring rhythm chart">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
 
@@ -62,32 +79,9 @@ export function ScoringRhythm({
         />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Scoring Rhythm</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              The match split into its four 20-minute quarters, averaged across the
-              team&apos;s last {LOOKBACK} completed matches (the same window as Form
-              and the KPIs). <Text style={styles.modalStrong}>Green bars
-              above the line are points scored</Text> in that quarter;{' '}
-              <Text style={styles.modalStrong}>red bars below are points conceded</Text>.
-              Taller bar = heavier scoring, and the number on each bar is the average.
-            </Text>
-            <Text style={styles.modalBody}>
-              Read it for habits: a tall green Q4 is a side that finishes over the top
-              of tiring defences; a deep red Q1 is a slow starter that spots opponents
-              a head start.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -218,6 +212,9 @@ function fmt(v: number): string {
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -254,43 +251,5 @@ const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
     minHeight: 150,
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

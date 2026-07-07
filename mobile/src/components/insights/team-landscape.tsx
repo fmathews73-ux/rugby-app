@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
 /**
  * Team Landscape — the strategy-matrix view of the international pool.
@@ -24,6 +26,7 @@ export function TeamLandscape({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -40,7 +43,21 @@ export function TeamLandscape({
   }, [summary.data, teams.data]);
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Team Landscape"
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.landscape}
+          purpose={
+            <>Every nation plotted by points scored against points conceded per game — four quadrants from Complete (score plenty, concede little) to Exposed.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <Text style={styles.sectionLabel}>Team Landscape</Text>
@@ -49,7 +66,7 @@ export function TeamLandscape({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the team landscape matrix">
-          <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
 
@@ -67,39 +84,16 @@ export function TeamLandscape({
         />
       )}
 
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Team Landscape</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              Every international side with completed matches, plotted on its last-10
-              per-game numbers: <Text style={styles.modalStrong}>points scored</Text>{' '}
-              left to right, <Text style={styles.modalStrong}>points conceded</Text>{' '}
-              bottom to top (higher on the chart = tighter defence). The crosshairs
-              sit at the pool medians, and this team is the green dot.
-            </Text>
-            <Text style={styles.modalBody}>
-              The quadrants: <Text style={styles.modalStrong}>Complete</Text> sides
-              (top right) score heavily and concede little. <Text style={styles.modalStrong}>
-              Grinders</Text> (top left) win low-scoring arm-wrestles.{' '}
-              <Text style={styles.modalStrong}>Entertainers</Text> (bottom right)
-              outscore their own leaks. <Text style={styles.modalStrong}>Exposed</Text>{' '}
-              (bottom left) are struggling at both ends. Where a team sits, and who
-              its neighbours are, says more than either number alone.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
-    </View>
+        </View>
+      }
+    />
   );
 }
 
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -132,43 +126,5 @@ const styles = StyleSheet.create({
     fontStyle: 'italic',
     paddingVertical: Spacing.three,
     textAlign: 'center',
-  },
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
   },
 });

@@ -125,64 +125,6 @@ export const PRE_MATCH_SECTION_INFO: Record<string, SectionInfo> = {
   },
 };
 
-export const TEAM_SECTION_INFO: Record<string, SectionInfo> = {
-  'Team Form': {
-    title: 'Team Form',
-    paragraphs: [
-      'The recent results read: streaks and the average points margin across the last ten completed matches — the margin bars above are its picture.',
-      'Margins carry more information than results — a run of one-score wins and a run of thirty-point wins are both "five from five", but they are not the same team.',
-    ],
-  },
-  'Team World Ranking': {
-    title: 'Team World Ranking',
-    paragraphs: [
-      'The trajectory across the last twelve monthly World Rugby ranking snapshots: climbed, slipped, or held.',
-      'World Rugby\u2019s rankings weight results by opponent strength, so sustained movement reflects genuine trajectory — beating better sides moves you further than beating up on weaker ones.',
-    ],
-  },
-  'Team Landscape': {
-    title: 'Team Landscape',
-    paragraphs: [
-      'Where the team sits on the pool map: points scored and conceded per game measured against the medians of every side in the competition set — the crosshairs on the chart.',
-      'The quadrants carry the verdict: complete sides beat the median at both ends, grinders defend without scoring, entertainers score without defending, and exposed sides trail on both.',
-    ],
-  },
-  'Team Efficiency KPIs': {
-    title: 'Team Efficiency KPIs',
-    paragraphs: [
-      'The per-game statistical profile across the analytical window: attack output, carry game, and the defensive ledger — the KPI bars above with their tier-average ticks.',
-      'This is the team\u2019s statistical identity: the baseline every match performance gets measured against.',
-    ],
-  },
-  'Scoring Rhythm': {
-    title: 'Scoring Rhythm',
-    paragraphs: [
-      'The match split into its four 20-minute quarters: when the points arrive (green, above the line) and when they leak (red, below), averaged across the window.',
-      'Teams have scoring habits — fast starters, second-half sides, closers. A quarter carrying 35% or more of the points is a habit worth planning around; an even spread is consistency.',
-    ],
-  },
-  'Possession vs Outcome': {
-    title: 'Possession vs Outcome',
-    paragraphs: [
-      'How the wins have actually arrived: each of the last ten matches plotted by possession share against the points margin.',
-      'Winning with the ball is control; winning without it is counter-punching; losing with the ball is the warning sign — possession that doesn\u2019t convert is the most fixable failure mode in rugby.',
-    ],
-  },
-  'Set Piece & Discipline': {
-    title: 'Set Piece & Discipline',
-    paragraphs: [
-      'The platform and the whistle in one read: scrum and lineout success against penalties conceded — the quadrant chart above places the team against the pool on both.',
-      'The narrative closes with the most pressing repair job, in priority order: discipline first (the cheapest points given away), then the weaker set piece, then defensive leakage.',
-    ],
-  },
-  'Discipline Trend': {
-    title: 'Discipline Trend',
-    paragraphs: [
-      'Penalties conceded in each match of the window against the bands the analysis judges by: 9 or fewer a game is disciplined, 12 or more is a problem.',
-      'The read is level AND direction — a rising count usually reaches the scoreboard within a match or two, while a falling one is a side cleaning its game up.',
-    ],
-  },
-};
 
 export const PLAYER_SECTION_INFO: Record<string, SectionInfo> = {
   Form: {

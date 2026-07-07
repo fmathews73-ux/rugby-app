@@ -81,9 +81,11 @@ const styles = StyleSheet.create({
     // Matches the tightened Fixtures pickerWrap top-padding — hero card
     // sits close to the AppHeader's bottom hairline.
     paddingTop: Spacing.two,
-    // Breathing room between the last card and the tab bar when the
-    // ScrollView is scrolled to the very bottom.
-    paddingBottom: PAGE_BOTTOM_INSET,
+    // Tightened after the analysis accordion was retired — the
+    // carousel dots are the page's last element, so only a modest gap
+    // to the tab bar is needed (Home-only; other pages keep the
+    // PAGE_BOTTOM_INSET token).
+    paddingBottom: Spacing.three,
     // Inter-card gap matches the `paddingTop` inside each carousel's dotsRow
     // (Spacing.three = 16pt) so dots feel equally padded above and below.
     // Changing this in one place keeps that symmetry consistent for all cards.

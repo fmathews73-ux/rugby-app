@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Modal, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
@@ -9,7 +9,9 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
@@ -52,6 +54,7 @@ export function ExtendedMomentum({
   showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const analysis = useTeamAnalysis(teamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
 
   // Reset toggle back to the primary team whenever the compare team
@@ -102,7 +105,21 @@ export function ExtendedMomentum({
     [activeTeamId, completedFixtures, resultByFixture],
   );
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title={title ?? 'Form'}
+          onClose={() => setInfoOpen(false)}
+          read={analysis.data?.form}
+          purpose={
+            <>Result margins from the team's recent matches — green bars above the line are wins, red below are losses; bar height is the size of the margin.</>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (icon outermost — same corner slot as
           the Team Profile card). */}
@@ -127,7 +144,7 @@ export function ExtendedMomentum({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain extended momentum">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
           </Pressable>
         </View>
       </View>
@@ -137,13 +154,9 @@ export function ExtendedMomentum({
       ) : (
         <MarginBars points={points} />
       )}
-
-      <MomentumInfoModal
-        visible={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        lookback={LOOKBACK}
-      />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -283,40 +296,10 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
 
 
 
-function MomentumInfoModal({
-  visible,
-  onClose,
-  lookback,
-}: {
-  visible: boolean;
-  onClose: () => void;
-  lookback: number;
-}) {
-  return (
-    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
-      <Pressable style={styles.modalBackdrop} onPress={onClose}>
-        <Pressable style={styles.modalCard} onPress={() => {}}>
-          <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Form (prev. {lookback})</Text>
-            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
-              <Ionicons name="close" size={20} color={Colors.light.text} />
-            </Pressable>
-          </View>
-          <Text style={styles.modalBody}>
-            The selected team's last {lookback} completed matches, oldest
-            (left) to most recent (right). Each bar rises or falls from the
-            zero line by that game's points margin — green bars above the
-            line are wins, red bars below are losses, and a small grey stub
-            on the line is a draw. Taller bar = bigger margin; the number on
-            each bar is the final margin itself.
-          </Text>
-        </Pressable>
-      </Pressable>
-    </Modal>
-  );
-}
-
 const styles = StyleSheet.create({
+  // Front face fills the flip container (grow-only — natural height
+  // stays content-driven).
+  cardFill: { flexGrow: 1 },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
@@ -364,47 +347,4 @@ const styles = StyleSheet.create({
   },
 
   // Modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
-  modalDivider: {
-    height: StyleSheet.hairlineWidth,
-    backgroundColor: '#E5E7EB',
-    marginVertical: Spacing.one,
-  },
 });
