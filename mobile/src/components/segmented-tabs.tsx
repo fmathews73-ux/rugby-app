@@ -27,10 +27,14 @@ export function SegmentedTabs<T extends string>({
   tabs,
   active,
   onSelect,
+  rightAccessory,
 }: {
   tabs: readonly { id: T; label: string }[];
   active: T;
   onSelect: (id: T) => void;
+  /** Optional content pinned at the strip's right edge, outside the
+   *  scrolling pill area (e.g. the team hub's squad totals). */
+  rightAccessory?: React.ReactNode;
 }) {
   // Right-edge fade: a clean clip reads as "the row ends here", hiding
   // any pill that's scrolled out of view (users were missing Analysis).
@@ -47,6 +51,7 @@ export function SegmentedTabs<T extends string>({
 
   return (
     <View style={styles.wrap}>
+      <View style={styles.scrollArea}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
@@ -92,6 +97,8 @@ export function SegmentedTabs<T extends string>({
           pointerEvents="none"
         />
       ) : null}
+      </View>
+      {rightAccessory ? <View style={styles.accessory}>{rightAccessory}</View> : null}
     </View>
   );
 }
@@ -107,7 +114,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
+  // The scrolling pill area (and its edge fades) own the flexible
+  // width; the accessory sits outside it so pills fade out before
+  // reaching it.
+  scrollArea: { flex: 1 },
+  accessory: { paddingRight: PillStrip.stripPadH, paddingLeft: 4 },
   inner: {
     paddingHorizontal: PillStrip.stripPadH,
     paddingVertical: PillStrip.stripPadV,

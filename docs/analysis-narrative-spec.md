@@ -325,9 +325,9 @@ read-model, or the season aggregate. Never invent a number.
 | # | Section | Content |
 |---|---|---|
 | 0 | *(Summary)* | 1–2 sentences: name, position, caps, appearance/start/minute record, points contribution if any. Unlabeled cold open. |
-| 1 | Scouting | Percentile profile vs positional peers (per-80 rates, prev.-10 window). Names strengths and the soft spot. |
-| 2 | Form | Recent-half vs earlier-half comparison across the appearance window: role key metric + minutes trend. |
-| 3 | Outlook | Closing outlook built from the profile: what to lift, what to hold. Mirrors the summary as an opener/closer pair. |
+| 0 | *(title row)* | STRICT 1:1 (2026-07-07): the resting read IS the scouting report — summary ¶ + percentile profile ¶ (strengths, soft spot) + development close ¶ (what to lift, what to hold). Evidence card: Player Profile (the percentile bars; renamed from "Scouting"). Former Scouting and Outlook sections merged here. |
+| 1 | Form | Recent-half vs earlier-half comparison across the appearance window: role key metric + minutes trend. Evidence: the trend chart. |
+| 2 | Season | The record card in prose (ADDED 2026-07-07): appearances/starts, minutes workload ("an eighty-minute player in all but name" / "used in bursts"), scoreboard contribution — or graft-not-glory when off the scoresheet. Evidence: the Season tiles. |
 
 ### 9.2 Thresholds (must match the template / future prompt)
 

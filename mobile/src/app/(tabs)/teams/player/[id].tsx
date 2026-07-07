@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, ScrollView, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
 import { usePlayer, usePlayerPercentiles } from '@/api/hooks';
+import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
@@ -37,17 +38,15 @@ const LOOKBACK = PLAYER_LOOKBACK;
 const GOOD_COLOR = '#059669';
 const BAD_COLOR = StatusColor.live;
 
-type PlayerTab = 'preview' | 'stats' | 'insights' | 'analysis';
+type PlayerTab = 'preview' | 'stats';
 
 const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
-  // Mirrors the fixture drill's arc, player-scoped: Preview is the
-  // backdrop (form trends + season summary), Stats the numeric record,
-  // Insights the visual BI read (scouting percentiles), Analysis the
-  // written synthesis.
+  // Preview IS the player read — the strict-1:1 chart carousel +
+  // Player Analysis accordion (same grammar as every other surface);
+  // Insights and Analysis pills retired 2026-07-07. Stats stays as the
+  // dense reference table.
   { id: 'preview', label: 'Preview' },
   { id: 'stats', label: 'Stats' },
-  { id: 'insights', label: 'Insights' },
-  { id: 'analysis', label: 'Analysis' },
 ];
 
 /**
@@ -123,24 +122,74 @@ export default function PlayerCardScreen() {
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
-          <>
-            <TrendCard
+          <View style={styles.previewBleed}>
+            <PlayerPreviewBlock
               playerId={playerId}
-              metrics={isForward ? FORWARD_TREND : BACK_TREND}
+              isForward={isForward}
             />
-            <SeasonCard playerId={playerId} />
-          </>
+          </View>
         )}
         {tab === 'stats' && <PlayerStatsTable playerId={playerId} />}
-        {tab === 'insights' && (
-          <ScoutingCard
-            playerId={playerId}
-            metrics={isForward ? FORWARD_SCOUT : BACK_SCOUT}
-          />
-        )}
-        {tab === 'analysis' && <PlayerAnalysisCard playerId={playerId} />}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+// ─── Preview block (strict 1:1 carousel + synced accordion) ────────────────
+
+// One narrative per card, labels identical to card titles. The Player
+// Profile percentile card pairs with the accordion's title row (the
+// resting scouting report), same convention as every other surface.
+const SECTION_PAGE: Record<string, number> = {
+  __summary__: 0, // Player Profile — the title row's evidence
+  Form: 1,
+  Season: 2,
+};
+const PAGE_SECTION: readonly string[] = ['__summary__', 'Form', 'Season'];
+
+function PlayerPreviewBlock({
+  playerId,
+  isForward,
+}: {
+  playerId: string;
+  isForward: boolean;
+}) {
+  const carouselRef = useRef<CardCarouselHandle>(null);
+  const [section, setSection] = useState('__summary__');
+
+  return (
+    <>
+      <CardCarousel
+        ref={carouselRef}
+        onPageChange={(i) => setSection(PAGE_SECTION[i] ?? '__summary__')}
+        pages={[
+          <ScoutingCard
+            key="profile"
+            playerId={playerId}
+            metrics={isForward ? FORWARD_SCOUT : BACK_SCOUT}
+            style={styles.pageCard}
+          />,
+          <TrendCard
+            key="form"
+            playerId={playerId}
+            metrics={isForward ? FORWARD_TREND : BACK_TREND}
+            style={styles.pageCard}
+          />,
+          <SeasonCard key="season" playerId={playerId} style={styles.pageCard} />,
+        ]}
+      />
+      <View style={styles.blockWrap}>
+        <PlayerAnalysisCard
+          playerId={playerId}
+          openSection={section}
+          onOpenSection={(next) => {
+            setSection(next);
+            const page = SECTION_PAGE[next];
+            if (page !== undefined) carouselRef.current?.scrollToPage(page);
+          }}
+        />
+      </View>
+    </>
   );
 }
 
@@ -149,9 +198,11 @@ export default function PlayerCardScreen() {
 function ScoutingCard({
   playerId,
   metrics,
+  style,
 }: {
   playerId: string;
   metrics: readonly ScoutMetric[];
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -169,10 +220,10 @@ function ScoutingCard({
     GROUP_LABELS[percentiles.data?.position_group ?? ''] ?? 'positional peers';
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Scouting</Text>
+          <Text style={styles.sectionLabel}>Player Profile</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -268,9 +319,11 @@ function ScoutRow({
 function TrendCard({
   playerId,
   metrics,
+  style,
 }: {
   playerId: string;
   metrics: readonly { field: PlayerStatField; label: string }[];
+  style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const history = usePlayerMatchHistory(playerId);
@@ -286,7 +339,7 @@ function TrendCard({
   );
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
           <Text style={styles.sectionLabel}>Form</Text>
@@ -413,7 +466,7 @@ function TrendSparkline({
 
 // ─── Season totals ──────────────────────────────────────────────────────────
 
-function SeasonCard({ playerId }: { playerId: string }) {
+function SeasonCard({ playerId, style }: { playerId: string; style?: StyleProp<ViewStyle> }) {
   const { data, isLoading } = usePlayerAggregate(playerId);
 
   const tiles = useMemo(() => {
@@ -432,7 +485,7 @@ function SeasonCard({ playerId }: { playerId: string }) {
   }, [data]);
 
   return (
-    <View style={styles.card}>
+    <View style={[styles.card, style]}>
       <Text style={styles.sectionLabel}>Season</Text>
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
@@ -592,17 +645,32 @@ function round1(v: number): number {
  * of `docs/analysis-narrative-spec.md`; `usePlayerAnalysis` is the
  * client-side template implementation pending the Phase 6 LLM cutover.
  */
-function PlayerAnalysisCard({ playerId }: { playerId: string }) {
+function PlayerAnalysisCard({
+  playerId,
+  openSection: controlledSection,
+  onOpenSection,
+}: {
+  playerId: string;
+  /** When provided, the accordion is CONTROLLED — the parent owns the
+   *  open section (two-way carousel sync). */
+  openSection?: string;
+  onOpenSection?: (section: string) => void;
+}) {
   const [infoOpen, setInfoOpen] = useState(false);
   // Accordion: exactly one section open at all times. The title row's
   // summary is the resting state — it starts open, closes when a
   // category dropdown opens, and reopens whenever the open dropdown is
   // closed (closing never leaves the card empty).
-  const [openSection, setOpenSection] = useState<string>('__summary__');
+  const [internalSection, setInternalSection] = useState<string>('__summary__');
+  const openSection = controlledSection ?? internalSection;
   const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
   const accordion = (label: string) => ({
     open: openSection === label,
-    onToggle: () => setOpenSection((p) => (p === label ? '__summary__' : label)),
+    onToggle: () => {
+      const next = openSection === label ? '__summary__' : label;
+      setInternalSection(next);
+      onOpenSection?.(next);
+    },
   });
   const { data, isLoading } = usePlayerAnalysis(playerId);
 
@@ -638,17 +706,22 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
         <View style={styles.narrativeStack}>
           {/* Cold-open summary — body of the title section above. */}
           {openSection === '__summary__' ? (
-            <Text style={styles.narrativeSummary}>{data.summary}</Text>
+            <>
+              {/* Resting read = the full scouting report (summary +
+                  profile read + development close) — its evidence is
+                  the Player Profile percentile card, same merge logic
+                  as Pre-Match's Profile H2H. */}
+              <Text style={styles.narrativeSummary}>{data.summary}</Text>
+              <Text style={styles.narrativeBody}>{data.scouting}</Text>
+              <Text style={styles.narrativeBody}>{data.outlook}</Text>
+            </>
           ) : null}
 
-          <PlayerNarrativeSection label="Scouting" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Scouting']!)} {...accordion("Scouting")}>
-            {data.scouting}
-          </PlayerNarrativeSection>
           <PlayerNarrativeSection label="Form" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Form']!)} {...accordion("Form")}>
             {data.form}
           </PlayerNarrativeSection>
-          <PlayerNarrativeSection label="Outlook" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Outlook']!)} {...accordion("Outlook")}>
-            {data.outlook}
+          <PlayerNarrativeSection label="Season" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Season']!)} {...accordion("Season")}>
+            {data.season}
           </PlayerNarrativeSection>
         </View>
       )}
@@ -658,7 +731,7 @@ function PlayerAnalysisCard({ playerId }: { playerId: string }) {
         onClose={() => setInfoOpen(false)}
         title="Player Analysis"
         paragraphs={[
-          'A written synthesis of everything the other tabs show: the percentile profile from Insights, the trend lines from Preview, and the season record from Stats, pulled together into an analyst read.',
+          'The written player read: the resting text under the title is the scouting report — who the player is, the genuine strengths and the soft spot, and what to lift next — with Form and Season carrying the trend and record reads against their charts.',
           'The scouting read names genuine strengths (70th percentile or better against positional peers) and soft spots (30th or below). The form read compares the recent half of the appearance window against the earlier half; moves under 15% are reported as steady.',
         ]}
       />
@@ -842,6 +915,11 @@ const styles = StyleSheet.create({
     flex: 1,
     gap: 2,
   },
+  // Preview-block bleed: unwraps the pane padding (carousel pages
+  // re-apply the card column internally) and carries the 16pt rhythm.
+  previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
+  blockWrap: { paddingHorizontal: Spacing.four },
+  pageCard: { flex: 1 },
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
   heroPhotoPlaceholder: {

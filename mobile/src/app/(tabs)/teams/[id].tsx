@@ -21,15 +21,14 @@ import { TIER_1_IDS } from '@/lib/tiers';
 type TeamTab = 'preview' | 'squad' | 'stats';
 
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
-  // Preview IS the team read — the synced chart carousel + Team
-  // Analysis accordion (identical to Home's My Team block), so the
-  // separate Insights and Analysis pills were retired 2026-07-07:
-  // their charts live in the Preview carousel as evidence pages and
-  // the narrative lives in the accordion. Squad = the cast, Stats =
-  // the dense reference table (premium surface).
+  // Team performance first, people second: Preview (the synced chart
+  // carousel + Team Analysis accordion — Insights/Analysis pills
+  // retired 2026-07-07) flows into Stats (the dense numeric record of
+  // the same performance), THEN Squad drills into the people behind
+  // it. Preview the team → see their stats → meet the squad.
   { id: 'preview', label: 'Preview' },
-  { id: 'squad', label: 'Squad' },
   { id: 'stats', label: 'Stats' },
+  { id: 'squad', label: 'Squad' },
 ];
 
 // Hero outcome-dot colours — same trio as FormCircles.
@@ -85,20 +84,10 @@ export default function TeamHubScreen() {
     setTab(next);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
-  // Position groups the user has expanded. Collapsed by default — a
-  // 45-player pool rolled up into six group headers keeps the card
-  // compact; users open only the units they're interested in.
-  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
   const [squadInfoOpen, setSquadInfoOpen] = useState(false);
-
-  const toggleGroup = (label: string) => {
-    setExpandedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
-      return next;
-    });
-  };
+  // Squad unit filter — the landing pages' pill grammar applied to the
+  // positional groups. 'all' shows every unit's card.
+  const [squadUnit, setSquadUnit] = useState('all');
 
   const teams = useTeams();
   const team = useMemo(
@@ -142,6 +131,18 @@ export default function TeamHubScreen() {
       };
     }).filter((s) => s.players.length > 0);
   }, [players.data]);
+
+  const squadUnitOptions = useMemo(
+    () => [
+      { id: 'all', label: 'All' },
+      ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
+    ],
+    [],
+  );
+  const visibleSections =
+    squadUnit === 'all'
+      ? squadSections
+      : squadSections.filter((sec) => sec.label === squadUnit);
 
   const squadTotals = useMemo(
     () => ({
@@ -213,7 +214,31 @@ export default function TeamHubScreen() {
           </View>
         </View>
       </View>
-      <SegmentedTabs tabs={TEAM_TABS} active={tab} onSelect={handleTabSelect} />
+      <SegmentedTabs
+        tabs={TEAM_TABS}
+        active={tab}
+        onSelect={handleTabSelect}
+        rightAccessory={
+          (
+            <View style={styles.squadMetaRow}>
+              <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
+              <Text style={styles.statLegendText}>
+                {squadTotals.caps.toLocaleString('en-GB')}
+              </Text>
+              <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
+              <Text style={styles.statLegendText}>{squadTotals.players}</Text>
+              <Pressable
+                onPress={() => setSquadInfoOpen(true)}
+                hitSlop={10}
+                accessibilityRole="button"
+                accessibilityLabel="Explain the squad"
+                style={styles.squadMetaSecondIcon}>
+                <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+              </Pressable>
+            </View>
+          )
+        }
+      />
 
       <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
@@ -232,32 +257,7 @@ export default function TeamHubScreen() {
         )}
 
         {tab === 'squad' && (
-          <View style={styles.card}>
-            <View style={styles.cardHeaderRow}>
-              <View style={styles.squadTitleGroup}>
-                <Text style={styles.sectionLabel}>Squad</Text>
-                <Pressable
-                  onPress={() => setSquadInfoOpen(true)}
-                  hitSlop={10}
-                  accessibilityRole="button"
-                  accessibilityLabel="Explain the squad card">
-                  <Ionicons
-                    name="information-circle-outline"
-                    size={14}
-                    color={Colors.light.textSecondary}
-                  />
-                </Pressable>
-              </View>
-              <View style={styles.squadMetaRow}>
-                <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
-                <Text style={styles.sectionLabel}>
-                  {squadTotals.caps.toLocaleString('en-GB')}
-                </Text>
-                <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
-                <Text style={styles.sectionLabel}>{squadTotals.players}</Text>
-              </View>
-            </View>
-
+          <>
             <Modal
               visible={squadInfoOpen}
               transparent
@@ -284,9 +284,8 @@ export default function TeamHubScreen() {
                     figure its player count.
                   </Text>
                   <Text style={styles.modalBody}>
-                    The blue bar is the unit&apos;s <Text style={styles.modalStrong}>share of the
-                    squad&apos;s total caps</Text> — where the experience is
-                    concentrated. A pack carrying most of the caps points to a
+                    Compare the units&apos; caps to see where the experience is
+                    concentrated: a pack carrying most of the caps points to a
                     forward-led, set-piece side; caps loaded in the back line
                     suggest the attacking know-how lives out wide. Units light on
                     caps are where a coach is blooding the next generation.
@@ -294,84 +293,57 @@ export default function TeamHubScreen() {
                 </Pressable>
               </Pressable>
             </Modal>
+            {/* Unit pill strip — the SAME strip component as the drill
+                tabs (white surface, grey inactive pills, edge fades),
+                full-bleed out of the pane padding. */}
+            <View style={styles.squadPillBleed}>
+              <SegmentedTabs
+                tabs={squadUnitOptions}
+                active={squadUnit}
+                onSelect={setSquadUnit}
+              />
+            </View>
+
             {players.isLoading ? (
               <Text style={styles.empty}>Loading…</Text>
-            ) : squadSections.length === 0 ? (
+            ) : visibleSections.length === 0 ? (
               <Text style={styles.empty}>No squad on file.</Text>
             ) : (
-              squadSections.map((section) => {
-                const expanded = expandedGroups.has(section.label);
-                return (
-                  <View key={section.label} style={styles.squadSection}>
-                    {/* Group header — tap to roll the unit open / closed.
-                        Count keeps the collapsed state informative. */}
-                    <Pressable
-                      onPress={() => toggleGroup(section.label)}
-                      style={({ pressed }) => [
-                        styles.squadGroupHeader,
-                        pressed && { opacity: 0.6 },
-                      ]}
-                      accessibilityRole="button"
-                      accessibilityLabel={`${expanded ? 'Collapse' : 'Expand'} ${section.label}`}>
-                      <View style={styles.squadGroupHeaderTop}>
-                        <Text style={styles.squadSectionLabel}>{section.label}</Text>
-                        <Ionicons
-                          name={expanded ? 'chevron-up' : 'chevron-down'}
-                          size={14}
-                          color={Colors.light.textSecondary}
-                        />
-                      </View>
-                      {/* Meta line: caps + players icons left, then the
-                          experience-share bar (this unit's slice of squad
-                          caps) inline — same 4pt anatomy as the stats
-                          bars. Static fill (no-motion rule). */}
-                      <View style={styles.capsShareRow}>
-                        <View style={styles.squadMetaRow}>
-                          <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
-                          <Text style={styles.sectionLabel}>
-                            {section.caps.toLocaleString('en-GB')}
-                          </Text>
-                          <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
-                          <Text style={styles.sectionLabel}>{section.players.length}</Text>
-                        </View>
-                        <View style={styles.capsShareTrack}>
-                          <View
-                            style={[
-                              styles.capsShareFill,
-                              { flex: squadTotals.caps > 0 ? section.caps / squadTotals.caps : 0 },
-                            ]}
-                          />
-                          <View
-                            style={{
-                              flex:
-                                squadTotals.caps > 0
-                                  ? 1 - section.caps / squadTotals.caps
-                                  : 1,
-                            }}
-                          />
-                        </View>
-                        <Text style={styles.capsSharePct}>
-                          {squadTotals.caps > 0
-                            ? Math.round((section.caps / squadTotals.caps) * 100)
-                            : 0}
-                          %
+              visibleSections.map((section) => (
+                <View key={section.label} style={styles.card}>
+                  {/* Category-card header — icon + label left, unit
+                      caps/players meta right, mirroring the Teams
+                      landing's MY TEAM / TIER cards. */}
+                  <View style={styles.cardHeaderRow}>
+                    <View style={styles.squadTitleGroup}>
+                      <Ionicons name="people-outline" size={14} color={Colors.light.textSecondary} />
+                      <Text style={styles.sectionLabel}>{section.label}</Text>
+                    </View>
+                    {/* Same fixed column as the player-row meta below,
+                        so the unit totals left-align with every meta
+                        line in the card. */}
+                    <View style={styles.groupMetaColumn}>
+                      <View style={styles.squadMetaRow}>
+                        <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
+                        <Text style={styles.sectionLabel}>
+                          {section.caps.toLocaleString('en-GB')}
                         </Text>
+                        <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
+                        <Text style={styles.sectionLabel}>{section.players.length}</Text>
                       </View>
-                    </Pressable>
-                    {expanded
-                      ? section.players.map((p) => (
-                          <PlayerRow
-                            key={p.id}
-                            player={p}
-                            onPress={() => router.push(`/teams/player/${p.id}`)}
-                          />
-                        ))
-                      : null}
+                    </View>
                   </View>
-                );
-              })
+                  {section.players.map((p) => (
+                    <PlayerRow
+                      key={p.id}
+                      player={p}
+                      onPress={() => router.push(`/teams/player/${p.id}`)}
+                    />
+                  ))}
+                </View>
+              ))
             )}
-          </View>
+          </>
         )}
 
         {tab === 'stats' && <TeamStatsTable teamId={teamId} />}
@@ -471,10 +443,6 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
   }, [summary.data, teamId, isTier1]);
 
   const tierLabel = isTier1 ? 'TIER 1 AVG' : 'TIER 2 AVG';
-  const teams = useTeams();
-  const teamCode =
-    teams.data?.find((t) => t.id === teamId)?.short_name ?? teamId.toUpperCase();
-
   if (summary.isLoading && !subject) {
     return (
       <View style={styles.card}>
@@ -492,21 +460,6 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
 
   return (
     <>
-      {/* Legend row — which side of the bars is which. */}
-      <View style={styles.statLegendRow}>
-        <View style={styles.statLegendLeftGroup}>
-          <Text style={styles.statLegendText}>{teamCode}</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the team statistics">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <Text style={styles.statLegendText}>{tierLabel}</Text>
-      </View>
-
       {/* Paired category cards, stacked — with-the-ball (Attack +
           Kicking), denying-and-securing (Defence + Set piece), and
           Discipline standing alone. Vertical scroll, not a carousel:
@@ -521,7 +474,26 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
             <View
               key={group.label}
               style={[styles.tierStatGroupBlock, gi > 0 && styles.tierStatGroupFollowing]}>
-              <Text style={styles.sectionLabel}>{group.label}</Text>
+              {gi === 0 ? (
+                /* Uppermost label row carries the card chrome: info
+                   icon after the category, comparison basis right —
+                   the legend row above the cards is gone. */
+                <View style={styles.cardHeaderRow}>
+                  <View style={styles.squadTitleGroup}>
+                    <Text style={styles.sectionLabel}>{group.label}</Text>
+                    <Pressable
+                      onPress={() => setInfoOpen(true)}
+                      hitSlop={10}
+                      accessibilityRole="button"
+                      accessibilityLabel="Explain the team statistics">
+                      <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
+                    </Pressable>
+                  </View>
+                  <Text style={styles.statLegendText}>{tierLabel}</Text>
+                </View>
+              ) : (
+                <Text style={styles.sectionLabel}>{group.label}</Text>
+              )}
               <View style={styles.tierStatList}>
                 {group.rows.map((row) => (
                   <TierStatBar
@@ -639,17 +611,20 @@ function PlayerRow({ player, onPress }: { player: Player; onPress: () => void })
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.playerRow, pressed && styles.playerRowPressed]}>
-      {/* Same person-circle glyph as the header's profile entry, in the
-          secondary grey — anonymous placeholder until a licensed player
-          photo path exists (register #5 image-rights tier). */}
-      <Ionicons name="person-circle-outline" size={32} color={Colors.light.textSecondary} />
-      <View style={styles.playerText}>
-        <Text style={styles.playerName}>{player.name}</Text>
+      {/* Teams-landing row grammar: 40pt glyph where the flag ball
+          sits, bold name where the CODE sits, two quiet meta lines in
+          the right-hand space, no chevron. Glyph stays the anonymous
+          placeholder until the image-rights tier (register #5/#28). */}
+      <Ionicons name="person-circle-outline" size={40} color={Colors.light.textSecondary} />
+      <Text style={styles.playerName} numberOfLines={1}>
+        {player.name}
+      </Text>
+      <View style={styles.playerMetaStack}>
         <Text style={styles.playerMeta}>
-          {POSITION_LABELS[player.primary_position]} · {age} · {player.cap_count} caps
+          {POSITION_LABELS[player.primary_position]} · {age}
         </Text>
+        <Text style={styles.playerMeta}>{player.cap_count} caps</Text>
       </View>
-      <Ionicons name="chevron-forward" size={16} color={Colors.light.textSecondary} />
     </Pressable>
   );
 }
@@ -680,6 +655,10 @@ const styles = StyleSheet.create({
   // Preview-block bleed: unwraps the pane padding AND carries the
   // 16pt inter-card rhythm the block's children expect from Home.
   previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
+  // Squad unit pills bleed to the screen edge AND pull up over the
+  // pane's top padding so the strip bonds directly under the drill
+  // tabs — one white pill surface, hairline-divided, no grey band.
+  squadPillBleed: { marginHorizontal: -Spacing.four, marginTop: -Spacing.three },
 
   card: {
     backgroundColor: '#FFFFFF',
@@ -773,37 +752,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  squadSection: {
-    gap: 0,
-    marginTop: Spacing.one,
-  },
   // Tappable group header — label left, count + chevron right. Hairline
   // beneath separates the header from the rows when expanded and from
   // the next header when collapsed.
-  squadGroupHeader: {
-    paddingVertical: Spacing.two,
-    gap: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
-  },
-  squadGroupHeaderTop: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  squadGroupCount: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  // Experience-share bar under each group header: unit caps as a share
-  // of squad caps.
-  capsShareRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
   squadTitleGroup: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -816,55 +767,42 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   squadMetaSecondIcon: { marginLeft: 6 },
-  // Same track anatomy as the stats bars (4pt, radius 2, grey track),
-  // blue fill — informational, not a better/worse verdict, so it stays
-  // off the green/red outcome pair.
-  capsShareTrack: {
-    flex: 1,
-    flexDirection: 'row',
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: '#F3F4F6',
-    overflow: 'hidden',
-  },
-  capsShareFill: {
-    backgroundColor: '#3B82F6',
-    borderRadius: 2,
-    height: 4,
-  },
-  capsSharePct: {
-    fontSize: 9,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-    minWidth: 26,
-    textAlign: 'right',
-  },
-  squadSectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
   playerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two + 4,
-    paddingVertical: Spacing.two,
+    gap: Spacing.three,
+    paddingVertical: Spacing.two + 2,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
   playerRowPressed: { opacity: 0.6 },
-  playerText: { flex: 1, gap: 2 },
   playerName: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
+    // Flexible column so the fixed-width meta stack below always
+    // starts at the same x — meta text forms one left-aligned column
+    // down the card regardless of name length.
+    flex: 1,
+    fontSize: TextSize.md,
+    fontWeight: TextWeight.bold,
     color: Colors.light.text,
   },
   playerMeta: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
+  },
+  // Mirrors playerMetaStack's column so header totals and row meta
+  // share one left edge.
+  groupMetaColumn: {
+    width: 120,
+    marginLeft: Spacing.two,
+    alignItems: 'flex-start',
+  },
+  playerMetaStack: {
+    // Narrow meta column pushed toward the card's right edge —
+    // maximum room for full surnames, meta still one aligned column.
+    width: 120,
+    marginLeft: Spacing.two,
+    alignItems: 'flex-start',
+    gap: 2,
   },
   empty: {
     fontSize: TextSize.sm,

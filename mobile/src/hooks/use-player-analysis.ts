@@ -40,6 +40,9 @@ export interface PlayerAnalysis {
   scouting: string;
   /** Recent-window trajectory read. */
   form: string;
+  /** "Season" — the record card in prose: appearances, role, minutes,
+   *  scoreboard contribution. */
+  season: string;
   /** Closing outlook, mirrors the match card's "Going forward". */
   outlook: string;
 }
@@ -96,6 +99,7 @@ export function usePlayerAnalysis(playerId: string): UsePlayerAnalysisResult {
       summary: buildSummary(p.name, surname, POSITION_LABELS[p.primary_position], p.cap_count, agg),
       scouting: buildScouting(surname, groupLabel, pct.peers, strengths, softSpot, rated, agg.totals),
       form: buildForm(surname, isForward, sheets),
+      season: buildSeason(surname, agg),
       outlook: buildOutlook(surname, strengths, softSpot),
     };
   }, [player.data, percentiles.data, aggregate.data, history.data]);
@@ -220,6 +224,36 @@ function buildForm(
 function listJoin(items: readonly string[]): string {
   if (items.length <= 1) return items[0] ?? '';
   return `${items.slice(0, -1).join(', ')}, and ${items[items.length - 1]}`;
+}
+
+/** "Season" — the record card in prose: role, volume, contribution. */
+function buildSeason(
+  surname: string,
+  agg: { appearances: number; starts: number; minutesTotal: number; totals: Record<string, number> },
+): string {
+  const apps = agg.appearances;
+  const starts = agg.starts;
+  const minutes = agg.minutesTotal;
+  const role =
+    starts === apps
+      ? 'every one a start'
+      : starts === 0
+        ? 'all of them off the bench'
+        : `${starts} of them starts`;
+  const avgMin = apps > 0 ? Math.round(minutes / apps) : 0;
+  const pts = agg.totals.points ?? 0;
+  const tries = agg.totals.tries ?? 0;
+  const contribution =
+    pts > 0
+      ? `The scoreboard contribution has been ${pts} points${tries > 0 ? ` (${tries} ${tries === 1 ? 'try' : 'tries'})` : ''}.`
+      : `The contribution has lived away from the scoresheet — graft rather than glory, which the profile above prices in.`;
+  const shift =
+    avgMin >= 70
+      ? `an eighty-minute player in all but name`
+      : avgMin >= 55
+        ? `a full-shift starter by workload`
+        : `used in bursts rather than full shifts`;
+  return `${surname} has ${apps} ${apps === 1 ? 'appearance' : 'appearances'} in the window, ${role}, averaging ${avgMin} minutes — ${shift}. ${contribution}`;
 }
 
 function buildOutlook(

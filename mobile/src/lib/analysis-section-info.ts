@@ -185,25 +185,18 @@ export const TEAM_SECTION_INFO: Record<string, SectionInfo> = {
 };
 
 export const PLAYER_SECTION_INFO: Record<string, SectionInfo> = {
-  Scouting: {
-    title: 'Scouting',
-    paragraphs: [
-      'The percentile profile against positional peers, built on per-80-minute rates: genuine strengths sit at the 70th percentile or better, soft spots at the 30th or below.',
-      'Per-80 rates strip out minutes played, so a high-impact bench player reads honestly against a starter — the profile measures output per time on the pitch.',
-    ],
-  },
   Form: {
     title: 'Form',
     paragraphs: [
-      'The recent half of the appearance window compared against the earlier half: the key metric for the player’s role, plus the minutes trend.',
+      'The recent half of the appearance window compared against the earlier half: the key metric for the player\u2019s role, plus the minutes trend — the trend chart above is its picture.',
       'Direction beats level for selection reads — a player trending up from a modest base is often a better pick than a big name trending down. Moves under 15% are reported as steady.',
     ],
   },
-  Outlook: {
-    title: 'Outlook',
+  Season: {
+    title: 'Season',
     paragraphs: [
-      'The forward look built from the profile: what to lift, and what to protect while lifting it.',
-      'Development framing, not judgement — the soft spot named here is the highest-leverage improvement available to this player’s game.',
+      'The record card in words: appearances and starts, the minutes workload, and the scoreboard contribution across the window.',
+      'Volume is context for everything else — per-80 rates strip minutes out of the profile, but selection and durability live here.',
     ],
   },
 };
