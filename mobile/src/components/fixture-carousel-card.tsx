@@ -3,6 +3,7 @@ import { StyleSheet, Text, View } from 'react-native';
 import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 
 import { LivePulseDot } from '@/components/live-pulse-dot';
+import { formatKickoffTime } from '@/lib/format-fixture-date';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
@@ -48,7 +49,9 @@ export function FixtureCarouselCard({
     <View style={[styles.card, { width }]}>
       {/* Date row — centred. Live-state is signalled inside the score slot
           (matches drill hero), so no top-level live indicator here. */}
-      <Text style={styles.headerLine}>{dayLabel}</Text>
+      <Text style={styles.headerLine}>
+        {fixture.status === 'scheduled' ? `${dayLabel} · Upcoming` : dayLabel}
+      </Text>
 
       {/* Matchup row — every item is a direct sibling of the row with
           `justifyContent: 'space-around'`, so distribution is even across
@@ -98,7 +101,7 @@ function ScoreBlock({
   isCompleted: boolean;
   isLive: boolean;
 }) {
-  const kickoffTime = fixture.kickoff_utc.slice(11, 16);
+  const kickoffTime = formatKickoffTime(fixture.kickoff_utc);
 
   if (isLive && result) {
     // Live with in-progress score: pulsing red dot + minute clock replaces
@@ -195,6 +198,7 @@ const styles = StyleSheet.create({
   // meta (competition · round · venue) at the bottom. Same token as the
   // drill hero's `headerLine`.
   headerLine: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

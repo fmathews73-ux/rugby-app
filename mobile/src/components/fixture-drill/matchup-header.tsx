@@ -4,6 +4,7 @@ import type { Fixture, Result, Team } from '@rugby-app/shared';
 
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { formatKickoffTime } from '@/lib/format-fixture-date';
 import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Matchup header ──────────────────────────────────────────────────────────
@@ -37,7 +38,11 @@ export function MatchupHeader({
           Competition + venue drop to below the flags/score row so the
           hero mirrors the Fixtures list layout: matchup first, then
           the "what tournament / where" meta line beneath. */}
-      <Text style={styles.headerLine}>{formatKickoff(fixture.kickoff_utc)}</Text>
+      <Text style={styles.headerLine}>
+        {fixture.status === 'scheduled'
+          ? `${formatKickoffDay(fixture.kickoff_utc)} · Upcoming`
+          : formatKickoff(fixture.kickoff_utc)}
+      </Text>
       {/* Row 1 — flags + score. Flags locked to `FlagSize.medium` (40 pt)
           to match the Home page fixture-carousel hero card — same "who's
           playing" visual weight across the two surfaces. The 3-letter
@@ -97,9 +102,14 @@ export function MatchupHeader({
                 </Text>
               </View>
             </View>
+          ) : fixture.status === 'scheduled' ? (
+            // Upcoming: kickoff time takes the score slot (same grammar
+            // as the Fixtures list rows); the date line above carries
+            // the 'Upcoming' state instead.
+            <Text style={styles.kickoffTime}>{formatKickoffTime(fixture.kickoff_utc)}</Text>
           ) : (
-            // No result yet (scheduled / postponed / cancelled): status
-            // pill anchors the match state where the score would go.
+            // Postponed / cancelled: status pill anchors the match
+            // state where the score would go.
             <StatusPill status={fixture.status} />
           )}
         </View>
@@ -149,6 +159,14 @@ function StatusPill({ status }: { status: Fixture['status'] }) {
 }
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function formatKickoffDay(iso: string): string {
+  return new Date(iso).toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+}
 
 function formatKickoff(iso: string): string {
   const date = new Date(iso);
@@ -253,6 +271,13 @@ const styles = StyleSheet.create({
     color: StatusColor.live,
     fontVariant: ['tabular-nums'],
   },
+  // Upcoming: clock in the score slot — Barlow at the code size, grey
+  // register (matchup-strip rule, design-system.md §3).
+  kickoffTime: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
+    color: Colors.light.textSecondary,
+  },
   detailScoreBox: {
     ...ScoreBoxSize.card,
     backgroundColor: '#F3F4F6',
@@ -272,5 +297,6 @@ const styles = StyleSheet.create({
   },
   pillText: { fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   pillDotSlot: { justifyContent: 'center' },
-  headerLine: { fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
+  headerLine: {
+    fontFamily: 'Barlow_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 });

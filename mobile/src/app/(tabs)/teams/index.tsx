@@ -13,7 +13,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
 import { TIER_1_IDS } from '@/lib/tiers';
@@ -226,8 +226,8 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   cardHeaderText: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.semibold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

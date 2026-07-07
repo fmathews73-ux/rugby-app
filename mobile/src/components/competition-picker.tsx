@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
   },
   pillLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: PillStrip.labelSize,
-    fontWeight: '700',
     letterSpacing: PillStrip.labelTracking,
   },
   pillLabelActive: { color: '#FFFFFF' },

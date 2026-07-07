@@ -11,7 +11,7 @@ import { useCompetitions, useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
-import { formatFixtureDate } from '@/lib/format-fixture-date';
+import { formatFixtureDate, formatKickoffTime } from '@/lib/format-fixture-date';
 
 // App-wide 24pt card column — matches FixtureCarousel's card width and
 // the Fixtures / Teams landing pages.
@@ -99,11 +99,17 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
     <View style={padded ? styles.page : undefined}>
       <View style={styles.card}>
         <NavSection
-          label="Next Match"
           onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`) : undefined}>
           {nextMatch && myTeamInfo ? (
             <>
-              <Text style={styles.dateCentered}>{formatFixtureDate(nextMatch)}</Text>
+              {/* Section identity folded into the date line — no
+                  separate header (owner call 2026-07-07). Title case,
+                  not uppercase. */}
+              <Text style={styles.dateCentered}>
+                {nextMatch.status === 'scheduled'
+                  ? `Next Match · ${formatFixtureDate(nextMatch)} · Upcoming`
+                  : `Next Match · ${formatFixtureDate(nextMatch)}`}
+              </Text>
               <FixtureLine
                 fixture={nextMatch}
                 teamId={teamId}
@@ -116,16 +122,16 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
               />
             </>
           ) : (
-            <Text style={styles.mutedRow}>No upcoming fixtures.</Text>
+            <Text style={styles.mutedRow}>Next Match · no upcoming fixtures</Text>
           )}
         </NavSection>
 
         <NavSection
-          label="Last Match"
+          divider
           onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`) : undefined}>
           {lastMatch && myTeamInfo ? (
             <>
-              <Text style={styles.dateCentered}>{formatFixtureDate(lastMatch)}</Text>
+              <Text style={styles.dateCentered}>{`Last Match · ${formatFixtureDate(lastMatch)}`}</Text>
               <FixtureLine
                 fixture={lastMatch}
                 teamId={teamId}
@@ -139,7 +145,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
               />
             </>
           ) : (
-            <Text style={styles.mutedRow}>No completed fixtures.</Text>
+            <Text style={styles.mutedRow}>Last Match · no completed fixtures</Text>
           )}
         </NavSection>
       </View>
@@ -148,12 +154,12 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
 }
 
 function NavSection({
-  label,
   onPress,
+  divider,
   children,
 }: {
-  label: string;
   onPress?: () => void;
+  divider?: boolean;
   children: React.ReactNode;
 }) {
   const inert = !onPress;
@@ -163,12 +169,10 @@ function NavSection({
       disabled={inert}
       style={({ pressed }) => [
         styles.section,
+        divider && styles.sectionDivider,
         !inert && styles.sectionWithChevron,
         pressed && !inert && { opacity: 0.75 },
       ]}>
-      <View style={styles.navSectionHeader}>
-        <Text style={styles.sectionLabel}>{label}</Text>
-      </View>
       {children}
     </Pressable>
   );
@@ -219,7 +223,7 @@ function FixtureLine({
       </View>
     );
   } else {
-    middle = <Text style={styles.fixtureTime}>{fixture.kickoff_utc.slice(11, 16)}</Text>;
+    middle = <Text style={styles.fixtureTime}>{formatKickoffTime(fixture.kickoff_utc)}</Text>;
   }
 
   return (
@@ -268,22 +272,19 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
     gap: Spacing.two,
   },
-  navSectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+  // Hairline between the two hero blocks — chevron-chrome grey.
+  sectionDivider: {
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#C7CBD1',
+    // 16pt below the hairline — same air as the card's own top padding
+    // above the Next Match line (and matches the 16pt above the line:
+    // section paddingBottom 8 + card gap 8).
+    paddingTop: Spacing.three,
   },
-  sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  // Centered date sitting between the section label and the score/time
-  // row — matches the FixtureCarouselCard's date position at the top of
-  // each hero card.
+  // Centered "Section · date · state" line at the top of each hero
+  // block — matches the FixtureCarouselCard's date position.
   dateCentered: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
@@ -341,7 +342,8 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   fixtureMeta: {
-    fontSize: TextSize.xs,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
   },

@@ -9,6 +9,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { useCompetitions, useSeasons, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { CompetitionPicker } from '@/components/competition-picker';
+import { formatKickoffTime } from '@/lib/format-fixture-date';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
@@ -342,7 +343,7 @@ export default function FixturesScreen() {
                     ) : fx.status === 'scheduled' ? (
                       // Upcoming: show the kickoff time in the middle slot
                       // (replaces the previous "Upcoming" badge).
-                      <Text style={styles.timeMid}>{fx.kickoff_utc.slice(11, 16)}</Text>
+                      <Text style={styles.timeMid}>{formatKickoffTime(fx.kickoff_utc)}</Text>
                     ) : fx.status === 'live' || fx.status === 'half-time' ? (
                       // Live / half-time — pulsing dot next to the label so
                       // the row reads as actively refreshing at a glance.
@@ -542,5 +543,6 @@ const styles = StyleSheet.create({
   },
   statusMidLive: { color: StatusColor.live, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   statusMidHalfTime: { color: StatusColor.warning, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
-  metaText: { fontSize: TextSize.xs, color: Colors.light.textSecondary, textAlign: 'center' },
+  metaText: {
+    fontFamily: 'Barlow_500Medium', fontSize: TextSize.xs, color: Colors.light.textSecondary, textAlign: 'center' },
 });

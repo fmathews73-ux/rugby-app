@@ -167,8 +167,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
   },
   pillLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: PillStrip.labelSize,
-    fontWeight: TextWeight.bold,
     letterSpacing: PillStrip.labelTracking,
   },
   pillLabelActive: { color: '#FFFFFF' },

@@ -734,6 +734,7 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   heroMetaText: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],

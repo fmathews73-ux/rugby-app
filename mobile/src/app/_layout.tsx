@@ -1,3 +1,4 @@
+import { Barlow_400Regular, Barlow_500Medium, Barlow_600SemiBold } from '@expo-google-fonts/barlow';
 import { BarlowCondensed_700Bold_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
@@ -26,7 +27,12 @@ export default function RootLayout() {
   // other sport-display moments) loads at runtime; the brand wordmark
   // font (Anton) is embedded natively via the expo-font config plugin
   // (app.json).
-  const [fontsLoaded] = useFonts({ BarlowCondensed_700Bold_Italic });
+  const [fontsLoaded] = useFonts({
+    BarlowCondensed_700Bold_Italic,
+    Barlow_400Regular,
+    Barlow_500Medium,
+    Barlow_600SemiBold,
+  });
 
   // Splash-screen hide. `preventAutoHideAsync()` above holds the splash
   // until React has mounted; without a matching `hideAsync()` the app

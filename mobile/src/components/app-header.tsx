@@ -1,7 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Image } from 'expo-image';
 import { useRouter, useSegments } from 'expo-router';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/theme';
 
@@ -31,9 +30,9 @@ export function AppHeader() {
           accessibilityRole="button"
           accessibilityLabel="Back"
           style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-          <View style={styles.backCircle}>
-            <Ionicons name="chevron-back" size={18} color="#FFFFFF" />
-          </View>
+          {/* Outline circle glyph — matches the profile avatar's
+              person-circle-outline treatment. */}
+          <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
         </Pressable>
       ) : (
         <Pressable
@@ -50,16 +49,14 @@ export function AppHeader() {
       )}
 
       <View style={styles.centreSlot}>
-        {/* Brand wordmark — owner-supplied image asset (transparent
-            PNG, 658×260). Replaces the earlier Anton text build of the
-            same mark; the source of truth is the asset now. */}
-        <Image
-          source={require('../../assets/images/rugby-iq-logo.png')}
-          style={styles.wordmark}
-          contentFit="contain"
-          accessible
-          accessibilityLabel="Rugby IQ"
-        />
+        {/* Brand wordmark — text build in the app's sport-display face
+            (Barlow Condensed 700 Italic), replacing the image asset so
+            the mark and the matchup strips share one voice. Same mark:
+            black RUGBY, red superscript IQ. */}
+        <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby IQ">
+          <Text style={styles.wordmarkMain}>RUGBY</Text>
+          <Text style={styles.wordmarkSup}>IQ</Text>
+        </View>
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
       <View style={styles.rightSlot} />
@@ -90,25 +87,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  // 658×260 source — height 28 keeps it crisp inside the 44pt header,
-  // width follows the source aspect ratio.
-  wordmark: {
-    height: 28,
-    width: 28 * (658 / 260),
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+  },
+  wordmarkMain: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: 26,
+    color: Colors.light.text,
+  },
+  wordmarkSup: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: 13,
+    color: Colors.light.text,
+    marginTop: 2,
+    marginLeft: 1,
   },
   rightSlot: {
     minWidth: 44,
     alignItems: 'flex-end',
   },
   slotPressed: { opacity: 0.5 },
-  // Grey disc + white glyph — the header's back chevron (28pt disc
-  // inside the 44pt slot).
-  backCircle: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: Colors.light.textSecondary,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
 });

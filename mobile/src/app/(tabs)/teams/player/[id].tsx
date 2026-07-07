@@ -942,7 +942,8 @@ const styles = StyleSheet.create({
   // Meta stack — quiet lines (position · age, measurables · caps,
   // team) left-aligned in the right-hand space.
   heroMetaText: {
-    fontSize: TextSize.xs,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },

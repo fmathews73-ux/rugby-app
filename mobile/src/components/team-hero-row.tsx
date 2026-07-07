@@ -108,7 +108,8 @@ const styles = StyleSheet.create({
     paddingLeft: Spacing.three,
   },
   metaText: {
-    fontSize: TextSize.xs,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
   },

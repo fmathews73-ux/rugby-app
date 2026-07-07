@@ -21,8 +21,8 @@ export function TeamPickerModal({
   visible,
   teams,
   currentTeamId,
-  title = 'My Team',
-  confirmLabel = 'Confirm',
+  title = 'Select your team',
+  confirmLabel = 'Select',
   onCancel,
   onConfirm,
   onClear,
@@ -30,7 +30,7 @@ export function TeamPickerModal({
   visible: boolean;
   teams: readonly Team[];
   currentTeamId: string | null;
-  /** Header title. Defaults to "My Team" for the primary favourite-team flow. */
+  /** Header title. Defaults to "Select your team" for the primary favourite-team flow. */
   title?: string;
   /** Primary-button label. Defaults to "Confirm". */
   confirmLabel?: string;
@@ -122,7 +122,6 @@ export function TeamPickerModal({
               {/* Title inside the card — same header treatment as the
                   Teams landing / Fixtures day cards. */}
               <View style={styles.groupHeader}>
-                <Ionicons name="list-outline" size={12} color={Colors.light.textSecondary} />
                 <Text style={styles.groupHeaderText}>{group.label}</Text>
               </View>
               {group.teams.map((t, i) => (
@@ -176,25 +175,24 @@ function TeamRow({
   isLast: boolean;
 }) {
   return (
-    <Pressable
-      onPress={onSelect}
-      style={({ pressed }) => [
-        styles.row,
-        !isLast && styles.rowDivider,
-        pressed && styles.rowPressed,
-      ]}>
-      <TeamHeroRow
-        team={team}
-        rankRow={rankRow}
-        right={
-          selected ? (
-            <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
-          ) : (
-            <View style={styles.tickPlaceholder} />
-          )
-        }
-      />
-    </Pressable>
+    <>
+      <Pressable
+        onPress={onSelect}
+        style={({ pressed }) => [styles.row, pressed && styles.rowPressed]}>
+        <TeamHeroRow
+          team={team}
+          rankRow={rankRow}
+          right={
+            selected ? (
+              <Ionicons name="checkmark-circle" size={26} color={Colors.light.text} />
+            ) : (
+              <View style={styles.tickPlaceholder} />
+            )
+          }
+        />
+      </Pressable>
+      {!isLast ? <View style={styles.rowDivider} /> : null}
+    </>
   );
 }
 
@@ -216,7 +214,7 @@ const styles = StyleSheet.create({
   // the current My Team selection. Matches iOS "destructive action" tone.
   headerActionDestructive: { fontSize: TextSize.md, color: StatusColor.live, fontWeight: TextWeight.semibold },
   headerActionSpacer: { width: 60 },
-  headerTitle: { fontSize: TextSize.lg, fontWeight: TextWeight.bold, color: Colors.light.text },
+  headerTitle: { fontFamily: 'Barlow_600SemiBold', fontSize: TextSize.lg, color: Colors.light.text },
 
   listContent: {
     padding: Spacing.four,
@@ -260,9 +258,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.two + 4,
   },
+  // Standalone inset divider — chevron-chrome grey with the same 16pt
+  // side inset as the Home Next/Last Match card's hairline.
   rowDivider: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
   },
   rowPressed: { backgroundColor: '#F3F4F6' },
   tickPlaceholder: { width: 26, height: 26 },
@@ -288,5 +289,9 @@ const styles = StyleSheet.create({
   },
   confirmPillPressed: { opacity: 0.85 },
   confirmPillDisabled: { backgroundColor: '#9CA3AF' },
-  confirmPillText: { color: Colors.light.textInverse, fontSize: TextSize.sm, fontWeight: TextWeight.bold },
+  confirmPillText: {
+    fontFamily: 'Barlow_600SemiBold',
+    fontSize: TextSize.md,
+    color: Colors.light.textInverse,
+  },
 });
