@@ -233,8 +233,12 @@ function PerspectiveRow({
           {/* Other side's value — the comparison tick. */}
           <View style={[styles.rowOtherTick, { left: `${tickFrac * 100}%` }]} />
         </View>
-        <View style={styles.rowValueBox}>
-          <Text style={styles.rowValue}>{fmt(active, percent)}</Text>
+        {/* Match-score convention: better side of the read takes the
+            winner tile, worse (or tie) the quiet loser tile. */}
+        <View style={[styles.rowValueBox, better ? styles.rowValueBoxWin : null]}>
+          <Text style={[styles.rowValue, better ? styles.rowValueTextWin : null]}>
+            {fmt(active, percent)}
+          </Text>
         </View>
       </View>
     </View>
@@ -317,6 +321,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  rowValueBoxWin: { backgroundColor: Colors.light.textSecondary },
+  rowValueTextWin: { color: Colors.light.textInverse },
   rowValue: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,

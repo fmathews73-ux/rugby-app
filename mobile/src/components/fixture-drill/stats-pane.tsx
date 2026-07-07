@@ -56,7 +56,7 @@ export function StatsPane({
   const sections: {
     title: string;
     description: string;
-    stats: { label: string; home: number; away: number; premium: boolean }[];
+    stats: { label: string; home: number; away: number; premium: boolean; inverted?: boolean }[];
   }[] = [
     {
       title: 'Match Overview',
@@ -145,9 +145,9 @@ export function StatsPane({
         'How each team fared at the set-piece phases — scrums and lineouts. Winning your own scrum or lineout is expected; losing it is a turnover in prime attacking territory. Winning the OPPONENT\'S is worth its weight in gold — steals disrupt phase play and momentum.',
       stats: [
         { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won, premium: true },
-        { label: 'Scrums lost', home: result.home_scrums_lost, away: result.away_scrums_lost, premium: true },
+        { label: 'Scrums lost', home: result.home_scrums_lost, away: result.away_scrums_lost, premium: true, inverted: true },
         { label: 'Lineouts won', home: result.home_lineouts_won, away: result.away_lineouts_won, premium: true },
-        { label: 'Lineouts lost', home: result.home_lineouts_lost, away: result.away_lineouts_lost, premium: true },
+        { label: 'Lineouts lost', home: result.home_lineouts_lost, away: result.away_lineouts_lost, premium: true, inverted: true },
       ],
     },
     {
@@ -156,10 +156,10 @@ export function StatsPane({
         'The ruck-and-maul engine room. Rucks won = attacking rucks where possession was retained; rucks lost = breakdown turnovers conceded (a Tier-1 side retains 90%+). Quick ball % = share of attacking rucks recycled inside 3 seconds — the single best predictor of attacking tempo, because slow ball lets the defence reset. Mauls won = driving mauls (usually off a lineout) that ended with possession retained or a penalty; mauls lost = held up or turned over.',
       stats: [
         { label: 'Rucks won', home: result.home_rucks_won, away: result.away_rucks_won, premium: false },
-        { label: 'Rucks lost', home: result.home_rucks_lost, away: result.away_rucks_lost, premium: false },
+        { label: 'Rucks lost', home: result.home_rucks_lost, away: result.away_rucks_lost, premium: false, inverted: true },
         { label: 'Quick ball % (0-3s)', home: result.home_ruck_speed_0_3s_percent, away: result.away_ruck_speed_0_3s_percent, premium: true },
         { label: 'Mauls won', home: result.home_mauls_won, away: result.away_mauls_won, premium: false },
-        { label: 'Mauls lost', home: result.home_mauls_lost, away: result.away_mauls_lost, premium: false },
+        { label: 'Mauls lost', home: result.home_mauls_lost, away: result.away_mauls_lost, premium: false, inverted: true },
       ],
     },
     {
@@ -171,7 +171,7 @@ export function StatsPane({
         { label: 'Tackle success %', home: result.home_tackle_success_percent, away: result.away_tackle_success_percent, premium: true },
         { label: 'Dominant tackles', home: result.home_dominant_tackles, away: result.away_dominant_tackles, premium: true },
         { label: 'Turnovers won', home: result.home_turnovers_won, away: result.away_turnovers_won, premium: true },
-        { label: 'Turnovers conceded', home: result.home_turnovers_conceded, away: result.away_turnovers_conceded, premium: true },
+        { label: 'Turnovers conceded', home: result.home_turnovers_conceded, away: result.away_turnovers_conceded, premium: true, inverted: true },
       ],
     },
     {
@@ -179,13 +179,13 @@ export function StatsPane({
       description:
         'How well each team stayed inside the laws. Penalties conceded = referee whistles against, with the three primary causes split out beneath (scrum, breakdown, offside — the remainder is other offences). Handling errors = knock-ons and forward passes. Yellow cards = 10-minute sin-bin. Red cards = permanent dismissal. A well-drilled team tends to sit below 8 penalties a game; anything over 12 hands the opponent easy territory and shots at goal.',
       stats: [
-        { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true },
-        { label: 'Scrum penalties', home: result.home_scrum_penalties_conceded, away: result.away_scrum_penalties_conceded, premium: true },
-        { label: 'Breakdown penalties', home: result.home_breakdown_penalties_conceded, away: result.away_breakdown_penalties_conceded, premium: true },
-        { label: 'Offside penalties', home: result.home_offside_penalties_conceded, away: result.away_offside_penalties_conceded, premium: true },
-        { label: 'Handling errors', home: result.home_handling_errors, away: result.away_handling_errors, premium: true },
-        { label: 'Yellow cards', home: result.home_yellow_cards, away: result.away_yellow_cards, premium: true },
-        { label: 'Red cards', home: result.home_red_cards, away: result.away_red_cards, premium: true },
+        { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true, inverted: true },
+        { label: 'Scrum penalties', home: result.home_scrum_penalties_conceded, away: result.away_scrum_penalties_conceded, premium: true, inverted: true },
+        { label: 'Breakdown penalties', home: result.home_breakdown_penalties_conceded, away: result.away_breakdown_penalties_conceded, premium: true, inverted: true },
+        { label: 'Offside penalties', home: result.home_offside_penalties_conceded, away: result.away_offside_penalties_conceded, premium: true, inverted: true },
+        { label: 'Handling errors', home: result.home_handling_errors, away: result.away_handling_errors, premium: true, inverted: true },
+        { label: 'Yellow cards', home: result.home_yellow_cards, away: result.away_yellow_cards, premium: true, inverted: true },
+        { label: 'Red cards', home: result.home_red_cards, away: result.away_red_cards, premium: true, inverted: true },
       ],
     },
   ];
@@ -223,6 +223,7 @@ export function StatsPane({
           label={s.label}
           home={s.home}
           away={s.away}
+          inverted={s.inverted}
           locked={s.premium && !IS_SUBSCRIBED}
         />
       ))}
@@ -303,11 +304,15 @@ function StatBar({
   label,
   home,
   away,
+  inverted = false,
   locked = false,
 }: {
   label: string;
   home: number;
   away: number;
+  /** Lower is better (losses, concessions, infractions) — flips the
+   *  leading/lagging verdict on bars and value tiles. */
+  inverted?: boolean;
   locked?: boolean;
 }) {
   const maxValue = Math.max(home, away, 1);
@@ -330,10 +335,10 @@ function StatBar({
   // lower gets the red. Ties render both bars in the neutral secondary text
   // colour so "no leader" reads distinctly. Uses the app's existing win /
   // loss tokens for consistency with the form sparkline + momentum arrows.
-  const homeColor =
-    home > away ? LEADING_COLOR : home < away ? LAGGING_COLOR : TIE_COLOR;
-  const awayColor =
-    away > home ? LEADING_COLOR : away < home ? LAGGING_COLOR : TIE_COLOR;
+  const homeBetter = inverted ? home < away : home > away;
+  const awayBetter = inverted ? away < home : away > home;
+  const homeColor = homeBetter ? LEADING_COLOR : awayBetter ? LAGGING_COLOR : TIE_COLOR;
+  const awayColor = awayBetter ? LEADING_COLOR : homeBetter ? LAGGING_COLOR : TIE_COLOR;
 
   return (
     <View style={styles.statBlock}>
@@ -341,8 +346,10 @@ function StatBar({
       <Text style={styles.statLabel}>{label}</Text>
       <View style={styles.statBarRowWrap}>
         <View style={styles.statBarRow}>
-          <View style={styles.statValueBox}>
-            <Text style={styles.statValue}>{home}</Text>
+          <View style={[styles.statValueBox, homeBetter ? styles.statValueBoxWin : null]}>
+            <Text style={[styles.statValue, homeBetter ? styles.statValueTextWin : null]}>
+              {home}
+            </Text>
           </View>
           <View style={styles.barTrack}>
             <View style={styles.barHalfLeft}>
@@ -359,8 +366,10 @@ function StatBar({
               <View style={{ flex: awaySpacerFlex }} />
             </View>
           </View>
-          <View style={styles.statValueBox}>
-            <Text style={styles.statValue}>{away}</Text>
+          <View style={[styles.statValueBox, awayBetter ? styles.statValueBoxWin : null]}>
+            <Text style={[styles.statValue, awayBetter ? styles.statValueTextWin : null]}>
+              {away}
+            </Text>
           </View>
         </View>
         {locked ? (
@@ -445,6 +454,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  statValueBoxWin: { backgroundColor: Colors.light.textSecondary },
+  statValueTextWin: { color: Colors.light.textInverse },
   statValue: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,

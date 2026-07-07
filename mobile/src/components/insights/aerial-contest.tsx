@@ -96,7 +96,9 @@ export function AerialContest({
             <>
               The kicking duel in the air: contestables the team puts up (and
               wins back) against contestables it fields (and secures). The
-              dark tick marks the Tier-1 average on each row.
+              dark tick marks the Tier-1 average on each row. Grey bars are
+              volume — a style, not a verdict; the green/red rows are where
+              quality is judged.
             </>
           }
         />
@@ -143,10 +145,24 @@ export function AerialContest({
                       />
                       <View style={[styles.avgMarker, { left: `${r.avg * 100}%` }]} />
                     </View>
-                    <View style={styles.valueBox}>
-                      <Text style={styles.valueText}>
+                    <View
+                      style={[
+                        styles.valueBox,
+                        !r.neutral && r.bar >= r.avg ? styles.valueBoxWin : null,
+                      ]}>
+                      <Text
+                        style={[
+                          styles.valueText,
+                          !r.neutral && r.bar >= r.avg ? styles.valueTextWin : null,
+                        ]}>
                         {r.value}
-                        <Text style={styles.suffix}>{r.suffix}</Text>
+                        <Text
+                          style={[
+                            styles.suffix,
+                            !r.neutral && r.bar >= r.avg ? styles.valueTextWin : null,
+                          ]}>
+                          {r.suffix}
+                        </Text>
                       </Text>
                     </View>
                   </View>
@@ -249,11 +265,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  valueBoxWin: { backgroundColor: Colors.light.textSecondary },
   valueText: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
+  valueTextWin: { color: Colors.light.textInverse },
   suffix: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,

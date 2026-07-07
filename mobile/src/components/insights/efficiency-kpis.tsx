@@ -191,6 +191,7 @@ function KpiRow({
   avg: number;
   inverted?: boolean;
 }) {
+  const good = kpiIsGood(bar, avg, inverted);
   return (
     <View style={styles.kpiRow}>
       <Text style={styles.kpiLabel}>{label}</Text>
@@ -212,13 +213,14 @@ function KpiRow({
               fill without competing with the value's dominant colour. */}
           <View style={[styles.kpiAvgMarker, { left: `${avg * 100}%` }]} />
         </View>
-        {/* Value as a mini score tile — the quiet losing-score
-            treatment on every row (the solid winner fill read too
-            harsh here); the bar colour alone carries the verdict. */}
-        <View style={styles.kpiValueBox}>
-          <Text style={styles.kpiValueText}>
+        {/* Value as a mini score tile following the match-score
+            convention: above the T1 average (polarity-aware) takes the
+            winner pairing (dark fill, white digits), below takes the
+            loser pairing (light fill, grey digits). */}
+        <View style={[styles.kpiValueBox, good ? styles.kpiValueBoxWin : null]}>
+          <Text style={[styles.kpiValueText, good ? styles.kpiValueTextWin : null]}>
             {value}
-            <Text style={styles.kpiSuffix}>{suffix}</Text>
+            <Text style={[styles.kpiSuffix, good ? styles.kpiValueTextWin : null]}>{suffix}</Text>
           </Text>
         </View>
       </View>
@@ -330,8 +332,8 @@ const styles = StyleSheet.create({
     fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
-  // Mini score tile in the fixed right rail — the quiet losing-score
-  // pairing (light fill, grey digits) on every row.
+  // Mini score tile in the fixed right rail — match-score convention:
+  // loser pairing by default, winner pairing when beating the average.
   kpiValueBox: {
     width: 52,
     height: 22,
@@ -340,11 +342,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  kpiValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   kpiValueText: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
+  kpiValueTextWin: { color: Colors.light.textInverse },
   kpiSuffix: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
