@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -160,7 +161,7 @@ export function AxisHeadToHead({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Explain ${info.title}`}>
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

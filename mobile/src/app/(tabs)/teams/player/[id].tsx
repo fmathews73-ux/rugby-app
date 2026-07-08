@@ -10,9 +10,12 @@ import { CardCarousel, type CardCarouselHandle } from '@/components/card-carouse
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { AppLogo } from '@/components/app-logo';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
+import { FadingScrollView } from '@/components/fading-scroll-view';
+import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import {
@@ -26,7 +29,6 @@ import {
   POSITION_LABELS,
   type ScoutMetric,
 } from '@/lib/player-roles';
-import { PLAYER_SECTION_INFO, type SectionInfo } from '@/lib/analysis-section-info';
 import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
 
 // Trend dot colours — same trio as the form circles / Form chart.
@@ -120,7 +122,7 @@ export default function PlayerCardScreen() {
       </View>
       <SegmentedTabs tabs={PLAYER_TABS} active={tab} onSelect={handleTabSelect} />
 
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
+      <FadingScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <View style={styles.previewBleed}>
             <PlayerPreviewBlock
@@ -130,7 +132,7 @@ export default function PlayerCardScreen() {
           </View>
         )}
         {tab === 'stats' && <PlayerStatsTable playerId={playerId} />}
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -140,13 +142,6 @@ export default function PlayerCardScreen() {
 // One narrative per card, labels identical to card titles. The Player
 // Profile percentile card pairs with the accordion's title row (the
 // resting scouting report), same convention as every other surface.
-const SECTION_PAGE: Record<string, number> = {
-  __summary__: 0, // Player Profile — the title row's evidence
-  Form: 1,
-  Season: 2,
-};
-const PAGE_SECTION: readonly string[] = ['__summary__', 'Form', 'Season'];
-
 function PlayerPreviewBlock({
   playerId,
   isForward,
@@ -155,41 +150,41 @@ function PlayerPreviewBlock({
   isForward: boolean;
 }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
-  const [section, setSection] = useState('__summary__');
+  // Flip-card grammar (Teams alignment pass, 2026-07-08): each card
+  // carries its narrative on its back — Profile gets the full scouting
+  // report (summary + profile read + development close), Form and
+  // Season their engine fields. The accordion + two-way sync is gone.
+  const analysis = usePlayerAnalysis(playerId);
+  const profileRead = analysis.data
+    ? `${analysis.data.summary}\n\n${analysis.data.scouting}\n\n${analysis.data.outlook}`
+    : null;
 
   return (
-    <>
-      <CardCarousel
-        ref={carouselRef}
-        onPageChange={(i) => setSection(PAGE_SECTION[i] ?? '__summary__')}
-        pages={[
-          <ScoutingCard
-            key="profile"
-            playerId={playerId}
-            metrics={isForward ? FORWARD_SCOUT : BACK_SCOUT}
-            style={styles.pageCard}
-          />,
-          <TrendCard
-            key="form"
-            playerId={playerId}
-            metrics={isForward ? FORWARD_TREND : BACK_TREND}
-            style={styles.pageCard}
-          />,
-          <SeasonCard key="season" playerId={playerId} style={styles.pageCard} />,
-        ]}
-      />
-      <View style={styles.blockWrap}>
-        <PlayerAnalysisCard
+    <CardCarousel
+      ref={carouselRef}
+      pages={[
+        <ScoutingCard
+          key="profile"
           playerId={playerId}
-          openSection={section}
-          onOpenSection={(next) => {
-            setSection(next);
-            const page = SECTION_PAGE[next];
-            if (page !== undefined) carouselRef.current?.scrollToPage(page);
-          }}
-        />
-      </View>
-    </>
+          metrics={isForward ? FORWARD_SCOUT : BACK_SCOUT}
+          style={styles.pageCard}
+          read={profileRead}
+        />,
+        <TrendCard
+          key="form"
+          playerId={playerId}
+          metrics={isForward ? FORWARD_TREND : BACK_TREND}
+          style={styles.pageCard}
+          read={analysis.data?.form ?? null}
+        />,
+        <SeasonCard
+          key="season"
+          playerId={playerId}
+          style={styles.pageCard}
+          read={analysis.data?.season ?? null}
+        />,
+      ]}
+    />
   );
 }
 
@@ -199,10 +194,13 @@ function ScoutingCard({
   playerId,
   metrics,
   style,
+  read,
 }: {
   playerId: string;
   metrics: readonly ScoutMetric[];
   style?: StyleProp<ViewStyle>;
+  /** Full scouting report for the flip back. */
+  read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
@@ -220,18 +218,35 @@ function ScoutingCard({
     GROUP_LABELS[percentiles.data?.position_group ?? ''] ?? 'positional peers';
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Profile"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={
+            <>
+              Percentile bars against every positional peer in the pool, on
+              per-80-minute rates over the last {LOOKBACK} appearances — the
+              tick is the peer median, and lower-is-better rows are already
+              flipped so a longer bar is always the better read.
+            </>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Profile</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the scouting percentiles">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Profile</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Read the player profile analysis">
+          <AppLogo height={14} />
+        </Pressable>
       </View>
 
       {percentiles.isLoading ? (
@@ -262,17 +277,9 @@ function ScoutingCard({
         </>
       )}
 
-      <InfoModal
-        visible={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        title={`Scouting (prev. ${LOOKBACK})`}
-        paragraphs={[
-          `Each bar ranks the player against every ${groupLabel.replace('players', 'player')} across the international pool, using per-80-minute rates over their last ${LOOKBACK} appearances — so bench shifts and full games compare fairly.`,
-          'The 80th percentile means better than 80% of positional peers. The tick at the halfway mark is the peer median. Lower-is-better rows (penalties, errors) are already flipped, so a longer green bar is always the better read.',
-          'Peers need at least 3 appearances in the window to enter the pool, keeping one-cameo outliers from distorting the distribution.',
-        ]}
-      />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -289,12 +296,19 @@ function ScoutRow({
     <View style={styles.scoutRow}>
       <View style={styles.scoutRowHead}>
         <Text style={styles.scoutLabel}>{label}</Text>
-        <Text style={styles.scoutValue}>
-          {formatPer80(per80)}
-          <Text style={styles.scoutSuffix}> /80</Text>
-          {'   '}
-          <Text style={styles.scoutPct}>{percentile}</Text>
-        </Text>
+        <View style={styles.scoutValueGroup}>
+          <Text style={styles.scoutValue}>
+            {formatPer80(per80)}
+            <Text style={styles.scoutSuffix}> /80</Text>
+          </Text>
+          {/* Percentile in the match-score tile convention: above the
+              peer median = winner pairing, below = loser pairing. */}
+          <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
+            <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
+              {percentile}
+            </Text>
+          </View>
+        </View>
       </View>
       <View style={styles.scoutTrack}>
         <View
@@ -320,10 +334,13 @@ function TrendCard({
   playerId,
   metrics,
   style,
+  read,
 }: {
   playerId: string;
   metrics: readonly { field: PlayerStatField; label: string }[];
   style?: StyleProp<ViewStyle>;
+  /** Form narrative for the flip back. */
+  read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const history = usePlayerMatchHistory(playerId);
@@ -339,18 +356,34 @@ function TrendCard({
   );
 
   return (
-    <View style={[styles.card, style]}>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Form"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={
+            <>
+              Per-appearance trends across the last {LOOKBACK} matches
+              played, oldest to newest — raw per-match values, so a quiet
+              cameo shows as a dip, which is part of the story.
+            </>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Form</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the form trends">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
+        <Text style={styles.sectionLabel}>Form</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Read the form analysis">
+          <AppLogo height={14} />
+        </Pressable>
       </View>
 
       {history.isLoading ? (
@@ -370,16 +403,9 @@ function TrendCard({
         </View>
       )}
 
-      <InfoModal
-        visible={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        title={`Form (prev. ${LOOKBACK})`}
-        paragraphs={[
-          `Per-appearance trend across the player's last ${LOOKBACK} matches played, oldest (left) to most recent (right). The number on the right is the most recent appearance's value.`,
-          'Raw per-match values, not per-80 rates — a quiet 20-minute cameo shows as a dip, which is part of the story.',
-        ]}
-      />
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -397,7 +423,9 @@ function TrendRow({
     <View style={styles.trendRow}>
       <View style={styles.trendRowHead}>
         <Text style={styles.trendLabel}>{label}</Text>
-        <Text style={styles.trendValue}>{latest}</Text>
+        <View style={styles.valueBox}>
+        <Text style={styles.valueBoxText}>{latest}</Text>
+      </View>
       </View>
       <TrendSparkline values={values} gradientId={gradientId} />
     </View>
@@ -466,7 +494,17 @@ function TrendSparkline({
 
 // ─── Season totals ──────────────────────────────────────────────────────────
 
-function SeasonCard({ playerId, style }: { playerId: string; style?: StyleProp<ViewStyle> }) {
+function SeasonCard({
+  playerId,
+  style,
+  read,
+}: {
+  playerId: string;
+  style?: StyleProp<ViewStyle>;
+  /** Season narrative for the flip back. */
+  read?: string | null;
+}) {
+  const [infoOpen, setInfoOpen] = useState(false);
   const { data, isLoading } = usePlayerAggregate(playerId);
 
   const tiles = useMemo(() => {
@@ -485,8 +523,35 @@ function SeasonCard({ playerId, style }: { playerId: string; style?: StyleProp<V
   }, [data]);
 
   return (
-    <View style={[styles.card, style]}>
-      <Text style={styles.sectionLabel}>Season</Text>
+    <FlipCard
+      style={style}
+      flipped={infoOpen}
+      back={
+        <NarrativeBack
+          title="Season"
+          onClose={() => setInfoOpen(false)}
+          read={read}
+          purpose={
+            <>
+              The season record at a glance — appearances, starts, minutes
+              and the scoring ledger, summed across every match the player
+              took the field in.
+            </>
+          }
+        />
+      }
+      front={
+        <View style={[styles.card, styles.cardFill]}>
+      <View style={styles.headerRow}>
+        <Text style={styles.sectionLabel}>Season</Text>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Read the season analysis">
+          <AppLogo height={14} />
+        </Pressable>
+      </View>
       {isLoading && !data ? (
         <Text style={styles.empty}>Loading…</Text>
       ) : !data || data.appearances === 0 ? (
@@ -501,7 +566,9 @@ function SeasonCard({ playerId, style }: { playerId: string; style?: StyleProp<V
           ))}
         </View>
       )}
-    </View>
+        </View>
+      }
+    />
   );
 }
 
@@ -636,158 +703,6 @@ function round1(v: number): number {
   return Math.round(v * 10) / 10;
 }
 
-// ─── Analysis narrative ─────────────────────────────────────────────────────
-
-/**
- * Templated player narrative for the Analysis pane — same visual grammar
- * as the match analysis card (small-caps mini-label + glyph above prose).
- * Structure and thresholds are defined by the "Player analysis" section
- * of `docs/analysis-narrative-spec.md`; `usePlayerAnalysis` is the
- * client-side template implementation pending the Phase 6 LLM cutover.
- */
-function PlayerAnalysisCard({
-  playerId,
-  openSection: controlledSection,
-  onOpenSection,
-}: {
-  playerId: string;
-  /** When provided, the accordion is CONTROLLED — the parent owns the
-   *  open section (two-way carousel sync). */
-  openSection?: string;
-  onOpenSection?: (section: string) => void;
-}) {
-  const [infoOpen, setInfoOpen] = useState(false);
-  // Accordion: exactly one section open at all times. The title row's
-  // summary is the resting state — it starts open, closes when a
-  // category dropdown opens, and reopens whenever the open dropdown is
-  // closed (closing never leaves the card empty).
-  const [internalSection, setInternalSection] = useState<string>('__summary__');
-  const openSection = controlledSection ?? internalSection;
-  const [sectionInfo, setSectionInfo] = useState<SectionInfo | null>(null);
-  const accordion = (label: string) => ({
-    open: openSection === label,
-    onToggle: () => {
-      const next = openSection === label ? '__summary__' : label;
-      setInternalSection(next);
-      onOpenSection?.(next);
-    },
-  });
-  const { data, isLoading } = usePlayerAnalysis(playerId);
-
-  return (
-    <View style={styles.card}>
-      <Pressable
-        style={styles.headerRow}
-        onPress={accordion('__summary__').onToggle}
-        accessibilityRole="button"
-        accessibilityLabel="Toggle the player analysis summary">
-        <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Player Analysis</Text>
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the player analysis">
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <Ionicons
-          name={openSection === '__summary__' ? 'chevron-up' : 'chevron-down'}
-          size={14}
-          color="#C7CBD1"
-        />
-      </Pressable>
-
-      {isLoading && !data ? (
-        <Text style={styles.empty}>Loading…</Text>
-      ) : !data ? (
-        <Text style={styles.empty}>Analysis populates once the player has made an appearance.</Text>
-      ) : (
-        <View style={styles.narrativeStack}>
-          {/* Cold-open summary — body of the title section above. */}
-          {openSection === '__summary__' ? (
-            <>
-              {/* Resting read = the full scouting report (summary +
-                  profile read + development close) — its evidence is
-                  the Player Profile percentile card, same merge logic
-                  as Pre-Match's Profile H2H. */}
-              <Text style={styles.narrativeSummary}>{data.summary}</Text>
-              <Text style={styles.narrativeBody}>{data.scouting}</Text>
-              <Text style={styles.narrativeBody}>{data.outlook}</Text>
-            </>
-          ) : null}
-
-          <PlayerNarrativeSection label="Form" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Form']!)} {...accordion("Form")}>
-            {data.form}
-          </PlayerNarrativeSection>
-          <PlayerNarrativeSection label="Season" onInfo={() => setSectionInfo(PLAYER_SECTION_INFO['Season']!)} {...accordion("Season")}>
-            {data.season}
-          </PlayerNarrativeSection>
-        </View>
-      )}
-
-      <InfoModal
-        visible={infoOpen}
-        onClose={() => setInfoOpen(false)}
-        title="Player Analysis"
-        paragraphs={[
-          'The written player read: the resting text under the title is the scouting report — who the player is, the genuine strengths and the soft spot, and what to lift next — with Form and Season carrying the trend and record reads against their charts.',
-          'The scouting read names genuine strengths (70th percentile or better against positional peers) and soft spots (30th or below). The form read compares the recent half of the appearance window against the earlier half; moves under 15% are reported as steady.',
-        ]}
-      />
-      <InfoModal
-        visible={sectionInfo !== null}
-        onClose={() => setSectionInfo(null)}
-        title={sectionInfo?.title ?? ''}
-        paragraphs={sectionInfo?.paragraphs ?? []}
-      />
-    </View>
-  );
-}
-
-function PlayerNarrativeSection({
-  label,
-  onInfo,
-  children,
-  open,
-  onToggle,
-}: {
-  label: string;
-  onInfo: () => void;
-  children: string;
-  open: boolean;
-  onToggle: () => void;
-}) {
-  return (
-    <View style={styles.narrativeSection}>
-      <Pressable
-        onPress={onToggle}
-        style={styles.narrativeMiniLabelRow}
-        accessibilityRole="button"
-        accessibilityLabel={`${open ? 'Collapse' : 'Expand'} ${label}`}>
-        <View style={styles.narrativeMiniLabelGroup}>
-          <Text style={styles.narrativeMiniLabel}>{label}</Text>
-          <Pressable
-            onPress={onInfo}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel={`Explain ${label}`}>
-            <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-          </Pressable>
-        </View>
-        <Ionicons
-          name={open ? 'chevron-up' : 'chevron-down'}
-          size={14}
-          color="#C7CBD1"
-        />
-      </Pressable>
-      {open ? <Text style={styles.narrativeBody}>{children}</Text> : null}
-    </View>
-  );
-}
-
-// ─── Shared bits ────────────────────────────────────────────────────────────
-
 function InfoModal({
   visible,
   onClose,
@@ -836,6 +751,30 @@ function formatPer80(v: number): string {
 }
 
 const styles = StyleSheet.create({
+  // Mini score tiles — match-score convention (winner dark/white when
+  // above the reference, quiet light/grey otherwise).
+  valueBox: {
+    width: 36,
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  valueBoxWin: { backgroundColor: Colors.light.textSecondary },
+  valueBoxText: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.textSecondary,
+  },
+  valueBoxTextWin: { color: Colors.light.textInverse },
+  scoutValueGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  // Front face fills the flip container (grow-only).
+  cardFill: { flexGrow: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: {
     paddingHorizontal: Spacing.four,
@@ -918,7 +857,6 @@ const styles = StyleSheet.create({
   // Preview-block bleed: unwraps the pane padding (carousel pages
   // re-apply the card column internally) and carries the 16pt rhythm.
   previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
-  blockWrap: { paddingHorizontal: Spacing.four },
   pageCard: { flex: 1 },
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
@@ -933,11 +871,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heroName: {
-    // Same scale as the nation code on the team hero.
+    // Player identity in the nation-code face — the jersey nameplate.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
-    fontWeight: TextWeight.bold,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.text,
-    flexShrink: 1,
+    textTransform: 'uppercase',
   },
   // Meta stack — quiet lines (position · age, measurables · caps,
   // team) left-aligned in the right-hand space.
@@ -957,8 +896,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   scoutLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
   },
   scoutValue: {
@@ -969,12 +908,6 @@ const styles = StyleSheet.create({
   scoutSuffix: {
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
-  },
-  scoutPct: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
   },
   scoutTrack: {
     height: 4,
@@ -1006,15 +939,9 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   trendLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    fontWeight: TextWeight.regular,
     color: Colors.light.textSecondary,
-  },
-  trendValue: {
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
   },
 
   // Stats table
@@ -1027,8 +954,8 @@ const styles = StyleSheet.create({
   statColHead: {
     width: NUM_COL_WIDTH,
     textAlign: 'right',
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -1038,8 +965,8 @@ const styles = StyleSheet.create({
     marginTop: Spacing.two,
   },
   statGroupLabel: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -1063,46 +990,6 @@ const styles = StyleSheet.create({
 
   // Analysis narrative — same grammar as the match analysis card:
   // fixed-gap stack, small-caps centred mini-labels, prose beneath.
-  narrativeStack: {
-    gap: Spacing.three,
-    marginTop: Spacing.one,
-  },
-  narrativeSummary: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 22,
-  },
-  narrativeSection: {
-    gap: 4,
-  },
-  narrativeMiniLabelRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    // Label + icon left, expand chevron right — the squad card's
-    // dropdown-header grammar. Symmetric vertical padding keeps the
-    // text dead-centre in the row height.
-    justifyContent: 'space-between',
-    paddingVertical: Spacing.two,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
-  },
-  narrativeMiniLabelGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  narrativeMiniLabel: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  narrativeBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 22,
-  },
 
   // Season tiles
   tileGrid: {
@@ -1117,14 +1004,14 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   tileValue: {
+    // Score face on the season tiles.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    color: Colors.light.textSecondary,
   },
   tileLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

@@ -7,6 +7,7 @@ import type { Fixture, Team } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeams } from '@/api/hooks';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Same two-team palette as the Scoring Progression worms.
@@ -68,7 +69,7 @@ export function ControlConversion({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the control versus conversion analysis">
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

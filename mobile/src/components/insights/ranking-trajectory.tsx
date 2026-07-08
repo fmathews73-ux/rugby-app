@@ -6,6 +6,7 @@ import Svg, { G, Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -113,7 +114,7 @@ export function RankingTrajectory({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the World Ranking chart">
-            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+            <AppLogo height={14} />
           </Pressable>
         </View>
       </View>

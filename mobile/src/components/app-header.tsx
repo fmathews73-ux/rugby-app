@@ -1,5 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter, useSegments } from 'expo-router';
+
+import { AppLogo } from '@/components/app-logo';import { useRouter, useSegments } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/theme';
@@ -35,29 +36,35 @@ export function AppHeader() {
           <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
         </Pressable>
       ) : (
-        <Pressable
-          onPress={() => {
-            // TODO: navigate to /profile once the screen is defined
-            // (register #15, Phase 4).
-          }}
-          hitSlop={8}
-          style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-          {/* Same register as the footer menu icons: bare outline
-              glyph in textSecondary. */}
-          <Ionicons name="person-circle-outline" size={28} color={Colors.light.textSecondary} />
-        </Pressable>
+        // Top-level screens keep the left slot as an empty spacer so
+        // the wordmark stays centred; the avatar lives on the right.
+        <View style={styles.slot} />
       )}
 
       <View style={styles.centreSlot}>
         {/* Brand wordmark — text build in the app's sport-display face
             (Barlow Condensed 700 Italic). Name trial: RUGBYMETRICS
             (register #23 still open). */}
-        <Text style={styles.wordmarkMain} accessible accessibilityLabel="Rugby Metrics">
-          RUGBYMETRICS
-        </Text>
+        <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby Metrics">
+          {/* Tilted to echo the wordmark's italic axis. */}
+          <View style={styles.logoTilt}>
+            <AppLogo height={20} />
+          </View>
+          <Text style={styles.wordmarkMain}>RUGBYMETRICS</Text>
+        </View>
       </View>
-      {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
-      <View style={styles.rightSlot} />
+      {/* Profile avatar on the right (owner call 2026-07-08); Fantasy
+          entry (register #25, deferred) will need a new home when it
+          lands. */}
+      <Pressable
+        onPress={() => {
+          // TODO: navigate to /profile once the screen is defined
+          // (register #15, Phase 4).
+        }}
+        hitSlop={8}
+        style={({ pressed }) => [styles.slot, styles.rightSlot, pressed && styles.slotPressed]}>
+        <Ionicons name="person-circle-outline" size={28} color={Colors.light.textSecondary} />
+      </Pressable>
     </View>
   );
 }
@@ -84,6 +91,14 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  logoTilt: {
+    transform: [{ rotate: '10deg' }],
+  },
+  wordmarkRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
   },
   wordmarkMain: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',

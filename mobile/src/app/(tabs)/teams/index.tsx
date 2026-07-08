@@ -10,6 +10,7 @@ import type { Fixture, Team } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useLatestRanking, useSeasons, useTeams } from '@/api/hooks';
 import { CompetitionPicker } from '@/components/competition-picker';
+import { FadingFlatList } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
@@ -142,7 +143,7 @@ export default function TeamsScreen() {
       ) : query.isError ? (
         <ErrorState error={query.error} />
       ) : (
-        <FlatList
+        <FadingFlatList
           data={groups}
           keyExtractor={(g) => g.label}
           contentContainerStyle={styles.listContent}

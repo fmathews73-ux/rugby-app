@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
@@ -65,7 +66,7 @@ export function SetPieceDiscipline({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the set-piece and discipline matrix">
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

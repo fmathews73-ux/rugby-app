@@ -5,6 +5,7 @@ import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as Sv
 
 import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers, type ScoringMarker } from '@/lib/scoring-markers';
 import {
@@ -91,7 +92,7 @@ export function CombinedPointsPattern({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Read the momentum analysis">
-            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+            <AppLogo height={14} />
           </Pressable>
         </View>
       </View>

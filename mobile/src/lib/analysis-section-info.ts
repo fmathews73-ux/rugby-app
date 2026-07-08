@@ -85,22 +85,6 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
 
 
 
-export const PLAYER_SECTION_INFO: Record<string, SectionInfo> = {
-  Form: {
-    title: 'Form',
-    paragraphs: [
-      'The recent half of the appearance window compared against the earlier half: the key metric for the player\u2019s role, plus the minutes trend — the trend chart above is its picture.',
-      'Direction beats level for selection reads — a player trending up from a modest base is often a better pick than a big name trending down. Moves under 15% are reported as steady.',
-    ],
-  },
-  Season: {
-    title: 'Season',
-    paragraphs: [
-      'The record card in words: appearances and starts, the minutes workload, and the scoreboard contribution across the window.',
-      'Volume is context for everything else — per-80 rates strip minutes out of the profile, but selection and durability live here.',
-    ],
-  },
-};
 
 /** Pre-match axis pairings — four dense cards/sections instead of
  *  eight thin ones (fewer carousel dots, more data points per card).

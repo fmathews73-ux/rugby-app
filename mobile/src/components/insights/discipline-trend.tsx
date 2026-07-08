@@ -5,6 +5,7 @@ import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeams } from '@/api/hooks';
@@ -69,7 +70,7 @@ export function DisciplineTrend({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the discipline trend chart">
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

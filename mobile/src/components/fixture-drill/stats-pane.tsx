@@ -8,6 +8,7 @@ import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 import { useFixtureEvents } from '@/api/hooks';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { LoadingState } from '@/components/state-views';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 export function StatsPane({
@@ -205,7 +206,7 @@ export function StatsPane({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read about ${section.title}`}>
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
       {section.stats.map((s) => (

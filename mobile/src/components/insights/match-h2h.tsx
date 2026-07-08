@@ -7,6 +7,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { useFixtureResult } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
 
@@ -279,7 +280,7 @@ function MatchH2HCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read the ${title} analysis`}>
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import { useTeam } from '@/api/hooks';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -116,7 +117,7 @@ export function AerialContest({
                 hitSlop={10}
                 accessibilityRole="button"
                 accessibilityLabel="Read the aerial contest analysis">
-                <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+                <AppLogo height={14} />
               </Pressable>
             </View>
           </View>

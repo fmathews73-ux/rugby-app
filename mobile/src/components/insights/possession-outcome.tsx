@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
@@ -57,7 +58,7 @@ export function PossessionOutcome({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the possession versus outcome chart">
-          <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+          <AppLogo height={14} />
         </Pressable>
       </View>
 

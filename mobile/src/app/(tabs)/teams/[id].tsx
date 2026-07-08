@@ -8,6 +8,7 @@ import type { Player, Position } from '@rugby-app/shared';
 
 import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { TeamMatchesCard } from '@/components/my-team-matches-card';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
@@ -226,7 +227,7 @@ export default function TeamHubScreen() {
         </View>
       </View>
       <SegmentedTabs tabs={TEAM_TABS} active={tab} onSelect={handleTabSelect} />
-      <ScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
+      <FadingScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
         {tab === 'preview' && (
           <>
             {/* THE team read, identical to Home's My Team experience,
@@ -291,9 +292,9 @@ export default function TeamHubScreen() {
                       landing's MY TEAM / TIER cards. */}
                   <View style={styles.cardHeaderRow}>
                     <View style={styles.squadTitleGroup}>
-                      <Ionicons name="list-outline" size={14} color={Colors.light.textSecondary} />
                       <Text style={styles.sectionLabel}>{section.label}</Text>
                     </View>
+                  <View style={styles.insetDivider} />
                     {/* Same fixed column as the player-row meta below,
                         so the unit totals left-align with every meta
                         line in the card. */}
@@ -324,7 +325,7 @@ export default function TeamHubScreen() {
 
         {tab === 'stats' && <TeamStatsTable teamId={teamId} />}
 
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -557,7 +558,14 @@ function TierStatBar({
         </Text>
       </View>
       <View style={styles.tierStatBarRow}>
-        <Text style={styles.tierStatValueLeft}>{formatStat(team, percent)}</Text>
+        {/* Team value in the match-score tile convention: beating the
+            tier average (inverted-aware) takes the winner pairing. */}
+        <View style={[styles.tierValueBox, !isTie && favourable ? styles.tierValueBoxWin : null]}>
+          <Text
+            style={[styles.tierValueText, !isTie && favourable ? styles.tierValueTextWin : null]}>
+            {formatStat(team, percent)}
+          </Text>
+        </View>
         <View style={styles.tierBarTrack}>
           <View style={styles.tierBarHalfLeft}>
             <View style={[styles.tierBarSeg, { flex: teamSegFlex, backgroundColor: teamColor }]} />
@@ -569,7 +577,9 @@ function TierStatBar({
             <View style={{ flex: tierSpacerFlex }} />
           </View>
         </View>
-        <Text style={styles.tierStatValueRight}>{formatStat(tier, percent)}</Text>
+        <View style={styles.tierValueBox}>
+          <Text style={styles.tierValueText}>{formatStat(tier, percent)}</Text>
+        </View>
       </View>
     </View>
   );
@@ -741,14 +751,21 @@ const styles = StyleSheet.create({
   },
 
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
   // Card-header row: section label left, xs team flag right — same
   // anchor treatment as the Form / Trajectory / KPI cards.
+  // Standalone inset divider — chevron-chrome grey, list-card grammar.
+  insetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
+    marginBottom: Spacing.two,
+  },
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -790,8 +807,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   playerName: {
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: TextSize.md,
-    fontWeight: TextWeight.bold,
     color: Colors.light.text,
   },
   playerMeta: {
@@ -835,8 +852,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statLegendText: {
-    fontSize: 10,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
@@ -857,37 +874,37 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   tierStatLabel: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
-    fontWeight: TextWeight.regular,
   },
   tierStatVariance: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
-    fontVariant: ['tabular-nums'],
   },
   tierStatBarRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
   },
-  tierStatValueLeft: {
+  // Score tiles for team vs tier values — winner pairing only when the
+  // team beats the tier average (the average itself stays quiet).
+  tierValueBox: {
     width: 44,
-    textAlign: 'left',
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
-    color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  tierStatValueRight: {
-    width: 44,
-    textAlign: 'right',
-    fontSize: TextSize.sm,
-    fontWeight: TextWeight.bold,
+  tierValueBoxWin: { backgroundColor: Colors.light.textSecondary },
+  tierValueText: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
   },
+  tierValueTextWin: { color: Colors.light.textInverse },
   tierBarTrack: {
     flex: 1,
     height: 4,
@@ -941,8 +958,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   modalTitle: {
+    fontFamily: 'Barlow_600SemiBold',
     fontSize: TextSize.lg,
-    fontWeight: TextWeight.bold,
     color: Colors.light.text,
   },
   modalBody: {

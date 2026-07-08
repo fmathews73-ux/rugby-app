@@ -10,6 +10,7 @@ import { fetchJson } from '@/api/client';
 import { useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
@@ -152,7 +153,7 @@ export function ExtendedMomentum({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain extended momentum">
-            <Ionicons name="reader-outline" size={14} color={Colors.light.textSecondary} />
+            <AppLogo height={14} />
           </Pressable>
         </View>
       </View>
