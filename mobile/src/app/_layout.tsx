@@ -27,7 +27,7 @@ export default function RootLayout() {
   // other sport-display moments) loads at runtime; the brand wordmark
   // font (Anton) is embedded natively via the expo-font config plugin
   // (app.json).
-  const [fontsLoaded] = useFonts({
+  const [fontsLoaded, fontError] = useFonts({
     BarlowCondensed_700Bold_Italic,
     Barlow_400Regular,
     Barlow_500Medium,
@@ -42,8 +42,8 @@ export default function RootLayout() {
   // tree, so we hide directly here — gated on the font so text never
   // flashes from the fallback face.
   useEffect(() => {
-    if (fontsLoaded) SplashScreen.hideAsync().catch(() => {});
-  }, [fontsLoaded]);
+    if (fontsLoaded || fontError) SplashScreen.hideAsync().catch(() => {});
+  }, [fontsLoaded, fontError]);
 
   const queryClient = useMemo(
     () =>
@@ -57,6 +57,14 @@ export default function RootLayout() {
       }),
     [],
   );
+
+  // Hold the whole tree until fonts are in. Text mounted before the
+  // font loads paints in the system fallback and never re-renders
+  // (navigator/screen memoization blocks the root re-render), so the
+  // wordmark and card titles were stuck on the fallback face.
+  // Proceed on error too — a failed font load falls back to system
+  // faces rather than hanging on a blank screen forever.
+  if (!fontsLoaded && !fontError) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
