@@ -7,7 +7,7 @@ import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 import type { Fixture, Result } from '@rugby-app/shared';
 
 import { fetchJson } from '@/api/client';
-import { useTeam } from '@/api/hooks';
+import { useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -104,6 +104,14 @@ export function ExtendedMomentum({
     () => formPointsFor(activeTeamId, completedFixtures, resultByFixture, LOOKBACK),
     [activeTeamId, completedFixtures, resultByFixture],
   );
+  // Opponent flag per bar — the x-axis identifies who each margin was
+  // against.
+  const allTeams = useTeams();
+  const flagByTeam = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const t of allTeams.data ?? []) m.set(t.id, t.flag_code);
+    return m;
+  }, [allTeams.data]);
   return (
     <FlipCard
       style={style}
@@ -152,7 +160,7 @@ export function ExtendedMomentum({
       {points.length === 0 ? (
         <Text style={styles.empty}>Not enough matches yet.</Text>
       ) : (
-        <MarginBars points={points} />
+        <MarginBars points={points} flagByTeam={flagByTeam} />
       )}
         </View>
       }
@@ -168,17 +176,27 @@ export function ExtendedMomentum({
  * baseline. Static fills (no motion, by rule); geometry computed in
  * real pixels from the onLayout-measured canvas.
  */
-function MarginBars({ points }: { points: readonly FormPoint[] }) {
+function MarginBars({
+  points,
+  flagByTeam,
+}: {
+  points: readonly FormPoint[];
+  flagByTeam: ReadonlyMap<string, string>;
+}) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
   // Vertical padding reserves room for the margin value badges above
-  // the tallest win bar and below the deepest loss bar.
+  // the tallest win bar and below the deepest loss bar. The opponent
+  // shields sit ON the zero baseline in a central strip: equal air
+  // above and below the shield before either side's bars begin.
   const padY = 20;
+  const SHIELD = 16;
+  const AXIS_HALF = SHIELD / 2 + 6; // shield half + equal padding each side
   const maxAbs = Math.max(20, ...points.map((p) => Math.abs(p.diff)));
   const zeroY = height / 2;
-  const halfBand = height / 2 - padY;
+  const halfBand = height / 2 - padY - AXIS_HALF;
 
   // Gridline step: a round number giving 2-3 rules per half.
   const gridStep = maxAbs <= 12 ? 5 : maxAbs <= 30 ? 10 : 20;
@@ -196,20 +214,20 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
       const cx = x + barW / 2;
       const barH = (Math.abs(p.diff) / maxAbs) * halfBand;
       if (p.diff === 0) {
-        // Draw — a 2px neutral stub straddling the baseline, no label
-        // (a zero margin is the absence of a story).
-        return { x, y: zeroY - 1, w: barW, h: 2, fill: DRAW_COLOR, label: null, labelY: 0, cx };
+        // Draw — a 2px neutral stub at the top edge of the axis strip,
+        // no label (a zero margin is the absence of a story).
+        return { x, y: zeroY - AXIS_HALF - 2, w: barW, h: 2, fill: DRAW_COLOR, label: null, labelY: 0, cx };
       }
       const isWin = p.diff > 0;
       return {
         x,
-        y: isWin ? zeroY - barH : zeroY,
+        y: isWin ? zeroY - AXIS_HALF - barH : zeroY + AXIS_HALF,
         w: barW,
         h: barH,
         fill: isWin ? WIN_COLOR : LOSS_COLOR,
         // Margin value badge: above the bar for wins, below for losses.
         label: String(Math.abs(p.diff)),
-        labelY: isWin ? zeroY - barH - 11 : zeroY + barH + 11,
+        labelY: isWin ? zeroY - AXIS_HALF - barH - 11 : zeroY + AXIS_HALF + barH + 11,
         cx,
       };
     });
@@ -225,6 +243,7 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
         })
       }>
       {width > 0 && height > 0 ? (
+        <>
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
           {/* Margin gridlines — quiet dashed rules at ±step intervals
               with bare flush-left numerals, so the empty regions of the
@@ -232,7 +251,10 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
               Discipline Trend bands / Ranking rungs). Drawn first so
               bars sit on top. */}
           {gridValues.map((g) => {
-            const gy = zeroY - (g / maxAbs) * halfBand;
+            const gy =
+              g > 0
+                ? zeroY - AXIS_HALF - (g / maxAbs) * halfBand
+                : zeroY + AXIS_HALF + (-g / maxAbs) * halfBand;
             return (
               <G key={`g${g}`}>
                 <Line
@@ -269,8 +291,8 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
                   x={b.cx}
                   y={b.labelY + 3}
                   fill={Colors.light.textSecondary}
-                  fontFamily="Barlow_500Medium"
-                  fontSize={9}
+                  fontFamily="BarlowCondensed_700Bold_Italic"
+                  fontSize={11}
                   textAnchor="middle">
                   {b.label}
                 </SvgText>
@@ -289,6 +311,22 @@ function MarginBars({ points }: { points: readonly FormPoint[] }) {
             strokeWidth={1.2}
           />
         </Svg>
+          {/* Opponent shields ON the zero baseline — who each margin
+              was against, centred in the axis strip between the two
+              half-charts. */}
+          {bars.map((b, i) => {
+            const flag = flagByTeam.get(points[i]?.opponentId ?? '');
+            if (!flag) return null;
+            return (
+              <View
+                key={`f${i}`}
+                style={{ position: 'absolute', left: b.cx - SHIELD / 2, top: zeroY - SHIELD / 2 - 1 }}
+                pointerEvents="none">
+                <TeamFlagShield flagCode={flag} width={SHIELD} />
+              </View>
+            );
+          })}
+        </>
       ) : null}
     </View>
   );
@@ -328,9 +366,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

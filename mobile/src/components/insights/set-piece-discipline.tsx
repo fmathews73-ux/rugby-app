@@ -47,7 +47,7 @@ export function SetPieceDiscipline({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Set Piece & Discipline"
+          title="Set-Piece"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.setPieceDiscipline}
           purpose={
@@ -59,7 +59,7 @@ export function SetPieceDiscipline({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Set Piece & Discipline</Text>
+        <Text style={styles.sectionLabel}>Set-Piece</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -116,9 +116,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

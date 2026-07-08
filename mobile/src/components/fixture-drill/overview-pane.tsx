@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture, MatchEvent, Player, Team } from '@rugby-app/shared';
 
 import { useFixtureEvents } from '@/api/hooks';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Overview pane — match-event timeline ────────────────────────────────────
@@ -28,7 +28,7 @@ export function OverviewPane({
   playerById: Map<string, Player>;
 }) {
   const events = useFixtureEvents(fixture.id, fixture.status);
-  const [collapsed, setCollapsed] = useState(false);
+
 
   if (fixture.status === 'scheduled') {
     return (
@@ -55,17 +55,23 @@ export function OverviewPane({
   // 'second-half-start' is dropped outright — Half Time already marks
   // the break, and a second bar two rows later reads as noise.
   const ordered = [...all].reverse().filter((e) => e.type !== 'second-half-start');
-  const visible = collapsed
-    ? ordered.filter(
-        (e) =>
-          e.type === 'kick-off' ||
-          e.type === 'half-time' ||
-          e.type === 'full-time' ||
-          e.type === 'try' ||
-          e.type === 'penalty-goal' ||
-          e.type === 'drop-goal',
-      )
-    : ordered;
+  // The timeline is deliberately scoring + personnel only (owner call
+  // 2026-07-08): milestones, tries, conversions, penalty/drop goals,
+  // substitutions and cards. Everything else is chart material, not
+  // timeline material — the old Show more/less tier is gone.
+  const visible = ordered.filter(
+    (e) =>
+      e.type === 'kick-off' ||
+      e.type === 'half-time' ||
+      e.type === 'full-time' ||
+      e.type === 'try' ||
+      e.type === 'conversion' ||
+      e.type === 'penalty-goal' ||
+      e.type === 'drop-goal' ||
+      e.type === 'substitution' ||
+      e.type === 'yellow-card' ||
+      e.type === 'red-card',
+  );
 
   return (
     <View style={styles.timelineContainer}>
@@ -77,20 +83,9 @@ export function OverviewPane({
           homeTeam={homeTeam}
           awayTeam={awayTeam}
           playerById={playerById}
+          allEvents={all}
         />
       ))}
-      <Pressable
-        onPress={() => setCollapsed((c) => !c)}
-        style={({ pressed }) => [styles.timelineToggle, pressed && { opacity: 0.6 }]}>
-        <Text style={styles.timelineToggleText}>
-          {collapsed ? 'Show more' : 'Show less'}
-        </Text>
-        <Ionicons
-          name={collapsed ? 'chevron-down' : 'chevron-up'}
-          size={16}
-          color={Colors.light.text}
-        />
-      </Pressable>
     </View>
   );
 }
@@ -103,18 +98,29 @@ function TimelineRow({
   homeTeam,
   awayTeam,
   playerById,
+  allEvents,
 }: {
   event: MatchEvent;
   fixture: Fixture;
   homeTeam: Team | undefined;
   awayTeam: Team | undefined;
   playerById: Map<string, Player>;
+  allEvents: readonly MatchEvent[];
 }) {
   const isMilestone =
     event.type === 'kick-off' ||
     event.type === 'half-time' ||
     event.type === 'full-time';
-  if (isMilestone) return <MilestoneBar type={event.type} />;
+  if (isMilestone)
+    return (
+      <MilestoneBar
+        type={event.type}
+        fixture={fixture}
+        homeTeam={homeTeam}
+        awayTeam={awayTeam}
+        allEvents={allEvents}
+      />
+    );
   const isHome = event.team_id === fixture.home_team_id;
   return (
     <EventRow
@@ -127,21 +133,100 @@ function TimelineRow({
   );
 }
 
-function MilestoneBar({ type }: { type: MatchEvent['type'] }) {
+/** Cumulative scoring tallies for one side up to a cutoff minute. */
+function tallyFor(
+  events: readonly MatchEvent[],
+  teamId: string | undefined,
+  maxMinute: number,
+): { tries: number; conversions: number; pens: number } {
+  const t = { tries: 0, conversions: 0, pens: 0 };
+  if (!teamId) return t;
+  for (const e of events) {
+    if (e.team_id !== teamId || e.minute > maxMinute) continue;
+    if (e.type === 'try') t.tries++;
+    else if (e.type === 'conversion') t.conversions++;
+    else if (e.type === 'penalty-goal') t.pens++;
+  }
+  return t;
+}
+
+function TallyCluster({
+  flag,
+  tally,
+  mirrored = false,
+}: {
+  flag: string | undefined;
+  tally: { tries: number; conversions: number; pens: number };
+  mirrored?: boolean;
+}) {
+  const pairs = (
+    <>
+      <View style={styles.tallyPair}>
+        <Ionicons name="american-football" size={12} color={Colors.light.textSecondary} />
+        <Text style={styles.tallyCount}>{tally.tries}</Text>
+      </View>
+      <View style={styles.tallyPair}>
+        <Ionicons name="american-football-outline" size={12} color={Colors.light.textSecondary} />
+        <Text style={styles.tallyCount}>{tally.conversions}</Text>
+      </View>
+      <View style={styles.tallyPair}>
+        <Ionicons name="flag-outline" size={12} color={Colors.light.textSecondary} />
+        <Text style={styles.tallyCount}>{tally.pens}</Text>
+      </View>
+    </>
+  );
+  return (
+    <View style={styles.tallyCluster}>
+      {mirrored ? pairs : null}
+      {flag ? <TeamFlagShield flagCode={flag} width={16} /> : null}
+      {mirrored ? null : pairs}
+    </View>
+  );
+}
+
+function MilestoneBar({
+  type,
+  fixture,
+  homeTeam,
+  awayTeam,
+  allEvents,
+}: {
+  type: MatchEvent['type'];
+  fixture: Fixture;
+  homeTeam: Team | undefined;
+  awayTeam: Team | undefined;
+  allEvents: readonly MatchEvent[];
+}) {
   const labels: Partial<Record<MatchEvent['type'], string>> = {
     'kick-off': 'Match Start',
     'half-time': 'Half Time',
     'full-time': 'Full Time',
   };
+  // HT and FT carry each side's cumulative scoring tally (shield +
+  // tries / conversions / penalties icon pairs) flanking the label.
+  const showTallies = type === 'half-time' || type === 'full-time';
+  const cutoff = type === 'half-time' ? 40 : Number.POSITIVE_INFINITY;
+  const homeTally = tallyFor(allEvents, fixture.home_team_id, cutoff);
+  const awayTally = tallyFor(allEvents, fixture.away_team_id, cutoff);
   return (
     <>
-      {/* Half Time gets a hairline ABOVE too — bracketing the break
-          off from the last first-half event. */}
-      {type === 'half-time' ? <View style={[styles.insetDivider, styles.insetDividerAbove]} /> : null}
-      <View style={styles.milestoneRow}>
+      {/* Half Time and Kick Off get a hairline ABOVE too — bracketing
+          the break and the match start. */}
+      {type === 'half-time' || type === 'kick-off' ? (
+        <View style={[styles.insetDivider, styles.insetDividerAbove]} />
+      ) : null}
+      <View style={[styles.milestoneRow, showTallies && styles.milestoneRowSpread]}>
+        {showTallies ? (
+          <TallyCluster flag={homeTeam?.flag_code} tally={homeTally} />
+        ) : null}
         <Text style={styles.categoryLabel}>{labels[type] ?? type}</Text>
+        {showTallies ? (
+          <TallyCluster flag={awayTeam?.flag_code} tally={awayTally} mirrored />
+        ) : null}
       </View>
-      <View style={styles.insetDivider} />
+      {/* Kick Off closes the (newest-first) timeline — nothing below
+          it, so no under-line. */}
+      {type !== 'kick-off' ? <View style={styles.insetDivider} /> : null}
     </>
   );
 }
@@ -195,11 +280,12 @@ function EventRow({
 function EventIcon({ event }: { event: MatchEvent }) {
   switch (event.type) {
     case 'try':
-      return <Ionicons name="american-football" size={16} color={Colors.light.text} />;
+      return <Ionicons name="american-football" size={16} color={Colors.light.textSecondary} />;
     case 'conversion':
-    case 'penalty-goal':
     case 'drop-goal':
       return <Ionicons name="american-football-outline" size={14} color={Colors.light.textSecondary} />;
+    case 'penalty-goal':
+      return <Ionicons name="flag-outline" size={14} color={Colors.light.textSecondary} />;
     case 'yellow-card':
       return <View style={[styles.cardGlyph, { backgroundColor: StatusColor.warning }]} />;
     case 'red-card':
@@ -353,21 +439,6 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.two,
   },
   // Show More / Show Less toggle at the bottom of the timeline.
-  timelineToggle: {
-    marginTop: Spacing.three,
-    paddingVertical: Spacing.two,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-  },
-  timelineToggleText: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    letterSpacing: TextTracking.wide,
-    textTransform: 'uppercase',
-  },
 
   // Standalone inset divider under each milestone header — chevron-
   // chrome grey, same grammar as the Line-Up section headers.
@@ -381,9 +452,30 @@ const styles = StyleSheet.create({
     marginBottom: 0,
     marginTop: Spacing.two,
   },
-  categoryLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+  milestoneRowSpread: {
+    justifyContent: 'space-between',
+    paddingHorizontal: Spacing.three,
+  },
+  tallyCluster: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  tallyPair: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  tallyCount: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: 12,
     color: Colors.light.textSecondary,
+  },
+  categoryLabel: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
 });

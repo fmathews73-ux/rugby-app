@@ -8,7 +8,6 @@ import { CardCarousel, type CardCarouselHandle } from '@/components/card-carouse
 import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
 import { ControlConversion } from '@/components/insights/control-conversion';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
-import { PitchHeatmap } from '@/components/insights/pitch-heatmap';
 import {
   MATCH_AXIS_PAIRS,
   MatchAxisH2H,
@@ -26,8 +25,9 @@ import { useMatchAnalysis } from '@/hooks/use-match-analysis';
  * carries its narrative on its flip side, fed by the match engine:
  *   Profile → summary · Momentum → momentum · Scoring Progression →
  *   progression · Match Gaps → variance · pairs → their openers
- *   (attackPattern / platform) + axis ¶s · Pitch Heatmap → heatmap ·
- *   Control vs Conversion → verdict.
+ *   (attackPattern / platform) + axis ¶s · Verdict → verdict.
+ *   (Pitch Heatmap removed 2026-07-08 — synthetic heat restated the
+ *   territory numbers; revisit with real event coordinates, PRD #34.)
  * The evidence is THIS match's own data: live while the game runs,
  * settled at full-time as the permanent record. The kickoff backdrop
  * lives entirely on Pre-Match.
@@ -101,6 +101,11 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
             ? analysis?.platform
             : null;
       const paragraphs = [...(opener ? [opener] : []), ...narratives];
+      // The territory read that backed the retired heatmap card rides
+      // with Kicking & Territory — same subject, one home.
+      if (pair.title === 'Kicking & Territory' && analysis?.heatmap) {
+        paragraphs.push(analysis.heatmap);
+      }
       pages.push(
         <MatchAxisH2H
           key={pair.title}
@@ -113,21 +118,6 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
           read={paragraphs.length > 0 ? paragraphs.join('\n\n') : null}
         />,
       );
-      if (pair.title === 'Kicking & Territory') {
-        // The heatmap is territory made visible — slotted straight
-        // after Kicking & Territory.
-        pages.push(
-          <PitchHeatmap
-            key="heatmap"
-            fixtureId={fixture.id}
-            homeTeamId={homeTeamId}
-            awayTeamId={awayTeamId}
-            fixtureStatus={fixture.status}
-            style={styles.pageCard}
-            read={analysis?.heatmap ?? null}
-          />,
-        );
-      }
     }
 
     // Control vs Conversion — the closing verdict chart.

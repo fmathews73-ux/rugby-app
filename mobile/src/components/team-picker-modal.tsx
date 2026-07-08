@@ -215,7 +215,13 @@ const styles = StyleSheet.create({
   // the current My Team selection. Matches iOS "destructive action" tone.
   headerActionDestructive: { fontSize: TextSize.md, color: StatusColor.live, fontWeight: TextWeight.semibold },
   headerActionSpacer: { width: 60 },
-  headerTitle: { fontFamily: 'Barlow_600SemiBold', fontSize: TextSize.lg, color: Colors.light.text },
+  headerTitle: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+  },
 
   listContent: {
     padding: Spacing.four,
@@ -246,11 +252,11 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
   },
   groupHeaderText: {
-    // List-group header, not a chart-card title — meta register, title
-    // case (same as the Fixtures day-card date headers).
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   row: {
     flexDirection: 'row',
@@ -300,8 +306,10 @@ const styles = StyleSheet.create({
   confirmPillPressed: { opacity: 0.85 },
   confirmPillDisabled: { backgroundColor: '#9CA3AF' },
   confirmPillText: {
-    fontFamily: 'Barlow_600SemiBold',
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textInverse,
+    textTransform: 'uppercase',
   },
 });

@@ -39,7 +39,7 @@ export function PossessionOutcome({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Possession vs Outcome"
+          title="Possession"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.possession}
           purpose={
@@ -51,7 +51,7 @@ export function PossessionOutcome({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Possession vs Outcome</Text>
+        <Text style={styles.sectionLabel}>Possession</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -191,9 +191,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

@@ -60,7 +60,7 @@ function Populated({
         <View style={[styles.card, styles.cardFill]}>
           {/* Title left, utility info icon pinned right on the same line. */}
           <View style={styles.headerRow}>
-            <Text style={styles.sectionLabel}>Team Profile</Text>
+            <Text style={styles.sectionLabel}>Profile</Text>
             <Pressable
               onPress={() => setInfoOpen(true)}
               hitSlop={10}
@@ -81,7 +81,7 @@ function Populated({
       }
       back={
         <NarrativeBack
-          title="Team Profile"
+          title="Profile"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.summary}
           purpose={
@@ -125,9 +125,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

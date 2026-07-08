@@ -170,7 +170,7 @@ export function MatchGaps({
   const rows = gaps.map((g) => MATCH_HEADLINE[g.key]);
   return (
     <MatchH2HCard
-      title="Match Gaps"
+      title="Gaps"
       fixture={fixture}
       homeCode={homeCode}
       awayCode={awayCode}
@@ -319,7 +319,12 @@ function MatchH2HCard({
                   </View>
                   <View style={[styles.rowValueBox, better ? styles.rowValueBoxWin : null]}>
                     <Text style={[styles.rowValue, better ? styles.rowValueTextWin : null]}>
-                      {fmt(active, row.percent)}
+                      {fmt(active)}
+                      {row.percent ? (
+                        <Text style={[styles.rowValueSuffix, better ? styles.rowValueTextWin : null]}>
+                          %
+                        </Text>
+                      ) : null}
                     </Text>
                   </View>
                 </View>
@@ -369,10 +374,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,
@@ -399,7 +405,7 @@ const styles = StyleSheet.create({
   // Mini score tile in the fixed right rail — the quiet losing-score
   // pairing, matching the Efficiency KPIs card.
   rowValueBox: {
-    width: 52,
+    width: 44,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
@@ -409,8 +415,14 @@ const styles = StyleSheet.create({
   rowValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   rowValueTextWin: { color: Colors.light.textInverse },
   rowValue: {
+    // Match-score face — condensed italic at the row-score size.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.textSecondary,
+  },
+  rowValueSuffix: {
     fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
   rowTrack: {

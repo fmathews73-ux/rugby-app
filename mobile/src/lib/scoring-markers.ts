@@ -14,9 +14,11 @@ export interface ScoringMarker {
   type: 'try' | 'conversion' | 'penalty-goal';
 }
 
+// App-wide scoring icon vocabulary: filled ball = try, outline ball =
+// conversion, flag = penalty goal.
 export const MARKER_ICON: Record<ScoringMarker['type'], keyof typeof Ionicons.glyphMap> = {
   try: 'american-football',
-  conversion: 'add-circle-outline',
+  conversion: 'american-football-outline',
   'penalty-goal': 'flag-outline',
 };
 

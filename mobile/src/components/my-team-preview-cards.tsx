@@ -60,14 +60,12 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
           key="form"
           teamId={teamId}
           style={styles.pageCard}
-          title="Team Form"
           showCornerFlag={false}
         />,
         <RankingTrajectory
           key="ranking"
           teamId={teamId}
           style={styles.pageCard}
-          title="Team World Ranking"
           showCornerFlag={false}
         />,
         <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
@@ -75,7 +73,6 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
           key="kpis"
           teamId={teamId}
           style={styles.pageCard}
-          title="Team Efficiency KPIs"
           showCornerFlag={false}
         />,
         <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,

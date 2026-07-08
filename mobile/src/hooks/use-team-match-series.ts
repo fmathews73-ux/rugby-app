@@ -10,6 +10,8 @@ import type { FormOutcome } from '@/hooks/use-team-recent-form';
 export interface TeamMatchPoint {
   fixtureId: string;
   kickoff: string;
+  /** The other side in that match — lets charts identify each bar. */
+  opponentId: string;
   outcome: FormOutcome;
   /** Points margin from the team's perspective (positive = won by). */
   margin: number;
@@ -72,6 +74,7 @@ export function useTeamMatchSeries(
       points.push({
         fixtureId: fx.id,
         kickoff: fx.kickoff_utc,
+        opponentId: isHome ? fx.away_team_id : fx.home_team_id,
         outcome: my > opp ? 'W' : my < opp ? 'L' : 'D',
         margin: my - opp,
         possessionPercent: isHome ? r.home_possession_percent : r.away_possession_percent,

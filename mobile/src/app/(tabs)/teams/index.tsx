@@ -13,7 +13,7 @@ import { CompetitionPicker } from '@/components/competition-picker';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamHeroRow } from '@/components/team-hero-row';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 
 import { TIER_1_IDS } from '@/lib/tiers';
@@ -217,11 +217,11 @@ const styles = StyleSheet.create({
     marginHorizontal: Spacing.three,
   },
   cardHeaderText: {
-    // List-group header, not a chart-card title — meta register, title
-    // case (same as the picker group headers and day-card dates).
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
 
   teamRow: {

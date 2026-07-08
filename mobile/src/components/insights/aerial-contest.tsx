@@ -89,7 +89,7 @@ export function AerialContest({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Aerial Contest"
+          title="Aerial"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.aerial}
           purpose={
@@ -106,7 +106,7 @@ export function AerialContest({
       front={
         <View style={[styles.card, styles.cardFill]}>
           <View style={styles.headerRow}>
-            <Text style={styles.sectionLabel}>Aerial Contest</Text>
+            <Text style={styles.sectionLabel}>Aerial</Text>
             <View style={styles.headerRightGroup}>
               {showCornerFlag && team.data ? (
                 <TeamFlagShield flagCode={team.data.flag_code} width={FlagSize.xs} />
@@ -213,9 +213,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,
@@ -258,7 +260,7 @@ const styles = StyleSheet.create({
   // Mini score tile in the fixed right rail — the quiet losing-score
   // pairing, matching the Efficiency KPIs card.
   valueBox: {
-    width: 52,
+    width: 44,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
@@ -267,8 +269,9 @@ const styles = StyleSheet.create({
   },
   valueBoxWin: { backgroundColor: Colors.light.textSecondary },
   valueText: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    // Match-score face — condensed italic at the row-score size.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
   },
   valueTextWin: { color: Colors.light.textInverse },

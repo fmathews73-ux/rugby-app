@@ -46,7 +46,7 @@ export function ScoringRhythm({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Scoring Rhythm"
+          title="Rhythm"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.rhythm}
           purpose={
@@ -58,7 +58,7 @@ export function ScoringRhythm({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Scoring Rhythm</Text>
+        <Text style={styles.sectionLabel}>Rhythm</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -198,8 +198,8 @@ function RhythmChart({
                 x={b.up.x + b.up.w / 2}
                 y={b.up.y - 8}
                 fill={Colors.light.textSecondary}
-                fontFamily="Barlow_500Medium"
-                fontSize={9}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {fmt(b.up.v)}
               </SvgText>
@@ -212,8 +212,8 @@ function RhythmChart({
                 x={b.down.x + b.down.w / 2}
                 y={b.down.y + b.down.h + 14}
                 fill={Colors.light.textSecondary}
-                fontFamily="Barlow_500Medium"
-                fontSize={9}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {fmt(b.down.v)}
               </SvgText>
@@ -272,9 +272,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

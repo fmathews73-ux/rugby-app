@@ -4,9 +4,10 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Coach, CoachRole, Fixture, LineUp, MatchOfficial, MatchOfficialRole, Player } from '@rugby-app/shared';
 
-import { useFixtureOfficials, useTeamCoachingStaff } from '@/api/hooks';
+import { useFixtureOfficials, useTeamCoachingStaff, useTeams } from '@/api/hooks';
 import { PlayerMatchSheet } from '@/components/fixture-drill/player-match-sheet';
 import { LoadingState } from '@/components/state-views';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Line-Up pane ────────────────────────────────────────────────────────────
@@ -27,6 +28,9 @@ export function LineUpPane({
   const officials = useFixtureOfficials(fixture.id);
   // Player whose match-scoped stat sheet is open in the bottom modal.
   const [sheetPlayerId, setSheetPlayerId] = useState<string | null>(null);
+  const teams = useTeams();
+  const homeFlag = teams.data?.find((t) => t.id === fixture.home_team_id)?.flag_code;
+  const awayFlag = teams.data?.find((t) => t.id === fixture.away_team_id)?.flag_code;
   if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
@@ -70,10 +74,18 @@ export function LineUpPane({
 
   return (
     <View style={styles.lineupContainer}>
+      {/* Nation shields at the outer edges, caps totals inside them,
+          title centred — the pane's own matchup strip. */}
       <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
-        <CapsJersey caps={totalCaps(startingRows, 'home')} />
+        <View style={styles.lineupHeaderSide}>
+          {homeFlag ? <TeamFlagShield flagCode={homeFlag} width={24} /> : null}
+          <CapsJersey caps={totalCaps(startingRows, 'home')} />
+        </View>
         <Text style={styles.categoryLabel}>Starting XV</Text>
-        <CapsJersey caps={totalCaps(startingRows, 'away')} mirrored />
+        <View style={styles.lineupHeaderSide}>
+          <CapsJersey caps={totalCaps(startingRows, 'away')} mirrored />
+          {awayFlag ? <TeamFlagShield flagCode={awayFlag} width={24} /> : null}
+        </View>
       </View>
       <View style={styles.insetDivider} />
       {startingRows.map(({ home, away }, i) => (
@@ -87,9 +99,15 @@ export function LineUpPane({
       ))}
 
       <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
-        <CapsJersey caps={totalCaps(benchRows, 'home')} />
+        <View style={styles.lineupHeaderSide}>
+          {homeFlag ? <TeamFlagShield flagCode={homeFlag} width={24} /> : null}
+          <CapsJersey caps={totalCaps(benchRows, 'home')} />
+        </View>
         <Text style={styles.categoryLabel}>Bench</Text>
-        <CapsJersey caps={totalCaps(benchRows, 'away')} mirrored />
+        <View style={styles.lineupHeaderSide}>
+          <CapsJersey caps={totalCaps(benchRows, 'away')} mirrored />
+          {awayFlag ? <TeamFlagShield flagCode={awayFlag} width={24} /> : null}
+        </View>
       </View>
       <View style={styles.insetDivider} />
       {benchRows.map(({ home, away }, i) => (
@@ -108,7 +126,7 @@ export function LineUpPane({
       {(homeCoaches.data?.length ?? 0) + (awayCoaches.data?.length ?? 0) > 0 ? (
         <>
           <View style={styles.lineupSectionHeader}>
-            <Text style={styles.categoryLabel}>Coaching Staff</Text>
+            <Text style={styles.categoryLabel}>Coaches</Text>
           </View>
       <View style={styles.insetDivider} />
           {pairCoachesByRole(homeCoaches.data ?? [], awayCoaches.data ?? []).map(
@@ -124,7 +142,7 @@ export function LineUpPane({
       {(officials.data?.length ?? 0) > 0 ? (
         <>
           <View style={styles.lineupSectionHeader}>
-            <Text style={styles.categoryLabel}>Match Officials</Text>
+            <Text style={styles.categoryLabel}>Officials</Text>
           </View>
       <View style={styles.insetDivider} />
           {sortOfficialsByRole(officials.data ?? []).map((o) => (
@@ -359,14 +377,21 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   categoryLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
 
   // Line-Up section header — icon + uppercase label centred. Same
   // treatment as milestoneRow so the two panes share one section-header
   // pattern.
+  lineupHeaderSide: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
   lineupSectionHeaderSpread: {
     justifyContent: 'space-between',
     paddingHorizontal: Spacing.three,
@@ -456,12 +481,11 @@ const styles = StyleSheet.create({
   },
 
   lineupSectionLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
-    paddingTop: Spacing.three,
-    paddingBottom: 4,
-    textAlign: 'center',
+    textTransform: 'uppercase',
   },
   // Compare row: [home #] [home player-label]   [away player-label] [away #]
   // Numbers pinned to the outer edges; each team's player-label

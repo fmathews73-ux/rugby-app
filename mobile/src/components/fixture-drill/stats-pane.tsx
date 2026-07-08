@@ -59,7 +59,7 @@ export function StatsPane({
     stats: { label: string; home: number; away: number; premium: boolean; inverted?: boolean }[];
   }[] = [
     {
-      title: 'Match Overview',
+      title: 'Overview',
       description:
         'The big-picture read on the match: how much of the ball each side had, how much of the game was played in the opponent\'s half, and where the score sat at half-time. A team can dominate possession + territory and still lose — this section is where those tensions show first.',
       stats: [
@@ -86,7 +86,7 @@ export function StatsPane({
       ],
     },
     {
-      title: 'Scoring by Quarter',
+      title: 'Quarters',
       description:
         'Points scored in each 20-minute block (Q1 = 0–20, Q2 = 20–40, Q3 = 40–60, Q4 = 60+). Rugby has no formal quarters, but analysts use these blocks to spot game-management patterns — teams that come out fast in Q1, teams that dominate after the half-time reset, teams that hold their nerve in the closing 20.',
       stats: [
@@ -140,7 +140,7 @@ export function StatsPane({
       ],
     },
     {
-      title: 'Set Piece',
+      title: 'Set-Piece',
       description:
         'How each team fared at the set-piece phases — scrums and lineouts. Winning your own scrum or lineout is expected; losing it is a turnover in prime attacking territory. Winning the OPPONENT\'S is worth its weight in gold — steals disrupt phase play and momentum.',
       stats: [
@@ -192,18 +192,9 @@ export function StatsPane({
 
   const flippedSection = sections.find((s) => s.title === flippedTitle) ?? null;
 
-  // Category pairings — natural rugby couples: points then their
-  // timing, with-the-ball, the possession contests, without-the-ball.
-  // Rendered as a vertical stack (Match Overview first, then the paired
-  // cards): stats are scan-and-compare reads, so scrolling beats a
-  // carousel here.
-  const headline = sections[0]!;
-  const pages: (typeof sections)[] = [
-    [sections[1]!, sections[2]!], // Scoring + Scoring by Quarter
-    [sections[3]!, sections[4]!], // Attack + Kicking
-    [sections[5]!, sections[6]!], // Set Piece + Breakdown
-    [sections[7]!, sections[8]!], // Defence + Discipline
-  ];
+  // ONE card per category (owner call 2026-07-08) — every section owns
+  // its own card and flip, rendered as a vertical stack: stats are
+  // scan-and-compare reads, so scrolling beats a carousel here.
 
   const renderSection = (section: (typeof sections)[number]) => (
     <View key={section.title} style={styles.sectionBlock}>
@@ -230,35 +221,22 @@ export function StatsPane({
     </View>
   );
 
-  // A card flips when the tapped section lives on it; the back shows
-  // that section's narrative (two-section cards flip to whichever
-  // section's reader icon was tapped).
-  const renderCard = (cardSections: (typeof sections)[number][]) => {
-    const flipped =
-      flippedSection !== null &&
-      cardSections.some((sec) => sec.title === flippedSection.title);
-    return (
-      <FlipCard
-        key={cardSections[0]!.title}
-        flipped={flipped}
-        back={
-          <NarrativeBack
-            title={flipped ? flippedSection!.title : cardSections[0]!.title}
-            onClose={() => setFlippedTitle(null)}
-            purpose={flipped ? flippedSection!.description : ''}
-          />
-        }
-        front={<View style={styles.statsCard}>{cardSections.map(renderSection)}</View>}
-      />
-    );
-  };
-
-  return (
-    <View style={styles.statsPaneStack}>
-      {renderCard([headline])}
-      {pages.map((pair) => renderCard(pair))}
-    </View>
+  const renderCard = (section: (typeof sections)[number]) => (
+    <FlipCard
+      key={section.title}
+      flipped={flippedSection?.title === section.title}
+      back={
+        <NarrativeBack
+          title={section.title}
+          onClose={() => setFlippedTitle(null)}
+          purpose={section.description}
+        />
+      }
+      front={<View style={styles.statsCard}>{renderSection(section)}</View>}
+    />
   );
+
+  return <View style={styles.statsPaneStack}>{sections.map(renderCard)}</View>;
 }
 
 // Stat-bar colour tokens — same solid pair the Efficiency KPI card uses so
@@ -399,9 +377,11 @@ const styles = StyleSheet.create({
   // same internal rhythm the standalone category cards had.
   sectionBlock: { gap: Spacing.two },
   categoryLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   // Header row of each Stats category card: the label sits at the top-left
   // with a small info icon immediately next to it. Same pattern as the
@@ -447,7 +427,7 @@ const styles = StyleSheet.create({
   // Value tiles — the quiet losing-score pairing (light fill, grey
   // Barlow digits), matching every other bar chart's value rail.
   statValueBox: {
-    width: 40,
+    width: 36,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
@@ -457,8 +437,9 @@ const styles = StyleSheet.create({
   statValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   statValueTextWin: { color: Colors.light.textInverse },
   statValue: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    // Match-score face — condensed italic at the row-score size.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
   },
 

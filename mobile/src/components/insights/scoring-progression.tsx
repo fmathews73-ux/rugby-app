@@ -18,7 +18,6 @@ import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers } from '@/lib/scoring-markers';
 
 // Match-scoped team-colour convention shared with the Momentum card and
 // the Profile radar: home = blue family, away = purple family. Strokes
@@ -35,11 +34,12 @@ const HALF_TIME_MIN = 40;
 
 // SVG viewBox — matches Form / Trajectory / Momentum chart dims so the
 // three cards stack visually consistently.
-// Top band: HT period label then the home scoring-marker strip;
-// bottom band: the away marker strip then the minute labels — same
-// bands as the Momentum chart.
-const PAD_TOP = 34;
-const PAD_BOTTOM = 44;
+// Headroom for the checkpoint badges above the top line; the bottom
+// band fits a below-baseline badge (0-score checkpoints hang 21pt
+// under the axis) plus the same 14pt air before the minute labels
+// that the Momentum chart uses.
+const PAD_TOP = 26;
+const PAD_BOTTOM = 52;
 // Symmetric 8pt horizontal padding — matches Preview's Form / Ranking
 // Trajectory `padX` so all four line charts on the fixture drill share
 // one plot-area rhythm. Y-axis point labels have been dropped to fit;
@@ -87,11 +87,6 @@ export function ScoringProgression({
     [events.data, homeTeamId, awayTeamId],
   );
 
-  // Scoring-event icon markers — same strips as the Momentum chart.
-  const scoringMarkers = useMemo(
-    () => buildScoringMarkers(events.data ?? [], homeTeamId),
-    [events.data, homeTeamId],
-  );
 
   // Measured canvas — geometry in real pixels (no viewBox stretching),
   // filling whatever height the carousel grants the card.
@@ -111,6 +106,28 @@ export function ScoringProgression({
   const scaleX = (min: number) => PAD_LEFT + (min / FULL_TIME_MIN) * PLOT_W;
   const scaleY = (pts: number) => PAD_TOP + PLOT_H - (pts / yMax) * PLOT_H;
 
+  // Fixed checkpoint badges only (owner call 2026-07-08): each side's
+  // running total at the quarter marks — 20' · HT · 60' · FT.
+  // Deterministic spots — never collide with each other, never wander
+  // from the story; per-event detail lives on the Timeline tab.
+  const totalAt = (pts: readonly ScorePoint[], minute: number): number => {
+    let v = 0;
+    for (const p of pts) {
+      if (p.minute <= minute) v = p.pts;
+    }
+    return v;
+  };
+  const fixedBadges: { x: number; y: number; label: number; color: string }[] = [];
+  // Quarter checkpoints: 20' · HT · 60' · FT — home totals above their
+  // line, away below, each pair just left of its minute mark.
+  for (const minute of [20, HALF_TIME_MIN, 60, FULL_TIME_MIN]) {
+    const xOff = minute === FULL_TIME_MIN ? -2 : -14;
+    const h = totalAt(series.home, minute);
+    const a = totalAt(series.away, minute);
+    fixedBadges.push({ x: scaleX(minute) + xOff, y: scaleY(h) - 13, label: h, color: HOME_LINE });
+    fixedBadges.push({ x: scaleX(minute) + xOff, y: scaleY(a) + 13, label: a, color: AWAY_LINE });
+  }
+
   const homePath = stepPath(series.home, scaleX, scaleY);
   const awayPath = stepPath(series.away, scaleX, scaleY);
   // Ribbon paths carry only the horizontal treads: the fade is built
@@ -129,7 +146,7 @@ export function ScoringProgression({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Scoring Progression"
+          title="Progression"
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>The scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
@@ -138,7 +155,7 @@ export function ScoringProgression({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Scoring Progression</Text>
+        <Text style={styles.sectionLabel}>Progression</Text>
         <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
@@ -164,7 +181,6 @@ export function ScoringProgression({
             })
           }>
           {CHART_W > 0 && CHART_H > 0 ? (
-        <>
         <Svg width={CHART_W} height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
           <Defs>
             <ClipPath id="progression-plot-clip">
@@ -239,6 +255,24 @@ export function ScoringProgression({
           <Path d={awayPath} fill="none" stroke={AWAY_LINE} strokeWidth={1} strokeLinejoin="round" />
           <Path d={homePath} fill="none" stroke={HOME_LINE} strokeWidth={1} strokeLinejoin="round" />
 
+          {/* Running-total badges at every scoring step — the same
+              quiet circle badge as the Ranking chart's shift markers:
+              home totals ride above their line, away below. */}
+          {fixedBadges.map((b, i) => (
+            <G key={`fb${i}`}>
+              <Circle cx={b.x} cy={b.y} r={8} fill="#F3F4F6" />
+              <SvgText
+                x={b.x}
+                y={b.y + 3}
+                fill={b.color}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
+                textAnchor="middle">
+                {b.label}
+              </SvgText>
+            </G>
+          ))}
+
           {/* Endpoint markers so the eye lands on the final totals. */}
           {homeFinal > 0 ? (
             <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={HOME_LINE} />
@@ -247,19 +281,6 @@ export function ScoringProgression({
             <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
           ) : null}
         </Svg>
-          {/* Scoring-event icon markers overlaid on the measured
-              canvas — home below the HT label, away above the minute
-              labels. */}
-          {placeScoringMarkers(scoringMarkers, scaleX, 18, CHART_H - PAD_BOTTOM + 4).map((mk, i) => (
-            <View key={i} style={{ position: 'absolute', left: mk.x, top: mk.y }} pointerEvents="none">
-              <Ionicons
-                name={MARKER_ICON[mk.type]}
-                size={MARKER_ICON_SIZE}
-                color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
-              />
-            </View>
-          ))}
-        </>
           ) : null}
         </View>
       )}
@@ -432,10 +453,11 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   legend: {
     flexDirection: 'row',
@@ -454,10 +476,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   legendText: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   // Fills the card height the carousel grants (tallest-sibling
   // normalisation); minHeight preserves the original canvas in

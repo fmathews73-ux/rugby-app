@@ -89,10 +89,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.text,
   },
   label: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    // Same face as the chart-card titles — the toggle names are team
+    // codes, so the condensed identity face fits naturally.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   labelActive: {
     color: Colors.light.textInverse,

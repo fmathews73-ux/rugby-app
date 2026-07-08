@@ -169,9 +169,10 @@ function MomentumMirror({
   // sparklines, Scoring Progression) so all match-scoped charts share
   // one plot-area rhythm.
   const padX = 8;
-  // Top band: period labels (KO/HT/FT) then the home scoring-marker
-  // strip; bottom band: the away marker strip then the minute labels.
-  const padTop = 34;
+  // Top band: period labels (KO/HT/FT), then the SAME 14pt air the
+  // bottom band has between icons and minute labels, then the home
+  // marker strip — symmetric rhythm top and bottom.
+  const padTop = 42;
   const padBottom = 44;
   const plotHeight = height - padTop - padBottom;
   const midY = padTop + plotHeight / 2;
@@ -189,7 +190,7 @@ function MomentumMirror({
   const placed = placeScoringMarkers(
     markers,
     xForMinute,
-    18,
+    28,
     height - padBottom + 4,
     effectiveMinute,
   );
@@ -433,10 +434,11 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   // Legend styling matches the Scoring Progression card so the two
   // temporal cards on the Insights pane share one grammar.
@@ -457,10 +459,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   legendText: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.semibold,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   // Fills the card height the carousel grants (tallest-sibling
   // normalisation); minHeight preserves the original canvas in

@@ -11,6 +11,8 @@ export type FormOutcome = 'W' | 'L' | 'D';
 export interface FormPoint {
   diff: number;
   outcome: FormOutcome;
+  /** The other side in that match — lets charts identify each bar. */
+  opponentId: string;
 }
 
 /** Weights used across all momentum calculations — most-recent-first. */
@@ -38,7 +40,7 @@ export function formPointsFor(
     const oppScore = isHome ? r.away_score : r.home_score;
     const diff = myScore - oppScore;
     const outcome: FormOutcome = diff > 0 ? 'W' : diff < 0 ? 'L' : 'D';
-    out.push({ diff, outcome });
+    out.push({ diff, outcome, opponentId: isHome ? fx.away_team_id : fx.home_team_id });
   }
   return out;
 }

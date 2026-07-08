@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
 import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
-import Svg, { Circle, Line, Path, Text as SvgText } from 'react-native-svg';
+import Svg, { G, Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
@@ -83,7 +83,7 @@ export function RankingTrajectory({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title={title ?? 'World Ranking'}
+          title={title ?? 'Ranking'}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.ranking}
           purpose={
@@ -96,7 +96,7 @@ export function RankingTrajectory({
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title ?? 'World Ranking'}</Text>
+        <Text style={styles.sectionLabel}>{title ?? 'Ranking'}</Text>
         <View style={styles.headerRightGroup}>
           {hasCompare ? (
             <TeamToggle
@@ -152,7 +152,8 @@ function TrajectoryChart({
   // title / meta text column; gridlines start after the label band.
   const padLeft = 18;
   const padRight = 10;
-  const padTop = 10;
+  // Headroom for the rank-shift badges (dot ±14 centre, r8).
+  const padTop = 24;
   // Bottom band reserved for the first/last month labels.
   const padBottom = 18;
 
@@ -171,7 +172,7 @@ function TrajectoryChart({
   const plotLeft = padLeft + 12;
   const plotRight = width - padRight - 4;
   const rankToY = (rank: number) =>
-    padTop + ((rank - minRank) / (maxRank - minRank)) * (plotBottom - padTop - 8);
+    padTop + ((rank - minRank) / (maxRank - minRank)) * (plotBottom - padTop - 24);
   const idxToX = (i: number) => {
     if (series.length === 1) return (plotLeft + plotRight) / 2;
     return plotLeft + (i / (series.length - 1)) * (plotRight - plotLeft);
@@ -189,13 +190,14 @@ function TrajectoryChart({
 
   const dots = series.map((s, i) => {
     const prev = i > 0 ? series[i - 1]! : null;
+    const shifted = prev !== null && s.rank !== prev.rank;
     const fill =
       prev === null || s.rank === prev.rank
         ? HELD_COLOR
         : s.rank < prev.rank
           ? BETTER_COLOR
           : WORSE_COLOR;
-    return { x: idxToX(i), y: rankToY(s.rank), fill };
+    return { x: idxToX(i), y: rankToY(s.rank), fill, rank: s.rank, shifted };
   });
 
   const first = series[0];
@@ -276,6 +278,30 @@ function TrajectoryChart({
           strokeWidth={i === dots.length - 1 ? 1.5 : 0}
         />
       ))}
+      {/* Rank badges at every vertical shift — the same quiet circle
+          badge as the Form margins, carrying the NEW rank. Offset above
+          improvements, below drops, clear of the step trace. */}
+      {dots.map((d, i) =>
+        d.shifted ? (
+          <G key={`rb${i}`}>
+            <Circle
+              cx={d.x}
+              cy={d.y + (d.fill === BETTER_COLOR ? -14 : 14)}
+              r={8}
+              fill="#F3F4F6"
+            />
+            <SvgText
+              x={d.x}
+              y={d.y + (d.fill === BETTER_COLOR ? -14 : 14) + 3}
+              fill={Colors.light.textSecondary}
+              fontFamily="BarlowCondensed_700Bold_Italic"
+              fontSize={11}
+              textAnchor="middle">
+              {d.rank}
+            </SvgText>
+          </G>
+        ) : null,
+      )}
       {/* X-axis endpoints: month labels. */}
       {first ? (
         <SvgText
@@ -342,9 +368,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

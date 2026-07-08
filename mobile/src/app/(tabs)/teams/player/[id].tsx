@@ -223,7 +223,7 @@ function ScoutingCard({
     <View style={[styles.card, style]}>
       <View style={styles.headerRow}>
         <View style={styles.headerTitleGroup}>
-          <Text style={styles.sectionLabel}>Player Profile</Text>
+          <Text style={styles.sectionLabel}>Profile</Text>
           <Pressable
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
@@ -870,8 +870,8 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   sectionLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',

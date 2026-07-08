@@ -4,8 +4,10 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
+import { useTeams } from '@/api/hooks';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
 
 const LOOKBACK = 10;
@@ -32,6 +34,14 @@ export function DisciplineTrend({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  // Opponent flag per bar — the x-axis identifies who each match was
+  // against.
+  const allTeams = useTeams();
+  const flagByTeam = useMemo(() => {
+    const m = new Map<string, string>();
+    for (const t of allTeams.data ?? []) m.set(t.id, t.flag_code);
+    return m;
+  }, [allTeams.data]);
   const analysis = useTeamAnalysis(teamId);
   const { data, isLoading } = useTeamMatchSeries(teamId, LOOKBACK);
 
@@ -41,7 +51,7 @@ export function DisciplineTrend({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Discipline Trend"
+          title="Discipline"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.disciplineTrend}
           purpose={
@@ -53,7 +63,7 @@ export function DisciplineTrend({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Discipline Trend</Text>
+        <Text style={styles.sectionLabel}>Discipline</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -68,7 +78,11 @@ export function DisciplineTrend({
       ) : data.length === 0 ? (
         <Text style={styles.empty}>No completed matches yet.</Text>
       ) : (
-        <TrendChart values={data.map((d) => d.penaltiesConceded)} />
+        <TrendChart
+          values={data.map((d) => d.penaltiesConceded)}
+          opponents={data.map((d) => d.opponentId)}
+          flagByTeam={flagByTeam}
+        />
       )}
 
         </View>
@@ -77,7 +91,15 @@ export function DisciplineTrend({
   );
 }
 
-function TrendChart({ values }: { values: readonly number[] }) {
+function TrendChart({
+  values,
+  opponents,
+  flagByTeam,
+}: {
+  values: readonly number[];
+  opponents: readonly string[];
+  flagByTeam: ReadonlyMap<string, string>;
+}) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
   const width = canvas.w;
   const height = canvas.h;
@@ -85,9 +107,14 @@ function TrendChart({ values }: { values: readonly number[] }) {
   const padRight = 8;
   // Room for the value badges above the tallest bar.
   const padTop = 22;
-  const padBottom = 6;
+  // Bottom axis band: 6pt air, 16pt opponent shield, 6pt air.
+  const SHIELD = 16;
+  const padBottom = SHIELD + 12;
 
   const maxVal = Math.max(PENS_HIGH + 2, ...values);
+  // The team's own average across the window — the personal baseline
+  // the 9/12 bands frame.
+  const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
   const plotBottom = height - padBottom;
   const yOf = (v: number) => padTop + (1 - v / maxVal) * (plotBottom - padTop);
 
@@ -121,6 +148,7 @@ function TrendChart({ values }: { values: readonly number[] }) {
         })
       }>
       {width > 0 && height > 0 ? (
+        <>
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
           {bars.map((b, i) => (
             <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
@@ -134,6 +162,26 @@ function TrendChart({ values }: { values: readonly number[] }) {
           <SvgText x={0} y={yOf(PENS_HIGH) + 3} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} textAnchor="start">
             {PENS_HIGH}
           </SvgText>
+          {/* The team's average — dotted, darker than the reference
+              bands, labelled at the right edge. */}
+          <Line
+            x1={padLeft}
+            y1={yOf(avg)}
+            x2={width - padRight}
+            y2={yOf(avg)}
+            stroke={Colors.light.textSecondary}
+            strokeWidth={1}
+            strokeDasharray="2 3"
+          />
+          <SvgText
+            x={0}
+            y={yOf(avg) - 4}
+            fill={Colors.light.textSecondary}
+            fontFamily="Barlow_500Medium"
+            fontSize={9}
+            textAnchor="start">
+            avg
+          </SvgText>
           {/* Value badges above each bar — same quiet circular badge
               as the Form / Scoring Rhythm values. */}
           {bars.map((b, i) => (
@@ -143,14 +191,29 @@ function TrendChart({ values }: { values: readonly number[] }) {
                 x={b.cx}
                 y={b.y - 8}
                 fill={Colors.light.textSecondary}
-                fontFamily="Barlow_500Medium"
-                fontSize={9}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {b.v}
               </SvgText>
             </G>
           ))}
         </Svg>
+          {/* Opponent shields along the x-axis — 6pt air both sides
+              inside the reserved bottom band. */}
+          {bars.map((b, i) => {
+            const flag = flagByTeam.get(opponents[i] ?? '');
+            if (!flag) return null;
+            return (
+              <View
+                key={`f${i}`}
+                style={{ position: 'absolute', left: b.cx - SHIELD / 2, top: plotBottom + 6 }}
+                pointerEvents="none">
+                <TeamFlagShield flagCode={flag} width={SHIELD} />
+              </View>
+            );
+          })}
+        </>
       ) : null}
     </View>
   );
@@ -183,9 +246,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

@@ -48,7 +48,7 @@ export function TeamLandscape({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Team Landscape"
+          title="Landscape"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.landscape}
           purpose={
@@ -60,7 +60,7 @@ export function TeamLandscape({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Team Landscape</Text>
+        <Text style={styles.sectionLabel}>Landscape</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -117,9 +117,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   empty: {
     fontSize: TextSize.sm,

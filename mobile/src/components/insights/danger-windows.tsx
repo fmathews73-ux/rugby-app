@@ -59,7 +59,7 @@ export function DangerWindows({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Danger Windows"
+          title="Danger"
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Each side's average points scored (up, green) and conceded (down, red) per 20-minute window — where one team's strong quarter lands on the other's weak one is where the match can swing.</>}
@@ -72,7 +72,7 @@ export function DangerWindows({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Danger Windows</Text>
+        <Text style={styles.sectionLabel}>Danger</Text>
         <View style={styles.headerCentre}>
           <TeamToggle
             primaryLabel={homeCode}
@@ -220,8 +220,8 @@ function WindowsChart({
                 x={b.up.x + b.up.w / 2}
                 y={b.up.y - 8}
                 fill={Colors.light.textSecondary}
-                fontFamily="Barlow_500Medium"
-                fontSize={9}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {fmt(b.up.v)}
               </SvgText>
@@ -234,8 +234,8 @@ function WindowsChart({
                 x={b.down.x + b.down.w / 2}
                 y={b.down.y + b.down.h + 14}
                 fill={Colors.light.textSecondary}
-                fontFamily="Barlow_500Medium"
-                fontSize={9}
+                fontFamily="BarlowCondensed_700Bold_Italic"
+                fontSize={11}
                 textAnchor="middle">
                 {fmt(b.down.v)}
               </SvgText>
@@ -296,10 +296,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,

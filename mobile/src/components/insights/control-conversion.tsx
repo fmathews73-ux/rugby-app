@@ -53,7 +53,7 @@ export function ControlConversion({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Control vs Conversion"
+          title="Verdict"
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Territory and possession control set against points per 22 entry — did the side that ran the match actually bank it on the scoreboard?</>}
@@ -62,7 +62,7 @@ export function ControlConversion({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Control vs Conversion</Text>
+        <Text style={styles.sectionLabel}>Verdict</Text>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -224,10 +224,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,

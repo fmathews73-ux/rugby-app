@@ -116,7 +116,7 @@ export function EfficiencyKpis({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title={title ?? 'Efficiency KPIs'}
+          title={title ?? 'Efficiency'}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.kpis}
           purpose={
@@ -129,7 +129,7 @@ export function EfficiencyKpis({
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title ?? 'Efficiency KPIs'}</Text>
+        <Text style={styles.sectionLabel}>{title ?? 'Efficiency'}</Text>
         <View style={styles.headerRightGroup}>
           {hasCompare ? (
             <TeamToggle
@@ -298,9 +298,11 @@ const styles = StyleSheet.create({
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
   },
   headerMeta: {
     fontSize: TextSize.xs,
@@ -335,7 +337,7 @@ const styles = StyleSheet.create({
   // Mini score tile in the fixed right rail — match-score convention:
   // loser pairing by default, winner pairing when beating the average.
   kpiValueBox: {
-    width: 52,
+    width: 44,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
@@ -344,8 +346,11 @@ const styles = StyleSheet.create({
   },
   kpiValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   kpiValueText: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    // Trial: the match-score face on KPI values — condensed italic at
+    // the row-score size (the tile already follows the win/loss fill
+    // convention, so the digits now match the scoreboard voice too).
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
   },
   kpiValueTextWin: { color: Colors.light.textInverse },

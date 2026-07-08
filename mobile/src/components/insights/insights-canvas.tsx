@@ -195,10 +195,11 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   sectionLabel: {
-    // Chart-card title rule — same as the Home carousel cards.
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   chartWrap: { position: 'relative' },
   // One row below the canvas, centred — the card's minHeight slack
@@ -224,10 +225,11 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   legendLabel: {
-    fontSize: TextSize.xs,
-    fontWeight: TextWeight.bold,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,

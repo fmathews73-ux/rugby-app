@@ -50,10 +50,10 @@ export function AppHeader() {
 
       <View style={styles.centreSlot}>
         {/* Brand wordmark — text build in the app's sport-display face
-            (Barlow Condensed 700 Italic). Name trial: RUGBY.METRICS
+            (Barlow Condensed 700 Italic). Name trial: RUGBYMETRICS
             (register #23 still open). */}
         <Text style={styles.wordmarkMain} accessible accessibilityLabel="Rugby Metrics">
-          RUGBY.METRICS
+          RUGBYMETRICS
         </Text>
       </View>
       {/* Right slot reserved for Fantasy entry (register #25 deferred). */}
