@@ -3,7 +3,7 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -42,7 +42,7 @@ export function ScoringRhythm({
     (scored.data?.gamesUsed ?? 0) > 0 && (conceded.data?.gamesUsed ?? 0) > 0;
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -65,7 +65,7 @@ export function ScoringRhythm({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the scoring rhythm chart">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

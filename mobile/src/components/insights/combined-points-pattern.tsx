@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } fro
 import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
 import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers, type ScoringMarker } from '@/lib/scoring-markers';
@@ -71,7 +71,7 @@ export function CombinedPointsPattern({
   const canRender = fixtureHasMomentum(fixture.data?.status);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -92,7 +92,7 @@ export function CombinedPointsPattern({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Read the momentum analysis">
-            <AppLogo height={14} />
+            <AppLogo height={14} spin />
           </Pressable>
         </View>
       </View>

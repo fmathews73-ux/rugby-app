@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -129,7 +129,7 @@ export function AxisHeadToHead({
     (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -161,7 +161,7 @@ export function AxisHeadToHead({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Explain ${info.title}`}>
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

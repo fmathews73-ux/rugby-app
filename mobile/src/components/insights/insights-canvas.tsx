@@ -6,7 +6,7 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
@@ -97,7 +97,7 @@ export function InsightsCanvas({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the Profile radar">
-            <AppLogo height={14} />
+            <AppLogo height={14} spin />
           </Pressable>
         </View>
       </View>
@@ -135,7 +135,7 @@ export function InsightsCanvas({
   );
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       front={front}

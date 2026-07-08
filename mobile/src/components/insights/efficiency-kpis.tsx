@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -112,7 +112,7 @@ export function EfficiencyKpis({
   }, [data]);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -147,7 +147,7 @@ export function EfficiencyKpis({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain Efficiency KPIs">
-            <AppLogo height={14} />
+            <AppLogo height={14} spin />
           </Pressable>
         </View>
       </View>

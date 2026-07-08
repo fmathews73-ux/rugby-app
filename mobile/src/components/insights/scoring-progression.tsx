@@ -16,7 +16,7 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
@@ -142,7 +142,7 @@ export function ScoringProgression({
   const hasScoring = series.home.length > 1 || series.away.length > 1;
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -163,7 +163,7 @@ export function ScoringProgression({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Read the scoring progression analysis">
-            <AppLogo height={14} />
+            <AppLogo height={14} spin />
           </Pressable>
         </View>
       </View>

@@ -6,7 +6,7 @@ import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 import type { Fixture, Team } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeams } from '@/api/hooks';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
@@ -49,7 +49,7 @@ export function ControlConversion({
   const away = teams.data?.find((t) => t.id === awayTeamId);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -69,7 +69,7 @@ export function ControlConversion({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the control versus conversion analysis">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

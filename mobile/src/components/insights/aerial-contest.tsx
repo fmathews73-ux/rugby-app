@@ -3,7 +3,7 @@ import { useState } from 'react';
 import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
@@ -85,7 +85,7 @@ export function AerialContest({
     : [];
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -117,7 +117,7 @@ export function AerialContest({
                 hitSlop={10}
                 accessibilityRole="button"
                 accessibilityLabel="Read the aerial contest analysis">
-                <AppLogo height={14} />
+                <AppLogo height={14} spin />
               </Pressable>
             </View>
           </View>

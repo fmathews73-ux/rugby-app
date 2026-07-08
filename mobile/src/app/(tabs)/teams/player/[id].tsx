@@ -15,7 +15,7 @@ import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor,
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { FadingScrollView } from '@/components/fading-scroll-view';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import {
@@ -218,7 +218,7 @@ function ScoutingCard({
     GROUP_LABELS[percentiles.data?.position_group ?? ''] ?? 'positional peers';
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -245,7 +245,7 @@ function ScoutingCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the player profile analysis">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 
@@ -356,7 +356,7 @@ function TrendCard({
   );
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -382,7 +382,7 @@ function TrendCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the form analysis">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 
@@ -523,7 +523,7 @@ function SeasonCard({
   }, [data]);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -549,7 +549,7 @@ function SeasonCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the season analysis">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
       {isLoading && !data ? (

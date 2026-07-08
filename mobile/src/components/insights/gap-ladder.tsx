@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import type { SignedGapView } from '@/hooks/use-match-preview';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -82,7 +82,7 @@ export function GapLadder({
     (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -114,7 +114,7 @@ export function GapLadder({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the profile head-to-head chart">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

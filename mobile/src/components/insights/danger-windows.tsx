@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
@@ -55,7 +55,7 @@ export function DangerWindows({
     (scored.data?.gamesUsed ?? 0) > 0 && (conceded.data?.gamesUsed ?? 0) > 0;
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -87,7 +87,7 @@ export function DangerWindows({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the danger windows chart">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

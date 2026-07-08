@@ -6,7 +6,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 
 import { useFixtureResult } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
@@ -251,7 +251,7 @@ function MatchH2HCard({
   const notStarted = fixture.status === 'scheduled';
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -280,7 +280,7 @@ function MatchH2HCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read the ${title} analysis`}>
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

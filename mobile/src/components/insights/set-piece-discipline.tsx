@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -43,7 +43,7 @@ export function SetPieceDiscipline({
   }, [summary.data, teams.data]);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -66,7 +66,7 @@ export function SetPieceDiscipline({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the set-piece and discipline matrix">
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
 

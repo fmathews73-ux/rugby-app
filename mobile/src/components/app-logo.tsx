@@ -1,3 +1,5 @@
+import { useEffect, useRef } from 'react';
+import { Animated, Easing } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 
 // Exact geometry extracted from the owner-licensed reference vector
@@ -13,12 +15,49 @@ const LOGO_PATH =
 const LOGO_RED = '#FF0000';
 
 /** App logo mark — `height` scales the whole artwork (width follows
- *  the true aspect). */
-export function AppLogo({ height = 22, color = LOGO_RED }: { height?: number; color?: string }) {
+ *  the true aspect). `spin` runs a slow continuous rotation (native
+ *  driver, pure transform) — used on the chart flip triggers so the
+ *  mark reads as pressable; the header lockup stays still. */
+export function AppLogo({
+  height = 22,
+  color = LOGO_RED,
+  spin = false,
+}: {
+  height?: number;
+  color?: string;
+  spin?: boolean;
+}) {
   const width = (height / LOGO_H) * LOGO_W;
-  return (
+  const turn = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    if (!spin) return;
+    const loop = Animated.loop(
+      Animated.timing(turn, {
+        toValue: 1,
+        duration: 8000,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [spin, turn]);
+
+  const mark = (
     <Svg width={width} height={height} viewBox={`0 0 ${LOGO_W} ${LOGO_H}`}>
       <Path d={LOGO_PATH} fill={color} />
     </Svg>
+  );
+  if (!spin) return mark;
+  return (
+    <Animated.View
+      style={{
+        transform: [
+          { rotate: turn.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '360deg'] }) },
+        ],
+      }}>
+      {mark}
+    </Animated.View>
   );
 }

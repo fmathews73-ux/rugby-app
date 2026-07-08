@@ -2,7 +2,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
-import { BackStrong, FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { BackStrong, FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -54,7 +54,7 @@ function Populated({
     // card to its narrative back face — purpose + live read — instead
     // of opening a modal. The overall team summary narrative lives on
     // this card's back; the radar is the app's overall-shape card.
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       front={
@@ -67,7 +67,7 @@ function Populated({
               hitSlop={10}
               accessibilityRole="button"
               accessibilityLabel="Explain the Profile radar">
-              <AppLogo height={14} />
+              <AppLogo height={14} spin />
             </Pressable>
           </View>
 

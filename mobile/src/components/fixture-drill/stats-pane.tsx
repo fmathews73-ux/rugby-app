@@ -6,7 +6,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 
 import { useFixtureEvents } from '@/api/hooks';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { LoadingState } from '@/components/state-views';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -206,7 +206,7 @@ export function StatsPane({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read about ${section.title}`}>
-          <AppLogo height={14} />
+          <AppLogo height={14} spin />
         </Pressable>
       </View>
       {section.stats.map((s) => (
@@ -223,7 +223,7 @@ export function StatsPane({
   );
 
   const renderCard = (section: (typeof sections)[number]) => (
-    <FlipCard
+    <FadeCard
       key={section.title}
       flipped={flippedSection?.title === section.title}
       back={

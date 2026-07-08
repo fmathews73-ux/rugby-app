@@ -5,7 +5,7 @@ import Svg, { G, Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { FlipCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { AppLogo } from '@/components/app-logo';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -79,7 +79,7 @@ export function RankingTrajectory({
   }, [history.data, activeTeamId, asOfDate]);
 
   return (
-    <FlipCard
+    <FadeCard
       style={style}
       flipped={infoOpen}
       back={
@@ -114,7 +114,7 @@ export function RankingTrajectory({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the World Ranking chart">
-            <AppLogo height={14} />
+            <AppLogo height={14} spin />
           </Pressable>
         </View>
       </View>

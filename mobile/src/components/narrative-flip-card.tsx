@@ -1,62 +1,9 @@
-import { Ionicons } from '@expo/vector-icons';
 import type { ReactNode } from 'react';
 import { useEffect, useRef } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
+import { AppLogo } from '@/components/app-logo';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
-
-/**
- * Flip-card container — the card's info icon flips it to a narrative
- * back face (metric purpose + the live read) instead of opening a
- * modal, keeping the insight physically attached to its evidence.
- * Pure rotateY transform on the native driver (no layout animation).
- */
-export function FlipCard({
-  flipped,
-  front,
-  back,
-  style,
-}: {
-  flipped: boolean;
-  front: ReactNode;
-  back: ReactNode;
-  style?: StyleProp<ViewStyle>;
-}) {
-  const anim = useRef(new Animated.Value(flipped ? 1 : 0)).current;
-  useEffect(() => {
-    Animated.timing(anim, {
-      toValue: flipped ? 1 : 0,
-      duration: 420,
-      easing: Easing.inOut(Easing.ease),
-      useNativeDriver: true,
-    }).start();
-  }, [flipped, anim]);
-
-  const frontRot = anim.interpolate({ inputRange: [0, 1], outputRange: ['0deg', '180deg'] });
-  const backRot = anim.interpolate({ inputRange: [0, 1], outputRange: ['180deg', '360deg'] });
-
-  return (
-    <View style={style}>
-      <Animated.View
-        style={[
-          styles.face,
-          { transform: [{ perspective: 1000 }, { rotateY: frontRot }] },
-        ]}
-        pointerEvents={flipped ? 'none' : 'auto'}>
-        {front}
-      </Animated.View>
-      <Animated.View
-        style={[
-          styles.face,
-          styles.backFace,
-          { transform: [{ perspective: 1000 }, { rotateY: backRot }] },
-        ]}
-        pointerEvents={flipped ? 'auto' : 'none'}>
-        {back}
-      </Animated.View>
-    </View>
-  );
-}
 
 /**
  * Standard narrative back face — dark card matching the front's
@@ -78,20 +25,20 @@ export function NarrativeBack({
       <View style={styles.headerRow}>
         <Text style={styles.title}>{title}</Text>
         <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back to chart">
-          <Ionicons name="close" size={16} color="rgba(255,255,255,0.85)" />
+          <AppLogo height={16} color={Colors.light.textSecondary} spin />
         </Pressable>
       </View>
       {/* NO scrolling — the narrative must fit the card's footprint.
           That cap is deliberate (owner rule): prose stays focused and
           to the point, or it gets cut. */}
       <View style={styles.backBody}>
-        <Text style={styles.eyebrow}>What this shows</Text>
+        <Text style={styles.eyebrow}>About</Text>
         <Text style={styles.body}>{purpose}</Text>
         {/* Read block only renders when a narrative feed exists —
             explainer-only backs (Stats categories) omit it. */}
         {read !== undefined ? (
           <>
-            <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>The read</Text>
+            <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>Insights</Text>
             <Text style={styles.body}>{read ?? 'Analysing…'}</Text>
           </>
         ) : null}
@@ -100,36 +47,69 @@ export function NarrativeBack({
   );
 }
 
+/**
+ * Card transition (app-wide since 2026-07-08, superseding the rotateY
+ * flip): the narrative back face fades in over the chart — calm and
+ * unhurried, letting the read arrive rather than snap. Pure
+ * native-driver opacity.
+ */
+export function FadeCard({
+  flipped,
+  front,
+  back,
+  style,
+}: {
+  flipped: boolean;
+  front: ReactNode;
+  back: ReactNode;
+  style?: StyleProp<ViewStyle>;
+}) {
+  const fade = useRef(new Animated.Value(flipped ? 1 : 0)).current;
+
+  useEffect(() => {
+    Animated.timing(fade, {
+      toValue: flipped ? 1 : 0,
+      duration: 1000,
+      easing: Easing.inOut(Easing.ease),
+      useNativeDriver: true,
+    }).start();
+  }, [flipped, fade]);
+
+  return (
+    <View style={style}>
+      {front}
+      <Animated.View
+        style={[styles.revealFill, { opacity: fade }]}
+        pointerEvents={flipped ? 'auto' : 'none'}>
+        {back}
+      </Animated.View>
+    </View>
+  );
+}
+
+
 /** Bold span for use inside `purpose` copy. */
 export function BackStrong({ children }: { children: ReactNode }) {
   return <Text style={strongStyle}>{children}</Text>;
 }
 
-const strongStyle = { fontWeight: '700' as const, color: '#FFFFFF' };
+const strongStyle = { fontFamily: 'Barlow_600SemiBold', color: Colors.light.text };
 
 const styles = StyleSheet.create({
-  // flexGrow with the default auto basis: the face keeps the front
-  // card's NATURAL content height (the carousel's equal-height pass
-  // measures it exactly as it measured the bare card), and only grows
-  // when the carousel stretches siblings. flex:1 (basis 0) breaks that
-  // measurement and inflates cards past their content.
-  face: {
-    flexGrow: 1,
-    backfaceVisibility: 'hidden',
+  backCard: {
+    flex: 1,
+    // White narrative surface (owner call 2026-07-08) — the read
+    // presents as the card's own page, dark text on white.
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    padding: Spacing.three,
   },
-  backFace: {
+  revealFill: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
-  },
-  backCard: {
-    flex: 1,
-    // Winning-score grey — the back face shares the score tiles' fill.
-    backgroundColor: Colors.light.textSecondary,
-    borderRadius: 12,
-    padding: Spacing.three,
   },
   headerRow: {
     flexDirection: 'row',
@@ -138,25 +118,29 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.two,
   },
   title: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
-    color: '#FFFFFF',
+    // Brand red — the narrative page is signed by the mark.
+    color: '#FF0000',
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.xs,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
-    color: 'rgba(255,255,255,0.55)',
+    color: '#9CA3AF',
     marginBottom: Spacing.one,
   },
   eyebrowSpaced: { marginTop: Spacing.two },
+  // Matches the hero meta register (competition · venue line):
+  // Barlow_500Medium sm in textSecondary.
   body: {
+    fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     lineHeight: 18,
-    color: 'rgba(255,255,255,0.92)',
+    color: Colors.light.textSecondary,
   },
 });
