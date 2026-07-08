@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { fitToLines } from '@/lib/fit-narrative';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
@@ -27,11 +28,13 @@ export function NarrativeBack({
   // text silently vanishing below the card edge.
   const [readLines, setReadLines] = useState<number>();
 
-  if (__DEV__ && typeof read === 'string' && read.length > 450) {
-    // Tripwire for the narrative length budget (spec §5.7) — flags the
-    // offending template field while browsing in dev.
+  if (__DEV__ && typeof read === 'string' && read.length > 900) {
+    // Tripwire for the narrative material ceiling — composite reads
+    // arrive pre-fitted to ≤900 chars (display then sentence-fits to
+    // the measured card); anything past this leaked around
+    // fitNarrative and needs its call site fixed (spec §5.7).
     console.warn(
-      `Narrative over budget on "${title}": ${read.length} chars (cap 450)`,
+      `Narrative over material ceiling on "${title}": ${read.length} chars (cap 900)`,
     );
   }
 
@@ -52,18 +55,30 @@ export function NarrativeBack({
         {/* Read block only renders when a narrative feed exists —
             explainer-only backs (Stats categories) omit it. */}
         {read !== undefined ? (
-          <>
-            <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>Insights</Text>
-            <View
-              style={styles.readFill}
-              onLayout={(e) =>
-                setReadLines(Math.max(2, Math.floor(e.nativeEvent.layout.height / BODY_LINE_HEIGHT)))
-              }>
-              <Text style={styles.body} numberOfLines={readLines}>
-                {read ?? 'Analysing…'}
-              </Text>
-            </View>
-          </>
+          <View
+            style={styles.readFill}
+            onLayout={(e) =>
+              // Eyebrow (~line-height + spacing) comes out of the block's
+              // measured height before line capacity is computed. NO
+              // minimum: a card whose About fills it renders no partial
+              // Insights (a forced 2-line floor was slicing text at the
+              // card edge on the short stats cards).
+              setReadLines(
+                Math.floor((e.nativeEvent.layout.height - READ_EYEBROW_HEIGHT) / BODY_LINE_HEIGHT),
+              )
+            }>
+            {readLines === undefined || readLines >= 1 ? (
+              <>
+                <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>Insights</Text>
+                {/* Sentence-fit to the measured capacity — every card
+                    carries as much whole-sentence prose as it can hold;
+                    numberOfLines stays as the belt-and-braces clamp. */}
+                <Text style={styles.body} numberOfLines={readLines}>
+                  {read && readLines ? fitToLines(read, readLines) : (read ?? 'Analysing…')}
+                </Text>
+              </>
+            ) : null}
+          </View>
         ) : null}
       </View>
     </View>
@@ -117,6 +132,9 @@ export function BackStrong({ children }: { children: ReactNode }) {
 }
 
 const BODY_LINE_HEIGHT = 18;
+// Insights eyebrow footprint inside the measured block: eyebrow line
+// (~15) + its top spacing (Spacing.two = 8) + bottom margin (4).
+const READ_EYEBROW_HEIGHT = 27;
 
 const strongStyle = { fontFamily: 'Barlow_600SemiBold', color: Colors.light.text };
 

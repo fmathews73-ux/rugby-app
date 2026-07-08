@@ -41,6 +41,10 @@ export interface CardCarouselHandle {
   scrollToPage: (index: number, animated?: boolean) => void;
 }
 
+// Truncated dot strip — beyond this many pages the strip windows
+// around the active dot (Instagram pattern) instead of growing.
+const MAX_DOTS = 7;
+
 export const CardCarousel = forwardRef<
   CardCarouselHandle,
   {
@@ -111,12 +115,32 @@ export const CardCarousel = forwardRef<
       </ScrollView>
 
       <View style={styles.dotsRow}>
-        {pages.map((_, i) => (
-          <View
-            key={i}
-            style={[styles.dot, activeIdx === i ? styles.dotActive : styles.dotInactive]}
-          />
-        ))}
+        {(() => {
+          const n = pages.length;
+          const windowed = n > MAX_DOTS;
+          const start = windowed
+            ? Math.max(0, Math.min(activeIdx - Math.floor(MAX_DOTS / 2), n - MAX_DOTS))
+            : 0;
+          const count = windowed ? MAX_DOTS : n;
+          return Array.from({ length: count }, (_, k) => {
+            const i = start + k;
+            // Edge dots shrink when pages continue past that side of
+            // the window — the "there's more" cue.
+            const isEdgeCue =
+              windowed &&
+              ((k === 0 && start > 0) || (k === count - 1 && start + count < n));
+            return (
+              <View
+                key={i}
+                style={[
+                  styles.dot,
+                  isEdgeCue && styles.dotSmall,
+                  activeIdx === i ? styles.dotActive : styles.dotInactive,
+                ]}
+              />
+            );
+          });
+        })()}
       </View>
     </View>
   );
@@ -129,10 +153,15 @@ const styles = StyleSheet.create({
   dotsRow: {
     flexDirection: 'row',
     justifyContent: 'center',
+    alignItems: 'center',
     gap: 8,
     paddingTop: Spacing.three,
+    // Fixed height so 6pt and 4pt dots baseline-centre without the
+    // row breathing when the window slides.
+    height: 14,
   },
   dot: { width: 6, height: 6, borderRadius: 999 },
+  dotSmall: { width: 4, height: 4 },
   dotActive: { backgroundColor: Colors.light.textSecondary },
   dotInactive: {
     backgroundColor: 'transparent',

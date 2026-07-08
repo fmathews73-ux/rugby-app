@@ -10,6 +10,7 @@ import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
+import { PAIR_PURPOSES } from '@/lib/analysis-section-info';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
 
@@ -219,7 +220,7 @@ export function MatchAxisH2H({
       awayCode={awayCode}
       rows={rows}
       read={read}
-      purpose="This match's numbers for the pair — live while the game runs, final at full-time. Each bar is the toggled side's read against the other side's dark tick."
+      purpose={PAIR_PURPOSES[pairTitle]?.match ?? "This match's numbers for the pair, live while the game runs, final at full-time."}
       style={style}
     />
   );

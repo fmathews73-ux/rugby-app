@@ -5,6 +5,7 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
 import { ControlConversion } from '@/components/insights/control-conversion';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
@@ -115,7 +116,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
           homeCode={homeCode}
           awayCode={awayCode}
           style={styles.pageCard}
-          read={paragraphs.length > 0 ? paragraphs.join('\n\n') : null}
+          read={fitNarrative(paragraphs, 900)}
         />,
       );
     }

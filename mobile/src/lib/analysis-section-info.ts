@@ -102,3 +102,42 @@ export const PRE_MATCH_AXIS_PAIRS: readonly {
   { title: 'Possession & Turnovers', keys: ['possession', 'turnovers'] },
 ];
 
+/**
+ * Per-pair About copy for the axis-pair card backs — every card's
+ * About must account for ITS departments (owner rule 2026-07-08), not
+ * a shared "per-game averages" boilerplate. Preview = coming-in
+ * last-10 framing; match = this-match framing.
+ */
+export const PAIR_PURPOSES: Record<string, { preview: string; match: string }> = {
+  'Attack & Defence': {
+    preview:
+      'What each side scores and what it lets in, from the last 10: strike output a game against tackle work and points conceded. Each bar is one side\u2019s average; the dark tick is the rival\u2019s number to beat.',
+    match:
+      'This match\u2019s strike ledger: attacking output against tackle work, live while the game runs and settled at full-time. Each bar is the toggled side\u2019s number against the other side\u2019s dark tick.',
+  },
+  'Set Piece & Discipline': {
+    preview:
+      'The platform game coming in: scrum and lineout returns set against the penalty ledger, from the last 10. A side that wins its own ball but keeps conceding penalties hands the platform straight back.',
+    match:
+      'The platform battle in this match: set-piece returns against the penalty count as they stand. Live it shows whose game is built on solid ball; at full-time, whose held up.',
+  },
+  'Kicking & Territory': {
+    preview:
+      'The kicking exchange coming in: boot volume and territory share from the last 10. The side that wins this line gets to play the match in the right half of the pitch.',
+    match:
+      'Tonight\u2019s kicking exchange: kick volume and territory share as they stand. The side winning this line is choosing where the match is played.',
+  },
+  'Aerial Contest': {
+    preview:
+      'The contestable slice of the kicking game, from the last 10: how often each side puts the ball up to compete, how much of it they get back, and how safe the back field has been under the high ball.',
+    match:
+      'The aerial exchange in this match: contestables delivered and regathered against receptions secured under pressure.',
+  },
+  'Possession & Turnovers': {
+    preview:
+      'Who keeps the ball and who gives it back, from the last 10: possession share against the turnover ledger. Control here sets the terms every other department works under.',
+    match:
+      'Ball ownership in this match: possession share against turnovers, live to the minute. Control here is what every other card has to work with.',
+  },
+};
+

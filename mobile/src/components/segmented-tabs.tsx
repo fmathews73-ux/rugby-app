@@ -1,5 +1,5 @@
 import { LinearGradient } from 'expo-linear-gradient';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   type NativeScrollEvent,
   type NativeSyntheticEvent,
@@ -57,13 +57,41 @@ export function SegmentedTabs<T extends string>({
   const showEndFade = contentW > viewportW && scrollX < contentW - viewportW - 4;
   const showStartFade = contentW > viewportW && scrollX > 4;
 
-  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) =>
+  const scrollRef = useRef<ScrollView>(null);
+  const scrollXRef = useRef(0);
+  const pillLayouts = useRef<Partial<Record<T, { x: number; w: number }>>>({});
+
+  const onScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+    scrollXRef.current = e.nativeEvent.contentOffset.x;
     setScrollX(e.nativeEvent.contentOffset.x);
+  };
+
+  // Selection auto-scroll: bring the active pill AND its next
+  // neighbour fully into view (mirrored on the left), so selecting the
+  // second-to-last pill always reveals the last one — users were
+  // missing Stats behind the edge fade after tapping Match Analysis.
+  useEffect(() => {
+    if (viewportW === 0) return;
+    const idx = tabs.findIndex((t) => t.id === active);
+    const cur = pillLayouts.current[active];
+    if (idx < 0 || !cur) return;
+    const next = idx + 1 < tabs.length ? pillLayouts.current[tabs[idx + 1].id] : null;
+    const prev = idx > 0 ? pillLayouts.current[tabs[idx - 1].id] : null;
+    const rightEdge = (next ? next.x + next.w : cur.x + cur.w) + PillStrip.stripPadH;
+    const leftEdge = (prev ? prev.x : cur.x) - PillStrip.stripPadH;
+    const x = scrollXRef.current;
+    if (rightEdge - x > viewportW) {
+      scrollRef.current?.scrollTo({ x: rightEdge - viewportW, animated: true });
+    } else if (leftEdge < x) {
+      scrollRef.current?.scrollTo({ x: Math.max(0, leftEdge), animated: true });
+    }
+  }, [active, viewportW, tabs]);
 
   return (
     <View style={styles.wrap}>
       <View style={styles.scrollArea}>
       <ScrollView
+        ref={scrollRef}
         horizontal
         showsHorizontalScrollIndicator={false}
         onLayout={(e) => setViewportW(Math.round(e.nativeEvent.layout.width))}
@@ -77,6 +105,12 @@ export function SegmentedTabs<T extends string>({
             <Pressable
               key={t.id}
               onPress={() => onSelect(t.id)}
+              onLayout={(e) => {
+                pillLayouts.current[t.id] = {
+                  x: e.nativeEvent.layout.x,
+                  w: e.nativeEvent.layout.width,
+                };
+              }}
               style={[styles.pill, isActive ? styles.pillActive : styles.pillInactive]}>
               <Text
                 style={[

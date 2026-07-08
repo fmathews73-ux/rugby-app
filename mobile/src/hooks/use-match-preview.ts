@@ -188,6 +188,33 @@ function winsOf(outcomes: readonly FormOutcome[]): number {
   return outcomes.filter((o) => o === 'W').length;
 }
 
+/** One sentence on the two sides' live streaks (most-recent-first
+ *  outcome arrays). Always returns a sentence when form exists so the
+ *  summary has a guaranteed second beat. */
+function runSentence(
+  home: Team,
+  away: Team,
+  homeForm: readonly FormOutcome[],
+  awayForm: readonly FormOutcome[],
+): string {
+  const phrase = (t: Team, outcomes: readonly FormOutcome[]): string | null => {
+    if (outcomes.length < 2) return null;
+    const kind = outcomes[0]!;
+    if (kind === 'D') return null;
+    let len = 1;
+    while (len < outcomes.length && outcomes[len] === kind) len++;
+    if (len < 2) return null;
+    return kind === 'W'
+      ? `${t.short_name} arrive on ${len} straight wins`
+      : `${t.short_name} come in off ${len} straight defeats`;
+  };
+  const hp = phrase(home, homeForm);
+  const ap = phrase(away, awayForm);
+  if (hp && ap) return `The runs sharpen it: ${hp}, while ${ap}.`;
+  if (hp || ap) return `${hp ?? ap}, and a live streak always colours the first exchanges.`;
+  return `Neither side brings a streak into it; both recent records read mixed, which puts a premium on settling quickly.`;
+}
+
 function buildSummary(
   home: Team,
   away: Team,
@@ -208,6 +235,7 @@ function buildSummary(
     const hr = Math.min(homeRank, awayRank);
     const lr = Math.max(homeRank, awayRank);
     const gap = lr - hr;
+    const higherWins = higher === home ? hw : aw;
     if (gap >= 8) {
       parts.push(
         `On paper, a mismatch: ${higher.name} sit ${ordinal(hr)} in the world, ${lower.name} down at ${ordinal(lr)}. The interesting question is whether the pitch agrees.`,
@@ -216,11 +244,21 @@ function buildSummary(
         parts.push(
           `It might. ${lower.short_name} have quietly won ${lowerWins} of their last five, and that is exactly the kind of form gaps like this ignore at their peril.`,
         );
+        parts.push(`${higher.short_name}, for their part, have won ${higherWins} of their own last five over the same stretch.`);
       } else if (hasForm) {
         parts.push(
           `${home.short_name} have won ${hw} of their last five, ${away.short_name} ${aw}.`,
         );
+        parts.push(
+          higherWins >= lowerWins
+            ? `Form and rankings point the same way, so the numbers give ${lower.short_name} nowhere to hide and nothing to lose in equal measure.`
+            : `Form runs against the table, which is precisely the tension that gives the fixture its edge.`,
+        );
       }
+      if (hasForm) parts.push(runSentence(home, away, homeForm, awayForm));
+      parts.push(
+        `A gap of ${gap} places sets the terms plainly: ${higher.short_name} defend a status, ${lower.short_name} arrive with nothing to protect, and that asymmetry shapes how much risk each side can afford in the opening quarter.`,
+      );
       return parts.join(' ');
     }
     if (gap >= 3) {
@@ -233,11 +271,26 @@ function buildSummary(
             ? `Form refuses to pick a side: ${hw} wins from the last five apiece.`
             : `Recent form ${(hw > aw ? home : away) === higher ? 'backs the rankings up' : 'muddies it'}: ${home.short_name} have won ${hw} of five, ${away.short_name} ${aw}.`,
         );
+        parts.push(runSentence(home, away, homeForm, awayForm));
       }
+      parts.push(`A ${gap}-place gap is an edge, not a verdict, and both camps will read it exactly that way.`);
+      parts.push(
+        `${higher.short_name} at ${ordinal(hr)} have ranking points to lose; ${lower.short_name} at ${ordinal(lr)} have a scalp to gain, and scalps move rankings faster than routine wins do.`,
+      );
+      parts.push(
+        `Rankings buy billing, not points, and the last five games say more about the eighty minutes ahead than the table does. The only number that matters from kickoff is the 0-0 on the scoreboard.`,
+      );
       return parts.join(' ');
     }
     parts.push(
       `${ordinal(hr)} against ${ordinal(lr)}, and barely a form line between them${hasForm ? ` at ${hw} and ${aw} wins from the last five` : ''}. Even on paper, even on habit. These are the fixtures that get decided by a single moment of control or panic.`,
+    );
+    if (hasForm) parts.push(runSentence(home, away, homeForm, awayForm));
+    parts.push(
+      `${higher.short_name} hold the higher rank by ${gap === 1 ? 'a single place' : `${gap} places`}, which is the kind of margin that swaps hands on any given weekend.`,
+    );
+    parts.push(
+      `Expect the talk all week to be about margins, because the numbers offer nothing else, and expect both benches to be planned around the hour mark rather than any assumption of control.`,
     );
     return parts.join(' ');
   }
@@ -245,6 +298,18 @@ function buildSummary(
   if (hasForm) {
     parts.push(
       `${home.short_name} arrive having won ${hw} of their last five, ${away.short_name} ${aw}. The rankings offer no verdict here, so form is the only paper this match has.`,
+    );
+    parts.push(runSentence(home, away, homeForm, awayForm));
+    parts.push(
+      hw === aw
+        ? `Identical win counts leave nothing to argue over except the manner of them, and manner is exactly what a five-game window cannot show.`
+        : `${(hw > aw ? home : away).short_name}'s record is the healthier of the two, though a one-line form table hides margins, venues and rotation.`,
+    );
+    parts.push(
+      `What the last five cannot settle, the first twenty minutes will: early scoreboard pressure is the fastest way to make a form line look prophetic or foolish.`,
+    );
+    parts.push(
+      `Five games is a short book, but it is the only book, and both coaching teams will have read the same pages looking for the same patterns.`,
     );
   }
   return parts.join(' ');
@@ -268,13 +333,17 @@ function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate):
     `${home.short_name} come in scoring ${f1} a game and conceding ${c1}. ` +
     `${away.short_name} arrive at ${f2} for, ${c2} against.`;
 
-  const gaps = computeSignedGaps(h, a)
+  const hNet = h.perGame.pointsScored - h.perGame.pointsConceded;
+  const aNet = a.perGame.pointsScored - a.perGame.pointsConceded;
+  const netLine = `Those baselines net out at ${signedPhrase(hNet)} a game for ${home.short_name} and ${signedPhrase(aNet)} for ${away.short_name}.`;
+
+  const separated = computeSignedGaps(h, a)
     .filter((g) => Math.abs(g.norm) >= 0.5)
-    .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm))
-    .slice(0, 3);
+    .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm));
+  const gaps = separated.slice(0, 3);
 
   if (gaps.length === 0) {
-    return `${backdrop} The profiles refuse to separate beyond that: nothing in the last ten matches picks a battleground. Fixtures like this get settled by execution, the first fifty-fifty refereeing call, and nerve.`;
+    return `${backdrop} The profiles refuse to separate beyond that: nothing in the last ten matches picks a battleground. Fixtures like this get settled by execution, the first fifty-fifty refereeing call, and nerve. ${netLine} All ten measures on the profile sheet sit inside the thresholds that would name a genuine edge, which is rarer than it sounds across a ten-match window. When the structure gives nobody an inch, the day's variables decide it: the bounce, the bench, and whichever side treats parity as an insult.`;
   }
 
   const phrase = (g: SignedGap): string => {
@@ -302,11 +371,33 @@ function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate):
         ? `${away.short_name} hold most of the levers going in.`
         : `The levers are split between the two sides, which is precisely what makes it a match.`;
 
+  const spreadLine =
+    separated.length === 1
+      ? `Just one of the ten measures genuinely separates these sides; the rest sit within touching distance, which concentrates the contest rather than spreading it.`
+      : separated.length >= 8
+        ? `Fully ${separated.length} of the ten measures separate these sides, so this is a fixture of contrasts rather than a fixture of margins.`
+        : `Only ${separated.length} of the ten measures genuinely separate these sides; the rest sit within touching distance, which concentrates the contest rather than spreading it.`;
+
+  const closer =
+    homeLeads === gaps.length
+      ? `${away.short_name}'s counter is to drag the match somewhere the profile sheet does not reach: tempo, chaos, and the scoreboard pressure of an early strike.`
+      : homeLeads === 0
+        ? `${home.short_name}'s counter is to drag the match somewhere the profile sheet does not reach: tempo, chaos, and the scoreboard pressure of an early strike.`
+        : `With the levers shared out, the first twenty minutes become a negotiation over whose version of the game gets played, and neither side can afford to lose that argument politely.`;
+
   if (gaps.length === 1) {
-    return `${backdrop} One battleground picks itself: ${phrase(gaps[0]!)}. ${verdict}`;
+    return `${backdrop} One battleground picks itself: ${phrase(gaps[0]!)}. ${verdict} ${netLine} ${spreadLine} ${closer}`;
   }
   const names = gaps.map(phrase);
-  return `${backdrop} ${gaps.length === 3 ? 'Three battlegrounds pick themselves' : 'Two battlegrounds pick themselves'}: ${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}. ${verdict}`;
+  return `${backdrop} ${gaps.length === 3 ? 'Three battlegrounds pick themselves' : 'Two battlegrounds pick themselves'}: ${names.slice(0, -1).join(', ')}, and ${names[names.length - 1]}. ${verdict} ${netLine} ${spreadLine} ${closer}`;
+}
+
+/** "plus-8.3" / "minus-2.1" / "dead level" for signed per-game nets. */
+function signedPhrase(n: number): string {
+  const r = Math.round(n * 10) / 10;
+  if (r > 0) return `plus-${fmt(r)}`;
+  if (r < 0) return `minus-${fmt(Math.abs(r))}`;
+  return 'dead level';
 }
 
 // ─── Per-axis coming-in comparison ──────────────────────────────────────────
@@ -348,10 +439,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Attack',
       narrative:
         t === 0
-          ? `Neither attack arrives with a claim on this fixture: ${fmt(hg.pointsScored)} and ${fmt(ag.pointsScored)} points a game, near enough identical. The first defensive error may matter more than the first clean break.`
+          ? `Neither attack arrives with a claim on this fixture: ${fmt(hg.pointsScored)} and ${fmt(ag.pointsScored)} points a game, near enough identical. The first defensive error may matter more than the first clean break. Line-break counts tell the same story at ${fmt(hg.lineBreaks)} and ${fmt(ag.lineBreaks)} a game, so expect points built from pressure rather than pace.`
           : t === 1
-            ? `${lead.short_name} shade the scoring habit at ${fmt(leadG.pointsScored)} a game to ${fmt(trailG.pointsScored)}. Not a gulf. But against a defence that has been conceding ${fmt(trailG.pointsConceded)}, small edges compound.`
-            : `${lead.short_name} bring the fixture's heavyweight attack: ${fmt(leadG.pointsScored)} points a game with ${fmt(leadG.tries)} tries in it. ${trail.short_name} have been letting in ${fmt(trailG.pointsConceded)}. Something gives, and probably early.`,
+            ? `${lead.short_name} shade the scoring habit at ${fmt(leadG.pointsScored)} a game to ${fmt(trailG.pointsScored)}. Not a gulf. But against a defence that has been conceding ${fmt(trailG.pointsConceded)}, small edges compound. The clean-break count reads ${fmt(leadG.lineBreaks)} a game against ${fmt(trailG.lineBreaks)}, and ${lead.short_name} convert their visits at ${fmt(leadG.pointsPerTwentyTwoEntry)} points per 22 entry.`
+            : `${lead.short_name} bring the fixture's heavyweight attack: ${fmt(leadG.pointsScored)} points a game with ${fmt(leadG.tries)} tries in it. ${trail.short_name} have been letting in ${fmt(trailG.pointsConceded)}. Something gives, and probably early. The supply line is real too: ${fmt(leadG.lineBreaks)} clean breaks a game feed that scoreboard, and leaks of that size rarely get patched in a single week.`,
     });
   }
 
@@ -368,10 +459,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Defence',
       narrative:
         t === 0
-          ? `Defence separates nobody here. ${fmt(hg.pointsConceded)} conceded a game plays ${fmt(ag.pointsConceded)}: two lines that have mostly held their shape.`
+          ? `Defence separates nobody here. ${fmt(hg.pointsConceded)} conceded a game plays ${fmt(ag.pointsConceded)}: two lines that have mostly held their shape. Tackle completion backs that up at ${Math.round(hg.tackleSuccessPercent)}% and ${Math.round(ag.tackleSuccessPercent)}%, so whichever line blinks first does so against its own habit. The try count agrees at ${fmt(hg.triesConceded)} and ${fmt(ag.triesConceded)} conceded a game; points may need building rather than taking.`
           : t === 1
-            ? `The tighter line belongs to ${tight.short_name}, conceding ${fmt(tightG.pointsConceded)} a game on a ${Math.round(tightG.tackleSuccessPercent)}% tackle count. It is the kind of margin that shows up in the final quarter rather than the first.`
-            : `Defensively this is lopsided. ${tight.short_name} give up ${fmt(tightG.pointsConceded)} a game; ${loose.short_name} have been leaking ${fmt(looseG.pointsConceded)}. If that gap survives contact with the weekend, the scoreboard will say so.`,
+            ? `The tighter line belongs to ${tight.short_name}, conceding ${fmt(tightG.pointsConceded)} a game on a ${Math.round(tightG.tackleSuccessPercent)}% tackle count. It is the kind of margin that shows up in the final quarter rather than the first. ${loose.short_name} are not leaking badly either at ${fmt(looseG.pointsConceded)} a game; the difference is degree, not kind.`
+            : `Defensively this is lopsided. ${tight.short_name} give up ${fmt(tightG.pointsConceded)} a game; ${loose.short_name} have been leaking ${fmt(looseG.pointsConceded)}. If that gap survives contact with the weekend, the scoreboard will say so. The try lines tell the same story at ${fmt(tightG.triesConceded)} conceded a game against ${fmt(looseG.triesConceded)}, and tries, not penalties, are what a gap this wide usually turns into.`,
     });
   }
 
@@ -385,15 +476,20 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
     const trail = other(gap);
     const leadG = lead === home ? hg : ag;
     const trailSet = Math.round(Math.min(hSet, aSet));
+    const setDriver =
+      Math.abs(hg.scrumSuccessPercent - ag.scrumSuccessPercent) >=
+      Math.abs(hg.lineoutSuccessPercent - ag.lineoutSuccessPercent)
+        ? 'scrum'
+        : 'lineout';
     axes.push({
       key: 'set-piece',
       label: 'Set-piece',
       narrative:
         t === 0
-          ? `Two dependable platforms, ${Math.round(hSet)}% and ${Math.round(aSet)}% combined scrum and lineout. Clean ball for both, so the contest moves elsewhere.`
+          ? `Two dependable platforms, ${Math.round(hSet)}% and ${Math.round(aSet)}% combined scrum and lineout. Clean ball for both, so the contest moves elsewhere. The scrums split ${Math.round(hg.scrumSuccessPercent)}% and ${Math.round(ag.scrumSuccessPercent)}%, the lineouts ${Math.round(hg.lineoutSuccessPercent)}% and ${Math.round(ag.lineoutSuccessPercent)}%, so neither pack has an obvious seam to work at. Expect the platforms to cancel out and the margins to move to the breakdown and the air.`
           : t === 1
-            ? `${lead.short_name} hold the steadier platform, ${Math.round(Math.max(hSet, aSet))}% combined set-piece to ${trailSet}%. Watch the first scrum: it will tell you whether that margin is real on the day.`
-            : `The set-piece is ${lead.short_name}'s to weaponise. Scrum at ${Math.round(leadG.scrumSuccessPercent)}%, lineout at ${Math.round(leadG.lineoutSuccessPercent)}%, against a platform running ${trailSet}% combined. Every ${trail.short_name} feed under pressure becomes a coin-flip for possession.`,
+            ? `${lead.short_name} hold the steadier platform, ${Math.round(Math.max(hSet, aSet))}% combined set-piece to ${trailSet}%. Watch the first scrum: it will tell you whether that margin is real on the day. Most of the gap lives in the ${setDriver}, which is exactly where sustained pressure tells first and where the penalty count usually follows.`
+            : `The set-piece is ${lead.short_name}'s to weaponise. Scrum at ${Math.round(leadG.scrumSuccessPercent)}%, lineout at ${Math.round(leadG.lineoutSuccessPercent)}%, against a platform running ${trailSet}% combined. Every ${trail.short_name} feed under pressure becomes a coin-flip for possession, and a creaking platform concedes penalties too, stacking this axis onto the discipline ledger.`,
     });
   }
 
@@ -405,15 +501,16 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
     const loose = other(gap);
     const cleanVal = Math.min(hg.penaltiesConceded, ag.penaltiesConceded);
     const looseVal = Math.max(hg.penaltiesConceded, ag.penaltiesConceded);
+    const cleanG = clean === home ? hg : ag;
     axes.push({
       key: 'discipline',
       label: 'Discipline',
       narrative:
         t === 0
-          ? `No free points on offer from the whistle: ${fmt(hg.penaltiesConceded)} and ${fmt(ag.penaltiesConceded)} penalties a game, both respectable numbers at this level.`
+          ? `No free points on offer from the whistle: ${fmt(hg.penaltiesConceded)} and ${fmt(ag.penaltiesConceded)} penalties a game, both respectable numbers at this level. The counts matter because the tees are loaded: at ${Math.round(hg.goalKickingPercent)}% and ${Math.round(ag.goalKickingPercent)}% goal-kicking, nearly every offence in range costs three. Neither side hands over cheap territory here, so field position will have to be earned with the boot instead.`
           : t === 1
-            ? `The penalty ledger leans against ${loose.short_name}, ${fmt(looseVal)} a game to ${fmt(cleanVal)}. A small margin, but tight Tests are decided from the tee.`
-            : `Discipline is the crack in ${loose.short_name}'s profile: ${fmt(looseVal)} penalties a game while ${clean.short_name} give up just ${fmt(cleanVal)}. That differential is territory, and territory becomes points.`,
+            ? `The penalty ledger leans against ${loose.short_name}, ${fmt(looseVal)} a game to ${fmt(cleanVal)}. A small margin, but tight Tests are decided from the tee. ${clean.short_name}'s kickers are operating at ${Math.round(cleanG.goalKickingPercent)}% from the ground, so the margin has a delivery mechanism, and every visit to the ${loose.short_name} half now carries a price tag.`
+            : `Discipline is the crack in ${loose.short_name}'s profile: ${fmt(looseVal)} penalties a game while ${clean.short_name} give up just ${fmt(cleanVal)}. That differential is territory, and territory becomes points. Add a ${Math.round(cleanG.goalKickingPercent)}% goal-kicking rate to the equation and the scoreboard can tick without a try being scored.`,
     });
   }
 
@@ -430,10 +527,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Kicking',
       narrative:
         t === 0
-          ? `Expect an even aerial contest: ${Math.round(hg.kicksInPlay)} and ${Math.round(ag.kicksInPlay)} kicks in play a game, and neither side hides from the exchange.`
+          ? `Expect an even aerial contest: ${Math.round(hg.kicksInPlay)} and ${Math.round(ag.kicksInPlay)} kicks in play a game, and neither side hides from the exchange. The metres nearly cancel out too, ${Math.round(hg.kickMeters)} against ${Math.round(ag.kickMeters)} a game, so both back fields get examined and the first mishandled bomb becomes the day's cheapest territory.`
           : t === 1
-            ? `${lead.short_name} put slightly more boot on the game, ${Math.round(leadG.kickMeters)} kick metres a match. Marginal, but field position compounds over eighty minutes.`
-            : `${lead.short_name} will look to play this one in the air: ${Math.round(leadG.kickMeters)} kick metres a game against ${Math.round(trailG.kickMeters)} coming back. If ${trail.short_name} cannot win the contestables, they spend the afternoon exiting.`,
+            ? `${lead.short_name} put slightly more boot on the game, ${Math.round(leadG.kickMeters)} kick metres a match. Marginal, but field position compounds over eighty minutes. With ${Math.round(leadG.kicksInPlay)} kicks in play a game the tactic is a habit rather than a mood, and the difference is ${Math.round(leadG.kickMeters - trailG.kickMeters)} metres a game of field position.`
+            : `${lead.short_name} will look to play this one in the air: ${Math.round(leadG.kickMeters)} kick metres a game against ${Math.round(trailG.kickMeters)} coming back. If ${trail.short_name} cannot win the contestables, they spend the afternoon exiting. A count of ${Math.round(leadG.kicksInPlay)} kicks in play a game makes the intention plain before a whistle blows.`,
     });
   }
 
@@ -444,15 +541,16 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
     const lead = pick(gap);
     const trail = other(gap);
     const leadVal = Math.round(Math.max(hg.territoryPercent, ag.territoryPercent));
+    const leadG = lead === home ? hg : ag;
     axes.push({
       key: 'territory',
       label: 'Territory',
       narrative:
         t === 0
-          ? `Territory splits down the middle by habit, ${Math.round(hg.territoryPercent)}% and ${Math.round(ag.territoryPercent)}%. Neither side is used to living in its own half, so someone's routine breaks today.`
+          ? `Territory splits down the middle by habit, ${Math.round(hg.territoryPercent)}% and ${Math.round(ag.territoryPercent)}%. Neither side is used to living in its own half, so someone's routine breaks today. Both make their visits count too, at ${fmt(hg.pointsPerTwentyTwoEntry)} and ${fmt(ag.pointsPerTwentyTwoEntry)} points per 22 entry, which puts a premium on the exit games at both ends.`
           : t === 1
-            ? `${lead.short_name} tend to play on the right side of halfway, a ${leadVal}% territory habit. Pressure follows position.`
-            : `Territory runs heavily to ${lead.short_name} at ${leadVal}% across the window. ${trail.short_name}'s exits will be examined all afternoon, and at this level a botched clearance is three points.`,
+            ? `${lead.short_name} tend to play on the right side of halfway, a ${leadVal}% territory habit. Pressure follows position. They average ${fmt(leadG.twentyTwoEntries)} entries into the 22 a game off the back of it, at ${fmt(leadG.pointsPerTwentyTwoEntry)} points a visit, so the habit is not idle occupation; it is how the scoreboard gets fed, three points at a time when tries do not come.`
+            : `Territory runs heavily to ${lead.short_name} at ${leadVal}% across the window. ${trail.short_name}'s exits will be examined all afternoon, and at this level a botched clearance is three points. The pressure gauge to watch is 22 entries: ${lead.short_name} average ${fmt(leadG.twentyTwoEntries)} a game, worth ${fmt(leadG.pointsPerTwentyTwoEntry)} points a visit on the ten-match record.`,
     });
   }
 
@@ -469,10 +567,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Possession',
       narrative:
         t === 0
-          ? `The ball will be shared: ${Math.round(hg.possessionPercent)}% to ${Math.round(ag.possessionPercent)}% possession on habit. Whoever breaks that pattern first changes the match.`
+          ? `The ball will be shared: ${Math.round(hg.possessionPercent)}% to ${Math.round(ag.possessionPercent)}% possession on habit. Whoever breaks that pattern first changes the match. With neither profile built on starving the other, the contest turns on care, and ${fmt(hg.handlingErrors)} against ${fmt(ag.handlingErrors)} handling errors a game is the giveaway line to monitor.`
           : t === 1
-            ? `${lead.short_name} typically see more of the ball at ${leadVal}%. Not dominance, but enough to set the rhythm if they keep it.`
-            : `${lead.short_name} hoard the ball, ${leadVal}% of it on average. The catch: hoarding only matters if the points follow (${fmt(leadG.pointsScored)} a game says they mostly do), and ${trail.short_name} will bet on their defence outlasting the phases.`,
+            ? `${lead.short_name} typically see more of the ball at ${leadVal}%. Not dominance, but enough to set the rhythm if they keep it. The carry game backs it up at ${Math.round(leadG.metersMade)} metres made a match, and rhythm with ball in hand is a defensive weapon too: the opposition cannot score while tackling.`
+            : `${lead.short_name} hoard the ball, ${leadVal}% of it on average. The catch: hoarding only matters if the points follow (${fmt(leadG.pointsScored)} a game says they mostly do), and ${trail.short_name} will bet on their defence outlasting the phases. At ${Math.round(leadG.metersMade)} metres made a game, the phases carry threat rather than just patience.`,
     });
   }
 
@@ -491,10 +589,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Turnovers',
       narrative:
         t === 0
-          ? `Loose ball should be a fair fight: net ${fmt(hNet)} a game against net ${fmt(aNet)}. The breakdown referees itself when it is this even.`
+          ? `Loose ball should be a fair fight: net ${fmt(hNet)} a game against net ${fmt(aNet)}. The breakdown referees itself when it is this even. Handling is the variable inside that, with ${fmt(hg.handlingErrors)} and ${fmt(ag.handlingErrors)} errors a game meaning both sides donate roughly as much as they steal. Security, not the jackal, is the thing to watch.`
           : t === 1
-            ? `The breakdown scraps lean ${lead.short_name}'s way at plus-${fmt(Math.abs(lead === home ? hNet : aNet))} a game. Fine margins, but turnovers have a habit of arriving at the worst possible moments.`
-            : `The breakdown is ${lead.short_name}'s hunting ground: ${fmt(leadG.turnoversWon)} turnovers won a game while ${trail.short_name} cough up ${fmt(trailG.turnoversConceded)}. Every loose ruck is a transition threat, and both benches know it.`,
+            ? `The breakdown scraps lean ${lead.short_name}'s way at plus-${fmt(Math.abs(lead === home ? hNet : aNet))} a game. Fine margins, but turnovers have a habit of arriving at the worst possible moments. The raw count behind it reads ${fmt(leadG.turnoversWon)} won a game against ${fmt(trailG.turnoversWon)}, and loose ball converts to points without needing a platform, which makes even a small edge here worth more than it looks.`
+            : `The breakdown is ${lead.short_name}'s hunting ground: ${fmt(leadG.turnoversWon)} turnovers won a game while ${trail.short_name} cough up ${fmt(trailG.turnoversConceded)}. Every loose ruck is a transition threat, and both benches know it. Add ${fmt(trailG.handlingErrors)} ${trail.short_name} handling errors a game and the supply of loose ball looks reliable.`,
     });
   }
 
@@ -512,10 +610,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Aerial (kicked)',
       narrative:
         t === 0
-          ? `Neither side owns its own bombs: ${Math.round(hg.deliveredWonPercent)}% and ${Math.round(ag.deliveredWonPercent)}% of contestables regathered. Kicking to compete is a coin-flip here, which usually means less of it.`
+          ? `Neither side owns its own bombs: ${Math.round(hg.deliveredWonPercent)}% and ${Math.round(ag.deliveredWonPercent)}% of contestables regathered. Kicking to compete is a coin-flip here, which usually means less of it. The volume line reads ${fmt(hg.contestablesDelivered)} and ${fmt(ag.contestablesDelivered)} contestables kicked a game, which is the sample those percentages are built on.`
           : t === 1
-            ? `${lead.short_name} get slightly more back from the boot, regathering ${Math.round(leadG.deliveredWonPercent)}% of their contestables to ${Math.round(trailG.deliveredWonPercent)}%. Enough to keep bombing; not enough to build a game on.`
-            : `The contestable kick is a genuine ${lead.short_name} weapon: ${Math.round(leadG.deliveredWonPercent)}% of their own bombs come back against ${trail.short_name}'s ${Math.round(trailG.deliveredWonPercent)}%. Expect the ball in the air early and often.`,
+            ? `${lead.short_name} get slightly more back from the boot, regathering ${Math.round(leadG.deliveredWonPercent)}% of their contestables to ${Math.round(trailG.deliveredWonPercent)}%. Enough to keep bombing; not enough to build a game on. At ${fmt(leadG.contestablesDelivered)} contestables kicked a game, the tactic stays in the plan without headlining it, and every regathered bomb is a phase of attack the defence never set for.`
+            : `The contestable kick is a genuine ${lead.short_name} weapon: ${Math.round(leadG.deliveredWonPercent)}% of their own bombs come back against ${trail.short_name}'s ${Math.round(trailG.deliveredWonPercent)}%. Expect the ball in the air early and often. At ${fmt(leadG.contestablesDelivered)} contestables kicked a game across the window, the sample is a strategy rather than an accident.`,
     });
   }
 
@@ -533,10 +631,10 @@ function buildPreviewAxes(home: Team, away: Team, h: TeamAggregate, a: TeamAggre
       label: 'Aerial (received)',
       narrative:
         t === 0
-          ? `Both back fields hold up under the high ball, securing ${Math.round(hg.receivedWonPercent)}% and ${Math.round(ag.receivedWonPercent)}% of what comes down on them. Kicking at either is donating possession.`
+          ? `Both back fields hold up under the high ball, securing ${Math.round(hg.receivedWonPercent)}% and ${Math.round(ag.receivedWonPercent)}% of what comes down on them. Kicking at either is donating possession. The traffic is real too, ${fmt(hg.contestablesReceived)} and ${fmt(ag.contestablesReceived)} contestables received a game, so that security has been earned rather than untested.`
           : t === 1
-            ? `${lead.short_name}'s back field is the calmer one, securing ${Math.round(leadG.receivedWonPercent)}% of received contestables to ${Math.round(trailG.receivedWonPercent)}%. A modest edge that decides a handful of fifty-fifties.`
-            : `There is a soft spot under the high ball: ${trail.short_name} secure only ${Math.round(trailG.receivedWonPercent)}% of received contestables while ${lead.short_name} claim ${Math.round(leadG.receivedWonPercent)}%. ${lead.short_name}'s exit strategy writes itself.`,
+            ? `${lead.short_name}'s back field is the calmer one, securing ${Math.round(leadG.receivedWonPercent)}% of received contestables to ${Math.round(trailG.receivedWonPercent)}%. A modest edge that decides a handful of fifty-fifties. On ${fmt(leadG.contestablesReceived)} received contestables a game that edge is examined constantly, and aerial fifty-fifties cluster at exactly the moments that decide field position.`
+            : `There is a soft spot under the high ball: ${trail.short_name} secure only ${Math.round(trailG.receivedWonPercent)}% of received contestables while ${lead.short_name} claim ${Math.round(leadG.receivedWonPercent)}%. ${lead.short_name}'s exit strategy writes itself. With ${fmt(trailG.contestablesReceived)} contestables already coming down on them a game, that soft spot will not stay private for long.`,
     });
   }
 
@@ -572,17 +670,26 @@ function buildDanger(
   // to exist.
   const hs = skewOf(p.homeScored);
   const ac = skewOf(p.awayConceded);
+  const as_ = skewOf(p.awayScored);
+  const hc = skewOf(p.homeConceded);
+  let hsUsed = false;
+  let asUsed = false;
+  let hcUsed = false;
+  let acUsed = false;
+
   if (hs && ac && hs.quarter === ac.quarter) {
     parts.push(
       `The ${QUARTER_LABELS[hs.quarter]} is the fault line. ${home.short_name} score ${hs.pct}% of their points there, and it is exactly where ${away.short_name} bleed (${ac.pct}% of everything they concede). Whoever owns that window owns the pattern of the match.`,
     );
+    hsUsed = true;
+    acUsed = true;
   }
-  const as_ = skewOf(p.awayScored);
-  const hc = skewOf(p.homeConceded);
   if (as_ && hc && as_.quarter === hc.quarter) {
     parts.push(
       `It cuts both ways: ${as_.pct}% of ${away.short_name}'s scoring lands in the ${QUARTER_LABELS[as_.quarter]}, ${home.short_name}'s own softest period. Expect both benches to be emptied with that window in mind.`,
     );
+    asUsed = true;
+    hcUsed = true;
   }
 
   // No collision: a lone strong skew is still a viewing instruction.
@@ -591,15 +698,65 @@ function buildDanger(
       parts.push(
         `${home.short_name} do their damage by appointment: ${hs.pct}% of their points arrive in the ${QUARTER_LABELS[hs.quarter]}. ${away.short_name} know exactly when the storm comes; surviving it is another matter.`,
       );
+      hsUsed = true;
     }
     if (as_) {
       parts.push(
         `${away.short_name} load ${as_.pct}% of their scoring into the ${QUARTER_LABELS[as_.quarter]}, so the match's rhythm has a timetable.`,
       );
+      asUsed = true;
     }
   }
 
-  return parts.length > 0 ? parts.join(' ') : null;
+  if (parts.length === 0) return null;
+
+  // Supporting context: every remaining above-threshold skew is a
+  // planning read of its own, appended after the headline collisions.
+  if (hs && !hsUsed) {
+    parts.push(
+      `${home.short_name}'s scoring has its own timetable as well: ${hs.pct}% of their points across the window arrive in the ${QUARTER_LABELS[hs.quarter]}.`,
+    );
+  }
+  if (as_ && !asUsed) {
+    parts.push(
+      `${away.short_name}, for their part, load ${as_.pct}% of their scoring into the ${QUARTER_LABELS[as_.quarter]}.`,
+    );
+  }
+  if (hc && !hcUsed) {
+    parts.push(
+      `The soft period on the ${home.short_name} side of the ledger is the ${QUARTER_LABELS[hc.quarter]}, where ${hc.pct}% of what they concede has landed.`,
+    );
+  }
+  if (ac && !acUsed) {
+    parts.push(
+      `${away.short_name} do their leaking in the ${QUARTER_LABELS[ac.quarter]} (${ac.pct}% of everything conceded), and opponents build game plans around windows like that.`,
+    );
+  }
+
+  // A side with NO skew is itself a finding: their points spread evenly.
+  const evenSides: Team[] = [];
+  if (!hs && p.homeScored && p.homeScored.gamesUsed > 0) evenSides.push(home);
+  if (!as_ && p.awayScored && p.awayScored.gamesUsed > 0) evenSides.push(away);
+  if (evenSides.length === 1) {
+    parts.push(
+      `${evenSides[0]!.short_name} offer no such pattern, spreading their points evenly enough that no quarter reaches the ${TIMING_SKEW}% share that marks a habit.`,
+    );
+  }
+
+  // Colour last, budget-gated so the assembled read stays inside the
+  // card-fit contract (spec §5.7): trim-from-the-tail material only.
+  const runningLength = (): number => parts.reduce((n, s) => n + s.length + 1, 0);
+  const colour = [
+    `None of it is a script: quarter shares describe the habit of the window, not a promise about the day.`,
+    `They are still bench-planning material, because replacements, kicking decisions and risk appetite all get timed around windows like these, and the side that manages its danger period better usually banks the swing.`,
+    `The pattern shapes chasing decisions too, because a side that knows when its opponent scores can choose when to absorb and when to press.`,
+  ];
+  for (const sentence of colour) {
+    if (runningLength() >= 650) break;
+    parts.push(sentence);
+  }
+
+  return parts.join(' ');
 }
 
 /**
@@ -684,7 +841,39 @@ function buildKeys(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate): 
   const prefix = isDeadHeat
     ? `Nothing separates these profiles by much, so the finest margin available is the one to own. `
     : '';
-  return `${prefix}For ${home.short_name}: ${keyText(home, away, homeGap, true)}. For ${away.short_name}: ${keyText(away, home, awayGap, false)}.`;
+  const sentences: string[] = [
+    `${prefix}For ${home.short_name}: ${keyText(home, away, homeGap, true)}. For ${away.short_name}: ${keyText(away, home, awayGap, false)}.`,
+  ];
+
+  // Supporting context after the two keys, in priority order: the
+  // runner-up lever, the lean tally, the even count, then colour.
+  // Budget-gated so the assembled read stays inside the card-fit
+  // contract (spec §5.7) whatever combination fires.
+  const usedKeys = new Set<PreviewAxisKey>([homeGap.key, awayGap.key]);
+  const third = gaps.find((g) => !usedKeys.has(g.key) && Math.abs(g.norm) >= 0.5);
+  const homeLean = gaps.filter((g) => g.norm >= 0.5).length;
+  const awayLean = gaps.filter((g) => g.norm <= -0.5).length;
+  const evenCount = gaps.length - homeLean - awayLean;
+  const candidates: (string | null)[] = [
+    third
+      ? `The next lever down is ${AXIS_LABELS[third.key].toLowerCase()}, where ${(third.norm > 0 ? home : away).short_name} hold the coming-in edge, and it is the first place to look if either primary plan stalls.`
+      : `No third lever presents itself: beyond those two conditions the profiles run close enough that neither bench can bank on a structural rescue.`,
+    homeLean > 0 && awayLean > 0
+      ? `Of the measures that genuinely separate, ${homeLean} lean ${home.short_name} and ${awayLean} lean ${away.short_name}, which is the balance of risk each game plan starts from.`
+      : homeLean + awayLean > 0
+        ? `Every measure that separates leans the same way, which tells you which side has to change the terms of the contest to get what it needs.`
+        : null,
+    evenCount > 0
+      ? `Elsewhere the sheet is flat, with ${evenCount === 1 ? 'one' : evenCount} of the ten measures reading even going in, so much of this match starts from scratch at kickoff.`
+      : null,
+    `Both conditions can hold at once for long stretches, and matches where they do are the ones that stay alive into the final quarter.`,
+  ];
+  for (const sentence of candidates) {
+    if (sentence == null) continue;
+    if (sentences.reduce((n, s) => n + s.length + 1, 0) >= 720) break;
+    sentences.push(sentence);
+  }
+  return sentences.join(' ');
 }
 
 type PerGame = TeamAggregate['perGame'];

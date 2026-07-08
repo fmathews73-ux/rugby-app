@@ -125,14 +125,27 @@ export function ScoringProgression({
     return v;
   };
   const fixedBadges: { x: number; y: number; label: number; color: string }[] = [];
-  // Quarter checkpoints: 20' · HT · 60' · FT — home totals above their
-  // line, away below, each pair just left of its minute mark.
+  // Quarter checkpoints: 20' · HT · 60' · FT. The pair straddles the
+  // pair of worms, not each its own line: the leading side's badge
+  // rides above the UPPER line, the trailing side's below the LOWER
+  // line — badge colour carries team identity, and the badges can
+  // never collide when the worms run close (they used to overlap in
+  // the gap between near-level lines). Level scores fall back to
+  // home-above / away-below.
   for (const minute of [20, HALF_TIME_MIN, 60, FULL_TIME_MIN]) {
     const xOff = minute === FULL_TIME_MIN ? -2 : -14;
     const h = totalAt(series.home, minute);
     const a = totalAt(series.away, minute);
-    fixedBadges.push({ x: scaleX(minute) + xOff, y: scaleY(h) - 13, label: h, color: HOME_LINE });
-    fixedBadges.push({ x: scaleX(minute) + xOff, y: scaleY(a) + 13, label: a, color: AWAY_LINE });
+    const x = scaleX(minute) + xOff;
+    const homeAbove = h >= a;
+    const upper = homeAbove
+      ? { label: h, color: HOME_LINE, lineY: scaleY(h) }
+      : { label: a, color: AWAY_LINE, lineY: scaleY(a) };
+    const lowerB = homeAbove
+      ? { label: a, color: AWAY_LINE, lineY: scaleY(a) }
+      : { label: h, color: HOME_LINE, lineY: scaleY(h) };
+    fixedBadges.push({ x, y: upper.lineY - 13, label: upper.label, color: upper.color });
+    fixedBadges.push({ x, y: lowerB.lineY + 13, label: lowerB.label, color: lowerB.color });
   }
 
   const homePath = stepPath(series.home, scaleX, scaleY);

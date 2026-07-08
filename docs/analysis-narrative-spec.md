@@ -213,13 +213,22 @@ The client clamps the Insights block to the whole lines that fit and
 ellipsizes anything beyond — an ellipsis in production is a GENERATION
 FAILURE, not an acceptable outcome. Write to the budget:
 
-- **Hard cap: 450 characters** per narrative field (including spaces
-  and punctuation). This is ~8 rendered lines at the card's measure
-  (Barlow Medium 12pt over ~322pt, ≈55–58 characters per line).
-- **Target: 300–420 characters.** Use the available space — a
-  two-line read on a tall card wastes the surface; a 449-character
-  wall on the smallest card is flirting with the clamp. Aim for the
-  target band, never exceed the cap.
+- **Two-tier contract.** The client measures each card and packs whole
+  sentences to its real capacity (`fitToLines`, ~52 chars/line), so
+  generation supplies MATERIAL and display decides the cut:
+  - **Solo fields** (render alone on a card): supply **600–900
+    characters** of complete sentences. Tall cards use it all; small
+    cards keep the head.
+  - **Joined components** (pair openers, axis narratives, player
+    summary/scouting/outlook): **200–350 characters each**, sharpest
+    finding in the FIRST sentence — the assembler interleaves whole
+    sentences from each component and the tail is the first casualty.
+  - **Hard ceiling: 900 characters** for any assembled read reaching
+    the client (`fitNarrative` material cap; the dev tripwire fires
+    beyond it).
+- **Priority ordering is the load-bearing rule.** Every field must
+  read complete if cut after ANY sentence boundary: finding first,
+  context second, colour last.
 - One paragraph only. No line breaks, no bullet lists, no headings —
   the card supplies the structure (About / Insights eyebrows).
 - Complete sentences only. Never end a field mid-sentence to duck
@@ -230,6 +239,15 @@ FAILURE, not an acceptable outcome. Write to the budget:
   MUST be stated verbatim in the Phase 6 LLM system prompt, with the
   character counts as acceptance criteria (a response over cap is
   regenerated, not truncated).
+- **Composite reads** (pair cards join an opener + two axis
+  narratives + optional territory paragraph; the H2H ladder joins
+  shape + keys; the player profile joins summary + scouting +
+  outlook): the client assembles these with `fitNarrative()`
+  (`mobile/src/lib/fit-narrative.ts`) — one paragraph, whole sentences
+  in priority order, stopping at the cap. Write each component so its
+  LEAD sentence carries its sharpest finding; later sentences are the
+  first to be dropped. At Phase 6 the LLM composes composite reads
+  directly to the 450 cap and this assembler becomes a failsafe only.
 
 ## 6. Refresh cadence (server-side, when LLM is wired up)
 

@@ -5,6 +5,7 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { AxisHeadToHead } from '@/components/insights/axis-head-to-head';
 import { DangerWindows } from '@/components/insights/danger-windows';
 import { GapLadder } from '@/components/insights/gap-ladder';
@@ -77,7 +78,7 @@ export function PreviewPane({
         awayCode={awayCode}
         asOfDate={asOfDate}
         style={styles.pageCard}
-        read={data ? `${data.shape}\n\n${data.keys}` : null}
+        read={data ? fitNarrative([data.shape, data.keys], 900) : null}
       />,
     ];
 
@@ -97,7 +98,7 @@ export function PreviewPane({
             awayCode={awayCode}
             asOfDate={asOfDate}
             style={styles.pageCard}
-            read={narratives.length > 0 ? narratives.join('\n\n') : null}
+            read={fitNarrative(narratives, 900)}
           />,
         );
       }

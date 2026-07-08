@@ -1,13 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
 
 import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { TeamMatchesCard } from '@/components/my-team-matches-card';
+import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { buildCategoryRead } from '@/components/fixture-drill/stats-pane';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { FadingScrollView } from '@/components/fading-scroll-view';
 import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
@@ -43,9 +48,15 @@ const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] 
 // Squad and its six positional units as SIBLING pills — a unit pill
 // is simply the squad view filtered to that unit; Squad shows all.
 // Declared after POSITION_GROUPS, which it spreads.
+// Stats categories as SIBLING pills after Stats (same grammar as the
+// squad units, owner ask 2026-07-08): a category pill is the Stats
+// view filtered to that one card; Stats shows all five.
+const STAT_CATEGORY_LABELS = ['Attack', 'Kicking', 'Defence', 'Set piece', 'Discipline'] as const;
+
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
   { id: 'preview', label: 'Preview' },
   { id: 'stats', label: 'Stats' },
+  ...STAT_CATEGORY_LABELS.map((label) => ({ id: `stat:${label}`, label })),
   { id: 'squad', label: 'Squad' },
   ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
 ];
@@ -92,6 +103,10 @@ export default function TeamHubScreen() {
   // Squad view when the Squad pill OR any unit pill is active; a unit
   // pill filters to that unit, Squad shows all.
   const isSquadView = tab === 'squad' || POSITION_GROUPS.some((g) => g.label === tab);
+  // Stats view when the Stats pill OR any category pill is active; a
+  // category pill filters to that one card, Stats shows all.
+  const isStatsView = tab === 'stats' || tab.startsWith('stat:');
+  const statsCategory = tab.startsWith('stat:') ? tab.slice('stat:'.length) : null;
 
   const teams = useTeams();
   const team = useMemo(
@@ -323,7 +338,7 @@ export default function TeamHubScreen() {
           </>
         )}
 
-        {tab === 'stats' && <TeamStatsTable teamId={teamId} />}
+        {isStatsView && <TeamStatsTable teamId={teamId} category={statsCategory} />}
 
       </FadingScrollView>
     </SafeAreaView>
@@ -334,10 +349,12 @@ export default function TeamHubScreen() {
 
 const TIER_STAT_GROUPS: readonly {
   label: string;
+  description: string;
   rows: readonly { field: string; label: string; percent?: boolean; inverted?: boolean }[];
 }[] = [
   {
     label: 'Attack',
+    description: 'The with-ball production line over the last 10: points, tries and metres a game, red-zone visits and their yield, plus possession and territory share. Every bar runs against the tier average.',
     rows: [
       { field: 'pointsScored', label: 'Points scored' },
       { field: 'tries', label: 'Tries' },
@@ -351,6 +368,7 @@ const TIER_STAT_GROUPS: readonly {
   },
   {
     label: 'Kicking',
+    description: 'The boot per game over the last 10: kicks in play, kick metres and the goal-kicking return, each against the tier average.',
     rows: [
       { field: 'kicksInPlay', label: 'Kicks in play' },
       { field: 'kickMeters', label: 'Kick metres' },
@@ -359,6 +377,7 @@ const TIER_STAT_GROUPS: readonly {
   },
   {
     label: 'Defence',
+    description: 'The denying numbers over the last 10: points and tries conceded, tackle completion and turnovers won, against the tier average.',
     rows: [
       { field: 'pointsConceded', label: 'Points conceded', inverted: true },
       { field: 'triesConceded', label: 'Tries conceded', inverted: true },
@@ -368,6 +387,7 @@ const TIER_STAT_GROUPS: readonly {
   },
   {
     label: 'Set piece',
+    description: 'Scrum and lineout success rates over the last 10 against the tier average: the platform the rest of the game is built on.',
     rows: [
       { field: 'scrumSuccessPercent', label: 'Scrum success', percent: true },
       { field: 'lineoutSuccessPercent', label: 'Lineout success', percent: true },
@@ -375,6 +395,7 @@ const TIER_STAT_GROUPS: readonly {
   },
   {
     label: 'Discipline',
+    description: 'The giveaway ledger over the last 10: penalties, handling errors, turnovers conceded and cards, against the tier average. Lower is the win on every row.',
     rows: [
       { field: 'penaltiesConceded', label: 'Penalties conceded', inverted: true },
       { field: 'handlingErrors', label: 'Handling errors', inverted: true },
@@ -398,9 +419,14 @@ const TIE_COLOR = Colors.light.textSecondary;
  * whether the gap favours the team (inverted-aware, so being UNDER
  * the tier average on penalties reads green).
  */
-function TeamStatsTable({ teamId }: { teamId: string }) {
-  const [infoOpen, setInfoOpen] = useState(false);
+function TeamStatsTable({ teamId, category }: { teamId: string; category?: string | null }) {
+  // Which category's card is flipped to its narrative back (fixture
+  // Stats grammar) — null when every card shows its front.
+  const [flippedLabel, setFlippedLabel] = useState<string | null>(null);
   const summary = useTeamsFormSummary();
+  const teams = useTeams();
+  const teamCode =
+    teams.data?.find((t) => t.id === teamId)?.short_name ?? teamId.toUpperCase();
 
   const isTier1 = TIER_1_IDS.has(teamId);
   const { subject, tierAvg } = useMemo(() => {
@@ -437,40 +463,36 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
 
   return (
     <>
-      {/* Paired category cards, stacked — with-the-ball (Attack +
-          Kicking), denying-and-securing (Defence + Set piece), and
-          Discipline standing alone. Vertical scroll, not a carousel:
-          stats are scan-and-compare reads. */}
-      {[
-        [TIER_STAT_GROUPS[0]!, TIER_STAT_GROUPS[1]!],
-        [TIER_STAT_GROUPS[2]!, TIER_STAT_GROUPS[3]!],
-        [TIER_STAT_GROUPS[4]!],
-      ].map((pair) => (
-        <View key={pair[0]!.label} style={styles.card}>
-          {pair.map((group, gi) => (
-            <View
-              key={group.label}
-              style={[styles.tierStatGroupBlock, gi > 0 && styles.tierStatGroupFollowing]}>
-              {gi === 0 ? (
-                /* Uppermost label row carries the card chrome: info
-                   icon after the category, comparison basis right —
-                   the legend row above the cards is gone. */
-                <View style={styles.cardHeaderRow}>
-                  <View style={styles.squadTitleGroup}>
-                    <Text style={styles.sectionLabel}>{group.label}</Text>
-                    <Pressable
-                      onPress={() => setInfoOpen(true)}
-                      hitSlop={10}
-                      accessibilityRole="button"
-                      accessibilityLabel="Explain the team statistics">
-                      <Ionicons name="information-circle-outline" size={14} color={Colors.light.textSecondary} />
-                    </Pressable>
-                  </View>
-                  <Text style={styles.statLegendText}>{tierLabel}</Text>
-                </View>
-              ) : (
+      {/* ONE card per category, stacked (fixture Stats grammar) — each
+          card flips to its About + Insights back; vertical scroll, not
+          a carousel: stats are scan-and-compare reads. */}
+      {TIER_STAT_GROUPS.filter((g) => !category || g.label === category).map((group) => (
+        <FadeCard
+          key={group.label}
+          flipped={flippedLabel === group.label}
+          back={
+            <NarrativeBack
+              title={group.label}
+              onClose={() => setFlippedLabel(null)}
+              purpose={group.description}
+              read={buildTierRead(group, subject.per_game, tierAvg, teamCode)}
+            />
+          }
+          front={
+            <View style={styles.card}>
+              <View style={styles.cardHeaderRow}>
                 <Text style={styles.sectionLabel}>{group.label}</Text>
-              )}
+                <View style={styles.tierHeaderRightGroup}>
+                  <Text style={styles.statLegendText}>{tierLabel}</Text>
+                  <Pressable
+                    onPress={() => setFlippedLabel(group.label)}
+                    hitSlop={10}
+                    accessibilityRole="button"
+                    accessibilityLabel={`Read about ${group.label}`}>
+                    <FlipTrigger />
+                  </Pressable>
+                </View>
+              </View>
               <View style={styles.tierStatList}>
                 {group.rows.map((row) => (
                   <TierStatBar
@@ -484,36 +506,39 @@ function TeamStatsTable({ teamId }: { teamId: string }) {
                 ))}
               </View>
             </View>
-          ))}
-        </View>
+          }
+        />
       ))}
-
-      <Modal visible={infoOpen} transparent animationType="fade" onRequestClose={() => setInfoOpen(false)}>
-        <Pressable style={styles.modalBackdrop} onPress={() => setInfoOpen(false)}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <View style={styles.modalHeader}>
-              <Text style={styles.modalTitle}>Team Statistics</Text>
-              <Pressable onPress={() => setInfoOpen(false)} hitSlop={10} accessibilityLabel="Close">
-                <Ionicons name="close" size={20} color={Colors.light.text} />
-              </Pressable>
-            </View>
-            <Text style={styles.modalBody}>
-              Per-game averages across the team&apos;s last 10 completed matches (left
-              side of each bar) against the average of every side in the same tier
-              (right side) — a Tier 1 team is measured against the Tier 1 mean, a
-              Tier 2 team against the Tier 2 mean.
-            </Text>
-            <Text style={styles.modalBody}>
-              The green bar marks the better side of each comparison and the signed
-              number beside the label is the variance from the tier average. For
-              lower-is-better rows (points conceded, penalties, errors, cards) the
-              colouring flips: sitting UNDER the tier average reads green.
-            </Text>
-          </Pressable>
-        </Pressable>
-      </Modal>
     </>
   );
+}
+
+/**
+ * Tier-comparison Insights read — the fixture pane's category engine
+ * with the tier average standing in as the away side, then sentence
+ * starts re-capitalised (the "away" name is a phrase, not a code).
+ */
+function buildTierRead(
+  group: (typeof TIER_STAT_GROUPS)[number],
+  perGame: Record<string, number>,
+  tierAvg: Record<string, number>,
+  teamCode: string,
+): string | null {
+  const read = buildCategoryRead(
+    {
+      title: group.label,
+      stats: group.rows.map((r) => ({
+        label: r.label,
+        home: Math.round((perGame[r.field] ?? 0) * 10) / 10,
+        away: Math.round((tierAvg[r.field] ?? 0) * 10) / 10,
+        inverted: r.inverted,
+      })),
+    },
+    teamCode,
+    'the rest of the tier',
+    false,
+  );
+  return read ? read.replace(/(^|\. )([a-z])/g, (_m, p: string, c: string) => p + c.toUpperCase()) : read;
 }
 
 /** Fixture-StatBar anatomy, team vs tier average, inverted-aware. */
@@ -530,6 +555,9 @@ function TierStatBar({
   percent?: boolean;
   inverted?: boolean;
 }) {
+  // Sweep-in driver (shared arrival grammar) — bars sweep out from the
+  // centre gap and the tiles count up in sync, fixture-StatBar style.
+  const ink = useChartInk();
   const maxValue = Math.max(team, tier, 1);
   const teamSegFlex = Math.max(0.001, team / maxValue);
   const teamSpacerFlex = Math.max(0.001, 1 - team / maxValue);
@@ -563,22 +591,47 @@ function TierStatBar({
         <View style={[styles.tierValueBox, !isTie && favourable ? styles.tierValueBoxWin : null]}>
           <Text
             style={[styles.tierValueText, !isTie && favourable ? styles.tierValueTextWin : null]}>
-            {formatStat(team, percent)}
+            <CountUpValue value={formatStat(team, percent).replace('%', '')} ink={ink} />
+            {percent ? '%' : ''}
           </Text>
         </View>
         <View style={styles.tierBarTrack}>
           <View style={styles.tierBarHalfLeft}>
-            <View style={[styles.tierBarSeg, { flex: teamSegFlex, backgroundColor: teamColor }]} />
+            <Animated.View
+              style={[
+                styles.tierBarSeg,
+                {
+                  flex: teamSegFlex,
+                  backgroundColor: teamColor,
+                  // Anchored on the centre gap; sweeps outward.
+                  transformOrigin: 'right',
+                  transform: [{ scaleX: ink }],
+                },
+              ]}
+            />
             <View style={{ flex: teamSpacerFlex }} />
           </View>
           <View style={styles.tierBarCentreGap} />
           <View style={styles.tierBarHalfRight}>
-            <View style={[styles.tierBarSeg, { flex: tierSegFlex, backgroundColor: tierColor }]} />
+            <Animated.View
+              style={[
+                styles.tierBarSeg,
+                {
+                  flex: tierSegFlex,
+                  backgroundColor: tierColor,
+                  transformOrigin: 'left',
+                  transform: [{ scaleX: ink }],
+                },
+              ]}
+            />
             <View style={{ flex: tierSpacerFlex }} />
           </View>
         </View>
         <View style={styles.tierValueBox}>
-          <Text style={styles.tierValueText}>{formatStat(tier, percent)}</Text>
+          <Text style={styles.tierValueText}>
+            <CountUpValue value={formatStat(tier, percent).replace('%', '')} ink={ink} />
+            {percent ? '%' : ''}
+          </Text>
         </View>
       </View>
     </View>
@@ -807,8 +860,12 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   playerName: {
-    fontFamily: 'Barlow_600SemiBold',
+    // Identity register — the condensed face in black, same as the
+    // nation codes; names ARE identity data.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.md,
+    textTransform: 'uppercase',
+    letterSpacing: TextTracking.wide,
     color: Colors.light.text,
   },
   playerMeta: {
@@ -857,6 +914,11 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
+  },
+  tierHeaderRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
   },
   tierStatList: {
     gap: Spacing.two + 4,

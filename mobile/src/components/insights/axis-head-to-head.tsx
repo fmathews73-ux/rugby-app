@@ -8,6 +8,7 @@ import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
+import { PAIR_PURPOSES } from '@/lib/analysis-section-info';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -139,7 +140,7 @@ export function AxisHeadToHead({
           title={title}
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>How the two sides come into this match in these departments — per-game averages from the last 10, each bar against its rival's tick.</>}
+          purpose={<>{PAIR_PURPOSES[title]?.preview ?? 'How the two sides come into this match in these departments.'}</>}
         />
       }
       front={

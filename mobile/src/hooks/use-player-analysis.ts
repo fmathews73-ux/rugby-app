@@ -126,8 +126,10 @@ function buildSummary(
   const scoring =
     agg.totals.points > 0
       ? ` ${surname}'s scoreboard contribution stands at ${agg.totals.points} points${agg.totals.tries > 0 ? `, ${agg.totals.tries} ${agg.totals.tries === 1 ? 'try' : 'tries'} among them` : ''}.`
-      : '';
-  return `${name} is a ${positionLabel.toLowerCase()} with ${caps} caps, and the current window shows ${agg.appearances} ${agg.appearances === 1 ? 'appearance' : 'appearances'} (${starts}) for ${agg.minutesTotal} minutes.${scoring}`;
+      : ` None of that time has come with scoreboard reward yet, so the value case lives in the profile that follows.`;
+  const avgMin = agg.appearances > 0 ? Math.round(agg.minutesTotal / agg.appearances) : 0;
+  const workload = ` The schedule works out at ${avgMin} minutes an outing.`;
+  return `${name} is a ${positionLabel.toLowerCase()} with ${caps} caps, and the current window shows ${agg.appearances} ${agg.appearances === 1 ? 'appearance' : 'appearances'} (${starts}) for ${agg.minutesTotal} minutes.${scoring}${workload}`;
 }
 
 function buildScouting(
@@ -156,6 +158,12 @@ function buildScouting(
     parts.push(
       `Set against ${peers} ${groupLabel} on per-80 rates, ${surname} profiles as balanced rather than spiky; no dimension pulls far enough clear of the peer median to call a weapon.`,
     );
+    if (rated.length > 0) {
+      const top = rated[0];
+      parts.push(
+        `The nearest thing to a spike is ${top.label.toLowerCase()}, ${ordinal(top.display)} percentile at ${formatRate(top.per80)} per 80, and the spread beneath it stays tight.`,
+      );
+    }
   }
   if (softSpot) {
     parts.push(
@@ -186,8 +194,17 @@ function buildForm(
 ): string {
   // Server order is kickoff DESC — newest first.
   const apps = sheets.filter((s) => s.minutes_played > 0).slice(0, PLAYER_LOOKBACK);
+  const trendSet = isForward ? FORWARD_TREND : BACK_TREND;
   if (apps.length < MIN_FORM_APPS) {
-    return `A trend read needs a deeper sample than ${apps.length} ${apps.length === 1 ? 'appearance' : 'appearances'}, so the halves comparison stays parked; the scouting profile above is the more reliable guide for now.`;
+    const lead = `A trend read needs a deeper sample than ${apps.length} ${apps.length === 1 ? 'appearance' : 'appearances'}, so the halves comparison stays parked; the scouting profile above is the more reliable guide for now.`;
+    const headline = trendSet[0];
+    const mins = apps.reduce((t, s) => t + s.minutes_played, 0);
+    const startCount = apps.filter((s) => s.started).length;
+    const headTotal = apps.reduce((t, s) => t + s[headline.field], 0);
+    const pts = apps.reduce((t, s) => t + s.points, 0);
+    const shown = `What the sample does show is ${mins} minutes across ${apps.length === 1 ? 'the single outing' : `the ${apps.length} outings`} (${startCount} ${startCount === 1 ? 'start' : 'starts'}), carrying ${headTotal} ${headline.label.toLowerCase()}${pts > 0 ? ` and ${pts} points` : ''}.`;
+    const closer = `The halves comparison switches on at ${MIN_FORM_APPS} appearances; before that, a single spike would masquerade as a trend, and this card refuses to print one.`;
+    return `${lead} ${shown} ${closer}`;
   }
 
   const half = Math.floor(apps.length / 2);
@@ -196,16 +213,32 @@ function buildForm(
 
   // ALL the role's Preview trend metrics, not just one — the same three
   // sparklines the Preview tab draws, reduced to rise/dip/held reads.
-  const trendSet = isForward ? FORWARD_TREND : BACK_TREND;
-  const reads = trendSet.map((m) => {
+  const reads: string[] = [];
+  let rises = 0;
+  let dips = 0;
+  for (const m of trendSet) {
     const recentAvg = avg(recent.map((s) => s[m.field]));
     const priorAvg = avg(prior.map((s) => s[m.field]));
     const word = trendWord(recentAvg, priorAvg);
+    if (word === 'up') rises++;
+    if (word === 'down') dips++;
     const label = m.label.toLowerCase();
-    if (word === 'held') return `${label} holding steady`;
-    return `${label} ${word === 'up' ? 'rising' : 'dipping'} (${formatRate(priorAvg)} to ${formatRate(recentAvg)} per game)`;
-  });
+    reads.push(
+      word === 'held'
+        ? `${label} holding steady`
+        : `${label} ${word === 'up' ? 'rising' : 'dipping'} (${formatRate(priorAvg)} to ${formatRate(recentAvg)} per game)`,
+    );
+  }
   const trendSentence = `Split the last ${apps.length} matches played into recent and earlier halves and the trend lines are plain: ${listJoin(reads)}.`;
+
+  const verdictSentence =
+    rises > 0 && dips === 0
+      ? `That is a profile moving one way: ${rises} of the ${trendSet.length} role lines up and none in retreat.`
+      : dips > 0 && rises === 0
+        ? `The direction is uncomfortable, with ${dips} of the ${trendSet.length} role lines down and none compensating.`
+        : rises > 0 && dips > 0
+          ? `Read strictly, the picture is mixed (${rises} ${rises === 1 ? 'line' : 'lines'} up against ${dips} down), so the shape of the output is changing rather than simply growing or shrinking.`
+          : `Three flat lines is its own finding: the output level is established and repeating, not drifting.`;
 
   const minRecent = avg(recent.map((s) => s.minutes_played));
   const minPrior = avg(prior.map((s) => s.minutes_played));
@@ -218,7 +251,44 @@ function buildForm(
         ? `${surname}'s minutes have climbed from ${Math.round(minPrior)} to ${Math.round(minRecent)} an outing, and growing minutes are the plainest read there is on selection trust.`
         : `${surname}'s minutes have slipped from ${Math.round(minPrior)} to ${Math.round(minRecent)} an outing; as a read on selection trust, that is the line to watch.`;
 
-  return `${trendSentence} ${minSentence}`;
+  // Ceiling of the run on the role's headline trend metric.
+  const headline = trendSet[0];
+  let peakVal = 0;
+  let peakIdx = -1;
+  apps.forEach((s, i) => {
+    if (s[headline.field] > peakVal) {
+      peakVal = s[headline.field];
+      peakIdx = i;
+    }
+  });
+  const peakSentence =
+    peakVal > 0
+      ? `The high-water mark of the run is ${formatRate(peakVal)} ${headline.label.toLowerCase()} in a single outing, and it ${peakIdx < half ? 'came in the recent half, so the ceiling is current' : 'dates from the earlier half, a ceiling the recent stretch has yet to touch again'}.`
+      : '';
+
+  const startsRecent = recent.filter((s) => s.started).length;
+  const startsPrior = prior.filter((s) => s.started).length;
+  const startsSentence =
+    startsRecent === recent.length && startsPrior === prior.length
+      ? `Every match in the sample has been a start, so none of these moves can be explained away by a changed role.`
+      : `The role split across the halves reads ${startsRecent} ${startsRecent === 1 ? 'start' : 'starts'} in the recent ${recent.length} against ${startsPrior} in the earlier ${prior.length}, worth holding alongside the raw trend lines.`;
+
+  const penRecent = avg(recent.map((s) => s.penalties_conceded));
+  const penPrior = avg(prior.map((s) => s.penalties_conceded));
+  const penTotal = apps.reduce((t, s) => t + s.penalties_conceded, 0);
+  const penWord = trendWord(penRecent, penPrior);
+  const penSentence =
+    penTotal === 0
+      ? ''
+      : penWord === 'up'
+        ? `One line creeping the wrong way: penalties conceded have gone from ${formatRate(penPrior)} to ${formatRate(penRecent)} a game across the same split.`
+        : penWord === 'down'
+          ? `The whistle count has eased too, from ${formatRate(penPrior)} to ${formatRate(penRecent)} penalties a game across the split.`
+          : `Penalties conceded sit level across the split at around ${formatRate(penRecent)} a game.`;
+
+  return [trendSentence, verdictSentence, minSentence, peakSentence, startsSentence, penSentence]
+    .filter(Boolean)
+    .join(' ');
 }
 
 function listJoin(items: readonly string[]): string {
@@ -246,14 +316,51 @@ function buildSeason(
   const contribution =
     pts > 0
       ? `The scoreboard contribution has been ${pts} points${tries > 0 ? ` (${tries} ${tries === 1 ? 'try' : 'tries'})` : ''}.`
-      : `The contribution has lived away from the scoresheet — graft rather than glory, which the profile above prices in.`;
+      : `The contribution has lived away from the scoresheet: graft rather than glory, which the profile above prices in.`;
   const shift =
     avgMin >= 70
       ? `an eighty-minute player in all but name`
       : avgMin >= 55
         ? `a full-shift starter by workload`
         : `used in bursts rather than full shifts`;
-  return `${surname} has ${apps} ${apps === 1 ? 'appearance' : 'appearances'} in the window, ${role}, averaging ${avgMin} minutes — ${shift}. ${contribution}`;
+
+  // The rest of the record card in prose, priority order: ball in hand,
+  // then the defensive ledger, then the boot, then the connective work.
+  const t = agg.totals;
+  const extras: string[] = [];
+  if (t.carries > 0) {
+    extras.push(
+      `The carrying ledger reads ${t.carries} carries for ${t.metres_carried} metres, ${formatRate(t.metres_carried / t.carries)} a carry.`,
+    );
+  }
+  const tackleAttempts = t.tackles_made + t.missed_tackles;
+  if (tackleAttempts > 0) {
+    extras.push(
+      `Defensively the window holds ${t.tackles_made} tackles at ${Math.round((t.tackles_made / tackleAttempts) * 100)}% completion.`,
+    );
+  }
+  if (t.kicks_from_hand > 0) {
+    extras.push(
+      `The boot has covered ${t.kick_metres} metres from ${t.kicks_from_hand} kicks out of hand.`,
+    );
+  }
+  if (t.rucks_hit > 0 || t.turnovers_won > 0) {
+    const breakdownBits: string[] = [];
+    if (t.rucks_hit > 0) breakdownBits.push(`${t.rucks_hit} rucks hit`);
+    if (t.turnovers_won > 0)
+      breakdownBits.push(`${t.turnovers_won} ${t.turnovers_won === 1 ? 'turnover' : 'turnovers'} won`);
+    extras.push(
+      `Around the ball, ${breakdownBits.join(' and ')} account for the work between the headline numbers.`,
+    );
+  }
+  if (t.passes > 0 && t.offloads > 0) {
+    extras.push(
+      `The link play shows in ${t.passes} passes and ${t.offloads} ${t.offloads === 1 ? 'offload' : 'offloads'} across the window.`,
+    );
+  }
+  const extrasText = extras.length > 0 ? ` ${extras.join(' ')}` : '';
+
+  return `${surname} has ${apps} ${apps === 1 ? 'appearance' : 'appearances'} in the window, ${role}, averaging ${avgMin} minutes, ${shift}. ${contribution}${extrasText}`;
 }
 
 function buildOutlook(
@@ -262,12 +369,16 @@ function buildOutlook(
   softSpot: RatedMetric | undefined,
 ): string {
   if (softSpot && strengths.length > 0) {
-    return `The next gain is clearly signposted: with the ${strengths[0].label.toLowerCase()} platform already established, lifting the ${softSpot.label.toLowerCase()} numbers is where a rounder profile comes from.`;
+    return `The next gain is clearly signposted: with the ${strengths[0].label.toLowerCase()} platform already established, lifting the ${softSpot.label.toLowerCase()} numbers is where a rounder profile comes from. That line runs at ${formatRate(softSpot.per80)} per 80 today, and the peer median is the first marker to reach.`;
   }
   if (softSpot) {
-    return `The ${softSpot.label.toLowerCase()} numbers are the place to start. Movement there changes the shape of the whole profile.`;
+    return `The ${softSpot.label.toLowerCase()} numbers are the place to start. Movement there changes the shape of the whole profile. At ${formatRate(softSpot.per80)} per 80 in this window, the peer median is the first marker worth chasing.`;
   }
-  return `Consolidation, not repair, is the brief for ${surname}: the level is set, and holding it across a longer run of matches is what turns a good window into a reputation.`;
+  const standard =
+    strengths.length > 0
+      ? ` The ${strengths[0].label.toLowerCase()} line, ${ordinal(strengths[0].display)} percentile in the group, is the standard the rest of the sheet now gets measured against.`
+      : ` A sheet with no circled weakness is its own kind of asset; depth of sample is the only thing it still lacks.`;
+  return `Consolidation, not repair, is the brief for ${surname}: the level is set, and holding it across a longer run of matches is what turns a good window into a reputation.${standard}`;
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

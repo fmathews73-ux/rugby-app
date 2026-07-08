@@ -35,9 +35,18 @@ export function AppHeader() {
           <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
         </Pressable>
       ) : (
-        // Top-level screens keep the left slot as an empty spacer so
-        // the wordmark stays centred; the avatar lives on the right.
-        <View style={styles.slot} />
+        // Top-level screens: menu entry point (drawer TBD) — mirrors
+        // the avatar's 28pt outline treatment on the right.
+        <Pressable
+          onPress={() => {
+            // TODO: open the app menu once its surface is defined.
+          }}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Menu"
+          style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
+          <Ionicons name="menu-outline" size={28} color={Colors.light.textSecondary} />
+        </Pressable>
       )}
 
       <View style={styles.centreSlot}>

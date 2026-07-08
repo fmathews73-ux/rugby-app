@@ -5,7 +5,7 @@ import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 
-import { useFixtureEvents } from '@/api/hooks';
+import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { LoadingState } from '@/components/state-views';
 import { FlipTrigger } from '@/components/flip-trigger';
@@ -17,15 +17,23 @@ export function StatsPane({
   fixture,
   result,
   resultLoading,
+  category,
 }: {
   fixture: Fixture;
   result: Result | null;
   resultLoading: boolean;
+  /** When set, render only that section's card (a category sibling
+   *  pill is active); null/undefined renders the full stack. */
+  category?: string | null;
 }) {
   // Which category's card is FLIPPED to its narrative back; null when
   // every card shows its front.
   const [flippedTitle, setFlippedTitle] = useState<string | null>(null);
   const events = useFixtureEvents(fixture.id, fixture.status);
+  const homeTeam = useTeam(fixture.home_team_id);
+  const awayTeam = useTeam(fixture.away_team_id);
+  const homeCode = homeTeam.data?.short_name ?? fixture.home_team_id.toUpperCase();
+  const awayCode = awayTeam.data?.short_name ?? fixture.away_team_id.toUpperCase();
   if (fixture.status === 'scheduled') {
     return (
       <View style={styles.paneEmpty}>
@@ -64,7 +72,7 @@ export function StatsPane({
     {
       title: 'Overview',
       description:
-        'The big-picture read on the match: how much of the ball each side had, how much of the game was played in the opponent\'s half, and where the score sat at half-time. A team can dominate possession + territory and still lose — this section is where those tensions show first.',
+        'Ball share, ground share and the half-time ledger: the control measures every other read hangs off. A side can dominate both and still lose; this card is where that tension shows first.',
       stats: [
         { label: 'Possession %', home: result.home_possession_percent, away: result.away_possession_percent, premium: false },
         { label: 'Territory %', home: result.home_territory_percent, away: result.away_territory_percent, premium: false },
@@ -74,7 +82,7 @@ export function StatsPane({
     {
       title: 'Scoring',
       description:
-        'Breakdown of how each team\'s points were scored. Try = 5, conversion = 2, penalty goal = 3, drop goal = 3. A team leaning on penalties usually means they held territory but couldn\'t break the defensive line; a team with lots of unconverted tries left points behind.',
+        'How the points were assembled: tries (5), conversions (2), penalty and drop goals (3), and the goal-kicking return. Penalty-heavy scoring means territory without breaches; unconverted tries are points left behind.',
       stats: [
         { label: 'Tries', home: result.home_tries, away: result.away_tries, premium: false },
         { label: 'Conversions', home: result.home_conversions, away: result.away_conversions, premium: false },
@@ -91,7 +99,7 @@ export function StatsPane({
     {
       title: 'Quarters',
       description:
-        'Points scored in each 20-minute block (Q1 = 0–20, Q2 = 20–40, Q3 = 40–60, Q4 = 60+). Rugby has no formal quarters, but analysts use these blocks to spot game-management patterns — teams that come out fast in Q1, teams that dominate after the half-time reset, teams that hold their nerve in the closing 20.',
+        'Points by 20-minute block, kick-off to the closing stretch. Fast starters, half-time-reset sides and closers all leave their fingerprint here.',
       stats: [
         { label: 'Q1 (0–20 min)', home: quarterScores.home[0]!, away: quarterScores.away[0]!, premium: false },
         { label: 'Q2 (20–40 min)', home: quarterScores.home[1]!, away: quarterScores.away[1]!, premium: false },
@@ -102,7 +110,7 @@ export function StatsPane({
     {
       title: 'Attack',
       description:
-        'The "how did they move forward" numbers. 22 entries = visits into the opposition 22 — the red zone. Points per 22 entry = how many points each visit yielded on average; around 2 is par at Test level, 3+ is clinical, and a side entering often but scoring little is leaving results on the table. Metres = total ground gained ball-in-hand. Post-contact metres = the subset won AFTER the first hit — the leg-drive read. Line breaks = clean breaches of the defensive line. Defenders beaten = tackle attempts evaded. Gainline % = share of carries that crossed the advantage line. Carries = ball-carry actions. Passes = successful passes made. Offloads = ball passed in the tackle. A high metres-per-carry ratio is a sign of a dominant carrying pack; lots of offloads points to a team happy to keep the ball alive.',
+        'Ground gained and what it produced: red-zone visits and their points yield, metres before and after contact, breaks, beaten defenders, the gainline share and the carry-pass-offload volume. Around 2 points per 22 visit is Test par; 3+ is clinical.',
       stats: [
         { label: '22 entries', home: result.home_twenty_two_entries, away: result.away_twenty_two_entries, premium: false },
         {
@@ -124,7 +132,7 @@ export function StatsPane({
     {
       title: 'Kicking',
       description:
-        'The kicking game — the "field-position lever" of rugby. Kicks in play = kicks that stayed on the field (chases, contestable box kicks, cross-field kicks). Kicks to touch = ball put out of bounds for a lineout. Kick metres gained = total ground won from kicks. 50/22s = kicks from your own half bouncing into touch inside the opposition 22, winning your own lineout throw — rare, and a momentum event every time. Contestables kicked = kicks put up to be fought for in the air; own kicks regathered = the ones the kicking side won back; receptions secured = high balls safely claimed when the OTHER side kicked. Big kicking numbers usually mean a team playing a territorial game rather than running everything.',
+        'The field-position lever: kick volume, touch-finders, metres off the boot and the 50/22 count, plus the aerial exchange — contestables put up, own kicks won back, receptions held under the other side\'s bombs.',
       stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
         { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
@@ -145,7 +153,7 @@ export function StatsPane({
     {
       title: 'Set-Piece',
       description:
-        'How each team fared at the set-piece phases — scrums and lineouts. Winning your own scrum or lineout is expected; losing it is a turnover in prime attacking territory. Winning the OPPONENT\'S is worth its weight in gold — steals disrupt phase play and momentum.',
+        'Scrum and lineout security, both directions. Winning your own ball is the entry fee; losing it is a turnover in prime territory, and stealing theirs swings momentum with it.',
       stats: [
         { label: 'Scrums won', home: result.home_scrums_won, away: result.away_scrums_won, premium: true },
         { label: 'Scrums lost', home: result.home_scrums_lost, away: result.away_scrums_lost, premium: true, inverted: true },
@@ -156,7 +164,7 @@ export function StatsPane({
     {
       title: 'Breakdown',
       description:
-        'The ruck-and-maul engine room. Rucks won = attacking rucks where possession was retained; rucks lost = breakdown turnovers conceded (a Tier-1 side retains 90%+). Quick ball % = share of attacking rucks recycled inside 3 seconds — the single best predictor of attacking tempo, because slow ball lets the defence reset. Mauls won = driving mauls (usually off a lineout) that ended with possession retained or a penalty; mauls lost = held up or turned over.',
+        'The ruck-and-maul engine room: rucks kept and lost, the share recycled inside 3 seconds — the best single predictor of attacking tempo — and the maul ledger.',
       stats: [
         { label: 'Rucks won', home: result.home_rucks_won, away: result.away_rucks_won, premium: false },
         { label: 'Rucks lost', home: result.home_rucks_lost, away: result.away_rucks_lost, premium: false, inverted: true },
@@ -168,7 +176,7 @@ export function StatsPane({
     {
       title: 'Defence',
       description:
-        'The defensive read. Tackles made = total completed tackles. Tackle success % = the share of attempted tackles that stuck (85% is a solid Tier-1 baseline; below 80% usually means a leaky defensive shape). Dominant tackles = hits that drove the carrier backwards — the momentum-swinging subset. Turnovers won = ball reclaimed at the breakdown or via steals. Turnovers conceded = ball lost in contact — the flip side of the same coin.',
+        'The tackle ledger: volume, completion rate and the dominant hits that drove carriers backwards, against the turnover exchange both ways. 85% completion is the Tier-1 baseline.',
       stats: [
         { label: 'Tackles made', home: result.home_tackles_made, away: result.away_tackles_made, premium: true },
         { label: 'Tackle success %', home: result.home_tackle_success_percent, away: result.away_tackle_success_percent, premium: true },
@@ -180,7 +188,7 @@ export function StatsPane({
     {
       title: 'Discipline',
       description:
-        'How well each team stayed inside the laws. Penalties conceded = referee whistles against, with the three primary causes split out beneath (scrum, breakdown, offside — the remainder is other offences). Handling errors = knock-ons and forward passes. Yellow cards = 10-minute sin-bin. Red cards = permanent dismissal. A well-drilled team tends to sit below 8 penalties a game; anything over 12 hands the opponent easy territory and shots at goal.',
+        'The penalty ledger with its three main causes split out, plus handling errors and cards. Lower is the win on every row; under 8 penalties a game is well-drilled, over 12 hands the opponent territory and shots at goal.',
       stats: [
         { label: 'Penalties conceded', home: result.home_penalties_conceded, away: result.away_penalties_conceded, premium: true, inverted: true },
         { label: 'Scrum penalties', home: result.home_scrum_penalties_conceded, away: result.away_scrum_penalties_conceded, premium: true, inverted: true },
@@ -233,13 +241,89 @@ export function StatsPane({
           title={section.title}
           onClose={() => setFlippedTitle(null)}
           purpose={section.description}
+          read={buildCategoryRead(section, homeCode, awayCode, fixture.status === 'completed')}
         />
       }
       front={<View style={styles.statsCard}>{renderSection(section)}</View>}
     />
   );
 
-  return <View style={styles.statsPaneStack}>{sections.map(renderCard)}</View>;
+  return (
+    <View style={styles.statsPaneStack}>
+      {sections.filter((sec) => !category || sec.title === category).map(renderCard)}
+    </View>
+  );
+}
+
+/**
+ * Stats-category Insights read, built from the category's own rows —
+ * leader ledger first, widest split second, second front and level
+ * measures after (priority order per narrative spec §5.7). Tense
+ * follows the match state: settled at full-time, running while live.
+ */
+export function buildCategoryRead(
+  section: {
+    title: string;
+    stats: { label: string; home: number; away: number; inverted?: boolean }[];
+  },
+  homeCode: string,
+  awayCode: string,
+  completed: boolean,
+): string | null {
+  const rows = section.stats;
+  if (rows.length === 0) return null;
+
+  const leaderOf = (r: (typeof rows)[number]) => {
+    if (r.home === r.away) return null;
+    const homeBetter = r.inverted ? r.home < r.away : r.home > r.away;
+    return homeBetter ? 'home' : 'away';
+  };
+  const homeLed = rows.filter((r) => leaderOf(r) === 'home');
+  const awayLed = rows.filter((r) => leaderOf(r) === 'away');
+  const level = rows.filter((r) => leaderOf(r) === null);
+
+  // Relative gap ranks the splits so percentages and raw counts can
+  // compete on one scale.
+  const gapOf = (r: (typeof rows)[number]) =>
+    Math.abs(r.home - r.away) / Math.max(Math.abs(r.home), Math.abs(r.away), 1);
+  const contested = rows.filter((r) => leaderOf(r) !== null).sort((a, b) => gapOf(b) - gapOf(a));
+
+  const fmtV = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+  const holds = completed ? 'finished with' : 'holds';
+  const sentences: string[] = [];
+
+  if (homeLed.length === 0 && awayLed.length === 0) {
+    sentences.push(
+      `Nothing separates the sides here: every ${section.title.toLowerCase()} measure on the card is level.`,
+    );
+  } else {
+    const lead =
+      homeLed.length === awayLed.length
+        ? `The ${section.title.toLowerCase()} ledger splits even, ${homeLed.length} measure${homeLed.length === 1 ? '' : 's'} each`
+        : homeLed.length > awayLed.length
+          ? `${homeCode} ${completed ? 'took' : 'lead'} the ${section.title.toLowerCase()} ledger ${homeLed.length}-${awayLed.length}`
+          : `${awayCode} ${completed ? 'took' : 'lead'} the ${section.title.toLowerCase()} ledger ${awayLed.length}-${homeLed.length}`;
+    sentences.push(`${lead}${level.length > 0 ? ` with ${level.length} level` : ''}.`);
+  }
+
+  const top = contested[0];
+  if (top) {
+    const leader = leaderOf(top) === 'home' ? homeCode : awayCode;
+    sentences.push(
+      `The widest split is ${top.label}: ${fmtV(top.home)} against ${fmtV(top.away)}, ${leader}'s number${top.inverted ? ', and on this row lower is the win' : ''}.`,
+    );
+  }
+  const second = contested[1];
+  if (second) {
+    const leader = leaderOf(second) === 'home' ? homeCode : awayCode;
+    sentences.push(`Next comes ${second.label}, where ${leader} ${holds} ${fmtV(leaderOf(second) === 'home' ? second.home : second.away)} to ${fmtV(leaderOf(second) === 'home' ? second.away : second.home)}.`);
+  }
+  const closest = contested[contested.length - 1];
+  if (closest && contested.length > 2 && gapOf(closest) < 0.1) {
+    sentences.push(`Tightest of the contested rows is ${closest.label}, ${fmtV(closest.home)} to ${fmtV(closest.away)}, close enough to swing ${completed ? 'a rematch' : 'before full-time'}.`);
+  }
+
+  return sentences.join(' ');
 }
 
 // Stat-bar colour tokens — same solid pair the Efficiency KPI card uses so

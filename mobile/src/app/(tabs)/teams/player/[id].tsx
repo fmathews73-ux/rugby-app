@@ -3,15 +3,19 @@ import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
 import { Animated, Modal, Pressable, ScrollView, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import Svg, { Circle, ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
+import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
-import { usePlayer, usePlayerPercentiles } from '@/api/hooks';
+import { usePlayer, usePlayerPercentiles, useTeam, useTeams } from '@/api/hooks';
+import { JerseyAvatar } from '@/components/jersey-avatar';
+import { TeamFlagShield } from '@/components/team-flag-shield';
+import { TEAM_JERSEY } from '@/lib/team-colors';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { FlipTrigger } from '@/components/flip-trigger';
-import { CountUpValue } from '@/components/insights/count-up-value';
+import { CountUpTSpan, CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
@@ -19,7 +23,6 @@ import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { FadingScrollView } from '@/components/fading-scroll-view';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
-import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import {
   BACK_SCOUT,
   BACK_TREND,
@@ -31,12 +34,9 @@ import {
   POSITION_LABELS,
   type ScoutMetric,
 } from '@/lib/player-roles';
-import { CHART_LINE_COLOR, smoothLinePath } from '@/lib/smooth-path';
+import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 
 // Trend dot colours — same trio as the form circles / Form chart.
-const TREND_UP_COLOR = '#059669';
-const TREND_DOWN_COLOR = '#DC2626';
-const TREND_FLAT_COLOR = '#9CA3AF';
 
 const LOOKBACK = PLAYER_LOOKBACK;
 const GOOD_COLOR = '#059669';
@@ -99,16 +99,28 @@ export default function PlayerCardScreen() {
       {/* Identity + pills pinned OUTSIDE the ScrollView, mirroring the
           fixture drill's hero + sub-tab strip. */}
       <View style={styles.identityHeader}>
-        {/* Identity text column left (name + meta rows), generous
-            player-photo placeholder right. The placeholder is the
-            future image slot — real headshots are a Phase 6
-            image-rights item (register #5/#28), so a large person
-            glyph holds the space until then. */}
+        {/* Identity text column left (name + meta rows), the squad
+            list's jersey avatar right — one identity mark from list to
+            hero. Real headshots remain a Phase 6 image-rights item
+            (register #5/#28); the jersey swaps out for them then. */}
         <View style={styles.heroRow}>
-          <View style={styles.heroTextStack}>
-            <Text style={styles.heroName} numberOfLines={2}>
-              {p.name}
-            </Text>
+          {/* Team-hero composition: identity group left (40pt jersey
+              mark + nameplate), meta stack centred in the remaining
+              right-hand space — NOT under the name. */}
+          <View style={styles.heroIdentityGroup}>
+            <JerseyAvatar jersey={TEAM_JERSEY[p.team_id]} size={40} />
+            {/* First name over surname — the squad list's two-line
+                stack at hero scale. */}
+            <View style={styles.heroNameStack}>
+              <Text style={styles.heroName} numberOfLines={1}>
+                {givenNames(p.name)}
+              </Text>
+              <Text style={styles.heroName} numberOfLines={1}>
+                {surname(p.name)}
+              </Text>
+            </View>
+          </View>
+          <View style={styles.heroMetaStack}>
             <Text style={styles.heroMetaText}>
               {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
             </Text>
@@ -116,9 +128,6 @@ export default function PlayerCardScreen() {
               {p.height_cm} cm · {p.weight_kg} kg
             </Text>
             <Text style={styles.heroMetaText}>{p.cap_count} caps</Text>
-          </View>
-          <View style={styles.heroPhotoPlaceholder}>
-            <Ionicons name="person-outline" size={44} color={Colors.light.textSecondary} />
           </View>
         </View>
       </View>
@@ -129,6 +138,7 @@ export default function PlayerCardScreen() {
           <View style={styles.previewBleed}>
             <PlayerPreviewBlock
               playerId={playerId}
+              teamId={p.team_id}
               isForward={isForward}
             />
           </View>
@@ -146,9 +156,11 @@ export default function PlayerCardScreen() {
 // resting scouting report), same convention as every other surface.
 function PlayerPreviewBlock({
   playerId,
+  teamId,
   isForward,
 }: {
   playerId: string;
+  teamId: string;
   isForward: boolean;
 }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
@@ -158,7 +170,7 @@ function PlayerPreviewBlock({
   // Season their engine fields. The accordion + two-way sync is gone.
   const analysis = usePlayerAnalysis(playerId);
   const profileRead = analysis.data
-    ? `${analysis.data.summary}\n\n${analysis.data.scouting}\n\n${analysis.data.outlook}`
+    ? fitNarrative([analysis.data.summary, analysis.data.scouting, analysis.data.outlook], 900)
     : null;
 
   return (
@@ -175,6 +187,7 @@ function PlayerPreviewBlock({
         <TrendCard
           key="form"
           playerId={playerId}
+          teamId={teamId}
           metrics={isForward ? FORWARD_TREND : BACK_TREND}
           style={styles.pageCard}
           read={analysis.data?.form ?? null}
@@ -300,35 +313,37 @@ function ScoutRow({
     <View style={styles.scoutRow}>
       <View style={styles.scoutRowHead}>
         <Text style={styles.scoutLabel}>{label}</Text>
-        <View style={styles.scoutValueGroup}>
-          <Text style={styles.scoutValue}>
-            {formatPer80(per80)}
-            <Text style={styles.scoutSuffix}> /80</Text>
-          </Text>
-          {/* Percentile in the match-score tile convention: above the
-              peer median = winner pairing, below = loser pairing. */}
-          <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
-            <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
-              <CountUpValue value={String(percentile)} ink={ink} />
-            </Text>
-          </View>
-        </View>
+        <Text style={styles.scoutValue}>
+          {formatPer80(per80)}
+          <Text style={styles.scoutSuffix}> /80</Text>
+        </Text>
       </View>
-      <View style={styles.scoutTrack}>
-        <Animated.View
-          style={[
-            styles.scoutFill,
-            {
-              width: `${percentile}%`,
-              backgroundColor: percentile >= 50 ? GOOD_COLOR : BAD_COLOR,
-              transformOrigin: 'left',
-              transform: [{ scaleX: ink }],
-            },
-          ]}
-        />
-        {/* Peer-median tick at the 50th percentile — same treatment as
-            the Efficiency KPI T1-average marker. */}
-        <View style={styles.scoutMedianMarker} />
+      {/* Track and percentile tile share one line — ladder grammar:
+          track flexes, tile in the fixed right rail. */}
+      <View style={styles.scoutLine}>
+        <View style={styles.scoutTrack}>
+          <Animated.View
+            style={[
+              styles.scoutFill,
+              {
+                width: `${percentile}%`,
+                backgroundColor: percentile >= 50 ? GOOD_COLOR : BAD_COLOR,
+                transformOrigin: 'left',
+                transform: [{ scaleX: ink }],
+              },
+            ]}
+          />
+          {/* Peer-median tick at the 50th percentile — same treatment as
+              the Efficiency KPI T1-average marker. */}
+          <View style={styles.scoutMedianMarker} />
+        </View>
+        {/* Percentile in the match-score tile convention: above the
+            peer median = winner pairing, below = loser pairing. */}
+        <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
+          <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
+            <CountUpValue value={String(percentile)} ink={ink} />
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -338,11 +353,13 @@ function ScoutRow({
 
 function TrendCard({
   playerId,
+  teamId,
   metrics,
   style,
   read,
 }: {
   playerId: string;
+  teamId: string;
   metrics: readonly { field: PlayerStatField; label: string }[];
   style?: StyleProp<ViewStyle>;
   /** Form narrative for the flip back. */
@@ -350,16 +367,34 @@ function TrendCard({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const history = usePlayerMatchHistory(playerId);
+  const team = useTeam(teamId);
+  const teams = useTeams();
+
+  // Headline metric only — the position list's lead field (tackles for
+  // forwards, metres for backs); the full spread lives on Profile.
+  const headline = metrics[0]!;
 
   // Newest-first from the server → oldest-first for left-to-right time.
   const appearances = useMemo(
     () =>
       (history.data ?? [])
-        .filter((s) => s.minutes_played > 0)
+        .filter((st) => st.minutes_played > 0)
         .slice(0, LOOKBACK)
         .reverse(),
     [history.data],
   );
+
+  // Opponent flag per appearance, via the team's fixture list.
+  const flagByFixture = useMemo(() => {
+    const byTeam = new Map<string, string>((teams.data ?? []).map((t) => [t.id, t.flag_code]));
+    const map = new Map<string, string>();
+    for (const f of team.data?.fixtures ?? []) {
+      const oppId = f.home_team_id === teamId ? f.away_team_id : f.home_team_id;
+      const flag = byTeam.get(oppId);
+      if (flag) map.set(f.id, flag);
+    }
+    return map;
+  }, [team.data, teams.data, teamId]);
 
   return (
     <FadeCard
@@ -372,128 +407,176 @@ function TrendCard({
           read={read}
           purpose={
             <>
-              Per-appearance trends across the last {LOOKBACK} matches
-              played, oldest to newest — raw per-match values, so a quiet
-              cameo shows as a dip, which is part of the story.
+              {headline.label} per appearance across the last {LOOKBACK} matches
+              played, oldest to newest, each bar against the run's own dotted
+              average — raw per-match values, so a quiet cameo shows as a dip,
+              which is part of the story.
             </>
           }
         />
       }
       front={
         <View style={[styles.card, styles.cardFill]}>
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Form</Text>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel="Read the form analysis">
-          <FlipTrigger />
-        </Pressable>
-      </View>
+          <View style={styles.headerRow}>
+            <Text style={styles.sectionLabel}>Form</Text>
+            <Pressable
+              onPress={() => setInfoOpen(true)}
+              hitSlop={10}
+              accessibilityRole="button"
+              accessibilityLabel="Read the form analysis">
+              <FlipTrigger />
+            </Pressable>
+          </View>
+          <Text style={styles.subMeta}>
+            {headline.label} per appearance · last {appearances.length} played
+          </Text>
 
-      {history.isLoading ? (
-        <Text style={styles.empty}>Loading…</Text>
-      ) : appearances.length < 2 ? (
-        <Text style={styles.empty}>Not enough appearances yet.</Text>
-      ) : (
-        <View style={styles.trendList}>
-          {metrics.map((m, i) => (
-            <TrendRow
-              key={m.field}
-              label={m.label}
-              gradientId={`player-trend-${i}`}
-              values={appearances.map((s) => s[m.field])}
+          {history.isLoading ? (
+            <Text style={styles.empty}>Loading…</Text>
+          ) : appearances.length < 2 ? (
+            <Text style={styles.empty}>Not enough appearances yet.</Text>
+          ) : (
+            <FormBars
+              values={appearances.map((st) => st[headline.field] as number)}
+              flags={appearances.map((st) => flagByFixture.get(st.fixture_id) ?? null)}
             />
-          ))}
-        </View>
-      )}
-
+          )}
         </View>
       }
     />
   );
 }
 
-function TrendRow({
-  label,
-  values,
-  gradientId,
-}: {
-  label: string;
-  values: readonly number[];
-  gradientId: string;
-}) {
-  const latest = values[values.length - 1] ?? 0;
+/**
+ * Per-appearance bar chart — the team Form / Discipline grammar at
+ * player scale: bars rise together out of the axis over grey ghosts,
+ * value badges above, opponent shields in the bottom band, the run's
+ * own average as a dotted line. Measured canvas, real pixels.
+ */
+function FormBars({ values, flags }: { values: readonly number[]; flags: readonly (string | null)[] }) {
+  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  const width = canvas.w;
+  const height = canvas.h;
+  const padLeft = 18;
+  const padRight = 8;
+  const padTop = 22;
+  const SHIELD = 16;
+  const padBottom = SHIELD + 12;
+
+  const maxVal = Math.max(1, ...values);
+  const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
+  const plotBottom = height - padBottom;
+  const yOf = (v: number) => padTop + (1 - v / maxVal) * (plotBottom - padTop);
+
+  const bars = useMemo(() => {
+    const n = values.length;
+    if (n === 0 || width === 0 || height === 0) return [];
+    const slotW = (width - padLeft - padRight) / n;
+    const barW = Math.min(SHIELD, Math.max(6, slotW * 0.62));
+    return values.map((v, i) => {
+      const x = padLeft + i * slotW + (slotW - barW) / 2;
+      const y = yOf(v);
+      return {
+        x,
+        y,
+        w: barW,
+        h: plotBottom - y,
+        cx: x + barW / 2,
+        v,
+        // Form signal: above the run's own average is the good day.
+        fill: v > avg ? GOOD_COLOR : v < avg ? BAD_COLOR : Colors.light.textSecondary,
+      };
+    });
+  }, [values, maxVal, width, height, plotBottom, avg]);
+
+  // Grow-in driver (shared arrival grammar).
+  const ink = useChartInk();
+
   return (
-    <View style={styles.trendRow}>
-      <View style={styles.trendRowHead}>
-        <Text style={styles.trendLabel}>{label}</Text>
-        <View style={styles.valueBox}>
-        <Text style={styles.valueBoxText}>{latest}</Text>
-      </View>
-      </View>
-      <TrendSparkline values={values} gradientId={gradientId} />
-    </View>
-  );
-}
-
-function TrendSparkline({
-  values,
-  gradientId,
-}: {
-  values: readonly number[];
-  gradientId: string;
-}) {
-  // Measured canvas width — geometry in real pixels, no viewBox
-  // stretching, so dots and strokes render true at any card width.
-  const [width, setWidth] = useState(0);
-  const height = 44;
-  const padX = 4;
-  const padY = 6;
-  const max = Math.max(1, ...values);
-
-  const points = values.map((v, i) => ({
-    x: padX + (values.length === 1 ? 0.5 : i / (values.length - 1)) * (width - 2 * padX),
-    y: height - padY - (v / max) * (height - 2 * padY),
-  }));
-  const linePath = smoothLinePath(points).path;
-
-  if (width === 0) {
-    return <View onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))} style={{ height }} />;
-  }
-  return (
-    <View onLayout={(e) => setWidth(Math.round(e.nativeEvent.layout.width))}>
-      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Defs>
-        <ClipPath id={`${gradientId}-clip`}>
-          <Rect x={0} y={0} width={width} height={height - padY} />
-        </ClipPath>
-      </Defs>
-      {/* Contour-hugging fade — short band beneath the line following
-          its shape, matching the Form / Trajectory treatment. Tighter
-          steps on this 44px-tall canvas. */}
-      <G clipPath={`url(#${gradientId}-clip)`}>
-        <LineFadeRibbon
-          path={linePath}
-          stroke={CHART_LINE_COLOR}
-          steps={5}
-          stepPx={2}
-          strokeWidth={2.2}
-        />
-      </G>
-      <Path d={linePath} stroke={CHART_LINE_COLOR} strokeWidth={1} fill="none" strokeLinecap="round" />
-      {/* Dots coloured by move vs the previous appearance (trend
-          metrics are all higher-is-better); first / unchanged points
-          take the neutral grey. */}
-      {points.map((pt, i) => {
-        const prev = i > 0 ? values[i - 1]! : null;
-        const v = values[i]!;
-        const fill =
-          prev === null || v === prev ? TREND_FLAT_COLOR : v > prev ? TREND_UP_COLOR : TREND_DOWN_COLOR;
-        return <Circle key={i} cx={pt.x} cy={pt.y} r={1.5} fill={fill} />;
-      })}
-      </Svg>
+    <View
+      style={styles.formBarsFill}
+      onLayout={(e) =>
+        setCanvas({
+          w: Math.round(e.nativeEvent.layout.width),
+          h: Math.round(e.nativeEvent.layout.height),
+        })
+      }>
+      {width > 0 && height > 0 ? (
+        <>
+          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {/* Grey ghosts — the static scale the colour grows into. */}
+            {bars.map((b, i) => (
+              <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
+            ))}
+            {/* The run's own average — dotted, labelled at the left
+                edge (Discipline grammar). */}
+            <Line
+              x1={padLeft}
+              y1={yOf(avg)}
+              x2={width - padRight}
+              y2={yOf(avg)}
+              stroke={Colors.light.textSecondary}
+              strokeWidth={1}
+              strokeDasharray="2 3"
+            />
+            <SvgText
+              x={0}
+              y={yOf(avg) - 4}
+              fill={Colors.light.textSecondary}
+              fontFamily="Barlow_500Medium"
+              fontSize={9}
+              textAnchor="start">
+              avg
+            </SvgText>
+            {/* Value badges above each bar. */}
+            {bars.map((b, i) => (
+              <G key={`l${i}`}>
+                <Circle cx={b.cx} cy={b.y - 11} r={8} fill="#F3F4F6" />
+                <SvgText
+                  x={b.cx}
+                  y={b.y - 8}
+                  fill={Colors.light.textSecondary}
+                  fontFamily="BarlowCondensed_700Bold_Italic"
+                  fontSize={11}
+                  textAnchor="middle">
+                  <CountUpTSpan value={String(b.v)} ink={ink} />
+                </SvgText>
+              </G>
+            ))}
+          </Svg>
+          {/* Verdict-colour layer growing up out of the axis over the
+              grey ghosts; every bar rises together. */}
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              transform: [
+                { translateY: plotBottom - height / 2 },
+                { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
+                { translateY: -(plotBottom - height / 2) },
+              ],
+            }}>
+            <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+              {bars.map((b, i) => (
+                <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
+              ))}
+            </Svg>
+          </Animated.View>
+          {/* Opponent shields along the x-axis band. */}
+          {bars.map((b, i) =>
+            flags[i] ? (
+              <View
+                key={`f${i}`}
+                style={{ position: 'absolute', left: b.cx - SHIELD / 2, top: plotBottom + 6 }}
+                pointerEvents="none">
+                <TeamFlagShield flagCode={flags[i]!} width={SHIELD} />
+              </View>
+            ) : null,
+          )}
+        </>
+      ) : null}
     </View>
   );
 }
@@ -512,21 +595,28 @@ function SeasonCard({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const { data, isLoading } = usePlayerAggregate(playerId);
+  const percentiles = usePlayerPercentiles(playerId, LOOKBACK);
 
-  const tiles = useMemo(() => {
+  // Season = the TOTALS ledger with peer standing behind each number:
+  // tile carries the season total, the bar its percentile among the
+  // position group (median tick at 50) — Profile reads rates, Season
+  // reads volume, one bar grammar across both.
+  const rows = useMemo(() => {
     if (!data) return [];
-    return [
-      { label: 'Apps', value: String(data.appearances) },
-      { label: 'Starts', value: String(data.starts) },
-      { label: 'Minutes', value: String(data.minutesTotal) },
-      { label: 'Points', value: String(data.totals.points) },
-      { label: 'Tries', value: String(data.totals.tries) },
-      {
-        label: 'Cards',
-        value: `${data.totals.yellow_cards}Y ${data.totals.red_cards}R`,
-      },
-    ];
-  }, [data]);
+    const labelByField = new Map<string, string>();
+    for (const group of STAT_GROUPS) {
+      for (const r of group.rows) labelByField.set(r.field, r.label);
+    }
+    return (percentiles.data?.metrics ?? [])
+      .filter((m) => labelByField.has(m.field))
+      .slice(0, 7)
+      .map((m) => ({
+        field: m.field,
+        label: labelByField.get(m.field)!,
+        total: (data.totals as Record<string, number>)[m.field] ?? 0,
+        percentile: Math.round(m.percentile),
+      }));
+  }, [data, percentiles.data]);
 
   return (
     <FadeCard
@@ -563,18 +653,72 @@ function SeasonCard({
       ) : !data || data.appearances === 0 ? (
         <Text style={styles.empty}>No appearances yet.</Text>
       ) : (
-        <View style={styles.tileGrid}>
-          {tiles.map((t) => (
-            <View key={t.label} style={styles.tile}>
-              <Text style={styles.tileValue}>{t.value}</Text>
-              <Text style={styles.tileLabel}>{t.label}</Text>
-            </View>
-          ))}
-        </View>
+        <>
+          {/* Participation as the meta line — the ledger below is the
+              story; apps/starts/minutes are its context. */}
+          <Text style={styles.subMeta}>
+            {data.appearances} apps · {data.starts} starts · {data.minutesTotal} mins ·{' '}
+            {data.totals.yellow_cards}Y {data.totals.red_cards}R
+          </Text>
+          <View style={styles.scoutList}>
+            {rows.map((r) => (
+              <SeasonRow
+                key={r.field}
+                label={r.label}
+                total={r.total}
+                percentile={r.percentile}
+              />
+            ))}
+          </View>
+        </>
       )}
         </View>
       }
     />
+  );
+}
+
+/** Season ledger row — season TOTAL in the tile, peer percentile as
+ *  the bar (ScoutRow's line grammar: track flexes, tile in the fixed
+ *  right rail, median tick at 50). */
+function SeasonRow({
+  label,
+  total,
+  percentile,
+}: {
+  label: string;
+  total: number;
+  percentile: number;
+}) {
+  // Sweep-in driver (shared arrival grammar).
+  const ink = useChartInk();
+  return (
+    <View style={styles.scoutRow}>
+      <View style={styles.scoutRowHead}>
+        <Text style={styles.scoutLabel}>{label}</Text>
+      </View>
+      <View style={styles.scoutLine}>
+        <View style={styles.scoutTrack}>
+          <Animated.View
+            style={[
+              styles.scoutFill,
+              {
+                width: `${percentile}%`,
+                backgroundColor: percentile >= 50 ? GOOD_COLOR : BAD_COLOR,
+                transformOrigin: 'left',
+                transform: [{ scaleX: ink }],
+              },
+            ]}
+          />
+          <View style={styles.scoutMedianMarker} />
+        </View>
+        <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
+          <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
+            <CountUpValue value={String(total)} ink={ink} />
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }
 
@@ -741,6 +885,16 @@ function InfoModal({
   );
 }
 
+function givenNames(full: string): string {
+  const i = full.lastIndexOf(' ');
+  return i === -1 ? full : full.slice(0, i);
+}
+
+function surname(full: string): string {
+  const i = full.lastIndexOf(' ');
+  return i === -1 ? '' : full.slice(i + 1);
+}
+
 function ageFrom(dobIso: string): number {
   const dob = new Date(dobIso);
   const now = new Date();
@@ -774,11 +928,6 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   valueBoxTextWin: { color: Colors.light.textInverse },
-  scoutValueGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
   // Front face fills the flip container (grow-only).
   cardFill: { flexGrow: 1 },
   safe: { flex: 1, backgroundColor: 'transparent' },
@@ -854,11 +1003,29 @@ const styles = StyleSheet.create({
   heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    alignSelf: 'stretch',
     gap: Spacing.three,
   },
-  heroTextStack: {
+  // Form bar canvas fills the card's remaining height (measured in
+  // real pixels — no viewBox stretch).
+  formBarsFill: { flex: 1, minHeight: 190 },
+  heroNameStack: {
+    gap: 0,
+  },
+  heroIdentityGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.three,
+    // Nameplates run long ("FELIX ORMSBY" two-line) — cap the identity
+    // group so the meta stack keeps its column, mirroring the team
+    // hero's balance.
+    maxWidth: '55%',
+  },
+  heroMetaStack: {
     flex: 1,
-    gap: 2,
+    alignItems: 'flex-start',
+    gap: Spacing.one,
+    paddingLeft: Spacing.four,
   },
   // Preview-block bleed: unwraps the pane padding (carousel pages
   // re-apply the card column internally) and carries the 16pt rhythm.
@@ -866,16 +1033,6 @@ const styles = StyleSheet.create({
   pageCard: { flex: 1 },
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
-  heroPhotoPlaceholder: {
-    width: 88,
-    height: 104,
-    borderRadius: 12,
-    backgroundColor: '#F3F4F6',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   heroName: {
     // Player identity in the nation-code face — the jersey nameplate.
     fontFamily: 'BarlowCondensed_700Bold_Italic',
@@ -915,7 +1072,13 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
+  scoutLine: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
   scoutTrack: {
+    flex: 1,
     height: 4,
     backgroundColor: '#F3F4F6',
     borderRadius: 2,
@@ -937,18 +1100,6 @@ const styles = StyleSheet.create({
   },
 
   // Trend
-  trendList: { gap: Spacing.three, marginTop: Spacing.one },
-  trendRow: { gap: 4 },
-  trendRowHead: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-  },
-  trendLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-  },
 
   // Stats table
   statColHeadRow: {
@@ -998,30 +1149,6 @@ const styles = StyleSheet.create({
   // fixed-gap stack, small-caps centred mini-labels, prose beneath.
 
   // Season tiles
-  tileGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginTop: Spacing.one,
-  },
-  tile: {
-    width: '33.33%',
-    alignItems: 'center',
-    paddingVertical: Spacing.two,
-    gap: 2,
-  },
-  tileValue: {
-    // Score face on the season tiles.
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.lg,
-    color: Colors.light.textSecondary,
-  },
-  tileLabel: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.xs,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
 
   // Modal
   modalBackdrop: {
