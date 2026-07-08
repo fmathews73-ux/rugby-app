@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -44,6 +46,8 @@ export function AerialContest({
   showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  // Sweep-in driver (shared arrival grammar).
+  const ink = useChartInk();
   const team = useTeam(teamId);
   const analysis = useTeamAnalysis(teamId);
   const { data, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
@@ -117,7 +121,7 @@ export function AerialContest({
                 hitSlop={10}
                 accessibilityRole="button"
                 accessibilityLabel="Read the aerial contest analysis">
-                <AppLogo height={14} spin />
+                <FlipTrigger />
               </Pressable>
             </View>
           </View>
@@ -131,7 +135,7 @@ export function AerialContest({
                   <Text style={styles.rowLabel}>{r.label}</Text>
                   <View style={styles.rowLine}>
                     <View style={styles.track}>
-                      <View
+                      <Animated.View
                         style={[
                           styles.fill,
                           {
@@ -141,6 +145,8 @@ export function AerialContest({
                               : r.bar >= r.avg
                                 ? GOOD_COLOR
                                 : BAD_COLOR,
+                            transformOrigin: 'left',
+                            transform: [{ scaleX: ink }],
                           },
                         ]}
                       />
@@ -156,7 +162,7 @@ export function AerialContest({
                           styles.valueText,
                           !r.neutral && r.bar >= r.avg ? styles.valueTextWin : null,
                         ]}>
-                        {r.value}
+                        <CountUpValue value={r.value} ink={ink} />
                         <Text
                           style={[
                             styles.suffix,

@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import type { SignedGapView } from '@/hooks/use-match-preview';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
 
@@ -76,6 +78,8 @@ export function GapLadder({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+  // Sweep-in driver (shared arrival grammar); replays on toggle.
+  const ink = useChartInk(activeSide);
   const home = useTeamAggregate(homeTeamId, asOfDate, LOOKBACK);
   const away = useTeamAggregate(awayTeamId, asOfDate, LOOKBACK);
   const ready =
@@ -114,7 +118,7 @@ export function GapLadder({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the profile head-to-head chart">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -142,10 +146,15 @@ export function GapLadder({
                 <Text style={styles.rowLabel}>{headline.label}</Text>
                 <View style={styles.rowLine}>
                   <View style={styles.rowTrack}>
-                    <View
+                    <Animated.View
                       style={[
                         styles.rowFill,
-                        { width: `${Math.max(barFrac, 0.01) * 100}%`, backgroundColor: fill },
+                        {
+                          width: `${Math.max(barFrac, 0.01) * 100}%`,
+                          backgroundColor: fill,
+                          transformOrigin: 'left',
+                          transform: [{ scaleX: ink }],
+                        },
                       ]}
                     />
                     {/* Other side's value — the comparison tick. */}
@@ -153,7 +162,7 @@ export function GapLadder({
                   </View>
                   <View style={[styles.rowValueBox, better ? styles.rowValueBoxWin : null]}>
                     <Text style={[styles.rowValue, better ? styles.rowValueTextWin : null]}>
-                      {fmt(active)}
+                      <CountUpValue value={fmt(active)} ink={ink} />
                       {headline.percent ? (
                         <Text style={[styles.rowValueSuffix, better ? styles.rowValueTextWin : null]}>
                           %

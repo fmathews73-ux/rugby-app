@@ -5,7 +5,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
@@ -67,7 +67,7 @@ export function TeamLandscape({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the team landscape matrix">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 

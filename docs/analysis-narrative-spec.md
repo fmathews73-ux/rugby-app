@@ -205,6 +205,32 @@ have monopolised…" as a rigid axis-by-axis opener. Vary between:
 - Leading with the finding ("Line integrity is the story of the last
   20 minutes…").
 
+### 5.7 Length budget (card-fit contract — HARD limits)
+
+Every narrative renders on a fixed-height card back that NEVER scrolls
+(product rule: the read must fit the evidence card, or it gets cut).
+The client clamps the Insights block to the whole lines that fit and
+ellipsizes anything beyond — an ellipsis in production is a GENERATION
+FAILURE, not an acceptable outcome. Write to the budget:
+
+- **Hard cap: 450 characters** per narrative field (including spaces
+  and punctuation). This is ~8 rendered lines at the card's measure
+  (Barlow Medium 12pt over ~322pt, ≈55–58 characters per line).
+- **Target: 300–420 characters.** Use the available space — a
+  two-line read on a tall card wastes the surface; a 449-character
+  wall on the smallest card is flirting with the clamp. Aim for the
+  target band, never exceed the cap.
+- One paragraph only. No line breaks, no bullet lists, no headings —
+  the card supplies the structure (About / Insights eyebrows).
+- Complete sentences only. Never end a field mid-sentence to duck
+  under the cap; cut the weakest observation instead.
+- Priority under pressure: the single sharpest data-grounded finding
+  first, supporting context second, colour last. Trim from the tail.
+- These limits are enforced at review for the client-side template and
+  MUST be stated verbatim in the Phase 6 LLM system prompt, with the
+  character counts as acceptance criteria (a response over cap is
+  regenerated, not truncated).
+
 ## 6. Refresh cadence (server-side, when LLM is wired up)
 
 - **Live matches:** event-driven regeneration, debounced 60 seconds.

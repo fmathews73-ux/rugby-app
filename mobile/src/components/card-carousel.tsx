@@ -1,4 +1,5 @@
 import {
+  createContext,
   forwardRef,
   type ReactNode,
   useImperativeHandle,
@@ -26,6 +27,14 @@ import { Colors, Spacing } from '@/constants/theme';
  * card `style={{ flex: 1 }}` (the insight cards' style prop) so
  * shorter cards stretch to match.
  */
+/**
+ * True while the surrounding carousel page is the visible one; true by
+ * default so standalone cards (stats stack, player screen) behave as
+ * always-active. Lets per-card attention cues (the logo trigger's
+ * spin-on-mount) re-fire when their page swipes into view.
+ */
+export const CarouselPageActiveContext = createContext(true);
+
 export interface CardCarouselHandle {
   /** Scroll to a page index — animated for accordion sync taps,
    *  instant (animated=false) for focus resets. */
@@ -94,7 +103,9 @@ export const CardCarousel = forwardRef<
         scrollEventThrottle={16}>
         {pages.map((page, i) => (
           <View key={i} style={[styles.page, { width: screenWidth }]}>
-            {page}
+            <CarouselPageActiveContext.Provider value={activeIdx === i}>
+              {page}
+            </CarouselPageActiveContext.Provider>
           </View>
         ))}
       </ScrollView>

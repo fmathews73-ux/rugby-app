@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeams } from '@/api/hooks';
@@ -70,7 +72,7 @@ export function DisciplineTrend({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the discipline trend chart">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -139,6 +141,10 @@ function TrendChart({
     });
   }, [values, width, height, maxVal]);
 
+  // Grow-in driver (shared arrival grammar).
+  // Grow-in driver (bars rise from the axis together).
+  const ink = useChartInk();
+
   return (
     <View
       style={styles.chartFill}
@@ -152,7 +158,7 @@ function TrendChart({
         <>
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
           {bars.map((b, i) => (
-            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
+            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
           ))}
           {/* Band reference lines + flush-left labels. */}
           <Line x1={padLeft} y1={yOf(PENS_LOW)} x2={width - padRight} y2={yOf(PENS_LOW)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
@@ -195,11 +201,32 @@ function TrendChart({
                 fontFamily="BarlowCondensed_700Bold_Italic"
                 fontSize={11}
                 textAnchor="middle">
-                {b.v}
+                <CountUpTSpan value={String(b.v)} ink={ink} />
               </SvgText>
             </G>
           ))}
         </Svg>
+          {/* Verdict-colour layer growing up out of the axis over the
+              grey ghosts; every bar rises together. Pure native-driver
+              transforms. */}
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              transform: [
+                { translateY: plotBottom - height / 2 },
+                { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
+                { translateY: -(plotBottom - height / 2) },
+              ],
+            }}>
+            <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+              {bars.map((b, i) => (
+                <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
+              ))}
+            </Svg>
+          </Animated.View>
           {/* Opponent shields along the x-axis — 6pt air both sides
               inside the reserved bottom band. */}
           {bars.map((b, i) => {

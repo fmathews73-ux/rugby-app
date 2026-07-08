@@ -4,8 +4,11 @@
  * card can compose the same SVG chart + axis math without duplicating them.
  */
 
+import { Animated, View } from 'react-native';
 import Svg, { Circle, Defs, Line, Path, Polygon, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
 
+
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors } from '@/constants/theme';
 import type { TeamAggregate } from '@/hooks/use-team-aggregate';
 
@@ -212,38 +215,13 @@ export function RadarChart({
   const primaryGradientId = `radar-fill-${fillColor.replace('#', '')}`;
   const compareGradientId = `radar-fill-${compareFillColor.replace('#', '')}`;
 
+  // Fade-in driver (shared arrival grammar) — position plots have
+  // no length to grow, so the data layer fades over the static grid.
+  const ink = useChartInk(axes);
+
   return (
+    <View>
     <Svg width="100%" height={height} viewBox={`0 0 ${size} ${height}`}>
-      <Defs>
-        {/* Radial fade anchored to the radar geometry (user space):
-            faint at the centre, strongest at full radius. Because the
-            gradient scales with radius, the fill at each axis's data
-            boundary is only as hot as the value that put it there —
-            strong dimensions literally glow brighter at their edge
-            than weak ones. */}
-        <RadialGradient
-          id={primaryGradientId}
-          cx={cx}
-          cy={cy}
-          r={r}
-          gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={fillColor} stopOpacity="0.06" />
-          <Stop offset="0.6" stopColor={fillColor} stopOpacity="0.22" />
-          <Stop offset="1" stopColor={fillColor} stopOpacity="0.55" />
-        </RadialGradient>
-        {compareAxes ? (
-          <RadialGradient
-            id={compareGradientId}
-            cx={cx}
-            cy={cy}
-            r={r}
-            gradientUnits="userSpaceOnUse">
-            <Stop offset="0" stopColor={compareFillColor} stopOpacity="0.06" />
-            <Stop offset="0.6" stopColor={compareFillColor} stopOpacity="0.22" />
-            <Stop offset="1" stopColor={compareFillColor} stopOpacity="0.55" />
-          </RadialGradient>
-        ) : null}
-      </Defs>
       {[0.25, 0.5, 0.75, 1].map((frac) => {
         const pts = axes
           .map((_, i) => pointOn(i, r * frac))
@@ -284,32 +262,6 @@ export function RadarChart({
           strokeDasharray="3 3"
         />
       ) : null}
-      {/* Compare-team polygon (away, purple). Drawn BEFORE the primary
-          polygon so that where the two overlap, the primary sits on top
-          and the fill blend darkens naturally rather than one team's
-          fill masking the other. */}
-      {comparePath ? (
-        <Path
-          d={comparePath}
-          fill={`url(#${compareGradientId})`}
-          stroke={compareStrokeColor}
-          strokeWidth={1}
-        />
-      ) : null}
-      <Path
-        d={teamPath}
-        fill={`url(#${primaryGradientId})`}
-        stroke={strokeColor}
-        strokeWidth={1}
-      />
-      {compareAxes?.map((ax, i) => {
-        const p = pointOn(i, r * ax.value);
-        return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.5} fill={compareStrokeColor} />;
-      })}
-      {axes.map((ax, i) => {
-        const p = pointOn(i, r * ax.value);
-        return <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={strokeColor} />;
-      })}
       {axes.map((ax, i) => {
         const labelP = pointOn(i, r + 16);
         return (
@@ -326,5 +278,63 @@ export function RadarChart({
         );
       })}
     </Svg>
+      {/* Data layer — polygons + vertex dots fade in over the grid. */}
+      <Animated.View
+        pointerEvents="none"
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, opacity: ink }}>
+        <Svg width="100%" height={height} viewBox={`0 0 ${size} ${height}`}>
+          <Defs>
+            <RadialGradient
+              id={`${primaryGradientId}-data`}
+              cx={cx}
+              cy={cy}
+              r={r}
+              gradientUnits="userSpaceOnUse">
+              <Stop offset="0" stopColor={fillColor} stopOpacity="0.06" />
+              <Stop offset="0.6" stopColor={fillColor} stopOpacity="0.22" />
+              <Stop offset="1" stopColor={fillColor} stopOpacity="0.55" />
+            </RadialGradient>
+            {compareAxes ? (
+              <RadialGradient
+                id={`${compareGradientId}-data`}
+                cx={cx}
+                cy={cy}
+                r={r}
+                gradientUnits="userSpaceOnUse">
+                <Stop offset="0" stopColor={compareFillColor} stopOpacity="0.06" />
+                <Stop offset="0.6" stopColor={compareFillColor} stopOpacity="0.22" />
+                <Stop offset="1" stopColor={compareFillColor} stopOpacity="0.55" />
+              </RadialGradient>
+            ) : null}
+          </Defs>
+          {/* Compare-team polygon (away, purple). Drawn BEFORE the
+              primary polygon so that where the two overlap, the primary
+              sits on top and the fill blend darkens naturally rather
+              than one team's fill masking the other. */}
+          {comparePath ? (
+            <Path
+              d={comparePath}
+              fill={`url(#${compareGradientId}-data)`}
+              stroke={compareStrokeColor}
+              strokeWidth={1}
+            />
+          ) : null}
+          <Path
+            d={teamPath}
+            fill={`url(#${primaryGradientId}-data)`}
+            stroke={strokeColor}
+            strokeWidth={1}
+          />
+          {compareAxes?.map((ax, i) => {
+            const p = pointOn(i, r * ax.value);
+            return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.5} fill={compareStrokeColor} />;
+          })}
+          {axes.map((ax, i) => {
+            const p = pointOn(i, r * ax.value);
+            return <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={strokeColor} />;
+          })}
+        </Svg>
+      </Animated.View>
+    </View>
   );
 }

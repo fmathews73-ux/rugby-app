@@ -1,14 +1,16 @@
 import { Ionicons } from '@expo/vector-icons';
 import { BlurView } from 'expo-blur';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Fixture, MatchEvent, Result } from '@rugby-app/shared';
 
 import { useFixtureEvents } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { LoadingState } from '@/components/state-views';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 export function StatsPane({
@@ -206,7 +208,7 @@ export function StatsPane({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read about ${section.title}`}>
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
       {section.stats.map((s) => (
@@ -295,16 +297,16 @@ function StatBar({
   locked?: boolean;
 }) {
   const maxValue = Math.max(home, away, 1);
-  // Static fills — each half's flex share against its spacer IS the bar
-  // length, growing out from the centre gap towards its flag. Motion
-  // graphics were tried here (JS-driven flex ramp on mount, then
-  // scroll-triggered reveal) and rejected as jittery; if fill animation
-  // ever returns, it needs a UI-thread driver (reanimated), not
-  // Animated-with-JS-driver on a layout prop.
+  // Each half's flex share against its spacer IS the bar length,
+  // growing out from the centre gap towards its flag. The arrival
+  // sweep is a scaleX TRANSFORM on the flex-sized segment (native
+  // driver) — the earlier JS-driven flex ramp was rejected as jittery;
+  // transforms never touch layout so the flex geometry stays static.
   // 15% grey headroom (MAX_FILL 0.85) — even the max value leaves
   // visible track at the outer edge, so bars read against a scale
   // instead of slamming the ends.
   const MAX_FILL = 0.85;
+  const ink = useChartInk();
   const homeSegFlex = Math.max(0.001, MAX_FILL * (home / maxValue));
   const homeSpacerFlex = Math.max(0.001, 1 - MAX_FILL * (home / maxValue));
   const awaySegFlex = Math.max(0.001, MAX_FILL * (away / maxValue));
@@ -327,27 +329,44 @@ function StatBar({
         <View style={styles.statBarRow}>
           <View style={[styles.statValueBox, homeBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, homeBetter ? styles.statValueTextWin : null]}>
-              {home}
+              <CountUpValue value={String(home)} ink={ink} />
             </Text>
           </View>
           <View style={styles.barTrack}>
             <View style={styles.barHalfLeft}>
-              <View
-                style={[styles.barSegHome, { flex: homeSegFlex, backgroundColor: homeColor }]}
+              <Animated.View
+                style={[
+                  styles.barSegHome,
+                  {
+                    flex: homeSegFlex,
+                    backgroundColor: homeColor,
+                    // Anchored on the centre gap; sweeps outward.
+                    transformOrigin: 'right',
+                    transform: [{ scaleX: ink }],
+                  },
+                ]}
               />
               <View style={{ flex: homeSpacerFlex }} />
             </View>
             <View style={styles.barCentreGap} />
             <View style={styles.barHalfRight}>
-              <View
-                style={[styles.barSegAway, { flex: awaySegFlex, backgroundColor: awayColor }]}
+              <Animated.View
+                style={[
+                  styles.barSegAway,
+                  {
+                    flex: awaySegFlex,
+                    backgroundColor: awayColor,
+                    transformOrigin: 'left',
+                    transform: [{ scaleX: ink }],
+                  },
+                ]}
               />
               <View style={{ flex: awaySpacerFlex }} />
             </View>
           </View>
           <View style={[styles.statValueBox, awayBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, awayBetter ? styles.statValueTextWin : null]}>
-              {away}
+              <CountUpValue value={String(away)} ink={ink} />
             </Text>
           </View>
         </View>

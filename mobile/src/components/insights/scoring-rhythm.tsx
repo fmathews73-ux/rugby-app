@@ -1,10 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
@@ -65,7 +67,7 @@ export function ScoringRhythm({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the scoring rhythm chart">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -130,6 +132,10 @@ function RhythmChart({
     });
   }, [width, height, scored, conceded, maxAbs, zeroY, halfBand]);
 
+  // Grow-in driver (shared arrival grammar).
+  // Grow-in driver (bars rise from the baseline together).
+  const ink = useChartInk();
+
   return (
     <View
       style={styles.chartFill}
@@ -185,10 +191,10 @@ function RhythmChart({
             );
           })}
           {bars.map((b) => (
-            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill={SCORED_COLOR} />
+            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill="#E5E7EB" />
           ))}
           {bars.map((b) => (
-            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
+            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill="#E5E7EB" />
           ))}
           {/* Value badges — scored above its bar, conceded below its
               bar; same quiet circular badge as the Form margin values. */}
@@ -202,7 +208,7 @@ function RhythmChart({
                 fontFamily="BarlowCondensed_700Bold_Italic"
                 fontSize={11}
                 textAnchor="middle">
-                {fmt(b.up.v)}
+                <CountUpTSpan value={fmt(b.up.v)} ink={ink} />
               </SvgText>
             </G>
           ))}
@@ -216,7 +222,7 @@ function RhythmChart({
                 fontFamily="BarlowCondensed_700Bold_Italic"
                 fontSize={11}
                 textAnchor="middle">
-                {fmt(b.down.v)}
+                <CountUpTSpan value={fmt(b.down.v)} ink={ink} />
               </SvgText>
             </G>
           ))}
@@ -236,6 +242,35 @@ function RhythmChart({
             </SvgText>
           ))}
         </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+        <>
+          {/* Verdict-colour layer growing out of the baseline over the
+              grey ghosts: scored up, conceded down — scaling about the
+              shared zero line moves both directions at once; every bar
+              rises together. Pure native-driver transforms. */}
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              transform: [
+                { translateY: zeroY - height / 2 },
+                { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
+                { translateY: -(zeroY - height / 2) },
+              ],
+            }}>
+            <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+              {bars.map((b) => (
+                <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill={SCORED_COLOR} />
+              ))}
+              {bars.map((b) => (
+                <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
+              ))}
+            </Svg>
+          </Animated.View>
+        </>
       ) : null}
     </View>
   );

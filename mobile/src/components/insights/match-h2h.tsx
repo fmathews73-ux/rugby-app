@@ -1,13 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
 import { useFixtureResult } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
 
@@ -246,6 +248,8 @@ function MatchH2HCard({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+  // Sweep-in driver (shared arrival grammar); replays on toggle.
+  const ink = useChartInk(activeSide);
   const result = useFixtureResult(fixture.id, fixture.status);
 
   const notStarted = fixture.status === 'scheduled';
@@ -280,7 +284,7 @@ function MatchH2HCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Read the ${title} analysis`}>
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -309,10 +313,15 @@ function MatchH2HCard({
                 <Text style={styles.rowLabel}>{row.label}</Text>
                 <View style={styles.rowLine}>
                   <View style={styles.rowTrack}>
-                    <View
+                    <Animated.View
                       style={[
                         styles.rowFill,
-                        { width: `${Math.max(barFrac, 0.01) * 100}%`, backgroundColor: fill },
+                        {
+                          width: `${Math.max(barFrac, 0.01) * 100}%`,
+                          backgroundColor: fill,
+                          transformOrigin: 'left',
+                          transform: [{ scaleX: ink }],
+                        },
                       ]}
                     />
                     {/* Other side's value — the comparison tick. */}
@@ -320,7 +329,7 @@ function MatchH2HCard({
                   </View>
                   <View style={[styles.rowValueBox, better ? styles.rowValueBoxWin : null]}>
                     <Text style={[styles.rowValue, better ? styles.rowValueTextWin : null]}>
-                      {fmt(active)}
+                      <CountUpValue value={fmt(active)} ink={ink} />
                       {row.percent ? (
                         <Text style={[styles.rowValueSuffix, better ? styles.rowValueTextWin : null]}>
                           %

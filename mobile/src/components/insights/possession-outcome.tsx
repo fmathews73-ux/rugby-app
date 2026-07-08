@@ -1,10 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
@@ -58,7 +59,7 @@ export function PossessionOutcome({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the possession versus outcome chart">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -103,6 +104,10 @@ function ScatterChart({
   const midX = xOf(50);
   const midY = yOf(0);
 
+  // Fade-in driver (shared arrival grammar) — dot plots fade over the
+  // static crosshairs.
+  const ink = useChartInk();
+
   return (
     <View
       style={styles.chartFill}
@@ -132,16 +137,6 @@ function ScatterChart({
           <SvgText x={(padLeft + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             OUTPLAYED
           </SvgText>
-          {/* Match dots. */}
-          {points.map((p, i) => (
-            <Circle
-              key={i}
-              cx={xOf(p.possessionPercent)}
-              cy={yOf(p.margin)}
-              r={3.5}
-              fill={p.outcome === 'W' ? WIN_COLOR : p.outcome === 'L' ? LOSS_COLOR : DRAW_COLOR}
-            />
-          ))}
           {/* Y-axis caption — rotated, reading upward. */}
           <SvgText
             x={8}
@@ -160,6 +155,24 @@ function ScatterChart({
             POSSESSION % →
           </SvgText>
         </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+        /* Dot layer fades in over the static frame. */
+        <Animated.View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
+          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {points.map((p, i) => (
+              <Circle
+                key={i}
+                cx={xOf(p.possessionPercent)}
+                cy={yOf(p.margin)}
+                r={3.5}
+                fill={p.outcome === 'W' ? WIN_COLOR : p.outcome === 'L' ? LOSS_COLOR : DRAW_COLOR}
+              />
+            ))}
+          </Svg>
+        </Animated.View>
       ) : null}
     </View>
   );

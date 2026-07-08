@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
+
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors } from '@/constants/theme';
 
 const SUBJECT_COLOR = '#059669';
@@ -43,6 +45,9 @@ export function MatrixChart({
   minHeight?: number;
 }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+
+  // Fade-in driver (shared arrival grammar).
+  const ink = useChartInk();
   const width = canvas.w;
   const height = canvas.h;
   const padLeft = 18;
@@ -105,27 +110,6 @@ export function MatrixChart({
             {quadrants.bl}
           </SvgText>
 
-          {/* Pool dots first, subject on top. */}
-          {points.map((p) =>
-            p.id === subjectId ? null : (
-              <Circle key={p.id} cx={xOf(p.x)} cy={yOf(p.y)} r={2.5} fill={POOL_COLOR} opacity={0.55} />
-            ),
-          )}
-          {subject ? (
-            <>
-              <Circle cx={xOf(subject.x)} cy={yOf(subject.y)} r={4.5} fill={SUBJECT_COLOR} />
-              <SvgText
-                x={xOf(subject.x)}
-                y={yOf(subject.y) >= padTop + 18 ? yOf(subject.y) - 8 : yOf(subject.y) + 14}
-                fill={Colors.light.text}
-                fontFamily="BarlowCondensed_700Bold_Italic"
-                fontSize={11}
-                textAnchor="middle">
-                {subject.code}
-              </SvgText>
-            </>
-          ) : null}
-
           {/* X-axis caption. */}
           <SvgText x={(padLeft + width - padRight) / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             {xCaption}
@@ -144,6 +128,36 @@ export function MatrixChart({
             {yCaption}
           </SvgText>
         </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+        /* Dot layer — the whole pool plus the subject's dot and code
+           fade in over the static frame. */
+        <Animated.View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
+          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {/* Pool dots first, subject on top. */}
+            {points.map((p) =>
+              p.id === subjectId ? null : (
+                <Circle key={p.id} cx={xOf(p.x)} cy={yOf(p.y)} r={2.5} fill={POOL_COLOR} opacity={0.55} />
+              ),
+            )}
+            {subject ? (
+              <>
+                <Circle cx={xOf(subject.x)} cy={yOf(subject.y)} r={4.5} fill={SUBJECT_COLOR} />
+                <SvgText
+                  x={xOf(subject.x)}
+                  y={yOf(subject.y) >= padTop + 18 ? yOf(subject.y) - 8 : yOf(subject.y) + 14}
+                  fill={Colors.light.text}
+                  fontFamily="BarlowCondensed_700Bold_Italic"
+                  fontSize={11}
+                  textAnchor="middle">
+                  {subject.code}
+                </SvgText>
+              </>
+            ) : null}
+          </Svg>
+        </Animated.View>
       ) : null}
     </View>
   );

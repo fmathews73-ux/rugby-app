@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
-import { AppLogo } from '@/components/app-logo';
+import { Ionicons } from '@expo/vector-icons';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
@@ -20,12 +20,27 @@ export function NarrativeBack({
   read?: string | null;
   onClose: () => void;
 }) {
+  // Overflow failsafe: the Insights block gets whatever height remains
+  // and clamps its prose to the whole lines that fit (ellipsis beyond).
+  // Content should never actually hit this — the narrative spec's
+  // length budget (§5.7) caps generation — but a clean ellipsis beats
+  // text silently vanishing below the card edge.
+  const [readLines, setReadLines] = useState<number>();
+
+  if (__DEV__ && typeof read === 'string' && read.length > 450) {
+    // Tripwire for the narrative length budget (spec §5.7) — flags the
+    // offending template field while browsing in dev.
+    console.warn(
+      `Narrative over budget on "${title}": ${read.length} chars (cap 450)`,
+    );
+  }
+
   return (
     <View style={styles.backCard}>
       <View style={styles.headerRow}>
         <Text style={styles.title}>{title}</Text>
         <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back to chart">
-          <AppLogo height={16} color={Colors.light.textSecondary} spin />
+          <Ionicons name="arrow-back-circle-outline" size={18} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
       {/* NO scrolling — the narrative must fit the card's footprint.
@@ -39,7 +54,15 @@ export function NarrativeBack({
         {read !== undefined ? (
           <>
             <Text style={[styles.eyebrow, styles.eyebrowSpaced]}>Insights</Text>
-            <Text style={styles.body}>{read ?? 'Analysing…'}</Text>
+            <View
+              style={styles.readFill}
+              onLayout={(e) =>
+                setReadLines(Math.max(2, Math.floor(e.nativeEvent.layout.height / BODY_LINE_HEIGHT)))
+              }>
+              <Text style={styles.body} numberOfLines={readLines}>
+                {read ?? 'Analysing…'}
+              </Text>
+            </View>
           </>
         ) : null}
       </View>
@@ -93,6 +116,8 @@ export function BackStrong({ children }: { children: ReactNode }) {
   return <Text style={strongStyle}>{children}</Text>;
 }
 
+const BODY_LINE_HEIGHT = 18;
+
 const strongStyle = { fontFamily: 'Barlow_600SemiBold', color: Colors.light.text };
 
 const styles = StyleSheet.create({
@@ -122,8 +147,8 @@ const styles = StyleSheet.create({
     fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
-    // Brand red — the narrative page is signed by the mark.
-    color: '#FF0000',
+    // Same title grey as the chart fronts — one register, both faces.
+    color: Colors.light.textSecondary,
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {
@@ -135,12 +160,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.one,
   },
   eyebrowSpaced: { marginTop: Spacing.two },
+  readFill: { flex: 1 },
   // Matches the hero meta register (competition · venue line):
   // Barlow_500Medium sm in textSecondary.
   body: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    lineHeight: 18,
+    lineHeight: BODY_LINE_HEIGHT,
     color: Colors.light.textSecondary,
   },
 });

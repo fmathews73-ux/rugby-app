@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
@@ -46,6 +48,9 @@ export function EfficiencyKpis({
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
+
+  // Sweep-in driver (shared arrival grammar).
+  const ink = useChartInk(activeSide);
 
   // Reset toggle back to primary whenever the compare team changes.
   useEffect(() => {
@@ -147,7 +152,7 @@ export function EfficiencyKpis({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain Efficiency KPIs">
-            <AppLogo height={14} spin />
+            <FlipTrigger />
           </Pressable>
         </View>
       </View>
@@ -165,6 +170,7 @@ export function EfficiencyKpis({
               bar={k.bar}
               avg={k.avg}
               inverted={k.inverted}
+              ink={ink}
             />
           ))}
         </View>
@@ -184,6 +190,7 @@ function KpiRow({
   bar,
   avg,
   inverted,
+  ink,
 }: {
   label: string;
   value: string;
@@ -191,6 +198,7 @@ function KpiRow({
   bar: number;
   avg: number;
   inverted?: boolean;
+  ink: Animated.Value;
 }) {
   const good = kpiIsGood(bar, avg, inverted);
   return (
@@ -200,12 +208,14 @@ function KpiRow({
           fixed right rail so every track ends at the same point. */}
       <View style={styles.kpiLine}>
         <View style={styles.kpiTrack}>
-          <View
+          <Animated.View
             style={[
               styles.kpiFill,
               {
                 width: `${bar * 100}%`,
                 backgroundColor: kpiBarColor(bar, avg, inverted),
+                transformOrigin: 'left',
+                transform: [{ scaleX: ink }],
               },
             ]}
           />
@@ -220,7 +230,7 @@ function KpiRow({
             loser pairing (light fill, grey digits). */}
         <View style={[styles.kpiValueBox, good ? styles.kpiValueBoxWin : null]}>
           <Text style={[styles.kpiValueText, good ? styles.kpiValueTextWin : null]}>
-            {value}
+            <CountUpValue value={value} ink={ink} />
             <Text style={[styles.kpiSuffix, good ? styles.kpiValueTextWin : null]}>{suffix}</Text>
           </Text>
         </View>

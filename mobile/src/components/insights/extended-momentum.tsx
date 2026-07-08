@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { useQueries } from '@tanstack/react-query';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
@@ -10,7 +10,9 @@ import { fetchJson } from '@/api/client';
 import { useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
@@ -153,7 +155,7 @@ export function ExtendedMomentum({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain extended momentum">
-            <AppLogo height={14} spin />
+            <FlipTrigger />
           </Pressable>
         </View>
       </View>
@@ -185,6 +187,10 @@ function MarginBars({
   flagByTeam: ReadonlyMap<string, string>;
 }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+
+  // Grow-in driver (shared arrival grammar).
+  // Grow-in driver (bars rise from the axis together); replays on toggle.
+  const ink = useChartInk(points);
   const width = canvas.w;
   const height = canvas.h;
   const padX = 8;
@@ -209,7 +215,9 @@ function MarginBars({
     if (n === 0 || width === 0 || height === 0) return [];
     const slotW = (width - 2 * padX) / n;
     // Fill the slot — thin bars in wide slots read as dead space.
-    const barW = Math.min(26, Math.max(6, slotW * 0.62));
+    // Bars match the opponent shields' width — bar and shield read as
+    // one column per match.
+    const barW = Math.min(SHIELD, slotW);
     return points.map((p, i) => {
       const x = padX + i * slotW + (slotW - barW) / 2;
       const cx = x + barW / 2;
@@ -280,7 +288,7 @@ function MarginBars({
             );
           })}
           {bars.map((b, i) => (
-            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
+            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
           ))}
           {bars.map((b, i) =>
             b.label ? (
@@ -295,7 +303,7 @@ function MarginBars({
                   fontFamily="BarlowCondensed_700Bold_Italic"
                   fontSize={11}
                   textAnchor="middle">
-                  {b.label}
+                  <CountUpTSpan value={b.label ?? '0'} ink={ink} />
                 </SvgText>
               </G>
             ) : null,
@@ -312,6 +320,38 @@ function MarginBars({
             strokeWidth={1.2}
           />
         </Svg>
+          {/* Verdict-colour layers — identical bar geometry in the
+              final W/L colours, growing out of the axis strip over the
+              full-size grey ghosts; every bar rises together. Two
+              layers so each side scaleY-anchors on its own baseline
+              (translate-scale-translate recipe); pure native-driver
+              transforms. */}
+          {([
+            { side: 'win', anchor: zeroY - AXIS_HALF },
+            { side: 'loss', anchor: zeroY + AXIS_HALF },
+          ] as const).map(({ side, anchor }) => (
+            <Animated.View
+              key={side}
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                transform: [
+                  { translateY: anchor - height / 2 },
+                  { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
+                  { translateY: -(anchor - height / 2) },
+                ],
+              }}>
+              <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+                {bars.map((b, i) => {
+                  const isLossBar = points[i]?.diff != null && points[i].diff < 0;
+                  if ((side === 'loss') !== isLossBar) return null;
+                  return <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />;
+                })}
+              </Svg>
+            </Animated.View>
+          ))}
           {/* Opponent shields ON the zero baseline — who each margin
               was against, centred in the axis strip between the two
               half-charts. */}

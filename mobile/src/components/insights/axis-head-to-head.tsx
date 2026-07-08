@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -161,7 +163,7 @@ export function AxisHeadToHead({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel={`Explain ${info.title}`}>
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -224,13 +226,25 @@ function PerspectiveRow({
   const better = inverted ? active < other : active > other;
   const worse = inverted ? active > other : active < other;
   const fill = better ? LEADING_COLOR : worse ? LAGGING_COLOR : TIE_COLOR;
+  // Sweep-in driver (shared arrival grammar).
+  const ink = useChartInk(`${active}/${other}`);
 
   return (
     <View style={styles.statBlock}>
       <Text style={styles.rowLabel}>{label}</Text>
       <View style={styles.rowLine}>
         <View style={styles.rowTrack}>
-          <View style={[styles.rowFill, { width: `${barFrac * 100}%`, backgroundColor: fill }]} />
+          <Animated.View
+            style={[
+              styles.rowFill,
+              {
+                width: `${barFrac * 100}%`,
+                backgroundColor: fill,
+                transformOrigin: 'left',
+                transform: [{ scaleX: ink }],
+              },
+            ]}
+          />
           {/* Other side's value — the comparison tick. */}
           <View style={[styles.rowOtherTick, { left: `${tickFrac * 100}%` }]} />
         </View>
@@ -238,7 +252,7 @@ function PerspectiveRow({
             winner tile, worse (or tie) the quiet loser tile. */}
         <View style={[styles.rowValueBox, better ? styles.rowValueBoxWin : null]}>
           <Text style={[styles.rowValue, better ? styles.rowValueTextWin : null]}>
-            {fmt(active)}
+            <CountUpValue value={fmt(active)} ink={ink} />
             {percent ? (
               <Text style={[styles.rowValueSuffix, better ? styles.rowValueTextWin : null]}>%</Text>
             ) : null}

@@ -1,13 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import type { Fixture, Team } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Same two-team palette as the Scoring Progression worms.
@@ -69,7 +70,7 @@ export function ControlConversion({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the control versus conversion analysis">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -108,6 +109,9 @@ interface SidePoint {
 
 function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+  // Fade-in driver (shared arrival grammar) — the two team dots fade
+  // over the static crosshairs.
+  const ink = useChartInk();
   const width = canvas.w;
   const height = canvas.h;
   const padX = 18;
@@ -177,9 +181,6 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
             OUTCLASSED
           </SvgText>
 
-          {dot(home, HOME_COLOR)}
-          {dot(away, AWAY_COLOR)}
-
           <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontSize={8} fontWeight="700" letterSpacing={0.4} textAnchor="middle">
             POSSESSION % →
           </SvgText>
@@ -196,6 +197,17 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
             POINTS SCORED →
           </SvgText>
         </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+        /* Dot layer fades in over the static frame. */
+        <Animated.View
+          pointerEvents="none"
+          style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
+          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {dot(home, HOME_COLOR)}
+            {dot(away, AWAY_COLOR)}
+          </Svg>
+        </Animated.View>
       ) : null}
     </View>
   );

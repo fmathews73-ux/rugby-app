@@ -1,6 +1,6 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Easing, Animated, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, {
   Circle,
   ClipPath,
@@ -17,7 +17,9 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Match-scoped team-colour convention shared with the Momentum card and
@@ -79,6 +81,10 @@ export function ScoringProgression({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  // Fade-in driver (shared arrival grammar) — the worms, ribbons and
+  // badges fade over the static timeline frame.
+  // Longer ease-in-out sweep for the timeline wipe.
+  const ink = useChartInk(undefined, { duration: 2000, easing: Easing.inOut(Easing.ease) });
   const events = useFixtureEvents(fixtureId, fixtureStatus);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
@@ -163,7 +169,7 @@ export function ScoringProgression({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Read the scoring progression analysis">
-            <AppLogo height={14} spin />
+            <FlipTrigger />
           </Pressable>
         </View>
       </View>
@@ -183,20 +189,6 @@ export function ScoringProgression({
           }>
           {CHART_W > 0 && CHART_H > 0 ? (
         <Svg width={CHART_W} height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
-          <Defs>
-            <ClipPath id="progression-plot-clip">
-              <Rect x={0} y={0} width={CHART_W} height={PAD_TOP + PLOT_H} />
-            </ClipPath>
-          </Defs>
-
-          {/* Contour-hugging fades — a short band beneath each worm
-              that follows its steps (GA-style), instead of area fills
-              reaching down to the axis. Away first so home's band sits
-              on top where the worms run close. */}
-          <G clipPath="url(#progression-plot-clip)">
-            <LineFadeRibbon path={awayTreads} stroke={AWAY_LINE} />
-            <LineFadeRibbon path={homeTreads} stroke={HOME_LINE} />
-          </G>
 
           {/* Y-axis gridlines. Numeric labels dropped so the chart matches
               the minimal-chrome Preview line charts; scale is implicit
@@ -251,37 +243,82 @@ export function ScoringProgression({
             </SvgText>
           ))}
 
-          {/* Team worms — away below, home above so the home line sits on
-              top in the frequent case of overlap at low scores. */}
-          <Path d={awayPath} fill="none" stroke={AWAY_LINE} strokeWidth={1} strokeLinejoin="round" />
-          <Path d={homePath} fill="none" stroke={HOME_LINE} strokeWidth={1} strokeLinejoin="round" />
-
-          {/* Running-total badges at every scoring step — the same
-              quiet circle badge as the Ranking chart's shift markers:
-              home totals ride above their line, away below. */}
-          {fixedBadges.map((b, i) => (
-            <G key={`fb${i}`}>
-              <Circle cx={b.x} cy={b.y} r={8} fill="#F3F4F6" />
-              <SvgText
-                x={b.x}
-                y={b.y + 3}
-                fill={b.color}
-                fontFamily="BarlowCondensed_700Bold_Italic"
-                fontSize={11}
-                textAnchor="middle">
-                {b.label}
-              </SvgText>
-            </G>
-          ))}
-
-          {/* Endpoint markers so the eye lands on the final totals. */}
-          {homeFinal > 0 ? (
-            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={HOME_LINE} />
-          ) : null}
-          {awayFinal > 0 ? (
-            <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
-          ) : null}
         </Svg>
+          ) : null}
+          {CHART_W > 0 && CHART_H > 0 ? (
+            /* Data layer — revealed left-to-right (kick-off → FT) by
+               the sliding clip window (Momentum recipe): outer view
+               (overflow hidden) slides in from the left, inner content
+               counter-slides, so worms, ribbons, badges and endpoints
+               stay put while the visible window sweeps the timeline. */
+            <Animated.View
+              pointerEvents="none"
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: CHART_W,
+                height: CHART_H,
+                overflow: 'hidden',
+                transform: [
+                  { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [-CHART_W, 0] }) },
+                ],
+              }}>
+              <Animated.View
+                style={{
+                  width: CHART_W,
+                  height: CHART_H,
+                  transform: [
+                    { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [CHART_W, 0] }) },
+                  ],
+                }}>
+              <Svg width={CHART_W} height={CHART_H} viewBox={`0 0 ${CHART_W} ${CHART_H}`}>
+                <Defs>
+                  <ClipPath id="progression-plot-clip-data">
+                    <Rect x={0} y={0} width={CHART_W} height={PAD_TOP + PLOT_H} />
+                  </ClipPath>
+                </Defs>
+                {/* Contour-hugging fades — a short band beneath each
+                    worm that follows its steps (GA-style). Away first
+                    so home's band sits on top where the worms run
+                    close. */}
+                <G clipPath="url(#progression-plot-clip-data)">
+                  <LineFadeRibbon path={awayTreads} stroke={AWAY_LINE} />
+                  <LineFadeRibbon path={homeTreads} stroke={HOME_LINE} />
+                </G>
+                {/* Team worms — away below, home above so the home line
+                    sits on top in the frequent case of overlap at low
+                    scores. */}
+                <Path d={awayPath} fill="none" stroke={AWAY_LINE} strokeWidth={1} strokeLinejoin="round" />
+                <Path d={homePath} fill="none" stroke={HOME_LINE} strokeWidth={1} strokeLinejoin="round" />
+                {/* Running-total badges at the fixed checkpoints — the
+                    same quiet circle badge as the Ranking shift
+                    markers: home totals above their line, away below. */}
+                {fixedBadges.map((b, i) => (
+                  <G key={`fb${i}`}>
+                    <Circle cx={b.x} cy={b.y} r={8} fill="#F3F4F6" />
+                    <SvgText
+                      x={b.x}
+                      y={b.y + 3}
+                      fill={b.color}
+                      fontFamily="BarlowCondensed_700Bold_Italic"
+                      fontSize={11}
+                      textAnchor="middle">
+                      <CountUpTSpan value={String(b.label)} ink={ink} />
+                    </SvgText>
+                  </G>
+                ))}
+                {/* Endpoint markers so the eye lands on the final
+                    totals. */}
+                {homeFinal > 0 ? (
+                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={HOME_LINE} />
+                ) : null}
+                {awayFinal > 0 ? (
+                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
+                ) : null}
+              </Svg>
+              </Animated.View>
+            </Animated.View>
           ) : null}
         </View>
       )}

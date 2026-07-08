@@ -1,11 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useMemo } from 'react';
-import { Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Easing, Animated, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
 
 import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers, type ScoringMarker } from '@/lib/scoring-markers';
 import {
@@ -92,7 +93,7 @@ export function CombinedPointsPattern({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Read the momentum analysis">
-            <AppLogo height={14} spin />
+            <FlipTrigger />
           </Pressable>
         </View>
       </View>
@@ -227,6 +228,11 @@ function MomentumMirror({
   ];
   const intermediateMilestones: readonly number[] = [20, 60];
 
+  // Fade-in driver (shared arrival grammar) — the momentum curve and
+  // its scoring markers fade over the static timeline frame.
+  // Longer ease-in-out sweep for the timeline wipe.
+  const ink = useChartInk(undefined, { duration: 2000, easing: Easing.inOut(Easing.ease) });
+
   return (
     <View
       style={styles.chartFill}
@@ -239,32 +245,6 @@ function MomentumMirror({
       {width > 0 && height > 0 ? (
         <>
     <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-      <Defs>
-        {/* Home fill (upper half) — strong colour at the peak, fading
-            to near-transparent at the zero baseline so the two halves
-            don't collide at the axis. */}
-        <LinearGradient id="momentum-home-fill" x1="0" y1={padTop} x2="0" y2={midY} gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={HOME_FILL} stopOpacity="0.7" />
-          <Stop offset="1" stopColor={HOME_FILL} stopOpacity="0.1" />
-        </LinearGradient>
-        {/* Away fill (lower half) — mirror gradient. Transparent at the
-            baseline, strong colour at the trough. */}
-        <LinearGradient id="momentum-away-fill" x1="0" y1={midY} x2="0" y2={height - padBottom} gradientUnits="userSpaceOnUse">
-          <Stop offset="0" stopColor={AWAY_FILL} stopOpacity="0.1" />
-          <Stop offset="1" stopColor={AWAY_FILL} stopOpacity="0.7" />
-        </LinearGradient>
-        {/* Clip rectangles that split the plot area at the baseline.
-            The same signed-curve path is drawn twice — once clipped
-            above the baseline (home colours) and once clipped below
-            (away colours). Every zero-crossing of the curve resolves
-            automatically as a colour hand-off. */}
-        <ClipPath id="momentum-clip-above">
-          <Rect x={0} y={padTop} width={width} height={midY - padTop} />
-        </ClipPath>
-        <ClipPath id="momentum-clip-below">
-          <Rect x={0} y={midY} width={width} height={height - padBottom - midY} />
-        </ClipPath>
-      </Defs>
 
       {/* Intermediate quarter guides (20', 60') — lightest dash so they
           pace the timeline without competing with the primary
@@ -309,53 +289,6 @@ function MomentumMirror({
         strokeWidth={1}
       />
 
-      {/* Fill — home half (above the baseline). Same closed area path
-          as the away fill; the clip rectangle keeps only the portion
-          above midY visible, so when the signed curve dips below the
-          baseline nothing renders here (no home momentum in that
-          window). */}
-      {areaPath ? (
-        <Path
-          d={areaPath}
-          fill="url(#momentum-home-fill)"
-          stroke="none"
-          clipPath="url(#momentum-clip-above)"
-        />
-      ) : null}
-      {/* Fill — away half (below the baseline). Mirror of the above. */}
-      {areaPath ? (
-        <Path
-          d={areaPath}
-          fill="url(#momentum-away-fill)"
-          stroke="none"
-          clipPath="url(#momentum-clip-below)"
-        />
-      ) : null}
-
-      {/* Line stroke — same signed curve, split into home / away
-          colours by the same clip pair. Colour hands off exactly at
-          the zero baseline at every crossing. */}
-      {smoothPath ? (
-        <>
-          <Path
-            d={smoothPath}
-            stroke={HOME_LINE}
-            strokeWidth={1}
-            fill="none"
-            strokeLinecap="round"
-            clipPath="url(#momentum-clip-above)"
-          />
-          <Path
-            d={smoothPath}
-            stroke={AWAY_LINE}
-            strokeWidth={1}
-            fill="none"
-            strokeLinecap="round"
-            clipPath="url(#momentum-clip-below)"
-          />
-        </>
-      ) : null}
-
       {/* Primary milestone labels along the top. */}
       {primaryMilestones.map((m) => (
         <SvgText
@@ -387,17 +320,100 @@ function MomentumMirror({
         </SvgText>
       ))}
     </Svg>
-          {/* Scoring-event icon markers overlaid on the measured
-              canvas — home above the plot, away below. */}
-          {placed.map((mk, i) => (
-            <View key={i} style={{ position: 'absolute', left: mk.x, top: mk.y }} pointerEvents="none">
-              <Ionicons
-                name={MARKER_ICON[mk.type]}
-                size={MARKER_ICON_SIZE}
-                color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
-              />
-            </View>
-          ))}
+          {/* Data layer — revealed left-to-right (kick-off → FT) by a
+              sliding clip window: the outer view (overflow hidden)
+              translates in from the left while the inner content
+              counter-translates, so the curve and markers stay put and
+              the visible window sweeps across the timeline. Pure
+              native-driver transforms. */}
+          <Animated.View
+            pointerEvents="none"
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width,
+              height,
+              overflow: 'hidden',
+              transform: [
+                { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [-width, 0] }) },
+              ],
+            }}>
+            <Animated.View
+              style={{
+                width,
+                height,
+                transform: [
+                  { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [width, 0] }) },
+                ],
+              }}>
+            <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+              <Defs>
+                <LinearGradient id="momentum-home-fill-data" x1="0" y1={padTop} x2="0" y2={midY} gradientUnits="userSpaceOnUse">
+                  <Stop offset="0" stopColor={HOME_FILL} stopOpacity="0.7" />
+                  <Stop offset="1" stopColor={HOME_FILL} stopOpacity="0.1" />
+                </LinearGradient>
+                <LinearGradient id="momentum-away-fill-data" x1="0" y1={midY} x2="0" y2={height - padBottom} gradientUnits="userSpaceOnUse">
+                  <Stop offset="0" stopColor={AWAY_FILL} stopOpacity="0.1" />
+                  <Stop offset="1" stopColor={AWAY_FILL} stopOpacity="0.7" />
+                </LinearGradient>
+                <ClipPath id="momentum-clip-above-data">
+                  <Rect x={0} y={padTop} width={width} height={midY - padTop} />
+                </ClipPath>
+                <ClipPath id="momentum-clip-below-data">
+                  <Rect x={0} y={midY} width={width} height={height - padBottom - midY} />
+                </ClipPath>
+              </Defs>
+              {areaPath ? (
+                <Path
+                  d={areaPath}
+                  fill="url(#momentum-home-fill-data)"
+                  stroke="none"
+                  clipPath="url(#momentum-clip-above-data)"
+                />
+              ) : null}
+              {areaPath ? (
+                <Path
+                  d={areaPath}
+                  fill="url(#momentum-away-fill-data)"
+                  stroke="none"
+                  clipPath="url(#momentum-clip-below-data)"
+                />
+              ) : null}
+              {smoothPath ? (
+                <>
+                  <Path
+                    d={smoothPath}
+                    stroke={HOME_LINE}
+                    strokeWidth={1}
+                    fill="none"
+                    strokeLinecap="round"
+                    clipPath="url(#momentum-clip-above-data)"
+                  />
+                  <Path
+                    d={smoothPath}
+                    stroke={AWAY_LINE}
+                    strokeWidth={1}
+                    fill="none"
+                    strokeLinecap="round"
+                    clipPath="url(#momentum-clip-below-data)"
+                  />
+                </>
+              ) : null}
+            </Svg>
+            {/* Scoring-event icon markers — home above the plot, away
+                below. */}
+            {placed.map((mk, i) => (
+              <View key={i} style={{ position: 'absolute', left: mk.x, top: mk.y }} pointerEvents="none">
+                <Ionicons
+                  name={MARKER_ICON[mk.type]}
+                  size={MARKER_ICON_SIZE}
+                  color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
+                />
+              </View>
+            ))}
+            </Animated.View>
+          </Animated.View>
         </>
       ) : null}
     </View>

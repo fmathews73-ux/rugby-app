@@ -1,11 +1,13 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
 
@@ -87,7 +89,7 @@ export function DangerWindows({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the danger windows chart">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -150,6 +152,10 @@ function WindowsChart({
     });
   }, [width, height, scored, conceded, maxAbs, zeroY, halfBand]);
 
+  // Grow-in driver (shared arrival grammar).
+  // Grow-in driver (bars rise from the baseline together); replays on toggle.
+  const ink = useChartInk(scored);
+
   return (
     <View
       style={styles.chartFill}
@@ -206,10 +212,10 @@ function WindowsChart({
             );
           })}
           {bars.map((b) => (
-            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill={SCORED_COLOR} />
+            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill="#E5E7EB" />
           ))}
           {bars.map((b) => (
-            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
+            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill="#E5E7EB" />
           ))}
           {/* Value badges — scored above its bar, conceded below its
               bar; same quiet circular badge as the Form / Scoring
@@ -224,7 +230,7 @@ function WindowsChart({
                 fontFamily="BarlowCondensed_700Bold_Italic"
                 fontSize={11}
                 textAnchor="middle">
-                {fmt(b.up.v)}
+                <CountUpTSpan value={fmt(b.up.v)} ink={ink} />
               </SvgText>
             </G>
           ))}
@@ -238,7 +244,7 @@ function WindowsChart({
                 fontFamily="BarlowCondensed_700Bold_Italic"
                 fontSize={11}
                 textAnchor="middle">
-                {fmt(b.down.v)}
+                <CountUpTSpan value={fmt(b.down.v)} ink={ink} />
               </SvgText>
             </G>
           ))}
@@ -258,6 +264,32 @@ function WindowsChart({
             </SvgText>
           ))}
         </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+        /* Verdict-colour layer growing out of the baseline over the
+           grey ghosts (Rhythm recipe); every bar rises together. Pure
+           native-driver transforms. */
+        <Animated.View
+          pointerEvents="none"
+          style={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            transform: [
+              { translateY: zeroY - height / 2 },
+              { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
+              { translateY: -(zeroY - height / 2) },
+            ],
+          }}>
+          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {bars.map((b) => (
+              <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill={SCORED_COLOR} />
+            ))}
+            {bars.map((b) => (
+              <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill={CONCEDED_COLOR} />
+            ))}
+          </Svg>
+        </Animated.View>
       ) : null}
     </View>
   );

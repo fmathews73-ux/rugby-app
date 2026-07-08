@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Modal, Pressable, ScrollView, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Animated, Modal, Pressable, ScrollView, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, ClipPath, Defs, G, Path, Rect } from 'react-native-svg';
 
@@ -10,7 +10,9 @@ import { CardCarousel, type CardCarouselHandle } from '@/components/card-carouse
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpValue } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
@@ -245,7 +247,7 @@ function ScoutingCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the player profile analysis">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -292,6 +294,8 @@ function ScoutRow({
   per80: number;
   percentile: number;
 }) {
+  // Sweep-in driver (shared arrival grammar).
+  const ink = useChartInk();
   return (
     <View style={styles.scoutRow}>
       <View style={styles.scoutRowHead}>
@@ -305,18 +309,20 @@ function ScoutRow({
               peer median = winner pairing, below = loser pairing. */}
           <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
             <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
-              {percentile}
+              <CountUpValue value={String(percentile)} ink={ink} />
             </Text>
           </View>
         </View>
       </View>
       <View style={styles.scoutTrack}>
-        <View
+        <Animated.View
           style={[
             styles.scoutFill,
             {
               width: `${percentile}%`,
               backgroundColor: percentile >= 50 ? GOOD_COLOR : BAD_COLOR,
+              transformOrigin: 'left',
+              transform: [{ scaleX: ink }],
             },
           ]}
         />
@@ -382,7 +388,7 @@ function TrendCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the form analysis">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
 
@@ -549,7 +555,7 @@ function SeasonCard({
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Read the season analysis">
-          <AppLogo height={14} spin />
+          <FlipTrigger />
         </Pressable>
       </View>
       {isLoading && !data ? (

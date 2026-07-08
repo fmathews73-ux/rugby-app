@@ -1,6 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-
-import { AppLogo } from '@/components/app-logo';import { useRouter, useSegments } from 'expo-router';
+import { useRouter, useSegments } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import { Colors } from '@/constants/theme';
@@ -48,7 +47,10 @@ export function AppHeader() {
         <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby Metrics">
           {/* Tilted to echo the wordmark's italic axis. */}
           <View style={styles.logoTilt}>
-            <AppLogo height={20} />
+            {/* Same fingerprint mark as the card triggers — identity
+                black beside the wordmark, still (no spin) in the
+                header. */}
+            <Ionicons name="finger-print-outline" size={22} color={Colors.light.text} />
           </View>
           <Text style={styles.wordmarkMain}>RUGBYMETRICS</Text>
         </View>

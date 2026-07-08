@@ -1,12 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useMemo, useState } from 'react';
-import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
+import { Easing, Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 import Svg, { G, Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
+import { CountUpTSpan } from '@/components/insights/count-up-value';
+import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -114,7 +116,7 @@ export function RankingTrajectory({
             hitSlop={10}
             accessibilityRole="button"
             accessibilityLabel="Explain the World Ranking chart">
-            <AppLogo height={14} spin />
+            <FlipTrigger />
           </Pressable>
         </View>
       </View>
@@ -147,6 +149,10 @@ function TrajectoryChart({
   series: { date: string; rank: number; points: number }[];
 }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
+
+  // Fade-in driver (shared arrival grammar).
+  // Timeline wipe (months left-to-right); replays on toggle.
+  const ink = useChartInk(series, { duration: 2000, easing: Easing.inOut(Easing.ease) });
   const width = canvas.w;
   const height = canvas.h;
   // Rank labels sit flush at x=0 so the axis aligns with the card's
@@ -263,6 +269,56 @@ function TrajectoryChart({
           </SvgText>
         ) : null,
       )}
+      {/* X-axis endpoints: month labels. */}
+      {first ? (
+        <SvgText
+          x={plotLeft}
+          y={height - 4}
+          fill={Colors.light.textSecondary}
+          fontFamily="Barlow_500Medium"
+          fontSize={9}
+          textAnchor="start">
+          {formatMonth(first.date)}
+        </SvgText>
+      ) : null}
+      {last ? (
+        <SvgText
+          x={plotRight}
+          y={height - 4}
+          fill={Colors.light.textSecondary}
+          fontFamily="Barlow_500Medium"
+          fontSize={9}
+          textAnchor="end">
+          {formatMonth(last.date)}
+        </SvgText>
+      ) : null}
+      </Svg>
+      ) : null}
+      {width > 0 && height > 0 ? (
+      /* Data layer — step trace, dots, and shift badges fade in over
+         the static lattice. */
+      <Animated.View
+        pointerEvents="none"
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width,
+          height,
+          overflow: 'hidden',
+          transform: [
+            { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [-width, 0] }) },
+          ],
+        }}>
+      <Animated.View
+        style={{
+          width,
+          height,
+          transform: [
+            { translateX: ink.interpolate({ inputRange: [0, 1], outputRange: [width, 0] }) },
+          ],
+        }}>
+      <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
       {/* Month-to-month step trace, under the dots — lighter than the
           standard chart line; the coloured dots carry the story. */}
       <Path d={stepPath} stroke="#9CA3AF" strokeWidth={1.2} fill="none" />
@@ -298,35 +354,14 @@ function TrajectoryChart({
               fontFamily="BarlowCondensed_700Bold_Italic"
               fontSize={11}
               textAnchor="middle">
-              {d.rank}
+              <CountUpTSpan value={String(d.rank)} ink={ink} />
             </SvgText>
           </G>
         ) : null,
       )}
-      {/* X-axis endpoints: month labels. */}
-      {first ? (
-        <SvgText
-          x={plotLeft}
-          y={height - 4}
-          fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
-          fontSize={9}
-          textAnchor="start">
-          {formatMonth(first.date)}
-        </SvgText>
-      ) : null}
-      {last ? (
-        <SvgText
-          x={plotRight}
-          y={height - 4}
-          fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
-          fontSize={9}
-          textAnchor="end">
-          {formatMonth(last.date)}
-        </SvgText>
-      ) : null}
       </Svg>
+      </Animated.View>
+      </Animated.View>
       ) : null}
     </View>
   );

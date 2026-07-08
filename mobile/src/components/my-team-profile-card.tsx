@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import { BackStrong, FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
-import { AppLogo } from '@/components/app-logo';
+import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -67,7 +67,7 @@ function Populated({
               hitSlop={10}
               accessibilityRole="button"
               accessibilityLabel="Explain the Profile radar">
-              <AppLogo height={14} spin />
+              <FlipTrigger />
             </Pressable>
           </View>
 
