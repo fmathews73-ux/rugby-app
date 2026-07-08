@@ -10,10 +10,11 @@ import { fetchJson } from '@/api/client';
 import { useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { formPointsFor, type FormPoint } from '@/lib/form-momentum';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
@@ -39,7 +40,6 @@ export function ExtendedMomentum({
   asOfDate,
   style,
   title,
-  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -54,7 +54,6 @@ export function ExtendedMomentum({
   title?: string;
   /** Hide the corner flag — Home's my-team cards drop it since the
    *  whole stack is already scoped to the selected team. */
-  showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
@@ -122,6 +121,8 @@ export function ExtendedMomentum({
       back={
         <NarrativeBack
           title={title ?? 'Form'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.form}
           purpose={
@@ -135,7 +136,11 @@ export function ExtendedMomentum({
           right on the same line (icon outermost — same corner slot as
           the Team Profile card). */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title ?? 'Form'}</Text>
+        <CardTitle
+          title={title ?? 'Form'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
+        />
         <View style={styles.headerRightGroup}>
           {hasCompare ? (
             <TeamToggle
@@ -144,11 +149,6 @@ export function ExtendedMomentum({
               activeSide={activeSide}
               onSelect={setActiveSide}
             />
-          ) : showCornerFlag && primaryTeam.data ? (
-            // Single-team mode — anchor the header with the team's flag
-            // so the card identifies its subject at a glance (Home's
-            // my-team stack opts out; its scope is already explicit).
-            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
           ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}

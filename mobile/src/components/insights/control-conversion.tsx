@@ -7,6 +7,7 @@ import type { Fixture, Team } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -56,6 +57,10 @@ export function ControlConversion({
       back={
         <NarrativeBack
           title="Verdict"
+          flagCode={home?.flag_code}
+          code={home?.short_name}
+          flagCode2={away?.flag_code}
+          code2={away?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Territory and possession control set against points per 22 entry — did the side that ran the match actually bank it on the scoreboard?</>}
@@ -64,7 +69,13 @@ export function ControlConversion({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Verdict</Text>
+        <CardTitle
+          title="Verdict"
+          flagCode={home?.flag_code}
+          code={home?.short_name}
+          flagCode2={away?.flag_code}
+          code2={away?.short_name}
+        />
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}

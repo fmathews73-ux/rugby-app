@@ -4,7 +4,9 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -47,6 +49,9 @@ export function DangerWindows({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const pairTeams = useTeams();
+  const homeSide = (pairTeams.data ?? []).find((t) => t.id === homeTeamId);
+  const awaySide = (pairTeams.data ?? []).find((t) => t.id === awayTeamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   const activeTeamId = activeSide === 'primary' ? homeTeamId : awayTeamId;
 
@@ -63,6 +68,10 @@ export function DangerWindows({
       back={
         <NarrativeBack
           title="Danger"
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Each side's average points scored (up, green) and conceded (down, red) per 20-minute window — where one team's strong quarter lands on the other's weak one is where the match can swing.</>}
@@ -75,7 +84,13 @@ export function DangerWindows({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Danger</Text>
+        <CardTitle
+          title="Danger"
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
+        />
         <View style={styles.headerCentre}>
           <TeamToggle
             primaryLabel={homeCode}

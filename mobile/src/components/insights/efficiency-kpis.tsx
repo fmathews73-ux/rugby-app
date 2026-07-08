@@ -3,12 +3,12 @@ import { useEffect, useMemo, useState } from 'react';
 import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { useTeam } from '@/api/hooks';
-import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
@@ -28,7 +28,6 @@ export function EfficiencyKpis({
   asOfDate,
   style,
   title,
-  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -43,7 +42,6 @@ export function EfficiencyKpis({
   title?: string;
   /** Hide the corner flag — Home's my-team cards drop it since the
    *  whole stack is already scoped to the selected team. */
-  showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
@@ -59,6 +57,7 @@ export function EfficiencyKpis({
 
   const primaryTeam = useTeam(teamId);
   const compareTeam = useTeam(compareTeamId ?? '');
+  const activeTeam = activeSide === 'primary' ? primaryTeam : compareTeam;
   // Prev-10 window — the same lookback as Form, Profile, and the
   // scouting/percentile reads, so every BI card describes one coherent
   // stretch of matches. The full-season baseline lives in the team
@@ -123,6 +122,8 @@ export function EfficiencyKpis({
       back={
         <NarrativeBack
           title={title ?? 'Efficiency'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.kpis}
           purpose={
@@ -135,7 +136,11 @@ export function EfficiencyKpis({
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title ?? 'Efficiency'}</Text>
+        <CardTitle
+          title={title ?? 'Efficiency'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
+        />
         <View style={styles.headerRightGroup}>
           {hasCompare ? (
             <TeamToggle
@@ -144,8 +149,6 @@ export function EfficiencyKpis({
               activeSide={activeSide}
               onSelect={setActiveSide}
             />
-          ) : showCornerFlag && primaryTeam.data ? (
-            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
           ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}

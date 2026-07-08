@@ -5,6 +5,7 @@ import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { TeamFlagShield } from '@/components/team-flag-shield';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -40,6 +41,7 @@ export function DisciplineTrend({
   // Opponent flag per bar — the x-axis identifies who each match was
   // against.
   const allTeams = useTeams();
+  const subjectTeam = (allTeams.data ?? []).find((t) => t.id === teamId);
   const flagByTeam = useMemo(() => {
     const m = new Map<string, string>();
     for (const t of allTeams.data ?? []) m.set(t.id, t.flag_code);
@@ -55,6 +57,8 @@ export function DisciplineTrend({
       back={
         <NarrativeBack
           title="Discipline"
+          flagCode={subjectTeam?.flag_code}
+          code={subjectTeam?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.disciplineTrend}
           purpose={
@@ -66,7 +70,11 @@ export function DisciplineTrend({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Discipline</Text>
+        <CardTitle
+          title="Discipline"
+          flagCode={subjectTeam?.flag_code}
+          code={subjectTeam?.short_name}
+        />
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}

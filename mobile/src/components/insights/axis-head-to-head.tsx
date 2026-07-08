@@ -4,7 +4,9 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
+import { useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -114,6 +116,9 @@ export function AxisHeadToHead({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const pairTeams = useTeams();
+  const homeSide = (pairTeams.data ?? []).find((t) => t.id === homeTeamId);
+  const awaySide = (pairTeams.data ?? []).find((t) => t.id === awayTeamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   const home = useTeamAggregate(homeTeamId, asOfDate, LOOKBACK);
   const away = useTeamAggregate(awayTeamId, asOfDate, LOOKBACK);
@@ -138,6 +143,10 @@ export function AxisHeadToHead({
       back={
         <NarrativeBack
           title={title}
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>{PAIR_PURPOSES[title]?.preview ?? 'How the two sides come into this match in these departments.'}</>}
@@ -150,7 +159,13 @@ export function AxisHeadToHead({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title}</Text>
+        <CardTitle
+          title={title}
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
+        />
         <View style={styles.headerCentre}>
           <TeamToggle
             primaryLabel={homeCode}

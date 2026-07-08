@@ -4,6 +4,8 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { useTeam } from '@/api/hooks';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -36,6 +38,7 @@ export function ScoringRhythm({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const subjectTeam = useTeam(teamId);
   const analysis = useTeamAnalysis(teamId);
   const scored = useTeamPointsPattern(teamId, 'scored', undefined, LOOKBACK);
   const conceded = useTeamPointsPattern(teamId, 'conceded', undefined, LOOKBACK);
@@ -50,6 +53,8 @@ export function ScoringRhythm({
       back={
         <NarrativeBack
           title="Rhythm"
+          flagCode={subjectTeam.data?.flag_code}
+          code={subjectTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.rhythm}
           purpose={
@@ -61,7 +66,11 @@ export function ScoringRhythm({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Rhythm</Text>
+        <CardTitle
+          title="Rhythm"
+          flagCode={subjectTeam.data?.flag_code}
+          code={subjectTeam.data?.short_name}
+        />
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}

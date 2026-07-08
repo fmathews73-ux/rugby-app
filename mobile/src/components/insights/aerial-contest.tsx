@@ -4,11 +4,11 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import { useTeam } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { TeamFlagShield } from '@/components/team-flag-shield';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, FlagSize, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
+import { Colors, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
@@ -39,11 +39,9 @@ const T1 = {
 export function AerialContest({
   teamId,
   style,
-  showCornerFlag = true,
 }: {
   teamId: string;
   style?: StyleProp<ViewStyle>;
-  showCornerFlag?: boolean;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   // Sweep-in driver (shared arrival grammar).
@@ -95,6 +93,8 @@ export function AerialContest({
       back={
         <NarrativeBack
           title="Aerial"
+          flagCode={team.data?.flag_code}
+          code={team.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.aerial}
           purpose={
@@ -111,11 +111,12 @@ export function AerialContest({
       front={
         <View style={[styles.card, styles.cardFill]}>
           <View style={styles.headerRow}>
-            <Text style={styles.sectionLabel}>Aerial</Text>
+            <CardTitle
+              title="Aerial"
+              flagCode={team.data?.flag_code}
+              code={team.data?.short_name}
+            />
             <View style={styles.headerRightGroup}>
-              {showCornerFlag && team.data ? (
-                <TeamFlagShield flagCode={team.data.flag_code} width={FlagSize.xs} />
-              ) : null}
               <Pressable
                 onPress={() => setInfoOpen(true)}
                 hitSlop={10}

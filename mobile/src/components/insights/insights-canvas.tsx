@@ -7,6 +7,7 @@ import type { Fixture } from '@rugby-app/shared';
 import { useTeam } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
@@ -85,7 +86,13 @@ export function InsightsCanvas({
       {/* Title left; accessory then the reader icon pinned right —
           same corner slot as the Home carousel cards. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Profile</Text>
+        <CardTitle
+          title="Profile"
+          flagCode={primaryTeam.data?.flag_code}
+          code={primaryTeam.data?.short_name}
+          flagCode2={compareTeamId ? compareTeam.data?.flag_code : null}
+          code2={compareTeamId ? compareTeam.data?.short_name : null}
+        />
         <View style={styles.headerRightGroup}>
           {/* Single-team mode anchors the header with the team's xs
               flag; compare mode's colour legend sits under the chart. */}
@@ -142,6 +149,10 @@ export function InsightsCanvas({
       back={
         <NarrativeBack
           title="Profile"
+          flagCode={primaryTeam.data?.flag_code}
+          code={primaryTeam.data?.short_name}
+          flagCode2={compareTeamId ? compareTeam.data?.flag_code : null}
+          code2={compareTeamId ? compareTeam.data?.short_name : null}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={

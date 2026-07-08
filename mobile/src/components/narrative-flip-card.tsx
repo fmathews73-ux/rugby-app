@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Animated, Easing, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
 
 import { Ionicons } from '@expo/vector-icons';
+import { CardTitle } from '@/components/card-title';
 import { fitToLines } from '@/lib/fit-narrative';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
@@ -12,11 +13,21 @@ import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
  */
 export function NarrativeBack({
   title,
+  flagCode,
+  code,
+  flagCode2,
+  code2,
   purpose,
   read,
   onClose,
 }: {
   title: string;
+  /** Team identity pair beside the title (team-scoped cards) — same
+   *  treatment as the front header; match cards pass both sides. */
+  flagCode?: string | null;
+  code?: string | null;
+  flagCode2?: string | null;
+  code2?: string | null;
   purpose: ReactNode;
   read?: string | null;
   onClose: () => void;
@@ -41,7 +52,7 @@ export function NarrativeBack({
   return (
     <View style={styles.backCard}>
       <View style={styles.headerRow}>
-        <Text style={styles.title}>{title}</Text>
+        <CardTitle title={title} flagCode={flagCode} code={code} flagCode2={flagCode2} code2={code2} />
         <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back to chart">
           <Ionicons name="arrow-back-circle-outline" size={18} color={Colors.light.textSecondary} />
         </Pressable>
@@ -159,14 +170,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: Spacing.two,
-  },
-  title: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
-    letterSpacing: TextTracking.wide,
-    textTransform: 'uppercase',
-    // Same title grey as the chart fronts — one register, both faces.
-    color: Colors.light.textSecondary,
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {

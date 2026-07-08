@@ -4,6 +4,8 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { useTeam } from '@/api/hooks';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -32,6 +34,7 @@ export function PossessionOutcome({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const subjectTeam = useTeam(teamId);
   const analysis = useTeamAnalysis(teamId);
   const { data, isLoading } = useTeamMatchSeries(teamId, LOOKBACK);
 
@@ -42,6 +45,8 @@ export function PossessionOutcome({
       back={
         <NarrativeBack
           title="Possession"
+          flagCode={subjectTeam.data?.flag_code}
+          code={subjectTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.possession}
           purpose={
@@ -53,7 +58,11 @@ export function PossessionOutcome({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Possession</Text>
+        <CardTitle
+          title="Possession"
+          flagCode={subjectTeam.data?.flag_code}
+          code={subjectTeam.data?.short_name}
+        />
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}

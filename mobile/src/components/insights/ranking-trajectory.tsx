@@ -4,12 +4,12 @@ import { Easing, Animated, Pressable, StyleSheet, type StyleProp, Text, View, ty
 import Svg, { G, Circle, Line, Path, Text as SvgText } from 'react-native-svg';
 
 import { useRankingHistory, useTeam } from '@/api/hooks';
-import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
@@ -32,7 +32,6 @@ export function RankingTrajectory({
   asOfDate,
   style,
   title,
-  showCornerFlag = true,
 }: {
   teamId: string;
   compareTeamId?: string | null;
@@ -47,7 +46,6 @@ export function RankingTrajectory({
   title?: string;
   /** Hide the corner flag — Home's my-team cards drop it since the
    *  whole stack is already scoped to the selected team. */
-  showCornerFlag?: boolean;
 }) {
   const history = useRankingHistory();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -63,6 +61,7 @@ export function RankingTrajectory({
   const compareTeam = useTeam(compareTeamId ?? '');
   const hasCompare = Boolean(compareTeamId);
   const activeTeamId = activeSide === 'primary' ? teamId : (compareTeamId ?? teamId);
+  const activeTeam = activeSide === 'primary' ? primaryTeam : compareTeam;
 
   const series = useMemo(() => {
     const points: { date: string; rank: number; points: number }[] = [];
@@ -87,6 +86,8 @@ export function RankingTrajectory({
       back={
         <NarrativeBack
           title={title ?? 'Ranking'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.ranking}
           purpose={
@@ -99,7 +100,11 @@ export function RankingTrajectory({
       {/* Title left; toggle/flag then the utility info icon pinned
           right on the same line (same corner slot as Team Profile). */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>{title ?? 'Ranking'}</Text>
+        <CardTitle
+          title={title ?? 'Ranking'}
+          flagCode={activeTeam.data?.flag_code}
+          code={activeTeam.data?.short_name}
+        />
         <View style={styles.headerRightGroup}>
           {hasCompare ? (
             <TeamToggle
@@ -108,8 +113,6 @@ export function RankingTrajectory({
               activeSide={activeSide}
               onSelect={setActiveSide}
             />
-          ) : showCornerFlag && primaryTeam.data ? (
-            <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
           ) : null}
           <Pressable
             onPress={() => setInfoOpen(true)}

@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 import { useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { MatrixChart } from '@/components/insights/matrix-chart';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -30,6 +31,7 @@ export function TeamLandscape({
   const analysis = useTeamAnalysis(teamId);
   const summary = useTeamsFormSummary();
   const teams = useTeams();
+  const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -50,6 +52,8 @@ export function TeamLandscape({
       back={
         <NarrativeBack
           title="Landscape"
+          flagCode={subjectTeam?.flag_code}
+          code={subjectTeam?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.landscape}
           purpose={
@@ -61,7 +65,11 @@ export function TeamLandscape({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Landscape</Text>
+        <CardTitle
+          title="Landscape"
+          flagCode={subjectTeam?.flag_code}
+          code={subjectTeam?.short_name}
+        />
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}

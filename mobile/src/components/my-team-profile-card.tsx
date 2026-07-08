@@ -6,6 +6,8 @@ import { BackStrong, FadeCard, NarrativeBack } from '@/components/narrative-flip
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { useTeam } from '@/api/hooks';
+import { CardTitle } from '@/components/card-title';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 
@@ -46,6 +48,7 @@ function Populated({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
+  const team = useTeam(teamId);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
   const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
 
@@ -61,7 +64,11 @@ function Populated({
         <View style={[styles.card, styles.cardFill]}>
           {/* Title left, utility info icon pinned right on the same line. */}
           <View style={styles.headerRow}>
-            <Text style={styles.sectionLabel}>Profile</Text>
+            <CardTitle
+              title="Profile"
+              flagCode={team.data?.flag_code}
+              code={team.data?.short_name}
+            />
             <Pressable
               onPress={() => setInfoOpen(true)}
               hitSlop={10}
@@ -83,6 +90,8 @@ function Populated({
       back={
         <NarrativeBack
           title="Profile"
+          flagCode={team.data?.flag_code}
+          code={team.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.summary}
           purpose={

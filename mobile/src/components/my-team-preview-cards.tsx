@@ -60,24 +60,21 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
           key="form"
           teamId={teamId}
           style={styles.pageCard}
-          showCornerFlag={false}
         />,
         <RankingTrajectory
           key="ranking"
           teamId={teamId}
           style={styles.pageCard}
-          showCornerFlag={false}
         />,
         <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
         <EfficiencyKpis
           key="kpis"
           teamId={teamId}
           style={styles.pageCard}
-          showCornerFlag={false}
         />,
         <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
         <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
-        <AerialContest key="aerial" teamId={teamId} style={styles.pageCard} showCornerFlag={false} />,
+        <AerialContest key="aerial" teamId={teamId} style={styles.pageCard} />,
         <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
         <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
       ]}

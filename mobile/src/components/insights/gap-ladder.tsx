@@ -4,7 +4,9 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import type { SignedGapView } from '@/hooks/use-match-preview';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
+import { useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -77,6 +79,9 @@ export function GapLadder({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
+  const pairTeams = useTeams();
+  const homeSide = (pairTeams.data ?? []).find((t) => t.id === homeTeamId);
+  const awaySide = (pairTeams.data ?? []).find((t) => t.id === awayTeamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   // Sweep-in driver (shared arrival grammar); replays on toggle.
   const ink = useChartInk(activeSide);
@@ -92,6 +97,10 @@ export function GapLadder({
       back={
         <NarrativeBack
           title="H2H"
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>The biggest statistical gaps between the two sides, ranked — the further a bar runs, the more one-sided that department has been over the last 10 matches.</>}
@@ -104,7 +113,13 @@ export function GapLadder({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>H2H</Text>
+        <CardTitle
+          title="H2H"
+          flagCode={homeSide?.flag_code}
+          code={homeSide?.short_name}
+          flagCode2={awaySide?.flag_code}
+          code2={awaySide?.short_name}
+        />
         <View style={styles.headerCentre}>
           <TeamToggle
             primaryLabel={homeCode}

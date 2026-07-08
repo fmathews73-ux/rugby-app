@@ -17,6 +17,7 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -167,6 +168,10 @@ export function ScoringProgression({
       back={
         <NarrativeBack
           title="Progression"
+          flagCode={homeTeam.data?.flag_code}
+          code={homeTeam.data?.short_name}
+          flagCode2={awayTeam.data?.flag_code}
+          code2={awayTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>The scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
@@ -175,7 +180,13 @@ export function ScoringProgression({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Progression</Text>
+        <CardTitle
+          title="Progression"
+          flagCode={homeTeam.data?.flag_code}
+          code={homeTeam.data?.short_name}
+          flagCode2={awayTeam.data?.flag_code}
+          code2={awayTeam.data?.short_name}
+        />
         <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
