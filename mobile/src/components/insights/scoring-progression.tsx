@@ -168,10 +168,6 @@ export function ScoringProgression({
       back={
         <NarrativeBack
           title="Progression"
-          flagCode={homeTeam.data?.flag_code}
-          code={homeTeam.data?.short_name}
-          flagCode2={awayTeam.data?.flag_code}
-          code2={awayTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>The scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
@@ -182,10 +178,6 @@ export function ScoringProgression({
       <View style={styles.headerRow}>
         <CardTitle
           title="Progression"
-          flagCode={homeTeam.data?.flag_code}
-          code={homeTeam.data?.short_name}
-          flagCode2={awayTeam.data?.flag_code}
-          code2={awayTeam.data?.short_name}
         />
         <View style={styles.headerRightGroup}>
           <Pressable

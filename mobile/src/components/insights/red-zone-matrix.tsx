@@ -39,10 +39,6 @@ export function RedZoneMatrix({
   const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
-  const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
-  const compareTeam = compareTeamId
-    ? (teams.data ?? []).find((t) => t.id === compareTeamId)
-    : null;
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -84,11 +80,6 @@ export function RedZoneMatrix({
       back={
         <NarrativeBack
           title="Red Zone"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          flagCode2={compareTeam?.flag_code}
-          code2={compareTeam?.short_name}
-          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           onClose={() => setInfoOpen(false)}
           read={
             compareTeamId
@@ -104,18 +95,13 @@ export function RedZoneMatrix({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Red Zone"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          flagCode2={compareTeam?.flag_code}
-          code2={compareTeam?.short_name}
-          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
-          centerTitle
-        />
+        {/* Radar/2x2 rule: title centred on the chart's vertical axis;
+            bar-chart cards keep left titles. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Red Zone" />
+        </View>
         <Pressable
           onPress={() => setInfoOpen(true)}
-          style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the red-zone matrix">
@@ -132,6 +118,7 @@ export function RedZoneMatrix({
           points={points}
           subjectId={teamId}
           subjectId2={compareTeamId}
+          subjectsOnly={Boolean(compareTeamId)}
           quadrants={{ tr: 'RELENTLESS', tl: 'CLINICAL', br: 'WASTEFUL', bl: 'BLUNT' }}
           xCaption="22 ENTRIES /GAME →"
           yCaption="POINTS PER VISIT →"
@@ -163,17 +150,21 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerTrigger: {
+  titleCentreFill: {
     position: 'absolute',
-    right: 0,
     top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.

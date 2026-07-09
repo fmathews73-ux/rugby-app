@@ -13,11 +13,6 @@ import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
  */
 export function NarrativeBack({
   title,
-  flagCode,
-  code,
-  flagCode2,
-  code2,
-  comparison,
   purpose,
   read,
   onClose,
@@ -25,11 +20,6 @@ export function NarrativeBack({
   title: string;
   /** Team identity pair beside the title (team-scoped cards) — same
    *  treatment as the front header; match cards pass both sides. */
-  flagCode?: string | null;
-  code?: string | null;
-  flagCode2?: string | null;
-  code2?: string | null;
-  comparison?: string | null;
   purpose: ReactNode;
   read?: string | null;
   onClose: () => void;
@@ -56,12 +46,6 @@ export function NarrativeBack({
       <View style={styles.headerRow}>
         <CardTitle
           title={title}
-          flagCode={flagCode}
-          code={code}
-          flagCode2={flagCode2}
-          code2={code2}
-          comparison={comparison}
-          centerTitle
         />
         <Pressable
           onPress={onClose}
@@ -181,6 +165,7 @@ const styles = StyleSheet.create({
     bottom: 0,
   },
   headerRow: {
+    justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
     position: 'relative',
@@ -190,6 +175,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 0,
     top: 0,
+    bottom: 0,
+    justifyContent: 'center',
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {

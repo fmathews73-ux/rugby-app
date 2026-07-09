@@ -21,6 +21,32 @@ import { PRE_MATCH_AXIS_PAIRS } from '@/lib/analysis-section-info';
 // ─── Preview (Pre-Match) pane ────────────────────────────────────────────────
 
 // Engine window — matches use-match-preview's WINDOW.
+// H2H ladder order (owner call 2026-07-09): the radar's lobes led by
+// the control pair — FIELD (possession, territory, kicking) → STRIKE
+// (attack, defence) → CONTEST (set-piece, turnovers, discipline) — so
+// ladder bars and radar lobes tell one story. Bar LENGTH still
+// carries gap size; ranking is no longer the order. Aerial axes stay
+// in their pair card.
+// SEVEN bars — the card's height is fixed (owner rule); kicking is
+// the axis that sits out (fully covered by the Territory matrix and
+// the Kicking & Territory pair card), keeping both the control pair
+// and the contest lobe whole.
+const LADDER_AXIS_ORDER = [
+  'possession',
+  'territory',
+  'attack',
+  'defence',
+  'set-piece',
+  'turnovers',
+  'discipline',
+] as const;
+
+function orderedGaps<T extends { key: string }>(gaps: readonly T[]): T[] {
+  return LADDER_AXIS_ORDER.map((k) => gaps.find((g) => g.key === k)).filter(
+    (g): g is T => g !== undefined,
+  );
+}
+
 const LOOKBACK = 10;
 
 /**
@@ -70,24 +96,10 @@ export function PreviewPane({
         style={styles.pageCard}
         read={data?.summary ?? null}
       />,
-      // One ladder card, top SEVEN gaps (the card's height fits 7
-      // bars). The eighth — the least-differentiating axis — isn't
-      // lost: every axis also renders in its axis-pair card below.
-      <GapLadder
-        key="ladder"
-        gaps={(data?.gaps ?? []).slice(0, 7)}
-        homeTeamId={homeTeamId}
-        awayTeamId={awayTeamId}
-        homeCode={homeCode}
-        awayCode={awayCode}
-        asOfDate={asOfDate}
-        style={styles.pageCard}
-        read={data ? fitNarrative([data.shape, data.keys], 900) : null}
-      />,
-      // Dual-highlight tier matrices (owner call 2026-07-09): context
-      // before numbers — where both game plans sit in the tier before
-      // the pair cards argue the head-to-head. Style clash, game
-      // script, conversion, line integrity.
+      // Dual-highlight tier matrices (owner order 2026-07-09): the
+      // strategic-context block straight after the radar — style
+      // clash, game script, conversion, line integrity — then the
+      // ladder bridges into the numeric pair cards.
       <TeamLandscape
         key="landscape"
         teamId={homeTeamId}
@@ -111,6 +123,22 @@ export function PreviewPane({
         teamId={homeTeamId}
         compareTeamId={awayTeamId}
         style={styles.pageCard}
+      />,
+      // The BRIDGE (owner order 2026-07-09): after the strategic
+      // matrices, the ladder lays out SEVEN core axes in the radar's
+      // lobe order (fixed card height; kicking sits out) — the table
+      // of contents for the pair cards that follow. Gap size lives in
+      // the bar lengths.
+      <GapLadder
+        key="ladder"
+        gaps={orderedGaps(data?.gaps ?? [])}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
+        homeCode={homeCode}
+        awayCode={awayCode}
+        asOfDate={asOfDate}
+        style={styles.pageCard}
+        read={data ? fitNarrative([data.shape, data.keys], 900) : null}
       />,
     ];
 

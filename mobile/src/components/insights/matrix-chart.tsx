@@ -33,6 +33,7 @@ export function MatrixChart({
   points,
   subjectId,
   subjectId2,
+  subjectsOnly,
   quadrants,
   xCaption,
   yCaption,
@@ -44,6 +45,10 @@ export function MatrixChart({
   /** Second highlighted subject (pre-match dual view) — rendered like
    *  the primary, drawn beneath it so the primary wins overlaps. */
   subjectId2?: string | null;
+  /** Match-specific mode: render ONLY the two subjects' dots. The
+   *  full pool still drives the crosshair medians and the scale, so
+   *  quadrant calls keep their tier meaning. */
+  subjectsOnly?: boolean;
   /** Quadrant labels, centred in each quadrant: top-right, top-left,
    *  bottom-right, bottom-left. */
   quadrants: { tr: string; tl: string; br: string; bl: string };
@@ -167,18 +172,20 @@ export function MatrixChart({
           style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
           <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
             {/* Pool dots first, subject on top. */}
-            {points.map((p) =>
-              p.id === subjectId || p.id === subjectId2 ? null : (
-                <Circle
-                  key={p.id}
-                  cx={xOf(p.x)}
-                  cy={yOf(p.y)}
-                  r={p.weight !== undefined ? 2 + p.weight * 3 : 2.5}
-                  fill={teamDotColor(p.id) ?? POOL_COLOR}
-                  opacity={0.55}
-                />
-              ),
-            )}
+            {subjectsOnly
+              ? null
+              : points.map((p) =>
+                  p.id === subjectId || p.id === subjectId2 ? null : (
+                    <Circle
+                      key={p.id}
+                      cx={xOf(p.x)}
+                      cy={yOf(p.y)}
+                      r={p.weight !== undefined ? 2 + p.weight * 3 : 2.5}
+                      fill={teamDotColor(p.id) ?? POOL_COLOR}
+                      opacity={0.55}
+                    />
+                  ),
+                )}
             {subject2 ? (
               <>
                 <Circle

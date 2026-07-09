@@ -4,10 +4,9 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import type { PreviewAxisKey } from '@/hooks/use-match-preview';
 import { AXIS_INFO, type SectionInfo } from '@/lib/analysis-section-info';
-import { useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
-import { FlipTrigger } from '@/components/flip-trigger';
+import { CardHeaderActions } from '@/components/card-header-actions';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAIR_PURPOSES } from '@/lib/analysis-section-info';
@@ -26,6 +25,62 @@ type PerGame = TeamAggregate['perGame'];
 
 /** The 2-4 per-game reads behind each preview axis — the numeric
  *  evidence for the axis narrative one pane below. */
+// Fixed row orders for pair cards where interleaving beats block
+// order. Attack & Defence MIRRORS for/against (owner call 2026-07-09):
+// scoreboard ledger, strike ledger, cause-and-prevention (line breaks
+// against tackle success — the Defence matrix's causation), engine
+// last.
+const PAIR_ROW_ORDER: Record<string, readonly string[]> = {
+  'Attack & Defence': [
+    'pointsScored',
+    'pointsConceded',
+    'tries',
+    'triesConceded',
+    'lineBreaks',
+    'tackleSuccessPercent',
+    'metersMade',
+  ],
+  // Platform first, then the giveaway ladder in ESCALATING cost:
+  // lost ball → penalties → ten minutes → the game.
+  'Set Piece & Discipline': [
+    'scrumSuccessPercent',
+    'lineoutSuccessPercent',
+    'handlingErrors',
+    'penaltiesConceded',
+    'yellowCards',
+    'redCards',
+  ],
+  // Supply chain: the boot buys field, field buys visits, visits pay
+  // points; the tee closes as the alternative route to the scoreboard.
+  'Kicking & Territory': [
+    'kicksInPlay',
+    'kickMeters',
+    'territoryPercent',
+    'twentyTwoEntries',
+    'pointsPerTwentyTwoEntry',
+    'goalKickingPercent',
+  ],
+  // Mirror ledgers (Attack & Defence grammar): the volume exchange
+  // first — up and at us — then the outcome exchange.
+  'Aerial Contest': [
+    'contestablesDelivered',
+    'contestablesReceived',
+    'deliveredWonPercent',
+    'receivedWonPercent',
+  ],
+  // The ball's life cycle: share → use → payoff → the exchange ledger,
+  // errors last as how most possession dies. Matches the default block
+  // order today — pinned so future row additions can't drift it.
+  'Possession & Turnovers': [
+    'possessionPercent',
+    'metersMade',
+    'pointsPerTwentyTwoEntry',
+    'turnoversWon',
+    'turnoversConceded',
+    'handlingErrors',
+  ],
+};
+
 const AXIS_ROWS: Record<
   PreviewAxisKey,
   readonly { field: keyof PerGame; label: string; percent?: boolean; inverted?: boolean }[]
@@ -116,9 +171,6 @@ export function AxisHeadToHead({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const pairTeams = useTeams();
-  const homeSide = (pairTeams.data ?? []).find((t) => t.id === homeTeamId);
-  const awaySide = (pairTeams.data ?? []).find((t) => t.id === awayTeamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   const home = useTeamAggregate(homeTeamId, asOfDate, LOOKBACK);
   const away = useTeamAggregate(awayTeamId, asOfDate, LOOKBACK);
@@ -128,11 +180,19 @@ export function AxisHeadToHead({
     paragraphs: axisKeys.flatMap((k) => AXIS_INFO[k]?.paragraphs ?? []),
   };
   // Concatenate the paired axes' rows, deduped by field (metres made
-  // appears under both attack and possession).
+  // appears under both attack and possession), then apply the pair's
+  // fixed row order where one exists.
   const seen = new Set<string>();
   const rows = axisKeys
     .flatMap((k) => AXIS_ROWS[k])
-    .filter((r) => (seen.has(r.field) ? false : (seen.add(r.field), true)));
+    .filter((r) => (seen.has(r.field) ? false : (seen.add(r.field), true)))
+    .sort((a, b) => {
+      const order = PAIR_ROW_ORDER[title];
+      if (!order) return 0;
+      const ia = order.indexOf(a.field as string);
+      const ib = order.indexOf(b.field as string);
+      return (ia === -1 ? order.length : ia) - (ib === -1 ? order.length : ib);
+    });
   const ready =
     (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
 
@@ -143,10 +203,6 @@ export function AxisHeadToHead({
       back={
         <NarrativeBack
           title={title}
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>{PAIR_PURPOSES[title]?.preview ?? 'How the two sides come into this match in these departments.'}</>}
@@ -159,28 +215,28 @@ export function AxisHeadToHead({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title={title}
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
-        />
-        <View style={styles.headerCentre}>
+        <CardTitle title={title} />
+        <CardHeaderActions
+
+          onExplain={() => setInfoOpen(true)}
+
+          accessibilityLabel={`Explain ${info.title}`}
+
+          toggle={
+
+            <>
           <TeamToggle
             primaryLabel={homeCode}
             compareLabel={awayCode}
             activeSide={activeSide}
             onSelect={setActiveSide}
             />
-        </View>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={`Explain ${info.title}`}>
-          <FlipTrigger />
-        </Pressable>
+
+            </>
+
+          }
+
+        />
       </View>
 
       {home.isLoading || away.isLoading ? (
@@ -302,17 +358,13 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    justifyContent: 'space-between',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  headerCentre: {
-    flex: 1,
-    alignItems: 'center',
-  },
+      },
   sectionLabel: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.md,

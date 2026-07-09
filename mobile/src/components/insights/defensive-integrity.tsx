@@ -42,10 +42,6 @@ export function DefensiveIntegrity({
   const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
-  const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
-  const compareTeam = compareTeamId
-    ? (teams.data ?? []).find((t) => t.id === compareTeamId)
-    : null;
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -63,11 +59,14 @@ export function DefensiveIntegrity({
               TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(compareTeamId))),
       )
       .map((s, i, rows) => {
-        // Points conceded per game → 0..1 weight (same normalisation
-        // as the margin sizing): bigger dot = leakier defence.
+        // Points conceded per game → 0..1 weight across the TRUE tier
+        // range: bigger dot = leakier defence. No zero anchor — unlike
+        // margins (which straddle zero), conceded is all-positive, and
+        // anchoring at 0 squashed the whole tier into the top of the
+        // scale (dots rendered near-identical).
         const conceded = rows.map((r) => r.per_game.pointsConceded ?? 0);
-        const minC = Math.min(...conceded, 0);
-        const span = Math.max(Math.max(...conceded, 0) - minC, 1);
+        const minC = Math.min(...conceded);
+        const span = Math.max(Math.max(...conceded) - minC, 0.1);
         return {
           id: s.team_id,
           code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
@@ -85,11 +84,6 @@ export function DefensiveIntegrity({
       back={
         <NarrativeBack
           title="Defence"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          flagCode2={compareTeam?.flag_code}
-          code2={compareTeam?.short_name}
-          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           onClose={() => setInfoOpen(false)}
           read={
             compareTeamId
@@ -105,18 +99,13 @@ export function DefensiveIntegrity({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Defence"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          flagCode2={compareTeam?.flag_code}
-          code2={compareTeam?.short_name}
-          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
-          centerTitle
-        />
+        {/* Radar/2x2 rule: title centred on the chart's vertical axis;
+            bar-chart cards keep left titles. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Defence" />
+        </View>
         <Pressable
           onPress={() => setInfoOpen(true)}
-          style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the defensive integrity matrix">
@@ -133,6 +122,7 @@ export function DefensiveIntegrity({
           points={points}
           subjectId={teamId}
           subjectId2={compareTeamId}
+          subjectsOnly={Boolean(compareTeamId)}
           quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
           xCaption="TACKLE SUCCESS % →"
           yCaption="FEWER BREAKS CONCEDED →"
@@ -165,17 +155,21 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerTrigger: {
+  titleCentreFill: {
     position: 'absolute',
-    right: 0,
     top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.

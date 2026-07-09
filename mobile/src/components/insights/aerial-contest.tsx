@@ -93,8 +93,6 @@ export function AerialContest({
       back={
         <NarrativeBack
           title="Aerial"
-          flagCode={team.data?.flag_code}
-          code={team.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.aerial}
           purpose={
@@ -113,8 +111,6 @@ export function AerialContest({
           <View style={styles.headerRow}>
             <CardTitle
               title="Aerial"
-              flagCode={team.data?.flag_code}
-              code={team.data?.short_name}
             />
             <View style={styles.headerRightGroup}>
               <Pressable

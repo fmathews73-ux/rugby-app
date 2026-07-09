@@ -3,12 +3,11 @@ import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
 import { BackStrong, FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
-import { RadarChart, buildRadarAxes, buildRadarAxesFromPerGame } from '@/components/insights/radar-chart';
+import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import { useTeam, useTeamsFormSummary } from '@/api/hooks';
+import { useTeam } from '@/api/hooks';
 import { teamDotColor } from '@/lib/team-colors';
-import { TIER_1_IDS } from '@/lib/tiers';
 import { CardTitle } from '@/components/card-title';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
@@ -53,21 +52,6 @@ function Populated({
   const team = useTeam(teamId);
   const { data: aggregate, isLoading } = useTeamAggregate(teamId, undefined, LOOKBACK);
   const axes = useMemo(() => buildRadarAxes(aggregate), [aggregate]);
-  // Tier-average reference: mean per-game sheet across the subject's
-  // tier, run through the same axis scales — the dashed polygon is a
-  // real benchmark, not a constant ring.
-  const pool = useTeamsFormSummary();
-  const referenceAxes = useMemo(() => {
-    const peers = (pool.data ?? []).filter(
-      (r) => r.games_played > 0 && TIER_1_IDS.has(r.team_id) === TIER_1_IDS.has(teamId),
-    );
-    if (peers.length < 4) return null;
-    const avg: Record<string, number> = {};
-    for (const key of Object.keys(peers[0]!.per_game)) {
-      avg[key] = peers.reduce((sum, r) => sum + (r.per_game[key] ?? 0), 0) / peers.length;
-    }
-    return buildRadarAxesFromPerGame(avg);
-  }, [pool.data, teamId]);
 
   return (
     // Flip-card pilot (owner call 2026-07-07): the info icon flips the
@@ -81,16 +65,13 @@ function Populated({
         <View style={[styles.card, styles.cardFill]}>
           {/* Title left, utility info icon pinned right on the same line. */}
           <View style={styles.headerRow}>
-            <CardTitle
-              title="Profile"
-              flagCode={team.data?.flag_code}
-              code={team.data?.short_name}
-              comparison="vs TIER AVG"
-              centerTitle
-            />
+            {/* Radar/2x2 rule: title centred on the chart's vertical
+                axis; bar-chart cards keep left titles. */}
+            <View style={styles.titleCentreFill} pointerEvents="none">
+              <CardTitle title="Profile" />
+            </View>
             <Pressable
               onPress={() => setInfoOpen(true)}
-              style={styles.headerTrigger}
               hitSlop={10}
               accessibilityRole="button"
               accessibilityLabel="Explain the Profile radar">
@@ -101,7 +82,6 @@ function Populated({
           {aggregate && aggregate.gamesPlayed > 0 ? (
             <RadarChart
               axes={axes}
-              referenceAxes={referenceAxes}
               // Team identity colour — the same guarded jersey colour
               // the chart dots use (white shirts fall back to their
               // secondary); gradient/stroke weights unchanged.
@@ -111,6 +91,7 @@ function Populated({
               strokeColor="transparent"
               fillColor={teamDotColor(teamId)}
               flatFillOpacity={0.25}
+              dotColor={teamDotColor(teamId)}
             />
           ) : null}
           {aggregate && aggregate.gamesPlayed > 0 ? (
@@ -134,18 +115,14 @@ function Populated({
       back={
         <NarrativeBack
           title="Profile"
-          flagCode={team.data?.flag_code}
-          code={team.data?.short_name}
-          comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.summary}
           purpose={
             <>
               The team's playing shape over the last {LOOKBACK} matches,
               across eight dimensions from <BackStrong>Attack</BackStrong> to{' '}
-              <BackStrong>Turnovers</BackStrong>. The dashed outline traces the
-              tier average on every axis — outside it is above the tier
-              on that dimension.
+              <BackStrong>Turnovers</BackStrong>. The further the shape reaches
+              on an axis, the stronger that part of the game has run.
             </>
           }
         />
@@ -173,17 +150,21 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerTrigger: {
+  titleCentreFill: {
     position: 'absolute',
-    right: 0,
     top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.

@@ -86,8 +86,6 @@ export function RankingTrajectory({
       back={
         <NarrativeBack
           title={title ?? 'Ranking'}
-          flagCode={activeTeam.data?.flag_code}
-          code={activeTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.ranking}
           purpose={
@@ -102,8 +100,6 @@ export function RankingTrajectory({
       <View style={styles.headerRow}>
         <CardTitle
           title={title ?? 'Ranking'}
-          flagCode={activeTeam.data?.flag_code}
-          code={activeTeam.data?.short_name}
         />
         <View style={styles.headerRightGroup}>
           {hasCompare ? (

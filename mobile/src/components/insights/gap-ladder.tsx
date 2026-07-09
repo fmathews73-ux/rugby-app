@@ -4,10 +4,9 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import type { SignedGapView } from '@/hooks/use-match-preview';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
-import { useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
-import { FlipTrigger } from '@/components/flip-trigger';
+import { CardHeaderActions } from '@/components/card-header-actions';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -79,9 +78,6 @@ export function GapLadder({
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const pairTeams = useTeams();
-  const homeSide = (pairTeams.data ?? []).find((t) => t.id === homeTeamId);
-  const awaySide = (pairTeams.data ?? []).find((t) => t.id === awayTeamId);
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   // Sweep-in driver (shared arrival grammar); replays on toggle.
   const ink = useChartInk(activeSide);
@@ -97,13 +93,9 @@ export function GapLadder({
       back={
         <NarrativeBack
           title="H2H"
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>The biggest statistical gaps between the two sides, ranked — the further a bar runs, the more one-sided that department has been over the last 10 matches.</>}
+          purpose={<>Seven core departments in the radar's order — field, strike, then the contest. The further a bar runs, the more one-sided that department has been over the last 10 matches.</>}
         />
       }
       front={
@@ -113,28 +105,28 @@ export function GapLadder({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title="H2H"
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
-        />
-        <View style={styles.headerCentre}>
+        <CardTitle title="H2H" />
+        <CardHeaderActions
+
+          onExplain={() => setInfoOpen(true)}
+
+          accessibilityLabel="Explain the profile head-to-head chart"
+
+          toggle={
+
+            <>
           <TeamToggle
             primaryLabel={homeCode}
             compareLabel={awayCode}
             activeSide={activeSide}
             onSelect={setActiveSide}
             />
-        </View>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel="Explain the profile head-to-head chart">
-          <FlipTrigger />
-        </Pressable>
+
+            </>
+
+          }
+
+        />
       </View>
 
       {home.isLoading || away.isLoading ? (
@@ -215,17 +207,15 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    justifyContent: 'space-between',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerCentre: {
-    flex: 1,
-    alignItems: 'center',
-  },
+  // Absolute right, spanning the row so the icon vertically centres
+  // on the title text at any header height.
   sectionLabel: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.md,

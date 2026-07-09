@@ -58,10 +58,6 @@ export function ControlConversion({
       back={
         <NarrativeBack
           title="Verdict"
-          flagCode={home?.flag_code}
-          code={home?.short_name}
-          flagCode2={away?.flag_code}
-          code2={away?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Territory and possession control set against points per 22 entry — did the side that ran the match actually bank it on the scoreboard?</>}
@@ -70,13 +66,11 @@ export function ControlConversion({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Verdict"
-          flagCode={home?.flag_code}
-          code={home?.short_name}
-          flagCode2={away?.flag_code}
-          code2={away?.short_name}
-        />
+        {/* Radar/2x2 rule: title centred on the chart's vertical axis;
+            bar-chart cards keep left titles. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Verdict" />
+        </View>
         <Pressable
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
@@ -247,11 +241,21 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row (16pt total with gap).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+  },
+  titleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionLabel: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',

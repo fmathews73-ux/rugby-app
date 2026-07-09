@@ -121,8 +121,6 @@ export function ExtendedMomentum({
       back={
         <NarrativeBack
           title={title ?? 'Form'}
-          flagCode={activeTeam.data?.flag_code}
-          code={activeTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.form}
           purpose={
@@ -138,8 +136,6 @@ export function ExtendedMomentum({
       <View style={styles.headerRow}>
         <CardTitle
           title={title ?? 'Form'}
-          flagCode={activeTeam.data?.flag_code}
-          code={activeTeam.data?.short_name}
         />
         <View style={styles.headerRightGroup}>
           {hasCompare ? (

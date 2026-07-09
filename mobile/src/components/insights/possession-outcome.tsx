@@ -33,7 +33,6 @@ export function PossessionOutcome({
   const analysis = useTeamAnalysis(teamId);
   const summary = useTeamsFormSummary();
   const teams = useTeams();
-  const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -70,9 +69,6 @@ export function PossessionOutcome({
       back={
         <NarrativeBack
           title="Possession"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.possession}
           purpose={
@@ -84,16 +80,13 @@ export function PossessionOutcome({
         <View style={[styles.card, styles.cardFill]}>
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Possession"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
-          centerTitle
-        />
+        {/* Radar/2x2 rule: title centred on the chart's vertical axis;
+            bar-chart cards keep left titles. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Possession" />
+        </View>
         <Pressable
           onPress={() => setInfoOpen(true)}
-          style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the possession matrix">
@@ -140,17 +133,21 @@ const styles = StyleSheet.create({
   },
   headerRow: {
     position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerTrigger: {
+  titleCentreFill: {
     position: 'absolute',
-    right: 0,
     top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.

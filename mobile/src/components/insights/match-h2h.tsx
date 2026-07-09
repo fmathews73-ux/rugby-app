@@ -4,11 +4,11 @@ import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewS
 
 import type { Fixture, Result } from '@rugby-app/shared';
 
-import { useTeams, useFixtureResult } from '@/api/hooks';
+import { useFixtureResult } from '@/api/hooks';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
-import { FlipTrigger } from '@/components/flip-trigger';
+import { CardHeaderActions } from '@/components/card-header-actions';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAIR_PURPOSES } from '@/lib/analysis-section-info';
@@ -253,9 +253,6 @@ function MatchH2HCard({
   // Sweep-in driver (shared arrival grammar); replays on toggle.
   const ink = useChartInk(activeSide);
   const result = useFixtureResult(fixture.id, fixture.status);
-  const pairTeams = useTeams();
-  const homeSide = (pairTeams.data ?? []).find((t) => t.id === fixture.home_team_id);
-  const awaySide = (pairTeams.data ?? []).find((t) => t.id === fixture.away_team_id);
 
   const notStarted = fixture.status === 'scheduled';
 
@@ -266,10 +263,6 @@ function MatchH2HCard({
       back={
         <NarrativeBack
           title={title}
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>{purpose}</>}
@@ -281,26 +274,19 @@ function MatchH2HCard({
       <View style={styles.headerRow}>
         <CardTitle
           title={title}
-          flagCode={homeSide?.flag_code}
-          code={homeSide?.short_name}
-          flagCode2={awaySide?.flag_code}
-          code2={awaySide?.short_name}
         />
-        <View style={styles.headerCentre}>
-          <TeamToggle
-            primaryLabel={homeCode}
-            compareLabel={awayCode}
-            activeSide={activeSide}
-            onSelect={setActiveSide}
-          />
-        </View>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel={`Read the ${title} analysis`}>
-          <FlipTrigger />
-        </Pressable>
+        <CardHeaderActions
+          onExplain={() => setInfoOpen(true)}
+          accessibilityLabel={`Read the ${title} analysis`}
+          toggle={
+            <TeamToggle
+              primaryLabel={homeCode}
+              compareLabel={awayCode}
+              activeSide={activeSide}
+              onSelect={setActiveSide}
+            />
+          }
+        />
       </View>
 
       {notStarted ? (
@@ -374,10 +360,6 @@ function fmt(v: number, percent?: boolean): string {
 const styles = StyleSheet.create({
   // Front face fills the flip container (grow-only).
   cardFill: { flexGrow: 1 },
-  headerCentre: {
-    flex: 1,
-    alignItems: 'center',
-  },
   card: {
     backgroundColor: '#FFFFFF',
     borderRadius: 12,

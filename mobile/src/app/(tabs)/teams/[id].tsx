@@ -428,7 +428,6 @@ function TeamStatsTable({ teamId, category }: { teamId: string; category?: strin
   const teams = useTeams();
   const teamCode =
     teams.data?.find((t) => t.id === teamId)?.short_name ?? teamId.toUpperCase();
-  const teamFlag = teams.data?.find((t) => t.id === teamId)?.flag_code;
 
   const isTier1 = TIER_1_IDS.has(teamId);
   const { subject, tierAvg } = useMemo(() => {
@@ -475,8 +474,6 @@ function TeamStatsTable({ teamId, category }: { teamId: string; category?: strin
           back={
             <NarrativeBack
               title={group.label}
-              flagCode={teamFlag}
-              code={teamCode}
               onClose={() => setFlippedLabel(null)}
               purpose={group.description}
               read={buildTierRead(group, subject.per_game, tierAvg, teamCode)}
@@ -485,7 +482,7 @@ function TeamStatsTable({ teamId, category }: { teamId: string; category?: strin
           front={
             <View style={styles.card}>
               <View style={styles.cardHeaderRow}>
-                <CardTitle title={group.label} flagCode={teamFlag} code={teamCode} />
+                <CardTitle title={group.label} />
                 <View style={styles.tierHeaderRightGroup}>
                   <Text style={styles.statLegendText}>{tierLabel}</Text>
                   <Pressable

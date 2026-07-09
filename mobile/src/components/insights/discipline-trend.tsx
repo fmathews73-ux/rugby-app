@@ -57,8 +57,6 @@ export function DisciplineTrend({
       back={
         <NarrativeBack
           title="Discipline"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.disciplineTrend}
           purpose={
@@ -72,8 +70,6 @@ export function DisciplineTrend({
       <View style={styles.headerRow}>
         <CardTitle
           title="Discipline"
-          flagCode={subjectTeam?.flag_code}
-          code={subjectTeam?.short_name}
         />
         <Pressable
           onPress={() => setInfoOpen(true)}

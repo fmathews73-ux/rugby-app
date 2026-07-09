@@ -79,10 +79,6 @@ export function CombinedPointsPattern({
       back={
         <NarrativeBack
           title="Momentum"
-          flagCode={homeTeam.data?.flag_code}
-          code={homeTeam.data?.short_name}
-          flagCode2={awayTeam.data?.flag_code}
-          code2={awayTeam.data?.short_name}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Both sides' weighted attacking activity as ONE net curve — above the line the home side has the match by the throat, below it the away side does.</>}
@@ -93,10 +89,6 @@ export function CombinedPointsPattern({
       <View style={styles.headerRow}>
         <CardTitle
           title="Momentum"
-          flagCode={homeTeam.data?.flag_code}
-          code={homeTeam.data?.short_name}
-          flagCode2={awayTeam.data?.flag_code}
-          code2={awayTeam.data?.short_name}
         />
         <View style={styles.headerRightGroup}>
           <Pressable

@@ -5,11 +5,11 @@ import { Pressable, StyleSheet, Text, View , type StyleProp, type ViewStyle } fr
 import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
-import { TeamFlagShield } from '@/components/team-flag-shield';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { teamDotColor } from '@/lib/team-colors';
+import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
 import {
   RADAR_AWAY_FILL,
@@ -86,27 +86,18 @@ export function InsightsCanvas({
       {/* Title left; accessory then the reader icon pinned right —
           same corner slot as the Home carousel cards. */}
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Profile"
-          flagCode={primaryTeam.data?.flag_code}
-          code={primaryTeam.data?.short_name}
-          flagCode2={compareTeamId ? compareTeam.data?.flag_code : null}
-          code2={compareTeamId ? compareTeam.data?.short_name : null}
-        />
-        <View style={styles.headerRightGroup}>
-          {/* Single-team mode anchors the header with the team's xs
-              flag; compare mode's colour legend sits under the chart. */}
-          {!hasCompare && primaryTeam.data ? (
-          <TeamFlagShield flagCode={primaryTeam.data.flag_code} width={FlagSize.xs} />
-        ) : null}
-          <Pressable
-            onPress={() => setInfoOpen(true)}
-            hitSlop={10}
-            accessibilityRole="button"
-            accessibilityLabel="Explain the Profile radar">
-            <FlipTrigger />
-          </Pressable>
+        {/* Radar/2x2 rule: title centred on the chart's vertical axis;
+            bar-chart cards keep left titles. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Profile" />
         </View>
+        <Pressable
+          onPress={() => setInfoOpen(true)}
+          hitSlop={10}
+          accessibilityRole="button"
+          accessibilityLabel="Explain the Profile radar">
+          <FlipTrigger />
+        </Pressable>
       </View>
 
       {fixtureStatus === 'scheduled' ? (
@@ -124,11 +115,32 @@ export function InsightsCanvas({
           <RadarChart
             axes={primaryReady ? primaryAxes : compareAxes}
             compareAxes={hasCompare && primaryReady && compareReady ? compareAxes : null}
+            // Nation identity colours — the squad palette (white
+            // shirts fall back to their accent), matching the Home
+            // Profile and every matrix dot.
+            // Borderless like the Home Profile: no outline strokes,
+            // dots carry each side's colour.
+            strokeColor="transparent"
+            fillColor={primaryTeamId ? teamDotColor(primaryTeamId) : undefined}
+            dotColor={primaryTeamId ? teamDotColor(primaryTeamId) : undefined}
+            compareStrokeColor="transparent"
+            compareFillColor={compareTeamId ? teamDotColor(compareTeamId) : undefined}
+            compareDotColor={compareTeamId ? teamDotColor(compareTeamId) : undefined}
+            // Home Profile fill treatment: flat colour at 25%, no
+            // radial gradient — the two translucencies blend where the
+            // shapes overlap.
+            flatFillOpacity={0.25}
           />
           {hasCompare ? (
             <View style={styles.legend}>
-              <LegendChip label={primaryShort} color={RADAR_FILL} />
-              <LegendChip label={compareShort} color={RADAR_AWAY_FILL} />
+              <LegendChip
+                label={primaryShort}
+                color={(primaryTeamId ? teamDotColor(primaryTeamId) : undefined) ?? RADAR_FILL}
+              />
+              <LegendChip
+                label={compareShort}
+                color={(compareTeamId ? teamDotColor(compareTeamId) : undefined) ?? RADAR_AWAY_FILL}
+              />
             </View>
           ) : null}
         </View>
@@ -149,10 +161,6 @@ export function InsightsCanvas({
       back={
         <NarrativeBack
           title="Profile"
-          flagCode={primaryTeam.data?.flag_code}
-          code={primaryTeam.data?.short_name}
-          flagCode2={compareTeamId ? compareTeam.data?.flag_code : null}
-          code2={compareTeamId ? compareTeam.data?.short_name : null}
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={
@@ -194,17 +202,22 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    position: 'relative',
+    justifyContent: 'flex-end',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
   },
-  headerRightGroup: {
-    flexDirection: 'row',
+  titleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
     alignItems: 'center',
-    gap: Spacing.two,
+    justifyContent: 'center',
   },
   sectionLabel: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',

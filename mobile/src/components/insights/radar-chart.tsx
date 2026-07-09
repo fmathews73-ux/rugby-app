@@ -24,7 +24,6 @@ export const RADAR_COLOR = '#3B82F6';
 export const RADAR_FILL = '#93C5FD';
 export const RADAR_AWAY_COLOR = '#8B5CF6';
 export const RADAR_AWAY_FILL = '#C4B5FD';
-export const REFERENCE_COLOR = Colors.light.textSecondary;
 
 export interface RadarAxis {
   key: string;
@@ -52,13 +51,7 @@ export const AXIS_CEILINGS = {
 };
 
 export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
-  return buildRadarAxesFromPerGame(data?.perGame);
-}
-
-/** Same normalisation from a bare per-game record — lets a TIER
- *  AVERAGE (mean of the tier's per_game sheets) run through the exact
- *  scales the subject uses, so reference polygons are honest. */
-export function buildRadarAxesFromPerGame(g: Record<string, number> | undefined): RadarAxis[] {
+  const g = data?.perGame;
   if (!g) {
     return [
       { key: 'attack', label: 'Attack', value: 0, raw: '—' },
@@ -172,8 +165,9 @@ export function RadarChart({
   fillColor = RADAR_FILL,
   compareStrokeColor = RADAR_AWAY_COLOR,
   compareFillColor = RADAR_AWAY_FILL,
-  referenceAxes,
   flatFillOpacity,
+  dotColor,
+  compareDotColor,
 }: {
   axes: readonly RadarAxis[];
   compareAxes?: readonly RadarAxis[] | null;
@@ -188,12 +182,14 @@ export function RadarChart({
    *  fill token. Rendered with the same opacity as the primary fill so
    *  overlap regions naturally darken via blending. */
   compareFillColor?: string;
-  /** Tier-average axes (same normalisation as `axes`) — drawn as the
-   *  dashed reference polygon in single-team mode. */
-  referenceAxes?: readonly RadarAxis[] | null;
   /** Flat-fill mode (Profile card): solid fillColor at this opacity
    *  instead of the radial gradient. */
   flatFillOpacity?: number;
+  /** Axis-value dot colour override — lets a borderless plot
+   *  (transparent stroke) keep its dots. Falls back to strokeColor. */
+  dotColor?: string;
+  /** Compare-side dot colour override, same purpose. */
+  compareDotColor?: string;
 }) {
   // Radar geometry — grown 30% from the original 260×240 / r=82 layout so
   // the hexagon dominates the Team Profile card rather than sitting in the
@@ -221,16 +217,6 @@ export function RadarChart({
     ? compareAxes.map((ax, i) => pointOn(i, r * ax.value))
     : null;
   const comparePath = compareVerts ? smoothClosedPath(compareVerts) : null;
-  // Honest benchmark (owner catch 2026-07-09): the reference polygon
-  // sits at the TIER AVERAGE per axis when supplied — an irregular
-  // shape, because averages differ per metric. The old constant-0.5
-  // octagon was scale chrome masquerading as an average. 0.5 remains
-  // only as the no-data fallback.
-  // Smoothed like the team line — the tier average is a data curve,
-  // not grid chrome, so it takes the same Bézier treatment.
-  const referencePath = smoothClosedPath(
-    axes.map((ax, i) => pointOn(i, r * (referenceAxes?.[i]?.value ?? 0.5))),
-  );
 
   // Gradient IDs derive from the fill colour so two radars with the
   // same palette share a definition and different palettes never
@@ -274,17 +260,7 @@ export function RadarChart({
           />
         );
       })}
-      {/* Reference polygon only shows in single-team mode. In
-          two-team overlay mode the second polygon IS the reference. */}
-      {!comparePath ? (
-        <Path
-          d={referencePath}
-          fill="none"
-          stroke={REFERENCE_COLOR}
-          strokeWidth={1}
-          strokeDasharray="3 3"
-        />
-      ) : null}
+
       {axes.map((ax, i) => {
         const labelP = pointOn(i, r + 16);
         return (
@@ -337,7 +313,8 @@ export function RadarChart({
           {comparePath ? (
             <Path
               d={comparePath}
-              fill={`url(#${compareGradientId}-data)`}
+              fill={flatFillOpacity !== undefined ? compareFillColor : `url(#${compareGradientId}-data)`}
+              fillOpacity={flatFillOpacity ?? 1}
               stroke={compareStrokeColor}
               strokeWidth={1}
             />
@@ -351,11 +328,11 @@ export function RadarChart({
           />
           {compareAxes?.map((ax, i) => {
             const p = pointOn(i, r * ax.value);
-            return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.5} fill={compareStrokeColor} />;
+            return <Circle key={`c${i}`} cx={p.x} cy={p.y} r={1.5} fill={compareDotColor ?? compareStrokeColor} />;
           })}
           {axes.map((ax, i) => {
             const p = pointOn(i, r * ax.value);
-            return <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={strokeColor} />;
+            return <Circle key={i} cx={p.x} cy={p.y} r={1.5} fill={dotColor ?? strokeColor} />;
           })}
         </Svg>
       </Animated.View>
