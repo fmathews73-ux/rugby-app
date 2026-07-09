@@ -86,6 +86,28 @@ const MATCH_PAIR_ROWS: Record<string, readonly RowDef[]> = {
     { label: '22 entries', get: field('home_twenty_two_entries', 'away_twenty_two_entries') },
     { label: 'Points per 22 entry', get: ppe },
   ],
+  // The contestable slice of the air battle — receptions derived from
+  // the OPPONENT's contestables (reconciliation principle), mirroring
+  // the stats pane's Kicking rows.
+  // Mirror-ledger order (pre-match aerial grammar): volume exchange
+  // then outcome exchange. Zero values render as zero bars — rows are
+  // NEVER dropped for empty data (owner rule 2026-07-09).
+  'Aerial Contest': [
+    { label: 'Contestables kicked', get: field('home_contestable_kicks', 'away_contestable_kicks') },
+    {
+      label: 'Contestables received',
+      get: (r, side) =>
+        side === 'home' ? r.away_contestable_kicks : r.home_contestable_kicks,
+    },
+    { label: 'Own kicks regathered', get: field('home_contestable_kicks_won', 'away_contestable_kicks_won') },
+    {
+      label: 'Receptions secured',
+      get: (r, side) =>
+        side === 'home'
+          ? r.away_contestable_kicks - r.away_contestable_kicks_won
+          : r.home_contestable_kicks - r.home_contestable_kicks_won,
+    },
+  ],
   'Possession & Turnovers': [
     { label: 'Possession', get: field('home_possession_percent', 'away_possession_percent'), percent: true },
     { label: 'Metres made', get: field('home_meters', 'away_meters') },
@@ -137,11 +159,16 @@ const MATCH_HEADLINE: Record<AxisKey, RowDef> = {
  *  the pre-match engine's kebab-case). Same titles app-wide. */
 export const MATCH_AXIS_PAIRS: readonly {
   title: string;
-  keys: readonly [AxisKey, AxisKey];
+  /** Axis keys feeding the back-face narrative; empty for pairs with
+   *  no match-axis narrative (Aerial — About-only back). */
+  keys: readonly AxisKey[];
 }[] = [
   { title: 'Attack & Defence', keys: ['attack', 'defence'] },
   { title: 'Set Piece & Discipline', keys: ['setPiece', 'discipline'] },
   { title: 'Kicking & Territory', keys: ['kicking', 'territory'] },
+  // Aerial rides behind Kicking & Territory (pre-match order); no
+  // match axis narratives exist for it, so its back is About-only.
+  { title: 'Aerial Contest', keys: [] },
   { title: 'Possession & Turnovers', keys: ['possession', 'turnovers'] },
 ];
 

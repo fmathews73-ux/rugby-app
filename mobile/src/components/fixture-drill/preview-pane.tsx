@@ -8,7 +8,7 @@ import { CardCarousel, type CardCarouselHandle } from '@/components/card-carouse
 import { fitNarrative } from '@/lib/fit-narrative';
 import { AxisHeadToHead } from '@/components/insights/axis-head-to-head';
 import { DangerWindows } from '@/components/insights/danger-windows';
-import { GapLadder } from '@/components/insights/gap-ladder';
+import { GapLadder, orderedGaps } from '@/components/insights/gap-ladder';
 import { TeamLandscape } from '@/components/insights/team-landscape';
 import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
 import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
@@ -21,32 +21,6 @@ import { PRE_MATCH_AXIS_PAIRS } from '@/lib/analysis-section-info';
 // ─── Preview (Pre-Match) pane ────────────────────────────────────────────────
 
 // Engine window — matches use-match-preview's WINDOW.
-// H2H ladder order (owner call 2026-07-09): the radar's lobes led by
-// the control pair — FIELD (possession, territory, kicking) → STRIKE
-// (attack, defence) → CONTEST (set-piece, turnovers, discipline) — so
-// ladder bars and radar lobes tell one story. Bar LENGTH still
-// carries gap size; ranking is no longer the order. Aerial axes stay
-// in their pair card.
-// SEVEN bars — the card's height is fixed (owner rule); kicking is
-// the axis that sits out (fully covered by the Territory matrix and
-// the Kicking & Territory pair card), keeping both the control pair
-// and the contest lobe whole.
-const LADDER_AXIS_ORDER = [
-  'possession',
-  'territory',
-  'attack',
-  'defence',
-  'set-piece',
-  'turnovers',
-  'discipline',
-] as const;
-
-function orderedGaps<T extends { key: string }>(gaps: readonly T[]): T[] {
-  return LADDER_AXIS_ORDER.map((k) => gaps.find((g) => g.key === k)).filter(
-    (g): g is T => g !== undefined,
-  );
-}
-
 const LOOKBACK = 10;
 
 /**

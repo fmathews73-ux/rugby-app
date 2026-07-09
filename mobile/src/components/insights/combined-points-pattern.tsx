@@ -8,6 +8,7 @@ import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { useChartInk } from '@/components/insights/use-chart-ink';
+import { teamDotColor } from '@/lib/team-colors';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { MARKER_ICON, MARKER_ICON_SIZE, buildScoringMarkers, placeScoringMarkers, type ScoringMarker } from '@/lib/scoring-markers';
 import {
@@ -58,6 +59,11 @@ export function CombinedPointsPattern({
   const fixture = useFixture(fixtureId);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
+  // Squad identity colours (owner call 2026-07-09) — the guarded
+  // jersey palette used app-wide; the old blue/purple stay as
+  // fallbacks while teams load. FILL variants lighten via opacity.
+  const homeColor = teamDotColor(homeTeamId) ?? HOME_LINE;
+  const awayColor = teamDotColor(awayTeamId) ?? AWAY_LINE;
   const { samples, maxAbs, effectiveMinute, isLoading, hasData } =
     useMatchMomentumTimeline(fixtureId, homeTeamId, awayTeamId);
   // Scoring events off the same timeline feed — rendered as icon
@@ -107,6 +113,8 @@ export function CombinedPointsPattern({
         <Text style={styles.empty}>Loading…</Text>
       ) : (
         <MomentumMirror
+          homeColor={homeColor}
+          awayColor={awayColor}
           samples={samples}
           maxAbs={maxAbs}
           effectiveMinute={effectiveMinute}
@@ -117,8 +125,8 @@ export function CombinedPointsPattern({
           the Profile radar's. */}
       {canRender ? (
         <View style={styles.legend}>
-          <LegendChip label={homeShort} color={HOME_FILL} />
-          <LegendChip label={awayShort} color={AWAY_FILL} />
+          <LegendChip label={homeShort} color={homeColor} />
+          <LegendChip label={awayShort} color={awayColor} />
         </View>
       ) : null}
 
@@ -159,11 +167,15 @@ function MomentumMirror({
   maxAbs,
   effectiveMinute,
   markers,
+  homeColor,
+  awayColor,
 }: {
   samples: readonly MomentumSample[];
   maxAbs: number;
   effectiveMinute: number;
   markers: readonly ScoringMarker[];
+  homeColor: string;
+  awayColor: string;
 }) {
   // Measured canvas — geometry in real pixels (no viewBox stretching),
   // filling whatever height the carousel grants the card.
@@ -353,12 +365,12 @@ function MomentumMirror({
             <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
               <Defs>
                 <LinearGradient id="momentum-home-fill-data" x1="0" y1={padTop} x2="0" y2={midY} gradientUnits="userSpaceOnUse">
-                  <Stop offset="0" stopColor={HOME_FILL} stopOpacity="0.7" />
-                  <Stop offset="1" stopColor={HOME_FILL} stopOpacity="0.1" />
+                  <Stop offset="0" stopColor={homeColor} stopOpacity="0.7" />
+                  <Stop offset="1" stopColor={homeColor} stopOpacity="0.1" />
                 </LinearGradient>
                 <LinearGradient id="momentum-away-fill-data" x1="0" y1={midY} x2="0" y2={height - padBottom} gradientUnits="userSpaceOnUse">
-                  <Stop offset="0" stopColor={AWAY_FILL} stopOpacity="0.1" />
-                  <Stop offset="1" stopColor={AWAY_FILL} stopOpacity="0.7" />
+                  <Stop offset="0" stopColor={awayColor} stopOpacity="0.1" />
+                  <Stop offset="1" stopColor={awayColor} stopOpacity="0.7" />
                 </LinearGradient>
                 <ClipPath id="momentum-clip-above-data">
                   <Rect x={0} y={padTop} width={width} height={midY - padTop} />
@@ -387,7 +399,7 @@ function MomentumMirror({
                 <>
                   <Path
                     d={smoothPath}
-                    stroke={HOME_LINE}
+                    stroke={homeColor}
                     strokeWidth={1}
                     fill="none"
                     strokeLinecap="round"
@@ -395,7 +407,7 @@ function MomentumMirror({
                   />
                   <Path
                     d={smoothPath}
-                    stroke={AWAY_LINE}
+                    stroke={awayColor}
                     strokeWidth={1}
                     fill="none"
                     strokeLinecap="round"
@@ -411,7 +423,7 @@ function MomentumMirror({
                 <Ionicons
                   name={MARKER_ICON[mk.type]}
                   size={MARKER_ICON_SIZE}
-                  color={mk.side === 'home' ? HOME_LINE : AWAY_LINE}
+                  color={mk.side === 'home' ? homeColor : awayColor}
                 />
               </View>
             ))}

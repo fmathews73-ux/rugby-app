@@ -5,6 +5,11 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { GapLadder, orderedGaps } from '@/components/insights/gap-ladder';
+import { TeamLandscape } from '@/components/insights/team-landscape';
+import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
+import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
+import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
 import { ControlConversion } from '@/components/insights/control-conversion';
@@ -12,11 +17,11 @@ import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import {
   MATCH_AXIS_PAIRS,
   MatchAxisH2H,
-  MatchGaps,
 } from '@/components/insights/match-h2h';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
 import { Spacing } from '@/constants/theme';
 import { useMatchAnalysis } from '@/hooks/use-match-analysis';
+import { useMatchPreview } from '@/hooks/use-match-preview';
 
 // ─── Analysis (Match Analysis) pane ──────────────────────────────────────────
 
@@ -36,6 +41,7 @@ import { useMatchAnalysis } from '@/hooks/use-match-analysis';
 export function AnalysisPane({ fixture }: { fixture: Fixture }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
   const { data: analysis } = useMatchAnalysis(fixture.id);
+  const { data: preview } = useMatchPreview(fixture.id);
   const homeTeam = useTeam(fixture.home_team_id);
   const awayTeam = useTeam(fixture.away_team_id);
   const homeCode = homeTeam.data?.short_name ?? fixture.home_team_id.toUpperCase();
@@ -73,18 +79,47 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         style={styles.pageCard}
         read={analysis?.progression ?? null}
       />,
-      // Variance — where the match is being won.
-      <MatchGaps
-        key="gaps"
-        fixture={fixture}
+      // The pre-match matrix block repeats here BY DESIGN (owner call
+      // 2026-07-09): same lens before and during the match —
+      // familiarity breeds value perception, and on completed
+      // fixtures the rolling window shows the dots this match moved.
+      <TeamLandscape
+        key="landscape"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <ScoringRhythm
+        key="rhythm"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <RedZoneMatrix
+        key="redzone"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <DefensiveIntegrity
+        key="defence"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      // H2H — the SAME coming-in ladder as Pre-Match (owner call
+      // 2026-07-09: the match pane repeats the pre-match lens; the
+      // this-match Gaps card it replaces lives on in match-h2h.tsx).
+      <GapLadder
+        key="ladder"
+        gaps={orderedGaps(preview?.gaps ?? [])}
+        homeTeamId={homeTeamId}
+        awayTeamId={awayTeamId}
         homeCode={homeCode}
         awayCode={awayCode}
-        // Top SEVEN gaps — same cap as the pre-match ladder, so no page
-        // outgrows the shared 400pt floor (every axis still renders in
-        // full inside its pair card).
-        gaps={(analysis?.gaps ?? []).slice(0, 7)}
+        asOfDate={fixture.kickoff_utc}
         style={styles.pageCard}
-        read={analysis?.variance ?? null}
+        read={preview ? fitNarrative([preview.shape, preview.keys], 900) : null}
       />,
     ];
 
@@ -116,7 +151,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
           homeCode={homeCode}
           awayCode={awayCode}
           style={styles.pageCard}
-          read={fitNarrative(paragraphs, 900)}
+          read={paragraphs.length > 0 ? fitNarrative(paragraphs, 900) : undefined}
         />,
       );
     }
@@ -135,7 +170,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
     );
 
     return pages;
-  }, [fixture, homeCode, awayCode, analysis]);
+  }, [fixture, homeCode, awayCode, analysis, preview]);
 
   return (
     <View style={styles.analysisPaneStack}>

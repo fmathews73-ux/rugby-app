@@ -21,6 +21,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
+import { teamDotColor } from '@/lib/team-colors';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // Match-scoped team-colour convention shared with the Momentum card and
@@ -89,6 +90,11 @@ export function ScoringProgression({
   const events = useFixtureEvents(fixtureId, fixtureStatus);
   const homeTeam = useTeam(homeTeamId);
   const awayTeam = useTeam(awayTeamId);
+  // Squad identity colours (owner call 2026-07-09) — the guarded
+  // jersey palette used app-wide; the old blue/purple stay as
+  // fallbacks while teams load. FILL variants lighten via opacity.
+  const homeColor = teamDotColor(homeTeamId) ?? HOME_LINE;
+  const awayColor = teamDotColor(awayTeamId) ?? AWAY_LINE;
 
   const series = useMemo(
     () => buildSeries(events.data ?? [], homeTeamId, awayTeamId),
@@ -140,11 +146,11 @@ export function ScoringProgression({
     const x = scaleX(minute) + xOff;
     const homeAbove = h >= a;
     const upper = homeAbove
-      ? { label: h, color: HOME_LINE, lineY: scaleY(h) }
-      : { label: a, color: AWAY_LINE, lineY: scaleY(a) };
+      ? { label: h, color: homeColor, lineY: scaleY(h) }
+      : { label: a, color: awayColor, lineY: scaleY(a) };
     const lowerB = homeAbove
-      ? { label: a, color: AWAY_LINE, lineY: scaleY(a) }
-      : { label: h, color: HOME_LINE, lineY: scaleY(h) };
+      ? { label: a, color: awayColor, lineY: scaleY(a) }
+      : { label: h, color: homeColor, lineY: scaleY(h) };
     fixedBadges.push({ x, y: upper.lineY - 13, label: upper.label, color: upper.color });
     fixedBadges.push({ x, y: lowerB.lineY + 13, label: lowerB.label, color: lowerB.color });
   }
@@ -299,14 +305,14 @@ export function ScoringProgression({
                     so home's band sits on top where the worms run
                     close. */}
                 <G clipPath="url(#progression-plot-clip-data)">
-                  <LineFadeRibbon path={awayTreads} stroke={AWAY_LINE} />
-                  <LineFadeRibbon path={homeTreads} stroke={HOME_LINE} />
+                  <LineFadeRibbon path={awayTreads} stroke={awayColor} />
+                  <LineFadeRibbon path={homeTreads} stroke={homeColor} />
                 </G>
                 {/* Team worms — away below, home above so the home line
                     sits on top in the frequent case of overlap at low
                     scores. */}
-                <Path d={awayPath} fill="none" stroke={AWAY_LINE} strokeWidth={1} strokeLinejoin="round" />
-                <Path d={homePath} fill="none" stroke={HOME_LINE} strokeWidth={1} strokeLinejoin="round" />
+                <Path d={awayPath} fill="none" stroke={awayColor} strokeWidth={1} strokeLinejoin="round" />
+                <Path d={homePath} fill="none" stroke={homeColor} strokeWidth={1} strokeLinejoin="round" />
                 {/* Running-total badges at the fixed checkpoints — the
                     same quiet circle badge as the Ranking shift
                     markers: home totals above their line, away below. */}
@@ -327,10 +333,10 @@ export function ScoringProgression({
                 {/* Endpoint markers so the eye lands on the final
                     totals. */}
                 {homeFinal > 0 ? (
-                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={HOME_LINE} />
+                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(homeFinal)} r={1.5} fill={homeColor} />
                 ) : null}
                 {awayFinal > 0 ? (
-                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={AWAY_LINE} />
+                  <Circle cx={scaleX(FULL_TIME_MIN)} cy={scaleY(awayFinal)} r={1.5} fill={awayColor} />
                 ) : null}
               </Svg>
               </Animated.View>
@@ -343,13 +349,13 @@ export function ScoringProgression({
           the Profile radar's. */}
       <View style={styles.legend}>
         <View style={styles.legendItem}>
-          <View style={[styles.legendSwatch, { backgroundColor: HOME_FILL }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: homeColor }]} />
           <Text style={styles.legendText}>
             {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
           </Text>
         </View>
         <View style={styles.legendItem}>
-          <View style={[styles.legendSwatch, { backgroundColor: AWAY_FILL }]} />
+          <View style={[styles.legendSwatch, { backgroundColor: awayColor }]} />
           <Text style={styles.legendText}>
             {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
           </Text>

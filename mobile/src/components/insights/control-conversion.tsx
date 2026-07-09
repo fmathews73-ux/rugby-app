@@ -215,6 +215,68 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
           pointerEvents="none"
           style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
           <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
+            {/* Variance decomposition (owner experiment 2026-07-09,
+                two-team 2x2s only): an L of hairlines between the two
+                dots — the horizontal leg carries the x-axis variance,
+                the vertical leg the y-axis variance, each labelled at
+                its midpoint with Δ and the midpoint-relative % var. */}
+            {(() => {
+              const hx = xOf(home.possession);
+              const hy = yOf(home.points);
+              const ax2 = xOf(away.possession);
+              const ay2 = yOf(away.points);
+              // RAW deltas in axis units (owner call 2026-07-09) —
+              // matches the scoreboard arithmetic, zero decoding. The
+              // possession axis's unit already is %.
+              const dx = Math.abs(home.possession - away.possession);
+              const dy = Math.abs(home.points - away.points);
+              // Labels sit ON their hairline: the line breaks around
+              // the label with padding either side.
+              const xLabel = `\u0394 ${Math.round(dx)}%`;
+              const yLabel = `\u0394 ${Math.round(dy)}`;
+              const xMid = (hx + ax2) / 2;
+              const yMid = (hy + ay2) / 2;
+              // ~4.5px per glyph at 8pt + 4px pad each side.
+              const xGapHalf = (xLabel.length * 4.5) / 2 + 4;
+              // Vertical line breaks by label HEIGHT, not width.
+              const yGapHalf = 9;
+              const xDir = ax2 >= hx ? 1 : -1;
+              const yDir = ay2 >= hy ? 1 : -1;
+              // Each leg wears the colour of the side that LEADS the
+              // axis it measures (squad palette).
+              const homeCol = teamDotColor(home.team.id) ?? HOME_COLOR;
+              const awayCol = teamDotColor(away.team.id) ?? AWAY_COLOR;
+              const xCol = home.possession >= away.possession ? homeCol : awayCol;
+              const yCol = home.points >= away.points ? homeCol : awayCol;
+              return (
+                <>
+                  <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
+                  <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
+                  <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke="#C7CBD1" strokeWidth={0.8} />
+                  <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke="#C7CBD1" strokeWidth={0.8} />
+                  <SvgText
+                    x={xMid}
+                    y={hy + 3}
+                    fill={xCol}
+                    fontFamily="Barlow_500Medium"
+                    fontSize={8}
+                    letterSpacing={0.4}
+                    textAnchor="middle">
+                    {xLabel}
+                  </SvgText>
+                  <SvgText
+                    x={ax2}
+                    y={yMid + 3}
+                    fill={yCol}
+                    fontFamily="Barlow_500Medium"
+                    fontSize={8}
+                    letterSpacing={0.4}
+                    textAnchor="middle">
+                    {yLabel}
+                  </SvgText>
+                </>
+              );
+            })()}
             {dot(home, teamDotColor(home.team.id) ?? HOME_COLOR)}
             {dot(away, teamDotColor(away.team.id) ?? AWAY_COLOR)}
           </Svg>

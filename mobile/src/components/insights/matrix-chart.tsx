@@ -34,6 +34,8 @@ export function MatrixChart({
   subjectId,
   subjectId2,
   subjectsOnly,
+  xUnit = '',
+  yUnit = '',
   quadrants,
   xCaption,
   yCaption,
@@ -49,6 +51,10 @@ export function MatrixChart({
    *  full pool still drives the crosshair medians and the scale, so
    *  quadrant calls keep their tier meaning. */
   subjectsOnly?: boolean;
+  /** Unit suffixes for the variance-L delta labels (dual mode) —
+   *  e.g. '%' on share axes; omit for raw counts. */
+  xUnit?: string;
+  yUnit?: string;
   /** Quadrant labels, centred in each quadrant: top-right, top-left,
    *  bottom-right, bottom-left. */
   quadrants: { tr: string; tl: string; br: string; bl: string };
@@ -186,6 +192,66 @@ export function MatrixChart({
                     />
                   ),
                 )}
+            {subject && subject2 && subjectsOnly
+              ? (() => {
+                  // Variance L (owner recipe 2026-07-09, Verdict-first):
+                  // grey hairlines decompose the gap; each leg's Δ
+                  // label (RAW axis units) wears the axis-leader's
+                  // squad colour. Lines break around the labels.
+                  const hx = xOf(subject.x);
+                  const hy = yOf(subject.y);
+                  const ax2 = xOf(subject2.x);
+                  const ay2 = yOf(subject2.y);
+                  const fmtD = (v: number) => {
+                    const r = Math.round(v * 10) / 10;
+                    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+                  };
+                  const xLabel = `\u0394 ${fmtD(Math.abs(subject.x - subject2.x))}${xUnit}`;
+                  const yLabel = `\u0394 ${fmtD(Math.abs(subject.y - subject2.y))}${yUnit}`;
+                  const xMid = (hx + ax2) / 2;
+                  const yMid = (hy + ay2) / 2;
+                  const xGapHalf = (xLabel.length * 4.5) / 2 + 4;
+                  const yGapHalf = 9;
+                  const xDir = ax2 >= hx ? 1 : -1;
+                  const yDir = ay2 >= hy ? 1 : -1;
+                  // x: larger raw x leads. y: smaller PLOTTED y is the
+                  // better side by matrix convention (up = good).
+                  const xCol =
+                    (subject.x >= subject2.x ? teamDotColor(subject.id) : teamDotColor(subject2.id)) ??
+                    Colors.light.textSecondary;
+                  const yCol =
+                    (subject.y <= subject2.y ? teamDotColor(subject.id) : teamDotColor(subject2.id)) ??
+                    Colors.light.textSecondary;
+                  return (
+                    <>
+                      <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
+                      <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
+                      <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke="#C7CBD1" strokeWidth={0.8} />
+                      <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke="#C7CBD1" strokeWidth={0.8} />
+                      <SvgText
+                        x={xMid}
+                        y={hy + 3}
+                        fill={xCol}
+                        fontFamily="Barlow_500Medium"
+                        fontSize={8}
+                        letterSpacing={0.4}
+                        textAnchor="middle">
+                        {xLabel}
+                      </SvgText>
+                      <SvgText
+                        x={ax2}
+                        y={yMid + 3}
+                        fill={yCol}
+                        fontFamily="Barlow_500Medium"
+                        fontSize={8}
+                        letterSpacing={0.4}
+                        textAnchor="middle">
+                        {yLabel}
+                      </SvgText>
+                    </>
+                  );
+                })()
+              : null}
             {subject2 ? (
               <>
                 <Circle

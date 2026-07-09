@@ -123,6 +123,7 @@ export function DefensiveIntegrity({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          xUnit={"%"}
           quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
           xCaption="TACKLE SUCCESS % →"
           yCaption="FEWER BREAKS CONCEDED →"

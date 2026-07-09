@@ -56,6 +56,32 @@ const AXIS_HEADLINE: Record<
  * gap bars — were dropped: one-off chrome, and a tick glyph that
  * meant something different from every other card.)
  */
+// H2H ladder order (owner call 2026-07-09): the radar's lobes led by
+// the control pair — FIELD (possession, territory, kicking) → STRIKE
+// (attack, defence) → CONTEST (set-piece, turnovers, discipline) — so
+// ladder bars and radar lobes tell one story. Bar LENGTH still
+// carries gap size; ranking is no longer the order. Aerial axes stay
+// in their pair card.
+// SEVEN bars — the card's height is fixed (owner rule); kicking is
+// the axis that sits out (fully covered by the Territory matrix and
+// the Kicking & Territory pair card), keeping both the control pair
+// and the contest lobe whole.
+export const LADDER_AXIS_ORDER = [
+  'possession',
+  'territory',
+  'attack',
+  'defence',
+  'set-piece',
+  'turnovers',
+  'discipline',
+] as const;
+
+export function orderedGaps<T extends { key: string }>(gaps: readonly T[]): T[] {
+  return LADDER_AXIS_ORDER.map((k) => gaps.find((g) => g.key === k)).filter(
+    (g): g is T => g !== undefined,
+  );
+}
+
 export function GapLadder({
   gaps,
   homeTeamId,

@@ -126,6 +126,8 @@ export function TeamLandscape({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          xUnit={"%"}
+          yUnit={"%"}
           quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'KEEP-BALL', bl: 'STARVED' }}
           xCaption="POSSESSION % →"
           yCaption="TERRITORY % →"
