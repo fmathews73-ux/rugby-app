@@ -13,8 +13,8 @@ import { Colors, Spacing, TextSize } from '@/constants/theme';
 /** One side's chart values from the match Result. */
 export interface MatchPairAxes {
   x: number;
-  /** Raw metric — negated before plotting when `yHigherIsBetter` is
-   *  false, so "better" always plots upward (matrix convention). */
+  /** Raw metric — the component negates it when `yHigherIsBetter`
+   *  (default), so "better" always plots upward. */
   y: number;
 }
 
@@ -70,7 +70,12 @@ export function MatchPairMatrix({
         id: teamId,
         code: codeById.get(teamId) ?? teamId.toUpperCase(),
         x: axes.x,
-        y: yHigherIsBetter ? axes.y : -axes.y,
+        // MatrixChart convention: SMALLER raw y plots higher. So
+        // higher-is-better metrics feed negated; lower-is-better
+        // (Defence's breaks conceded) feed raw. Verify against the
+        // ladder's numbers, not against which dot "looks" right —
+        // getting this backwards inverted every match matrix once.
+        y: yHigherIsBetter ? -axes.y : axes.y,
       };
     });
   })();

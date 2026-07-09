@@ -142,8 +142,8 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         getAxes={(r, side) => ({
           x: side === 'home' ? r.home_tackle_success_percent : r.away_tackle_success_percent,
           // Breaks conceded = the opponent's breaks (reconciliation
-          // principle); lower is better, so yHigherIsBetter=false
-          // flips it to plot upward.
+          // principle); lower-is-better, so it feeds RAW
+          // (yHigherIsBetter=false) — the chart plots smaller y higher.
           y: side === 'home' ? r.away_line_breaks : r.home_line_breaks,
         })}
         yHigherIsBetter={false}
