@@ -70,15 +70,10 @@ export default function TabsLayout() {
           ),
         }}
       />
-      <Tabs.Screen
-        name="rankings"
-        options={{
-          title: 'Rankings',
-          tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'trophy' : 'trophy-outline'} size={size} color={color} />
-          ),
-        }}
-      />
+      {/* Rankings removed from the footer (owner call 2026-07-09);
+          href: null keeps the route alive for deep links while hiding
+          the tab — world-rank data still surfaces on hero rows. */}
+      <Tabs.Screen name="rankings" options={{ href: null }} />
       <Tabs.Screen
         name="predictor"
         options={{

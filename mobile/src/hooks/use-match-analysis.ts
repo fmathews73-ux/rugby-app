@@ -19,15 +19,6 @@ const BASELINE_VARIANCE_THRESHOLD = 0.15;
  * On top of that a summary and a variance story name the dimensions
  * that decided (or are deciding) the match.
  */
-/** Signed, threshold-normalised in-match axis gap for chart surfaces
- *  (the Match Gaps card). norm > 0 = home ahead; |norm| >= 1 crosses
- *  the "decisive" threshold buildVariance names axes at. */
-export interface MatchGapView {
-  key: AxisKey;
-  label: string;
-  norm: number;
-}
-
 export interface MatchAnalysis {
   /** Scoreline + high-level narrative shape. 1 paragraph. */
   summary: string;
@@ -42,9 +33,6 @@ export interface MatchAnalysis {
   /** "Scoring Progression" — the scoreboard-flow read: lead changes,
    *  taken-for-good minute, decisive runs (was the flow paragraph). */
   progression: string;
-  /** "Match Gaps" — biggest 2-3 gaps between the sides, named as the
-   *  deciding dimensions of the match. 1 paragraph. */
-  variance: string;
   /** 8 per-axis narrative reads, in the same order as the Profile
    *  radar. Each axis is a mini-section rendered under its own
    *  small-caps label — full prose with metrics woven in, no table. */
@@ -52,9 +40,6 @@ export interface MatchAnalysis {
   /** "Pitch Heatmap" — where the match has been played: the territory
    *  + red-zone read behind the heat map. */
   heatmap: string;
-  /** All 8 in-match gaps, biggest first — chart feed for Match Gaps so
-   *  the visual and the Match Gaps prose come off one engine. */
-  gaps: MatchGapView[];
   /** Closing verdict — the match summarised through the control-vs-
    *  conversion lens (matches the pane's closing chart). NOT forward-
    *  looking: it seals the story the sections above told. */
@@ -243,14 +228,6 @@ function buildAnalysis(
       (isLive
         ? `No scoring swings to chart yet — the progression read opens with the first score. Until it lands, this is a contest of field position and patience, and the first side to cash a 22 visit writes the opening line of the story.`
         : `The scoreboard never produced a swing worth charting: no lead changes, no decisive run — a match that moved in inches. Test matches that finish without a single charted swing are rare, and this one was settled in the margins the other cards describe.`),
-    variance: buildVariance(result, home, away, isLive, ctx),
-    gaps: computeAxisGaps(result)
-      .map((g) => ({
-        key: g.key,
-        label: g.label,
-        norm: ((g.advantage === 'home' ? 1 : -1) * g.signedGap) / gapThreshold(g.key),
-      }))
-      .sort((x, y) => Math.abs(y.norm) - Math.abs(x.norm)),
     axes,
     verdict: buildVerdict(result, home, away, isLive),
     generatedAtMinute,
@@ -890,183 +867,6 @@ function joinToCap(parts: readonly string[], cap: number): string {
     out = `${out} ${next}`;
   }
   return out;
-}
-
-/** Signed axis gap used for the variance story — positive = home ahead. */
-interface AxisGap {
-  key: AxisKey;
-  label: string;
-  signedGap: number;
-  advantage: 'home' | 'away';
-}
-
-function buildVariance(
-  result: Result,
-  home: Team,
-  away: Team,
-  isLive: boolean,
-  _ctx: PreMatchContext,
-): string {
-  const gaps = computeAxisGaps(result);
-  const decisive = gaps.filter((g) => Math.abs(g.signedGap) >= gapThreshold(g.key));
-  // Threshold-normalised ranking so a 2-penalty gap and a 10pp
-  // possession gap compare fairly across axes.
-  const ranked = gaps
-    .slice()
-    .sort((x, y) => Math.abs(y.signedGap) / gapThreshold(y.key) - Math.abs(x.signedGap) / gapThreshold(x.key));
-
-  if (decisive.length === 0) {
-    const s: string[] = [];
-    s.push(
-      isLive
-        ? `Near-mirror numbers so far, with no dimension yet opening a decisive gap between ${home.short_name} and ${away.short_name}.`
-        : `Near-mirror numbers throughout: no single dimension separated ${home.short_name} and ${away.short_name} decisively, and the match was settled in the margins.`,
-    );
-    const nearest = ranked[0]!;
-    s.push(
-      `Nearest to a real split ${isLive ? 'is' : 'was'} ${nearest.label.toLowerCase()}, ${gapPhrase(nearest)} in ${(nearest.advantage === 'home' ? home : away).short_name}'s favour, still short of the line this read treats as decisive.`,
-    );
-    const second = ranked[1]!;
-    s.push(
-      `Behind it ${isLive ? 'sits' : 'sat'} ${second.label.toLowerCase()} at ${gapPhrase(second)}, the same story in miniature.`,
-    );
-    s.push(
-      `${home.short_name} and ${away.short_name} ${isLive ? 'have produced' : 'produced'} matching profiles across attack, defence and the platform axes alike, the statistical signature of a genuine arm-wrestle.`,
-    );
-    s.push(
-      isLive
-        ? `Even matches break eventually, and when this one does, the first axis through its threshold will be the tell.`
-        : `When nothing separates the profiles, the winning of it comes down to moments, and the progression card holds those.`,
-    );
-    return s.join(' ');
-  }
-
-  const homeWinners = decisive.filter((g) => g.advantage === 'home');
-  const awayWinners = decisive.filter((g) => g.advantage === 'away');
-  const rank = (a: AxisGap, b: AxisGap) => Math.abs(b.signedGap) - Math.abs(a.signedGap);
-  const topHome = homeWinners.slice().sort(rank).slice(0, 2);
-  const topAway = awayWinners.slice().sort(rank).slice(0, 2);
-
-  const parts: string[] = [];
-  if (topHome.length) parts.push(`${home.short_name} ${isLive ? 'ahead' : 'came out ahead'} on ${listGapLabels(topHome)}`);
-  if (topAway.length) parts.push(`${away.short_name} ${isLive ? 'ahead' : 'ended up ahead'} on ${listGapLabels(topAway)}`);
-
-  const s: string[] = [];
-  s.push(
-    isLive
-      ? `The gaps that matter are opening up: ${parts.join('; ')}. Those are the dimensions writing the scoreboard.`
-      : `The gaps that mattered are plain: ${parts.join('; ')}. Those were the dimensions that wrote the scoreboard.`,
-  );
-
-  const widest = ranked[0]!;
-  s.push(
-    `The widest split ${isLive ? 'is' : 'was'} ${widest.label.toLowerCase()}, ${gapPhrase(widest)} in ${(widest.advantage === 'home' ? home : away).short_name}'s favour.`,
-  );
-
-  const evenCount = gaps.length - decisive.length;
-  s.push(
-    decisive.length >= 4
-      ? `With ${decisive.length} of the eight axes past the decisive line, the advantage ${isLive ? 'is' : 'was'} broad rather than built on one front.`
-      : `The other ${evenCount} axes ${isLive ? 'sit' : 'sat'} inside the noise band, so this ${isLive ? 'is a match being decided' : 'was a match decided'} on specific fronts, not across the board.`,
-  );
-
-  const nearMiss = ranked.find((g) => Math.abs(g.signedGap) < gapThreshold(g.key));
-  if (nearMiss) {
-    s.push(`Closest to joining the list ${isLive ? 'is' : 'was'} ${nearMiss.label.toLowerCase()}, just shy of its threshold.`);
-  }
-
-  s.push(
-    isLive
-      ? `Gaps at this stage either harden or close; the next passage of sustained pressure will say which.`
-      : `Set those gaps against the final scoreline and the story tells itself.`,
-  );
-  return s.join(' ');
-}
-
-/** Human phrase for an axis gap's magnitude, in that axis's own unit. */
-function gapPhrase(g: AxisGap): string {
-  const v = Math.round(g.signedGap);
-  switch (g.key) {
-    case 'attack':
-    case 'defence':
-      return `a ${v}-point gap`;
-    case 'discipline':
-      return `a ${v}-penalty gap`;
-    case 'turnovers':
-      return `a ${v}-turnover gap`;
-    case 'kicking':
-      return `${v} metres a kick`;
-    default:
-      return `${v} percentage points`;
-  }
-}
-
-/** Threshold above which an axis gap is worth naming as decisive. Tight
- *  numeric axes want smaller thresholds than percentage axes. */
-function gapThreshold(key: AxisKey): number {
-  switch (key) {
-    case 'attack':
-    case 'defence':
-      return 3;
-    case 'discipline':
-    case 'turnovers':
-      return 2;
-    case 'kicking':
-      return 5;
-    case 'setPiece':
-    case 'territory':
-    case 'possession':
-      return 6;
-    default:
-      return 3;
-  }
-}
-
-function computeAxisGaps(result: Result): AxisGap[] {
-  const homeSet = combinedSetPiecePercent(
-    result.home_scrums_won,
-    result.home_scrums_lost,
-    result.home_lineouts_won,
-    result.home_lineouts_lost,
-  );
-  const awaySet = combinedSetPiecePercent(
-    result.away_scrums_won,
-    result.away_scrums_lost,
-    result.away_lineouts_won,
-    result.away_lineouts_lost,
-  );
-  const homeMPerKick = result.home_kicks_in_play > 0 ? result.home_kick_meters / result.home_kicks_in_play : 0;
-  const awayMPerKick = result.away_kicks_in_play > 0 ? result.away_kick_meters / result.away_kicks_in_play : 0;
-
-  const raw: { key: AxisKey; label: string; homeVal: number; awayVal: number; higherIsBetter: boolean }[] = [
-    { key: 'attack', label: 'Attack', homeVal: result.home_score, awayVal: result.away_score, higherIsBetter: true },
-    { key: 'defence', label: 'Defence', homeVal: result.away_score, awayVal: result.home_score, higherIsBetter: false },
-    { key: 'setPiece', label: 'Set-piece', homeVal: homeSet, awayVal: awaySet, higherIsBetter: true },
-    { key: 'discipline', label: 'Discipline', homeVal: result.home_penalties_conceded ?? 0, awayVal: result.away_penalties_conceded ?? 0, higherIsBetter: false },
-    { key: 'kicking', label: 'Kicking', homeVal: homeMPerKick, awayVal: awayMPerKick, higherIsBetter: true },
-    { key: 'territory', label: 'Territory', homeVal: result.home_territory_percent, awayVal: result.away_territory_percent, higherIsBetter: true },
-    { key: 'possession', label: 'Possession', homeVal: result.home_possession_percent, awayVal: result.away_possession_percent, higherIsBetter: true },
-    { key: 'turnovers', label: 'Turnovers', homeVal: result.home_turnovers_won, awayVal: result.away_turnovers_won, higherIsBetter: true },
-  ];
-
-  return raw.map((r) => {
-    const rawDelta = r.homeVal - r.awayVal;
-    // For "higherIsBetter=false" axes (Defence and Discipline are
-    // inverted, but by the time we get here Defence's home/away vals are
-    // already swapped so it reads higher-is-better), pass through.
-    const homeAhead = r.higherIsBetter ? rawDelta > 0 : rawDelta < 0;
-    return {
-      key: r.key,
-      label: r.label,
-      signedGap: Math.abs(rawDelta),
-      advantage: homeAhead ? ('home' as const) : ('away' as const),
-    };
-  });
-}
-
-function listGapLabels(gaps: readonly AxisGap[]): string {
-  if (gaps.length === 1) return gaps[0]!.label;
-  return gaps.map((g) => g.label).join(' and ');
 }
 
 // ─── Per-axis narrative builders ────────────────────────────────────────────

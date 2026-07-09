@@ -13,7 +13,7 @@ import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAIR_PURPOSES } from '@/lib/analysis-section-info';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
-import type { AxisKey, MatchGapView } from '@/hooks/use-match-analysis';
+import type { AxisKey } from '@/hooks/use-match-analysis';
 
 // Standard bar-row tokens (same as Profile H2H / Axis H2H / KPIs).
 const AHEAD_COLOR = '#059669';
@@ -131,30 +131,6 @@ const INFO_KEY: Record<AxisKey, string> = {
   turnovers: 'turnovers',
 };
 
-/** One headline read per axis for the Match Gaps card — the same
- *  metrics buildVariance judges the match on. */
-const MATCH_HEADLINE: Record<AxisKey, RowDef> = {
-  attack: { label: 'Points', get: field('home_score', 'away_score') },
-  defence: { label: 'Points conceded', get: field('away_score', 'home_score'), inverted: true },
-  setPiece: {
-    label: 'Set-piece success',
-    get: (r, s) => (scrumPct(r, s) + lineoutPct(r, s)) / 2,
-    percent: true,
-  },
-  discipline: { label: 'Penalties conceded', get: field('home_penalties_conceded', 'away_penalties_conceded'), inverted: true },
-  kicking: {
-    label: 'Metres per kick',
-    get: (r, s) => {
-      const kicks = s === 'home' ? r.home_kicks_in_play : r.away_kicks_in_play;
-      const metres = s === 'home' ? r.home_kick_meters : r.away_kick_meters;
-      return kicks > 0 ? metres / kicks : 0;
-    },
-  },
-  territory: { label: 'Territory', get: field('home_territory_percent', 'away_territory_percent'), percent: true },
-  possession: { label: 'Possession', get: field('home_possession_percent', 'away_possession_percent'), percent: true },
-  turnovers: { label: 'Turnovers won', get: field('home_turnovers_won', 'away_turnovers_won') },
-};
-
 /** The four standard axis pairs, match-engine keys (camelCase, unlike
  *  the pre-match engine's kebab-case). Same titles app-wide. */
 export const MATCH_AXIS_PAIRS: readonly {
@@ -172,47 +148,6 @@ export const MATCH_AXIS_PAIRS: readonly {
   { title: 'Possession & Turnovers', keys: ['possession', 'turnovers'] },
 ];
 
-
-// ─── Match Gaps (Variance evidence) ─────────────────────────────────────────
-
-/**
- * Match Gaps — the Variance section's evidence: one headline read per
- * axis from THIS match's numbers, ordered biggest in-match gap first
- * (the same ranking buildVariance names axes from). Standard bar-row
- * grammar: toggled side's bar, dark tick = the other side, live while
- * the match runs, settled at full-time.
- */
-export function MatchGaps({
-  fixture,
-  homeCode,
-  awayCode,
-  gaps,
-  read,
-  style,
-}: {
-  fixture: Fixture;
-  homeCode: string;
-  awayCode: string;
-  /** Engine gap ranking (biggest first) from useMatchAnalysis. */
-  gaps: readonly MatchGapView[];
-  /** Live narrative for the flip back (match engine `variance`). */
-  read?: string | null;
-  style?: StyleProp<ViewStyle>;
-}) {
-  const rows = gaps.map((g) => MATCH_HEADLINE[g.key]);
-  return (
-    <MatchH2HCard
-      title="Gaps"
-      fixture={fixture}
-      homeCode={homeCode}
-      awayCode={awayCode}
-      rows={rows}
-      read={read}
-      purpose="One headline read per axis from this match, biggest gap first — the bar is the toggled side's number, the dark tick the other side's. Live it re-ranks as gaps open; at full-time it is the record of where the match was won."
-      style={style}
-    />
-  );
-}
 
 // ─── Match Axis H2H (paired-section evidence) ───────────────────────────────
 
