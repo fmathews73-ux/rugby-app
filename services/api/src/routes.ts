@@ -225,8 +225,20 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       let entries22 = 0, pointsFrom22 = 0;
       let goalKicksMade = 0, goalKicksAttempted = 0;
       let firstHalfFor = 0, secondHalfFor = 0;
+      let firstHalfAgainst = 0, secondHalfAgainst = 0;
       let lineBreaksConceded = 0;
-      let scrumPens = 0, breakdownPens = 0;
+      let scrumPens = 0, breakdownPens = 0, offsidePens = 0;
+      // Full-parity extension (owner call 2026-07-09): the team Stats
+      // pane mirrors the fixture Stats row set, so every fixture-pane
+      // metric needs a per-game twin here.
+      let conversions = 0, penaltyGoals = 0, dropGoals = 0;
+      let postContact = 0, defendersBeaten = 0, gainlinePct = 0;
+      let carries = 0, passes = 0, offloads = 0;
+      let kicksToTouch = 0, fiftyTwentyTwos = 0;
+      let contestables = 0, contestablesWon = 0, receptionsSecured = 0;
+      let rucksWon = 0, rucksLost = 0, quickBallPct = 0;
+      let maulsWon = 0, maulsLost = 0;
+      let tacklesMade = 0, dominantTackles = 0;
       let games = 0;
       for (const fx of completed) {
         const r = store.resultByFixture.get(fx.id);
@@ -241,7 +253,39 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           const ft = isHome ? r.home_score : r.away_score;
           firstHalfFor += ht;
           secondHalfFor += ft - ht;
+          const htA = isHome ? r.half_time_away : r.half_time_home;
+          const ftA = isHome ? r.away_score : r.home_score;
+          firstHalfAgainst += htA;
+          secondHalfAgainst += ftA - htA;
         }
+        conversions += isHome ? r.home_conversions : r.away_conversions;
+        penaltyGoals += isHome ? r.home_penalties : r.away_penalties;
+        dropGoals += isHome ? r.home_drop_goals : r.away_drop_goals;
+        postContact += isHome ? r.home_post_contact_metres : r.away_post_contact_metres;
+        defendersBeaten += isHome ? r.home_defenders_beaten : r.away_defenders_beaten;
+        gainlinePct += isHome ? r.home_gainline_success_percent : r.away_gainline_success_percent;
+        carries += isHome ? r.home_carries : r.away_carries;
+        passes += isHome ? r.home_passes : r.away_passes;
+        offloads += isHome ? r.home_offloads : r.away_offloads;
+        kicksToTouch += isHome ? r.home_kicks_to_touch : r.away_kicks_to_touch;
+        fiftyTwentyTwos += isHome ? r.home_fifty_twenty_twos : r.away_fifty_twenty_twos;
+        contestables += isHome ? r.home_contestable_kicks : r.away_contestable_kicks;
+        contestablesWon += isHome ? r.home_contestable_kicks_won : r.away_contestable_kicks_won;
+        // Opponent-derived (reconciliation principle), mirroring the
+        // fixture pane's Receptions secured row.
+        receptionsSecured += isHome
+          ? r.away_contestable_kicks - r.away_contestable_kicks_won
+          : r.home_contestable_kicks - r.home_contestable_kicks_won;
+        rucksWon += isHome ? r.home_rucks_won : r.away_rucks_won;
+        rucksLost += isHome ? r.home_rucks_lost : r.away_rucks_lost;
+        quickBallPct += isHome ? r.home_ruck_speed_0_3s_percent : r.away_ruck_speed_0_3s_percent;
+        maulsWon += isHome ? r.home_mauls_won : r.away_mauls_won;
+        maulsLost += isHome ? r.home_mauls_lost : r.away_mauls_lost;
+        tacklesMade += isHome ? r.home_tackles_made : r.away_tackles_made;
+        dominantTackles += isHome ? r.home_dominant_tackles : r.away_dominant_tackles;
+        offsidePens += isHome
+          ? r.home_offside_penalties_conceded
+          : r.away_offside_penalties_conceded;
         ptsAgainst += isHome ? r.away_score : r.home_score;
         triesFor += isHome ? r.home_tries : r.away_tries;
         triesAgainst += isHome ? r.away_tries : r.home_tries;
@@ -326,6 +370,34 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           secondHalfPointsScored: secondHalfFor / g,
           goalKickingPercent:
             goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
+          firstHalfPointsConceded: firstHalfAgainst / g,
+          secondHalfPointsConceded: secondHalfAgainst / g,
+          conversions: conversions / g,
+          penaltyGoals: penaltyGoals / g,
+          dropGoals: dropGoals / g,
+          postContactMetres: postContact / g,
+          defendersBeaten: defendersBeaten / g,
+          gainlineSuccessPercent: gainlinePct / g,
+          carries: carries / g,
+          passes: passes / g,
+          offloads: offloads / g,
+          kicksToTouch: kicksToTouch / g,
+          fiftyTwentyTwos: fiftyTwentyTwos / g,
+          contestableKicks: contestables / g,
+          contestableKicksWon: contestablesWon / g,
+          receptionsSecured: receptionsSecured / g,
+          rucksWon: rucksWon / g,
+          rucksLost: rucksLost / g,
+          ruckSpeed0to3sPercent: quickBallPct / g,
+          maulsWon: maulsWon / g,
+          maulsLost: maulsLost / g,
+          tacklesMade: tacklesMade / g,
+          dominantTackles: dominantTackles / g,
+          scrumsWon: scrumWon / g,
+          scrumsLost: scrumLost / g,
+          lineoutsWon: lineoutWon / g,
+          lineoutsLost: lineoutLost / g,
+          offsidePenaltiesConceded: offsidePens / g,
         },
       };
     });

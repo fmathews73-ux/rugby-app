@@ -171,6 +171,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: PillStrip.stripPadH,
     paddingVertical: PillStrip.stripPadV,
     gap: PillStrip.gap,
+    // Centre short fixed sets (team hub's three pills); flexGrow only
+    // engages when content is narrower than the strip, so overflowing
+    // strips (fixture drill) scroll exactly as before.
+    flexGrow: 1,
+    justifyContent: 'center',
   },
   // Edge fades — dissolve the overflowing pill into the surface white
   // so the eye reads "more that way". Pills scroll beneath them to the

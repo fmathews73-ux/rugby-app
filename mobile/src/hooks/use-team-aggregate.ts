@@ -49,6 +49,34 @@ export interface TeamAggregate {
     firstHalfPointsScored: number;
     secondHalfPointsScored: number;
     goalKickingPercent: number;
+    firstHalfPointsConceded: number;
+    secondHalfPointsConceded: number;
+    conversions: number;
+    penaltyGoals: number;
+    dropGoals: number;
+    postContactMetres: number;
+    defendersBeaten: number;
+    gainlineSuccessPercent: number;
+    carries: number;
+    passes: number;
+    offloads: number;
+    kicksToTouch: number;
+    fiftyTwentyTwos: number;
+    contestableKicks: number;
+    contestableKicksWon: number;
+    receptionsSecured: number;
+    rucksWon: number;
+    rucksLost: number;
+    ruckSpeed0to3sPercent: number;
+    maulsWon: number;
+    maulsLost: number;
+    tacklesMade: number;
+    dominantTackles: number;
+    scrumsWon: number;
+    scrumsLost: number;
+    lineoutsWon: number;
+    lineoutsLost: number;
+    offsidePenaltiesConceded: number;
     /** Contestable kicks put up per game. */
     contestablesDelivered: number;
     /** % of the team's own contestable kicks it regathered. */
@@ -132,6 +160,16 @@ export function useTeamAggregate(
     let pensConceded = 0, handlingErrors = 0, yellows = 0, reds = 0;
     let entries22 = 0, pointsFrom22 = 0, goalKicksMade = 0, goalKicksAttempted = 0;
     let aerialDelivered = 0, aerialDeliveredWon = 0, aerialReceived = 0, aerialReceivedWon = 0;
+    // Full-parity extension (owner call 2026-07-09) — the team Stats
+    // pane mirrors the fixture Stats row set, so every fixture-pane
+    // metric gets a per-game twin. Mirrors routes.ts form-summary.
+    let firstHalfAgainst = 0, secondHalfAgainst = 0;
+    let convs = 0, penGoals = 0, drops = 0;
+    let postContact = 0, defBeaten = 0, gainlinePct = 0;
+    let carriesN = 0, passesN = 0, offloadsN = 0;
+    let kicksTouch = 0, fifty22s = 0;
+    let rucksW = 0, rucksL = 0, quickBallPct = 0, maulsW = 0, maulsL = 0;
+    let tacklesM = 0, domTackles = 0, offsidePens = 0;
 
     for (const { result, fixture } of results) {
       const isHome = fixture.home_team_id === teamId;
@@ -141,7 +179,36 @@ export function useTeamAggregate(
         const ft = isHome ? result.home_score : result.away_score;
         firstHalfFor += ht;
         secondHalfFor += ft - ht;
+        const htA = isHome ? result.half_time_away : result.half_time_home;
+        const ftA = isHome ? result.away_score : result.home_score;
+        firstHalfAgainst += htA;
+        secondHalfAgainst += ftA - htA;
       }
+      convs += isHome ? result.home_conversions : result.away_conversions;
+      penGoals += isHome ? result.home_penalties : result.away_penalties;
+      drops += isHome ? result.home_drop_goals : result.away_drop_goals;
+      postContact += isHome ? result.home_post_contact_metres : result.away_post_contact_metres;
+      defBeaten += isHome ? result.home_defenders_beaten : result.away_defenders_beaten;
+      gainlinePct += isHome
+        ? result.home_gainline_success_percent
+        : result.away_gainline_success_percent;
+      carriesN += isHome ? result.home_carries : result.away_carries;
+      passesN += isHome ? result.home_passes : result.away_passes;
+      offloadsN += isHome ? result.home_offloads : result.away_offloads;
+      kicksTouch += isHome ? result.home_kicks_to_touch : result.away_kicks_to_touch;
+      fifty22s += isHome ? result.home_fifty_twenty_twos : result.away_fifty_twenty_twos;
+      rucksW += isHome ? result.home_rucks_won : result.away_rucks_won;
+      rucksL += isHome ? result.home_rucks_lost : result.away_rucks_lost;
+      quickBallPct += isHome
+        ? result.home_ruck_speed_0_3s_percent
+        : result.away_ruck_speed_0_3s_percent;
+      maulsW += isHome ? result.home_mauls_won : result.away_mauls_won;
+      maulsL += isHome ? result.home_mauls_lost : result.away_mauls_lost;
+      tacklesM += isHome ? result.home_tackles_made : result.away_tackles_made;
+      domTackles += isHome ? result.home_dominant_tackles : result.away_dominant_tackles;
+      offsidePens += isHome
+        ? result.home_offside_penalties_conceded
+        : result.away_offside_penalties_conceded;
       ptsAgainst += isHome ? result.away_score : result.home_score;
       triesFor += isHome ? result.home_tries : result.away_tries;
       triesAgainst += isHome ? result.away_tries : result.home_tries;
@@ -234,6 +301,34 @@ export function useTeamAggregate(
         secondHalfPointsScored: secondHalfFor / n,
         goalKickingPercent:
           goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
+        firstHalfPointsConceded: firstHalfAgainst / n,
+        secondHalfPointsConceded: secondHalfAgainst / n,
+        conversions: convs / n,
+        penaltyGoals: penGoals / n,
+        dropGoals: drops / n,
+        postContactMetres: postContact / n,
+        defendersBeaten: defBeaten / n,
+        gainlineSuccessPercent: gainlinePct / n,
+        carries: carriesN / n,
+        passes: passesN / n,
+        offloads: offloadsN / n,
+        kicksToTouch: kicksTouch / n,
+        fiftyTwentyTwos: fifty22s / n,
+        contestableKicks: aerialDelivered / n,
+        contestableKicksWon: aerialDeliveredWon / n,
+        receptionsSecured: aerialReceivedWon / n,
+        rucksWon: rucksW / n,
+        rucksLost: rucksL / n,
+        ruckSpeed0to3sPercent: quickBallPct / n,
+        maulsWon: maulsW / n,
+        maulsLost: maulsL / n,
+        tacklesMade: tacklesM / n,
+        dominantTackles: domTackles / n,
+        scrumsWon: scrumWon / n,
+        scrumsLost: scrumLost / n,
+        lineoutsWon: lineoutWon / n,
+        lineoutsLost: lineoutLost / n,
+        offsidePenaltiesConceded: offsidePens / n,
         contestablesDelivered: aerialDelivered / n,
         // Ratio-of-sums so low-volume games don't overweigh.
         deliveredWonPercent:
@@ -276,6 +371,34 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   firstHalfPointsScored: 0,
   secondHalfPointsScored: 0,
   goalKickingPercent: 0,
+  firstHalfPointsConceded: 0,
+  secondHalfPointsConceded: 0,
+  conversions: 0,
+  penaltyGoals: 0,
+  dropGoals: 0,
+  postContactMetres: 0,
+  defendersBeaten: 0,
+  gainlineSuccessPercent: 0,
+  carries: 0,
+  passes: 0,
+  offloads: 0,
+  kicksToTouch: 0,
+  fiftyTwentyTwos: 0,
+  contestableKicks: 0,
+  contestableKicksWon: 0,
+  receptionsSecured: 0,
+  rucksWon: 0,
+  rucksLost: 0,
+  ruckSpeed0to3sPercent: 0,
+  maulsWon: 0,
+  maulsLost: 0,
+  tacklesMade: 0,
+  dominantTackles: 0,
+  scrumsWon: 0,
+  scrumsLost: 0,
+  lineoutsWon: 0,
+  lineoutsLost: 0,
+  offsidePenaltiesConceded: 0,
   contestablesDelivered: 0,
   deliveredWonPercent: 0,
   contestablesReceived: 0,

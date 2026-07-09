@@ -24,7 +24,7 @@ import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, Te
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { JerseyAvatar } from '@/components/jersey-avatar';
 import { WORLD_CUP_WINS, TROPHY_COLOR } from '@/lib/honours';
-import { TEAM_JERSEY } from '@/lib/team-colors';
+import { TEAM_JERSEY, jerseyGlyphColors } from '@/lib/team-colors';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
@@ -45,16 +45,34 @@ const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] 
   { label: 'Back Three', positions: ['left-wing', 'right-wing', 'fullback'] },
 ];
 
-// ONE flat pill bar (owner call 2026-07-07): Preview and Stats, then
-// Squad and its six positional units as SIBLING pills — a unit pill
-// is simply the squad view filtered to that unit; Squad shows all.
-// Declared after POSITION_GROUPS, which it spreads.
+// ONE flat pill bar, three pills (owner call 2026-07-09): the unit
+// sibling pills were retired along with the stats category pills —
+// the squad cards ARE the units, so the pills only duplicated them.
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
   { id: 'preview', label: 'Preview' },
   { id: 'stats', label: 'Stats' },
   { id: 'squad', label: 'Squad' },
-  ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
 ];
+
+/** Squad-colour jersey at meta size — the Line-Up's CapsJersey
+ *  treatment (solid shirt in the squad fill, trim-colour outline
+ *  overlay for white shirts) at the 12pt icon register. */
+function SquadJersey({ teamId }: { teamId: string }) {
+  const glyph = jerseyGlyphColors(teamId);
+  if (!glyph) {
+    return <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />;
+  }
+  return (
+    <View>
+      <Ionicons name="shirt" size={12} color={glyph.fill} />
+      {glyph.border ? (
+        <View style={styles.squadJerseyBorder} pointerEvents="none">
+          <Ionicons name="shirt-outline" size={12} color={glyph.border} />
+        </View>
+      ) : null}
+    </View>
+  );
+}
 
 /** Human position labels for the player rows. */
 const POSITION_LABELS: Record<Position, string> = {
@@ -95,9 +113,7 @@ export default function TeamHubScreen() {
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
   const [squadInfoOpen, setSquadInfoOpen] = useState(false);
-  // Squad view when the Squad pill OR any unit pill is active; a unit
-  // pill filters to that unit, Squad shows all.
-  const isSquadView = tab === 'squad' || POSITION_GROUPS.some((g) => g.label === tab);
+  const isSquadView = tab === 'squad';
   const isStatsView = tab === 'stats';
 
   const teams = useTeams();
@@ -143,10 +159,7 @@ export default function TeamHubScreen() {
     }).filter((s) => s.players.length > 0);
   }, [players.data]);
 
-  const visibleSections =
-    tab === 'squad'
-      ? squadSections
-      : squadSections.filter((sec) => sec.label === tab);
+  const visibleSections = squadSections;
 
   const squadTotals = useMemo(
     () => ({
@@ -208,9 +221,10 @@ export default function TeamHubScreen() {
             ) : null}
             {squadTotals.players > 0 ? (
               <View style={styles.heroRecordRow}>
-                <Text style={styles.heroMetaText}>
-                  {squadTotals.caps.toLocaleString('en-GB')} Caps · {squadTotals.players} Players
-                </Text>
+                <SquadJersey teamId={teamId} />
+                <Text style={styles.heroMetaText}> {squadTotals.caps.toLocaleString('en-GB')}</Text>
+                <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.heroMetaSecondIcon} />
+                <Text style={styles.heroMetaText}> {squadTotals.players}</Text>
               </View>
             ) : null}
             {outcomes.length > 0 ? (
@@ -238,15 +252,15 @@ export default function TeamHubScreen() {
         {tab === 'preview' && (
           <>
             {/* THE team read, identical to Home's My Team experience,
-                hub-scoped: next/last match, then the synced chart
-                carousel + Team Analysis accordion. The bleed unwraps
-                the pane's 24pt padding; the block re-applies the card
-                column internally (carousel full-width, analysis
-                padded). */}
-            <TeamMatchesCard teamId={teamId} />
+                hub-scoped: chart carousel on top (owner call
+                2026-07-09, matching Home's order), then last/next
+                match. The bleed unwraps the pane's 24pt padding; the
+                block re-applies the card column internally (carousel
+                full-width, analysis padded). */}
             <View style={styles.previewBleed}>
               <TeamPreviewBlock teamId={teamId} />
             </View>
+            <TeamMatchesCard teamId={teamId} />
           </>
         )}
 
@@ -301,13 +315,9 @@ export default function TeamHubScreen() {
                     <View style={styles.squadTitleGroup}>
                       <Text style={styles.sectionLabel}>{section.label}</Text>
                     </View>
-                  <View style={styles.insetDivider} />
-                    {/* Same fixed column as the player-row meta below,
-                        so the unit totals left-align with every meta
-                        line in the card. */}
                     <View style={styles.groupMetaColumn}>
                       <View style={styles.squadMetaRow}>
-                        <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />
+                        <SquadJersey teamId={teamId} />
                         <Text style={styles.sectionLabel}>
                           {section.caps.toLocaleString('en-GB')}
                         </Text>
@@ -316,6 +326,10 @@ export default function TeamHubScreen() {
                       </View>
                     </View>
                   </View>
+                  {/* Line-Up hairline pair: chrome-grey divider under
+                      the section header; the whisper-grey row
+                      separators live on each player row. */}
+                  <View style={styles.squadHeaderDivider} />
                   {section.players.map((p) => (
                     <PlayerRow
                       key={p.id}
@@ -339,59 +353,116 @@ export default function TeamHubScreen() {
 
 // ─── Stats table ────────────────────────────────────────────────────────────
 
+// Full row parity with the fixture Stats pane (owner call
+// 2026-07-09): SAME nine categories, SAME rows — only the value frame
+// differs (per-game prev-10 vs tier average here; match totals
+// there). Quarters becomes Halves: per-game quarter splits would need
+// event-level aggregation, half splits fall out of the half-time line.
 const TIER_STAT_GROUPS: readonly {
   label: string;
   description: string;
   rows: readonly { field: string; label: string; percent?: boolean; inverted?: boolean }[];
 }[] = [
   {
-    label: 'Attack',
-    description: 'The with-ball production line over the last 10: points, tries and metres a game, red-zone visits and their yield, plus possession and territory share. Every bar runs against the tier average.',
+    label: 'Overview',
+    description: 'The control shares over the last 10 — possession and territory per game against the tier average, with the half-time points position.',
     rows: [
-      { field: 'pointsScored', label: 'Points scored' },
+      { field: 'possessionPercent', label: 'Possession %', percent: true },
+      { field: 'territoryPercent', label: 'Territory %', percent: true },
+      { field: 'firstHalfPointsScored', label: 'Half-time points' },
+    ],
+  },
+  {
+    label: 'Scoring',
+    description: 'How the points arrive per game over the last 10 — tries, boot and the goal-kicking return, against the tier average.',
+    rows: [
       { field: 'tries', label: 'Tries' },
-      { field: 'metersMade', label: 'Metres made' },
-      { field: 'lineBreaks', label: 'Line breaks' },
+      { field: 'conversions', label: 'Conversions' },
+      { field: 'penaltyGoals', label: 'Penalties' },
+      { field: 'dropGoals', label: 'Drop goals' },
+      { field: 'goalKickingPercent', label: 'Goal kicking %', percent: true },
+    ],
+  },
+  {
+    label: 'Halves',
+    description: 'The shape of the eighty per game over the last 10 — points scored and conceded either side of the break, against the tier average.',
+    rows: [
+      { field: 'firstHalfPointsScored', label: '1st-half points' },
+      { field: 'secondHalfPointsScored', label: '2nd-half points' },
+      { field: 'firstHalfPointsConceded', label: '1st-half conceded', inverted: true },
+      { field: 'secondHalfPointsConceded', label: '2nd-half conceded', inverted: true },
+    ],
+  },
+  {
+    label: 'Attack',
+    description: 'The with-ball production line per game over the last 10 — red-zone visits and their yield, carry metres and the breaks they buy, against the tier average.',
+    rows: [
       { field: 'twentyTwoEntries', label: '22 entries' },
       { field: 'pointsPerTwentyTwoEntry', label: 'Points per 22 entry' },
-      { field: 'possessionPercent', label: 'Possession', percent: true },
-      { field: 'territoryPercent', label: 'Territory', percent: true },
+      { field: 'metersMade', label: 'Meters made' },
+      { field: 'postContactMetres', label: 'Post-contact metres' },
+      { field: 'lineBreaks', label: 'Line breaks' },
+      { field: 'defendersBeaten', label: 'Defenders beaten' },
+      { field: 'gainlineSuccessPercent', label: 'Gainline success %', percent: true },
+      { field: 'carries', label: 'Carries' },
+      { field: 'passes', label: 'Passes' },
+      { field: 'offloads', label: 'Offloads' },
     ],
   },
   {
     label: 'Kicking',
-    description: 'The boot per game over the last 10: kicks in play, kick metres and the goal-kicking return, each against the tier average.',
+    description: 'The boot per game over the last 10 — volume, metres and the contestable air battle, against the tier average.',
     rows: [
       { field: 'kicksInPlay', label: 'Kicks in play' },
-      { field: 'kickMeters', label: 'Kick metres' },
-      { field: 'goalKickingPercent', label: 'Goal kicking', percent: true },
+      { field: 'kicksToTouch', label: 'Kicks to touch' },
+      { field: 'kickMeters', label: 'Kick metres gained' },
+      { field: 'fiftyTwentyTwos', label: '50/22 kicks' },
+      { field: 'contestableKicks', label: 'Contestables kicked' },
+      { field: 'contestableKicksWon', label: 'Own kicks regathered' },
+      { field: 'receptionsSecured', label: 'Receptions secured' },
+    ],
+  },
+  {
+    label: 'Set-Piece',
+    description: 'The platform per game over the last 10 — scrums and lineouts won and lost, against the tier average.',
+    rows: [
+      { field: 'scrumsWon', label: 'Scrums won' },
+      { field: 'scrumsLost', label: 'Scrums lost', inverted: true },
+      { field: 'lineoutsWon', label: 'Lineouts won' },
+      { field: 'lineoutsLost', label: 'Lineouts lost', inverted: true },
+    ],
+  },
+  {
+    label: 'Breakdown',
+    description: 'The contact-area contest per game over the last 10 — ruck and maul returns and the speed of the ball they produce, against the tier average.',
+    rows: [
+      { field: 'rucksWon', label: 'Rucks won' },
+      { field: 'rucksLost', label: 'Rucks lost', inverted: true },
+      { field: 'ruckSpeed0to3sPercent', label: 'Quick ball % (0-3s)', percent: true },
+      { field: 'maulsWon', label: 'Mauls won' },
+      { field: 'maulsLost', label: 'Mauls lost', inverted: true },
     ],
   },
   {
     label: 'Defence',
-    description: 'The denying numbers over the last 10: points and tries conceded, tackle completion and turnovers won, against the tier average.',
+    description: 'The denying numbers per game over the last 10 — tackle volume, completion and the ball won back, against the tier average.',
     rows: [
-      { field: 'pointsConceded', label: 'Points conceded', inverted: true },
-      { field: 'triesConceded', label: 'Tries conceded', inverted: true },
-      { field: 'tackleSuccessPercent', label: 'Tackle success', percent: true },
+      { field: 'tacklesMade', label: 'Tackles made' },
+      { field: 'tackleSuccessPercent', label: 'Tackle success %', percent: true },
+      { field: 'dominantTackles', label: 'Dominant tackles' },
       { field: 'turnoversWon', label: 'Turnovers won' },
     ],
   },
   {
-    label: 'Set piece',
-    description: 'Scrum and lineout success rates over the last 10 against the tier average: the platform the rest of the game is built on.',
-    rows: [
-      { field: 'scrumSuccessPercent', label: 'Scrum success', percent: true },
-      { field: 'lineoutSuccessPercent', label: 'Lineout success', percent: true },
-    ],
-  },
-  {
     label: 'Discipline',
-    description: 'The giveaway ledger over the last 10: penalties, handling errors, turnovers conceded and cards, against the tier average. Lower is the win on every row.',
+    description: 'The giveaway ledger per game over the last 10 — turnovers, the penalty count and its causes, errors and cards, against the tier average. Lower is the win on every row.',
     rows: [
-      { field: 'penaltiesConceded', label: 'Penalties conceded', inverted: true },
-      { field: 'handlingErrors', label: 'Handling errors', inverted: true },
       { field: 'turnoversConceded', label: 'Turnovers conceded', inverted: true },
+      { field: 'penaltiesConceded', label: 'Penalties conceded', inverted: true },
+      { field: 'scrumPenaltiesConceded', label: 'Scrum penalties', inverted: true },
+      { field: 'breakdownPenaltiesConceded', label: 'Breakdown penalties', inverted: true },
+      { field: 'offsidePenaltiesConceded', label: 'Offside penalties', inverted: true },
+      { field: 'handlingErrors', label: 'Handling errors', inverted: true },
       { field: 'yellowCards', label: 'Yellow cards', inverted: true },
       { field: 'redCards', label: 'Red cards', inverted: true },
     ],
@@ -550,32 +621,29 @@ function TierStatBar({
   // Sweep-in driver (shared arrival grammar) — bars sweep out from the
   // centre gap and the tiles count up in sync, fixture-StatBar style.
   const ink = useChartInk();
+  // Standard headroom rule (fixture Stats): the longest bar tops out
+  // at 85% of its half, so grey track stays visible past both maxes
+  // and bars read against a scale instead of slamming the ends.
+  const MAX_FILL = 0.85;
   const maxValue = Math.max(team, tier, 1);
-  const teamSegFlex = Math.max(0.001, team / maxValue);
-  const teamSpacerFlex = Math.max(0.001, 1 - team / maxValue);
-  const tierSegFlex = Math.max(0.001, tier / maxValue);
-  const tierSpacerFlex = Math.max(0.001, 1 - tier / maxValue);
+  const teamSegFlex = Math.max(0.001, MAX_FILL * (team / maxValue));
+  const teamSpacerFlex = Math.max(0.001, 1 - MAX_FILL * (team / maxValue));
+  const tierSegFlex = Math.max(0.001, MAX_FILL * (tier / maxValue));
+  const tierSpacerFlex = Math.max(0.001, 1 - MAX_FILL * (tier / maxValue));
 
   // Better-side colouring: higher wins unless the metric is inverted.
   const variance = team - tier;
   const favourable = inverted ? variance < 0 : variance > 0;
   const isTie = Math.abs(variance) < 0.05;
+  // Fixture-Stats convention: leader green, trailer red, BOTH grey
+  // only when even.
   const teamColor = isTie ? TIE_COLOR : favourable ? LEADING_COLOR : LAGGING_COLOR;
-  const tierColor = TIE_COLOR;
-
-  const varText = `${variance >= 0 ? '+' : ''}${formatStat(variance, percent)}`;
+  const tierColor = isTie ? TIE_COLOR : favourable ? LAGGING_COLOR : LEADING_COLOR;
 
   return (
     <View style={styles.tierStatBlock}>
       <View style={styles.tierStatLabelRow}>
         <Text style={styles.tierStatLabel}>{label}</Text>
-        <Text
-          style={[
-            styles.tierStatVariance,
-            { color: isTie ? TIE_COLOR : favourable ? LEADING_COLOR : LAGGING_COLOR },
-          ]}>
-          {' '}{varText}
-        </Text>
       </View>
       <View style={styles.tierStatBarRow}>
         {/* Team value in the match-score tile convention: beating the
@@ -584,7 +652,6 @@ function TierStatBar({
           <Text
             style={[styles.tierValueText, !isTie && favourable ? styles.tierValueTextWin : null]}>
             <CountUpValue value={formatStat(team, percent).replace('%', '')} ink={ink} />
-            {percent ? '%' : ''}
           </Text>
         </View>
         <View style={styles.tierBarTrack}>
@@ -622,7 +689,6 @@ function TierStatBar({
         <View style={styles.tierValueBox}>
           <Text style={styles.tierValueText}>
             <CountUpValue value={formatStat(tier, percent).replace('%', '')} ink={ink} />
-            {percent ? '%' : ''}
           </Text>
         </View>
       </View>
@@ -670,7 +736,10 @@ function PlayerRow({
         <Text style={styles.playerMeta}>
           {POSITION_LABELS[player.primary_position]} · {age}
         </Text>
-        <Text style={styles.playerMeta}>{player.cap_count} caps</Text>
+        <View style={styles.playerCapsRow}>
+          <SquadJersey teamId={teamId} />
+          <Text style={styles.playerMeta}>{player.cap_count}</Text>
+        </View>
       </View>
       <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
     </Pressable>
@@ -804,12 +873,11 @@ const styles = StyleSheet.create({
   },
   // Card-header row: section label left, xs team flag right — same
   // anchor treatment as the Form / Trajectory / KPI cards.
-  // Standalone inset divider — chevron-chrome grey, list-card grammar.
-  insetDivider: {
+  // Under the unit header, full content width — the card's padding
+  // provides the inset (unlike Line-Up's unpadded list cards).
+  squadHeaderDivider: {
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#C7CBD1',
-    marginHorizontal: Spacing.three,
-    marginBottom: Spacing.two,
   },
   cardHeaderRow: {
     flexDirection: 'row',
@@ -864,12 +932,19 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
-  // Mirrors playerMetaStack's column so header totals and row meta
-  // share one left edge.
+  squadJerseyBorder: { position: 'absolute', top: 0, left: 0 },
+  heroMetaSecondIcon: { marginLeft: 8 },
+  // Jersey-and-caps pair — same icon+value grammar as the unit header.
+  playerCapsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  // Header totals hug the card's RIGHT edge (owner call 2026-07-09)
+  // — the card padding gives the same inset the title has on the left.
   groupMetaColumn: {
-    width: 120,
     marginLeft: Spacing.two,
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
   },
   playerMetaStack: {
     // Narrow meta column pushed toward the card's right edge —
@@ -932,10 +1007,6 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
-  },
-  tierStatVariance: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.xs,
   },
   tierStatBarRow: {
     flexDirection: 'row',
