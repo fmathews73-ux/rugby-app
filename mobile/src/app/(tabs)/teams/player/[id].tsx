@@ -8,13 +8,14 @@ import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 import { usePlayer, usePlayerPercentiles, useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { CapsJerseyBadge, SquadBarbell, SquadMan } from '@/components/squad-jersey';
-import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan, CountUpValue } from '@/components/insights/count-up-value';
+import { RadarChart } from '@/components/insights/radar-chart';
+import { teamDotColor } from '@/lib/team-colors';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
@@ -23,14 +24,12 @@ import { FadingScrollView } from '@/components/fading-scroll-view';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { usePlayerMatchHistory } from '@/hooks/use-player-match-stats';
 import {
-  BACK_SCOUT,
-  BACK_TREND,
+  BACK_CATEGORY_ORDER,
+  FORWARD_CATEGORY_ORDER,
   FORWARD_POSITIONS,
-  FORWARD_SCOUT,
-  FORWARD_TREND,
-  GROUP_LABELS,
   PLAYER_LOOKBACK,
   POSITION_LABELS,
+  SCOUT_CATEGORIES,
   type ScoutMetric,
 } from '@/lib/player-roles';
 import { CHART_LINE_COLOR } from '@/lib/smooth-path';
@@ -41,14 +40,15 @@ const LOOKBACK = PLAYER_LOOKBACK;
 const GOOD_COLOR = '#059669';
 const BAD_COLOR = StatusColor.live;
 
-type PlayerTab = 'preview' | 'stats';
+type PlayerTab = 'season' | 'preview' | 'stats';
 
 const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
-  // Preview IS the player read — the strict-1:1 chart carousel +
-  // Player Analysis accordion (same grammar as every other surface);
-  // Insights and Analysis pills retired 2026-07-07. Stats stays as the
-  // dense reference table.
-  { id: 'preview', label: 'Preview' },
+  // Season leads (owner call 2026-07-10): the totals ledger is the
+  // landing read; Profile is the scouting deck (radar + six peer-bar
+  // category cards); Stats stays as the dense reference table.
+  // Insights and Analysis pills retired 2026-07-07.
+  { id: 'season', label: 'Season' },
+  { id: 'preview', label: 'Profile' },
   { id: 'stats', label: 'Stats' },
 ];
 
@@ -62,7 +62,7 @@ const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
 export default function PlayerCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const playerId = id ?? '';
-  const [tab, setTab] = useState<PlayerTab>('preview');
+  const [tab, setTab] = useState<PlayerTab>('season');
   const scrollRef = useRef<ScrollView>(null);
 
   const player = usePlayer(playerId);
@@ -138,14 +138,13 @@ export default function PlayerCardScreen() {
       <SegmentedTabs tabs={PLAYER_TABS} active={tab} onSelect={handleTabSelect} />
 
       <FadingScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
+        {tab === 'season' && <SeasonPane playerId={playerId} />}
         {tab === 'preview' && (
-          <View style={styles.previewBleed}>
-            <PlayerPreviewBlock
-              playerId={playerId}
-              teamId={p.team_id}
-              isForward={isForward}
-            />
-          </View>
+          <PlayerPreviewBlock
+            playerId={playerId}
+            teamId={p.team_id}
+            isForward={isForward}
+          />
         )}
         {tab === 'stats' && <PlayerStatsTable playerId={playerId} />}
       </FadingScrollView>
@@ -153,7 +152,7 @@ export default function PlayerCardScreen() {
   );
 }
 
-// ─── Preview block (strict 1:1 carousel + synced accordion) ────────────────
+// ─── Profile block (stacked category cards, fixture-Stats grammar) ─────────
 
 // One narrative per card, labels identical to card titles. The Player
 // Profile percentile card pairs with the accordion's title row (the
@@ -167,7 +166,6 @@ function PlayerPreviewBlock({
   teamId: string;
   isForward: boolean;
 }) {
-  const carouselRef = useRef<CardCarouselHandle>(null);
   // Flip-card grammar (Teams alignment pass, 2026-07-08): each card
   // carries its narrative on its back — Profile gets the full scouting
   // report (summary + profile read + development close), Form and
@@ -178,32 +176,51 @@ function PlayerPreviewBlock({
     : null;
 
   return (
-    <CardCarousel
-      ref={carouselRef}
-      pages={[
-        <ScoutingCard
-          key="profile"
-          playerId={playerId}
-          metrics={isForward ? FORWARD_SCOUT : BACK_SCOUT}
-          style={styles.pageCard}
-          read={profileRead}
-        />,
-        <TrendCard
-          key="form"
+    <View style={styles.profileStack}>
+      {[
+        // The player's SHAPE at a glance (owner call 2026-07-09):
+        // six lobes = the six category cards below, each the player's
+        // composite standing vs positional peers. The full scouting
+        // narrative rides this lead card's back.
+        <PlayerRadarCard
+          key="radar"
           playerId={playerId}
           teamId={teamId}
-          metrics={isForward ? FORWARD_TREND : BACK_TREND}
-          style={styles.pageCard}
-          read={analysis.data?.form ?? null}
+          isForward={isForward}
+          read={profileRead}
         />,
-        <SeasonCard
-          key="season"
-          playerId={playerId}
-          style={styles.pageCard}
-          read={analysis.data?.season ?? null}
-        />,
+        // Comprehensive scouting deck (owner call 2026-07-09): six
+        // category cards covering EVERY feed-backed stat, ordered by
+        // the role's bread and butter; the full scouting narrative
+        // rides the lead card's back.
+        ...(isForward ? FORWARD_CATEGORY_ORDER : BACK_CATEGORY_ORDER).map(
+          (key) => {
+            const cat = SCOUT_CATEGORIES[key]!;
+            return (
+              <ScoutingCard
+                key={key}
+                title={cat.title}
+                purpose={cat.purpose}
+                playerId={playerId}
+                metrics={cat.metrics}
+
+              />
+            );
+          },
+        ),
       ]}
-    />
+    </View>
+  );
+}
+
+// ─── Season pane ────────────────────────────────────────────────────────────
+
+function SeasonPane({ playerId }: { playerId: string }) {
+  const analysis = usePlayerAnalysis(playerId);
+  return (
+    <View style={styles.profileStack}>
+      <SeasonCard playerId={playerId} read={analysis.data?.season ?? null} />
+    </View>
   );
 }
 
@@ -211,14 +228,19 @@ function PlayerPreviewBlock({
 
 function ScoutingCard({
   playerId,
+  title,
+  purpose,
   metrics,
   style,
   read,
 }: {
   playerId: string;
+  title: string;
+  /** About copy for the flip back. */
+  purpose: string;
   metrics: readonly ScoutMetric[];
   style?: StyleProp<ViewStyle>;
-  /** Full scouting report for the flip back. */
+  /** Scouting narrative for the flip back (lead card only). */
   read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
@@ -226,15 +248,12 @@ function ScoutingCard({
   const percentiles = usePlayerPercentiles(playerId, LOOKBACK);
 
   const byField = useMemo(() => {
-    const m = new Map<string, { per80: number; percentile: number }>();
+    const m = new Map<string, { per_game: number; peer_avg: number }>();
     for (const row of percentiles.data?.metrics ?? []) {
-      m.set(row.field, { per80: row.per80, percentile: row.percentile });
+      m.set(row.field, { per_game: row.per_game, peer_avg: row.peer_avg });
     }
     return m;
   }, [percentiles.data]);
-
-  const groupLabel =
-    GROUP_LABELS[percentiles.data?.position_group ?? ''] ?? 'positional peers';
 
   return (
     <FadeCard
@@ -242,30 +261,28 @@ function ScoutingCard({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Profile"
+          title={title}
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={
-            <>
-              Percentile bars against every positional peer in the pool, on
-              per-80-minute rates over the last {LOOKBACK} appearances — the
-              tick is the peer median, and lower-is-better rows are already
-              flipped so a longer bar is always the better read.
-            </>
-          }
+          purpose={<>{purpose}</>}
         />
       }
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Profile</Text>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel="Read the player profile analysis">
-          <FlipTrigger />
-        </Pressable>
+        <Text style={styles.sectionLabel}>{title}</Text>
+        {/* Reference caption + trigger right — the team Stats card's
+            TIER 1 AVG anatomy with the positional pool as the frame. */}
+        <View style={styles.headerRightGroup}>
+          <Text style={styles.peerTag}>PEER AVG</Text>
+          <Pressable
+            onPress={() => setInfoOpen(true)}
+            hitSlop={10}
+            accessibilityRole="button"
+            accessibilityLabel={`Explain the ${title} scouting card`}>
+            <FlipTrigger />
+          </Pressable>
+        </View>
       </View>
 
       {percentiles.isLoading ? (
@@ -274,21 +291,17 @@ function ScoutingCard({
         <Text style={styles.empty}>No appearances yet to profile.</Text>
       ) : (
         <>
-          <Text style={styles.subMeta}>
-            vs {percentiles.data.peers} {groupLabel} ·{' '}
-            {percentiles.data.appearances} apps
-          </Text>
           <View style={styles.scoutList}>
             {metrics.map((m) => {
               const row = byField.get(m.field);
               if (!row) return null;
-              const display = m.inverted ? 100 - row.percentile : row.percentile;
               return (
-                <ScoutRow
+                <PeerRow
                   key={m.field}
                   label={m.label}
-                  per80={row.per80}
-                  percentile={display}
+                  mine={row.per_game}
+                  avg={row.peer_avg}
+                  inverted={m.inverted}
                 />
               );
             })}
@@ -302,50 +315,79 @@ function ScoutingCard({
   );
 }
 
-function ScoutRow({
+/** Per-game vs the average positional peer — the team Stats row
+ *  grammar verbatim: value tile, centre-out diverging bars, avg tile;
+ *  leader green, trailer red, grey when even (inverted-aware). */
+function PeerRow({
   label,
-  per80,
-  percentile,
+  mine,
+  avg,
+  inverted,
 }: {
   label: string;
-  per80: number;
-  percentile: number;
+  mine: number;
+  avg: number;
+  inverted?: boolean;
 }) {
-  // Sweep-in driver (shared arrival grammar).
   const ink = useChartInk();
+  // Standard headroom rule: the longest bar tops out at 85%.
+  const MAX_FILL = 0.85;
+  const maxValue = Math.max(mine, avg, 0.001);
+  const mineSeg = Math.max(0.001, MAX_FILL * (mine / maxValue));
+  const mineSpacer = Math.max(0.001, 1 - MAX_FILL * (mine / maxValue));
+  const avgSeg = Math.max(0.001, MAX_FILL * (avg / maxValue));
+  const avgSpacer = Math.max(0.001, 1 - MAX_FILL * (avg / maxValue));
+  const variance = mine - avg;
+  const favourable = inverted ? variance < 0 : variance > 0;
+  const isTie = Math.abs(variance) < 0.05;
+  const mineColor = isTie ? Colors.light.textSecondary : favourable ? GOOD_COLOR : BAD_COLOR;
+  const avgColor = isTie ? Colors.light.textSecondary : favourable ? BAD_COLOR : GOOD_COLOR;
+
   return (
     <View style={styles.scoutRow}>
-      <View style={styles.scoutRowHead}>
+      <View style={styles.peerLabelRow}>
         <Text style={styles.scoutLabel}>{label}</Text>
-        <Text style={styles.scoutValue}>
-          {formatPer80(per80)}
-          <Text style={styles.scoutSuffix}> /80</Text>
-        </Text>
       </View>
-      {/* Track and percentile tile share one line — ladder grammar:
-          track flexes, tile in the fixed right rail. */}
-      <View style={styles.scoutLine}>
-        <View style={styles.scoutTrack}>
-          <Animated.View
-            style={[
-              styles.scoutFill,
-              {
-                width: `${percentile}%`,
-                backgroundColor: percentile >= 50 ? GOOD_COLOR : BAD_COLOR,
-                transformOrigin: 'left',
-                transform: [{ scaleX: ink }],
-              },
-            ]}
-          />
-          {/* Peer-median tick at the 50th percentile — same treatment as
-              the Efficiency KPI T1-average marker. */}
-          <View style={styles.scoutMedianMarker} />
+      <View style={styles.peerBarRow}>
+        <View style={[styles.valueBox, !isTie && favourable ? styles.valueBoxWin : null]}>
+          <Text style={[styles.valueBoxText, !isTie && favourable ? styles.valueBoxTextWin : null]}>
+            <CountUpValue value={formatPeer(mine)} ink={ink} />
+          </Text>
         </View>
-        {/* Percentile in the match-score tile convention: above the
-            peer median = winner pairing, below = loser pairing. */}
-        <View style={[styles.valueBox, percentile >= 50 ? styles.valueBoxWin : null]}>
-          <Text style={[styles.valueBoxText, percentile >= 50 ? styles.valueBoxTextWin : null]}>
-            <CountUpValue value={String(percentile)} ink={ink} />
+        <View style={styles.peerBarTrack}>
+          <View style={styles.peerBarHalfLeft}>
+            <Animated.View
+              style={[
+                styles.peerBarSeg,
+                {
+                  flex: mineSeg,
+                  backgroundColor: mineColor,
+                  transformOrigin: 'right',
+                  transform: [{ scaleX: ink }],
+                },
+              ]}
+            />
+            <View style={{ flex: mineSpacer }} />
+          </View>
+          <View style={styles.peerBarCentreGap} />
+          <View style={styles.peerBarHalfRight}>
+            <Animated.View
+              style={[
+                styles.peerBarSeg,
+                {
+                  flex: avgSeg,
+                  backgroundColor: avgColor,
+                  transformOrigin: 'left',
+                  transform: [{ scaleX: ink }],
+                },
+              ]}
+            />
+            <View style={{ flex: avgSpacer }} />
+          </View>
+        </View>
+        <View style={styles.valueBox}>
+          <Text style={styles.valueBoxText}>
+            <CountUpValue value={formatPeer(avg)} ink={ink} />
           </Text>
         </View>
       </View>
@@ -353,235 +395,114 @@ function ScoutRow({
   );
 }
 
-// ─── Trend sparklines ───────────────────────────────────────────────────────
+function formatPeer(v: number): string {
+  const r = Math.round(v * 10) / 10;
+  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+}
 
-function TrendCard({
+// ─── Player radar (shape lead card) ─────────────────────────────────────────
+
+/** Six lobes = the six category cards beneath — each the mean of the
+ *  category's DISPLAY percentiles (lower-is-better rows pre-flipped),
+ *  so more area is always more standing vs the positional peer pool.
+ *  Fixed axis order for shape comparability across players. */
+const RADAR_CATEGORY_ORDER = [
+  'scoring',
+  'attack',
+  'kicking',
+  'defence',
+  'contest',
+  'discipline',
+] as const;
+const RADAR_LABELS: Record<string, string> = {
+  scoring: 'Scoring',
+  attack: 'Attack',
+  kicking: 'Kicking',
+  defence: 'Defence',
+  contest: 'Breakdown',
+  discipline: 'Discipline',
+};
+
+function PlayerRadarCard({
   playerId,
   teamId,
-  metrics,
-  style,
+  isForward,
   read,
 }: {
   playerId: string;
   teamId: string;
-  metrics: readonly { field: PlayerStatField; label: string }[];
-  style?: StyleProp<ViewStyle>;
-  /** Form narrative for the flip back. */
+  isForward: boolean;
+  /** Full scouting narrative for the flip back. */
   read?: string | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const history = usePlayerMatchHistory(playerId);
-  const team = useTeam(teamId);
-  const teams = useTeams();
+  const percentiles = usePlayerPercentiles(playerId, LOOKBACK);
 
-  // Headline metric only — the position list's lead field (tackles for
-  // forwards, metres for backs); the full spread lives on Profile.
-  const headline = metrics[0]!;
+  const axes = useMemo(() => {
+    const byField = new Map(
+      (percentiles.data?.metrics ?? []).map((m) => [m.field, m.percentile]),
+    );
+    return RADAR_CATEGORY_ORDER.map((key) => {
+      const cat = SCOUT_CATEGORIES[key]!;
+      const displays = cat.metrics.map((m) => {
+        const pct = byField.get(m.field) ?? 0;
+        return m.inverted ? 100 - pct : pct;
+      });
+      const mean =
+        displays.length > 0 ? displays.reduce((a, b) => a + b, 0) / displays.length : 0;
+      return {
+        key,
+        label: RADAR_LABELS[key]!,
+        value: mean / 100,
+        raw: `${Math.round(mean)} pctile`,
+      };
+    });
+  }, [percentiles.data]);
 
-  // Newest-first from the server → oldest-first for left-to-right time.
-  const appearances = useMemo(
-    () =>
-      (history.data ?? [])
-        .filter((st) => st.minutes_played > 0)
-        .slice(0, LOOKBACK)
-        .reverse(),
-    [history.data],
-  );
-
-  // Opponent flag per appearance, via the team's fixture list.
-  const flagByFixture = useMemo(() => {
-    const byTeam = new Map<string, string>((teams.data ?? []).map((t) => [t.id, t.flag_code]));
-    const map = new Map<string, string>();
-    for (const f of team.data?.fixtures ?? []) {
-      const oppId = f.home_team_id === teamId ? f.away_team_id : f.home_team_id;
-      const flag = byTeam.get(oppId);
-      if (flag) map.set(f.id, flag);
-    }
-    return map;
-  }, [team.data, teams.data, teamId]);
+  const ready = Boolean(percentiles.data && percentiles.data.appearances > 0);
 
   return (
     <FadeCard
-      style={style}
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Form"
+          title="Profile"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={
-            <>
-              {headline.label} per appearance across the last {LOOKBACK} matches
-              played, oldest to newest, each bar against the run's own dotted
-              average — raw per-match values, so a quiet cameo shows as a dip,
-              which is part of the story.
-            </>
-          }
+          purpose={<>The player's shape in one glance — six lobes, one per card below, each his overall standing against every positional peer. A full lobe leads that department; a shallow one trails it.</>}
         />
       }
       front={
         <View style={[styles.card, styles.cardFill]}>
-          <View style={styles.headerRow}>
-            <Text style={styles.sectionLabel}>Form</Text>
+          <View style={styles.radarHeaderRow}>
+            {/* Radar rule: title centred on the chart's vertical axis. */}
+            <View style={styles.radarTitleCentreFill} pointerEvents="none">
+              <Text style={styles.sectionLabel}>Profile</Text>
+            </View>
             <Pressable
               onPress={() => setInfoOpen(true)}
               hitSlop={10}
               accessibilityRole="button"
-              accessibilityLabel="Read the form analysis">
+              accessibilityLabel="Read the player scouting report">
               <FlipTrigger />
             </Pressable>
           </View>
-          <Text style={styles.subMeta}>
-            {headline.label} per appearance · last {appearances.length} played
-          </Text>
-
-          {history.isLoading ? (
+          {percentiles.isLoading ? (
             <Text style={styles.empty}>Loading…</Text>
-          ) : appearances.length < 2 ? (
-            <Text style={styles.empty}>Not enough appearances yet.</Text>
+          ) : !ready ? (
+            <Text style={styles.empty}>No appearances yet to profile.</Text>
           ) : (
-            <FormBars
-              values={appearances.map((st) => st[headline.field] as number)}
-              flags={appearances.map((st) => flagByFixture.get(st.fixture_id) ?? null)}
+            <RadarChart
+              axes={axes}
+              strokeColor="transparent"
+              fillColor={teamDotColor(teamId)}
+              dotColor={teamDotColor(teamId)}
+              flatFillOpacity={0.25}
             />
           )}
         </View>
       }
     />
-  );
-}
-
-/**
- * Per-appearance bar chart — the team Form / Discipline grammar at
- * player scale: bars rise together out of the axis over grey ghosts,
- * value badges above, opponent shields in the bottom band, the run's
- * own average as a dotted line. Measured canvas, real pixels.
- */
-function FormBars({ values, flags }: { values: readonly number[]; flags: readonly (string | null)[] }) {
-  const [canvas, setCanvas] = useState({ w: 0, h: 0 });
-  const width = canvas.w;
-  const height = canvas.h;
-  const padLeft = 18;
-  const padRight = 8;
-  const padTop = 22;
-  const SHIELD = 16;
-  const padBottom = SHIELD + 12;
-
-  const maxVal = Math.max(1, ...values);
-  const avg = values.length > 0 ? values.reduce((a, b) => a + b, 0) / values.length : 0;
-  const plotBottom = height - padBottom;
-  const yOf = (v: number) => padTop + (1 - v / maxVal) * (plotBottom - padTop);
-
-  const bars = useMemo(() => {
-    const n = values.length;
-    if (n === 0 || width === 0 || height === 0) return [];
-    const slotW = (width - padLeft - padRight) / n;
-    const barW = Math.min(SHIELD, Math.max(6, slotW * 0.62));
-    return values.map((v, i) => {
-      const x = padLeft + i * slotW + (slotW - barW) / 2;
-      const y = yOf(v);
-      return {
-        x,
-        y,
-        w: barW,
-        h: plotBottom - y,
-        cx: x + barW / 2,
-        v,
-        // Form signal: above the run's own average is the good day.
-        fill: v > avg ? GOOD_COLOR : v < avg ? BAD_COLOR : Colors.light.textSecondary,
-      };
-    });
-  }, [values, maxVal, width, height, plotBottom, avg]);
-
-  // Grow-in driver (shared arrival grammar).
-  const ink = useChartInk();
-
-  return (
-    <View
-      style={styles.formBarsFill}
-      onLayout={(e) =>
-        setCanvas({
-          w: Math.round(e.nativeEvent.layout.width),
-          h: Math.round(e.nativeEvent.layout.height),
-        })
-      }>
-      {width > 0 && height > 0 ? (
-        <>
-          <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-            {/* Grey ghosts — the static scale the colour grows into. */}
-            {bars.map((b, i) => (
-              <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
-            ))}
-            {/* The run's own average — dotted, labelled at the left
-                edge (Discipline grammar). */}
-            <Line
-              x1={padLeft}
-              y1={yOf(avg)}
-              x2={width - padRight}
-              y2={yOf(avg)}
-              stroke={Colors.light.textSecondary}
-              strokeWidth={1}
-              strokeDasharray="2 3"
-            />
-            <SvgText
-              x={0}
-              y={yOf(avg) - 4}
-              fill={Colors.light.textSecondary}
-              fontFamily="Barlow_500Medium"
-              fontSize={9}
-              textAnchor="start">
-              avg
-            </SvgText>
-            {/* Value badges above each bar. */}
-            {bars.map((b, i) => (
-              <G key={`l${i}`}>
-                <Circle cx={b.cx} cy={b.y - 11} r={8} fill="#F3F4F6" />
-                <SvgText
-                  x={b.cx}
-                  y={b.y - 8}
-                  fill={Colors.light.textSecondary}
-                  fontFamily="BarlowCondensed_700Bold_Italic"
-                  fontSize={11}
-                  textAnchor="middle">
-                  <CountUpTSpan value={String(b.v)} ink={ink} />
-                </SvgText>
-              </G>
-            ))}
-          </Svg>
-          {/* Verdict-colour layer growing up out of the axis over the
-              grey ghosts; every bar rises together. */}
-          <Animated.View
-            pointerEvents="none"
-            style={{
-              position: 'absolute',
-              top: 0,
-              left: 0,
-              transform: [
-                { translateY: plotBottom - height / 2 },
-                { scaleY: ink.interpolate({ inputRange: [0, 1], outputRange: [0.001, 1] }) },
-                { translateY: -(plotBottom - height / 2) },
-              ],
-            }}>
-            <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-              {bars.map((b, i) => (
-                <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill={b.fill} />
-              ))}
-            </Svg>
-          </Animated.View>
-          {/* Opponent shields along the x-axis band. */}
-          {bars.map((b, i) =>
-            flags[i] ? (
-              <View
-                key={`f${i}`}
-                style={{ position: 'absolute', left: b.cx - SHIELD / 2, top: plotBottom + 6 }}
-                pointerEvents="none">
-                <TeamFlagShield flagCode={flags[i]!} width={SHIELD} />
-              </View>
-            ) : null,
-          )}
-        </>
-      ) : null}
-    </View>
   );
 }
 
@@ -1033,8 +954,10 @@ const styles = StyleSheet.create({
   },
   // Preview-block bleed: unwraps the pane padding (carousel pages
   // re-apply the card column internally) and carries the 16pt rhythm.
-  previewBleed: { marginHorizontal: -Spacing.four, gap: Spacing.three },
-  pageCard: { flex: 1 },
+  // Vertical card stack (owner call 2026-07-09, fixture-Stats
+  // grammar): one card per scouting category, Form and Season beneath
+  // — carousel retired on this pane.
+  profileStack: { gap: Spacing.three },
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
   heroName: {
@@ -1061,6 +984,65 @@ const styles = StyleSheet.create({
 
   // Scouting
   scoutList: { gap: Spacing.two, marginTop: Spacing.one },
+  peerLabelRow: { alignItems: 'center' },
+  peerBarRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  peerBarTrack: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 6,
+  },
+  peerBarHalfLeft: {
+    flex: 1,
+    flexDirection: 'row-reverse',
+    alignItems: 'center',
+    height: 4,
+  },
+  peerBarHalfRight: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: 4,
+  },
+  peerBarSeg: {
+    height: 4,
+    borderRadius: 2,
+  },
+  peerBarCentreGap: { width: 4 },
+  headerRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  peerTag: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.xs,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+  },
+  radarHeaderRow: {
+    position: 'relative',
+    justifyContent: 'flex-end',
+    marginBottom: Spacing.two,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  radarTitleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   scoutRow: { gap: 4 },
   scoutRowHead: {
     flexDirection: 'row',

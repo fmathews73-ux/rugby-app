@@ -75,6 +75,108 @@ export const BACK_SCOUT: readonly ScoutMetric[] = [
   { field: 'handling_errors', label: 'Handling errors', inverted: true },
 ];
 
+/** One scouting category card — full-coverage complement to the
+ *  curated role profiles above. */
+export interface ScoutCategory {
+  title: string;
+  /** About copy for the card back. */
+  purpose: string;
+  metrics: readonly ScoutMetric[];
+}
+
+// Comprehensive scouting categories (owner call 2026-07-09): every
+// PlayerMatchStats field the feed supplies (Opta RU7 floor + the two
+// Superscout-backed counts), grouped by the schema's own taxonomy —
+// nothing curated away. Zero rows still render (row permanence).
+export const SCOUT_CATEGORIES: Record<string, ScoutCategory> = {
+  scoring: {
+    title: 'Scoring',
+    purpose:
+      'The scoreboard ledger — tries, the passes that made them and total points, per game against the average player in his position.',
+    metrics: [
+      { field: 'tries', label: 'Tries' },
+      { field: 'try_assists', label: 'Try assists' },
+      { field: 'points', label: 'Points' },
+    ],
+  },
+  attack: {
+    title: 'Attack',
+    purpose:
+      'The with-ball engine — volume, metres and what the carries broke, per game against the average player in his position. On handling errors the lower number wins the green.',
+    metrics: [
+      { field: 'carries', label: 'Carries' },
+      { field: 'metres_carried', label: 'Metres carried' },
+      { field: 'clean_breaks', label: 'Clean breaks' },
+      { field: 'defenders_beaten', label: 'Defenders beaten' },
+      { field: 'offloads', label: 'Offloads' },
+      { field: 'passes', label: 'Passes' },
+      { field: 'handling_errors', label: 'Handling errors', inverted: true },
+    ],
+  },
+  kicking: {
+    title: 'Kicking',
+    purpose:
+      'The boot — goal kicks landed, kicks from hand and the metres they bought, per game against the average player in his position.',
+    metrics: [
+      { field: 'conversions', label: 'Conversions' },
+      { field: 'penalty_goals', label: 'Penalty goals' },
+      { field: 'drop_goals', label: 'Drop goals' },
+      { field: 'kicks_from_hand', label: 'Kicks from hand' },
+      { field: 'kick_metres', label: 'Kick metres' },
+    ],
+  },
+  defence: {
+    title: 'Defence',
+    purpose:
+      'The denying numbers — tackle volume, the ones that slipped and the ball stolen back, per game against the average player in his position. On missed tackles the lower number wins the green.',
+    metrics: [
+      { field: 'tackles_made', label: 'Tackles made' },
+      { field: 'missed_tackles', label: 'Missed tackles', inverted: true },
+      { field: 'turnovers_won', label: 'Turnovers won' },
+    ],
+  },
+  contest: {
+    title: 'Breakdown & Set-Piece',
+    purpose:
+      'The contest work — ruck arrivals, lineout ball won and lineout ball stolen, per game against the average player in his position.',
+    metrics: [
+      { field: 'rucks_hit', label: 'Rucks hit' },
+      { field: 'lineout_takes', label: 'Lineout takes' },
+      { field: 'lineout_steals', label: 'Lineout steals' },
+    ],
+  },
+  discipline: {
+    title: 'Discipline',
+    purpose:
+      'The giveaway ledger — penalties and cards, per game against the average player in his position. The lower number wins the green on every row.',
+    metrics: [
+      { field: 'penalties_conceded', label: 'Penalties conceded', inverted: true },
+      { field: 'yellow_cards', label: 'Yellow cards', inverted: true },
+      { field: 'red_cards', label: 'Red cards', inverted: true },
+    ],
+  },
+};
+
+// Category order leads with the role's bread and butter — forwards
+// read contact-first, backs read strike-first. Same six cards either
+// way (row permanence at card scale).
+export const FORWARD_CATEGORY_ORDER = [
+  'attack',
+  'defence',
+  'contest',
+  'scoring',
+  'kicking',
+  'discipline',
+] as const;
+export const BACK_CATEGORY_ORDER = [
+  'attack',
+  'scoring',
+  'kicking',
+  'defence',
+  'contest',
+  'discipline',
+] as const;
+
 // Role-based trend metrics for the Form sparklines.
 export const FORWARD_TREND: readonly { field: PlayerStatField; label: string }[] = [
   { field: 'tackles_made', label: 'Tackles' },

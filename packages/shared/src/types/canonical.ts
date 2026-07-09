@@ -425,6 +425,12 @@ export interface PlayerPercentiles {
     per80: number;
     /** 0–100. Share of the peer pool at or below the subject's rate. */
     percentile: number;
+    /** The subject's per-GAME average over the window — the fan-facing
+     *  rate (per-80 stays for the analyst columns). */
+    per_game: number;
+    /** Peer-pool mean of the per-game averages — the "average peer"
+     *  reference the profile bars run against. */
+    peer_avg: number;
   }[];
 }
 

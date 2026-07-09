@@ -500,6 +500,10 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       // with one 12-minute cameo shouldn't set the distribution's tail.
       const MIN_PEER_APPEARANCES = 3;
       const ratesByPlayer = new Map<string, Record<string, number>>();
+      // Per-GAME averages alongside the per-80 rates — the profile
+      // bars read per-game vs the average peer (owner call 2026-07-09:
+      // per-80/percentile framing was analyst-grade mental fatigue).
+      const gameRatesByPlayer = new Map<string, Record<string, number>>();
       let subjectAppearances = 0;
 
       for (const p of store.players) {
@@ -526,10 +530,13 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           }
         }
         const rates: Record<string, number> = {};
+        const gameRates: Record<string, number> = {};
         for (const f of PERCENTILE_FIELDS) {
           rates[f] = minutes > 0 ? (totals[f]! * 80) / minutes : 0;
+          gameRates[f] = totals[f]! / sheets.length;
         }
         ratesByPlayer.set(p.id, rates);
+        gameRatesByPlayer.set(p.id, gameRates);
       }
 
       const subjectRates = ratesByPlayer.get(subject.id);
@@ -546,13 +553,19 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       }
 
       const peerRates = [...ratesByPlayer.values()];
+      const peerGameRates = [...gameRatesByPlayer.values()];
+      const subjectGameRates = gameRatesByPlayer.get(subject.id)!;
       const metrics = PERCENTILE_FIELDS.map((field) => {
         const mine = subjectRates[field]!;
         const atOrBelow = peerRates.filter((r) => r[field]! <= mine).length;
+        const peerAvg =
+          peerGameRates.reduce((sum, r) => sum + r[field]!, 0) / peerGameRates.length;
         return {
           field,
           per80: Number(mine.toFixed(2)),
           percentile: Math.round((atOrBelow / peerRates.length) * 100),
+          per_game: Number(subjectGameRates[field]!.toFixed(2)),
+          peer_avg: Number(peerAvg.toFixed(2)),
         };
       });
 
