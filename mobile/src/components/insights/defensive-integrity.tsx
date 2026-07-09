@@ -9,7 +9,6 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
-import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -39,7 +38,6 @@ export function DefensiveIntegrity({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
-  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -86,9 +84,9 @@ export function DefensiveIntegrity({
           title="Defence"
           onClose={() => setInfoOpen(false)}
           read={
-            compareTeamId
-              ? fitNarrative([analysis.data?.defensiveIntegrity, compareAnalysis.data?.defensiveIntegrity], 900)
-              : analysis.data?.defensiveIntegrity
+            // Pair frame: tier-median reads no longer match the chart;
+            // About-only until pair-relative narratives exist.
+            compareTeamId ? undefined : analysis.data?.defensiveIntegrity
           }
           purpose={
             <>Every nation in the team’s tier plotted by tackle completion against line breaks conceded — missed tackles are the proximate cause of breaks, and completion under ~85% almost always shows on the scoreboard. Dot size is points conceded per game: bigger is leakier.</>
@@ -123,6 +121,7 @@ export function DefensiveIntegrity({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          pairCentered={Boolean(compareTeamId)}
           xUnit={"%"}
           quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
           xCaption="TACKLE SUCCESS % →"

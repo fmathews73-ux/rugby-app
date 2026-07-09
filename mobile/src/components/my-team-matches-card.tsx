@@ -102,7 +102,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
             the chart carousel, so the result the charts describe leads
             and the upcoming fixture follows. */}
         <NavSection
-          onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`) : undefined}>
+          onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`, { withAnchor: true }) : undefined}>
           {lastMatch && myTeamInfo ? (
             <>
               <Text style={styles.dateCentered}>{`Last Match · ${formatFixtureDate(lastMatch)}`}</Text>
@@ -125,7 +125,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
 
         <NavSection
           divider
-          onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`) : undefined}>
+          onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`, { withAnchor: true }) : undefined}>
           {nextMatch && myTeamInfo ? (
             <>
               <Text style={styles.dateCentered}>

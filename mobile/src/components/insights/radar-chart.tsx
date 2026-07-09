@@ -8,6 +8,8 @@ import { Animated, View } from 'react-native';
 import Svg, { Circle, Defs, Line, Path, Polygon, RadialGradient, Stop, Text as SvgText } from 'react-native-svg';
 
 
+import type { Result } from '@rugby-app/shared';
+
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors } from '@/constants/theme';
 import type { TeamAggregate } from '@/hooks/use-team-aggregate';
@@ -119,6 +121,38 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       value: clip01(g.possessionPercent / AXIS_CEILINGS.possession),
       raw: `${g.possessionPercent.toFixed(0)}% possession`,
     },
+  ];
+}
+
+/**
+ * Match-scoped twin of `buildRadarAxes` (owner call 2026-07-09): the
+ * SAME eight axes and ceilings, fed by ONE match's Result instead of
+ * the prev-10 per-game averages — single-match values live on the same
+ * scale as per-game averages, so the ceilings transfer directly.
+ */
+export function buildMatchRadarAxes(result: Result, side: 'home' | 'away'): RadarAxis[] {
+  const own = (k: string) => result[`${side}_${k}` as keyof Result] as number;
+  const score = side === 'home' ? result.home_score : result.away_score;
+  const conceded = side === 'home' ? result.away_score : result.home_score;
+  const pct = (won: number, lost: number) => (won + lost > 0 ? (won / (won + lost)) * 100 : 0);
+  const setPiecePercent =
+    (pct(own('scrums_won'), own('scrums_lost')) + pct(own('lineouts_won'), own('lineouts_lost'))) / 2;
+  const kicks = own('kicks_in_play');
+  const metersPerKick = kicks > 0 ? own('kick_meters') / kicks : 0;
+  const turnovers = own('turnovers_won');
+  const pens = own('penalties_conceded');
+  const territory = own('territory_percent');
+  const possession = own('possession_percent');
+
+  return [
+    { key: 'attack', label: 'Attack', value: clip01(score / AXIS_CEILINGS.attack), raw: `${score} pts` },
+    { key: 'defence', label: 'Defence', value: clip01(1 - conceded / AXIS_CEILINGS.defence), raw: `${conceded} pts conceded` },
+    { key: 'setPiece', label: 'Set-piece', value: clip01(setPiecePercent / AXIS_CEILINGS.setPiece), raw: `${setPiecePercent.toFixed(0)}% success` },
+    { key: 'turnovers', label: 'Turnovers', value: clip01(turnovers / AXIS_CEILINGS.turnovers), raw: `${turnovers} won` },
+    { key: 'discipline', label: 'Discipline', value: clip01(1 - pens / AXIS_CEILINGS.discipline), raw: `${pens} pens` },
+    { key: 'kicking', label: 'Kicking', value: clip01(metersPerKick / AXIS_CEILINGS.kicking), raw: `${metersPerKick.toFixed(0)} m/kick` },
+    { key: 'territory', label: 'Territory', value: clip01(territory / AXIS_CEILINGS.territory), raw: `${territory.toFixed(0)}% territory` },
+    { key: 'possession', label: 'Possession', value: clip01(possession / AXIS_CEILINGS.possession), raw: `${possession.toFixed(0)}% possession` },
   ];
 }
 

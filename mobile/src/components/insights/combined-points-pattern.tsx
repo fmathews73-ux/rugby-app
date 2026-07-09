@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useState, useMemo } from 'react';
 import { Easing, Animated, Pressable, StyleSheet, Text, View, type StyleProp, type ViewStyle } from 'react-native';
-import Svg, { ClipPath, Defs, LinearGradient, Line, Path, Rect, Stop, Text as SvgText } from 'react-native-svg';
+import Svg, { ClipPath, Defs, Line, Path, Rect, Text as SvgText } from 'react-native-svg';
 
 import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
@@ -93,9 +93,11 @@ export function CombinedPointsPattern({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Momentum"
-        />
+        {/* Chart-title rule: Momentum/Progression centre like the
+            radar and 2x2 cards. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Momentum" />
+        </View>
         <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
@@ -364,14 +366,6 @@ function MomentumMirror({
               }}>
             <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
               <Defs>
-                <LinearGradient id="momentum-home-fill-data" x1="0" y1={padTop} x2="0" y2={midY} gradientUnits="userSpaceOnUse">
-                  <Stop offset="0" stopColor={homeColor} stopOpacity="0.7" />
-                  <Stop offset="1" stopColor={homeColor} stopOpacity="0.1" />
-                </LinearGradient>
-                <LinearGradient id="momentum-away-fill-data" x1="0" y1={midY} x2="0" y2={height - padBottom} gradientUnits="userSpaceOnUse">
-                  <Stop offset="0" stopColor={awayColor} stopOpacity="0.1" />
-                  <Stop offset="1" stopColor={awayColor} stopOpacity="0.7" />
-                </LinearGradient>
                 <ClipPath id="momentum-clip-above-data">
                   <Rect x={0} y={padTop} width={width} height={midY - padTop} />
                 </ClipPath>
@@ -382,7 +376,8 @@ function MomentumMirror({
               {areaPath ? (
                 <Path
                   d={areaPath}
-                  fill="url(#momentum-home-fill-data)"
+                  fill={homeColor}
+                  fillOpacity={0.25}
                   stroke="none"
                   clipPath="url(#momentum-clip-above-data)"
                 />
@@ -390,30 +385,11 @@ function MomentumMirror({
               {areaPath ? (
                 <Path
                   d={areaPath}
-                  fill="url(#momentum-away-fill-data)"
+                  fill={awayColor}
+                  fillOpacity={0.25}
                   stroke="none"
                   clipPath="url(#momentum-clip-below-data)"
                 />
-              ) : null}
-              {smoothPath ? (
-                <>
-                  <Path
-                    d={smoothPath}
-                    stroke={homeColor}
-                    strokeWidth={1}
-                    fill="none"
-                    strokeLinecap="round"
-                    clipPath="url(#momentum-clip-above-data)"
-                  />
-                  <Path
-                    d={smoothPath}
-                    stroke={awayColor}
-                    strokeWidth={1}
-                    fill="none"
-                    strokeLinecap="round"
-                    clipPath="url(#momentum-clip-below-data)"
-                  />
-                </>
               ) : null}
             </Svg>
             {/* Scoring-event icon markers — home above the plot, away
@@ -454,11 +430,21 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    position: 'relative',
     // Standard air below the title/icon row (16pt total with gap).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
+  },
+  titleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerRightGroup: {
     flexDirection: 'row',

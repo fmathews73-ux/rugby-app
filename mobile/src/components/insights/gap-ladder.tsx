@@ -2,6 +2,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
 import { Animated, Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } from 'react-native';
 
+import type { Fixture, Result } from '@rugby-app/shared';
+
+import { useFixtureResult } from '@/api/hooks';
 import type { SignedGapView } from '@/hooks/use-match-preview';
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
@@ -43,6 +46,25 @@ const AXIS_HEADLINE: Record<
   territory: { label: 'Territory', get: (pg) => pg.territoryPercent, percent: true },
   possession: { label: 'Possession', get: (pg) => pg.possessionPercent, percent: true },
   turnovers: { label: 'Turnovers won', get: (pg) => pg.turnoversWon },
+};
+
+/** Match-mode twin of AXIS_HEADLINE (owner call 2026-07-09): the same
+ *  seven headline reads pulled from THIS match's Result — the Match
+ *  Analysis ladder shows the game itself, not the coming-in averages
+ *  (a per-game 21.2 masquerading as a match score read as a bug).
+ *  Labels / percent / inverted flags stay shared with AXIS_HEADLINE. */
+const pctOf = (won: number, lost: number) => (won + lost > 0 ? (won / (won + lost)) * 100 : 0);
+const MATCH_AXIS_HEADLINE: Record<string, (r: Result, side: 'home' | 'away') => number> = {
+  attack: (r, s) => (s === 'home' ? r.home_score : r.away_score),
+  defence: (r, s) => (s === 'home' ? r.away_score : r.home_score),
+  'set-piece': (r, s) =>
+    s === 'home'
+      ? (pctOf(r.home_scrums_won, r.home_scrums_lost) + pctOf(r.home_lineouts_won, r.home_lineouts_lost)) / 2
+      : (pctOf(r.away_scrums_won, r.away_scrums_lost) + pctOf(r.away_lineouts_won, r.away_lineouts_lost)) / 2,
+  discipline: (r, s) => (s === 'home' ? r.home_penalties_conceded : r.away_penalties_conceded),
+  kicking: (r, s) => (s === 'home' ? r.home_kick_meters : r.away_kick_meters),
+  territory: (r, s) => (s === 'home' ? r.home_territory_percent : r.away_territory_percent),
+  possession: (r, s) => (s === 'home' ? r.home_possession_percent : r.away_possession_percent),
 };
 
 /**
@@ -89,6 +111,7 @@ export function GapLadder({
   homeCode,
   awayCode,
   asOfDate,
+  fixture,
   read,
   style,
 }: {
@@ -99,6 +122,10 @@ export function GapLadder({
   homeCode: string;
   awayCode: string;
   asOfDate?: string;
+  /** Match mode (owner call 2026-07-09): when set, every rung reads
+   *  THIS fixture's Result instead of the prev-10 per-game averages.
+   *  Pre-Match omits it and stays the coming-in ladder. */
+  fixture?: Fixture;
   /** Live narrative for the flip back (pre-match engine field). */
   read?: string | null;
   style?: StyleProp<ViewStyle>;
@@ -107,10 +134,17 @@ export function GapLadder({
   const [activeSide, setActiveSide] = useState<ToggleSide>('primary');
   // Sweep-in driver (shared arrival grammar); replays on toggle.
   const ink = useChartInk(activeSide);
-  const home = useTeamAggregate(homeTeamId, asOfDate, LOOKBACK);
-  const away = useTeamAggregate(awayTeamId, asOfDate, LOOKBACK);
-  const ready =
-    (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
+  const matchMode = Boolean(fixture);
+  const result = useFixtureResult(fixture?.id ?? '', fixture?.status);
+  const home = useTeamAggregate(matchMode ? '' : homeTeamId, asOfDate, LOOKBACK);
+  const away = useTeamAggregate(matchMode ? '' : awayTeamId, asOfDate, LOOKBACK);
+  const ready = matchMode
+    ? Boolean(result.data)
+    : (home.data?.gamesPlayed ?? 0) > 0 && (away.data?.gamesPlayed ?? 0) > 0;
+  // Match mode always walks the full seven-axis order; the pre-match
+  // ladder keeps whatever the caller's engine ranking supplied.
+  const rowKeys = matchMode ? LADDER_AXIS_ORDER : gaps.map((g) => g.key);
+  const isLoading = matchMode ? result.isLoading : home.isLoading || away.isLoading;
 
   return (
     <FadeCard
@@ -121,7 +155,13 @@ export function GapLadder({
           title="Head to Head"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>Seven core departments in the radar's order — field, strike, then the contest. The further a bar runs, the more one-sided that department has been over the last 10 matches.</>}
+          purpose={
+            matchMode ? (
+              <>Seven core departments in the radar's order — field, strike, then the contest — scored from THIS match's numbers. The further a bar runs, the more one-sided that department is on the day.</>
+            ) : (
+              <>Seven core departments in the radar's order — field, strike, then the contest. The further a bar runs, the more one-sided that department has been over the last 10 matches.</>
+            )
+          }
         />
       }
       front={
@@ -155,17 +195,20 @@ export function GapLadder({
         />
       </View>
 
-      {home.isLoading || away.isLoading ? (
+      {isLoading ? (
         <Text style={styles.empty}>Loading…</Text>
-      ) : gaps.length === 0 || !ready ? (
-        <Text style={styles.empty}>Not enough completed matches yet.</Text>
+      ) : rowKeys.length === 0 || !ready ? (
+        <Text style={styles.empty}>
+          {matchMode ? 'No match data on file.' : 'Not enough completed matches yet.'}
+        </Text>
       ) : (
         <View style={styles.rowsStack}>
-          {gaps.map((g) => {
-            const headline = AXIS_HEADLINE[g.key];
-            if (!headline) return null;
-            const h = headline.get(home.data!.perGame);
-            const a = headline.get(away.data!.perGame);
+          {rowKeys.map((key) => {
+            const headline = AXIS_HEADLINE[key];
+            const matchGet = MATCH_AXIS_HEADLINE[key];
+            if (!headline || (matchMode && !matchGet)) return null;
+            const h = matchMode ? matchGet(result.data!, 'home') : headline.get(home.data!.perGame);
+            const a = matchMode ? matchGet(result.data!, 'away') : headline.get(away.data!.perGame);
             const active = activeSide === 'primary' ? h : a;
             const other = activeSide === 'primary' ? a : h;
             const max = Math.max(active, other, 0.001);
@@ -175,7 +218,7 @@ export function GapLadder({
             const worse = headline.inverted ? active > other : active < other;
             const fill = better ? AHEAD_COLOR : worse ? BEHIND_COLOR : EVEN_COLOR;
             return (
-              <View key={g.key} style={styles.rowBlock}>
+              <View key={key} style={styles.rowBlock}>
                 <Text style={styles.rowLabel}>{headline.label}</Text>
                 <View style={styles.rowLine}>
                   <View style={styles.rowTrack}>

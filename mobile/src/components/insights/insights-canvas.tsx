@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View , type StyleProp, type ViewStyle } fr
 
 import type { Fixture } from '@rugby-app/shared';
 
-import { useTeam } from '@/api/hooks';
+import { useFixtureResult, useTeam } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
@@ -15,6 +15,7 @@ import {
   RADAR_AWAY_FILL,
   RADAR_FILL,
   RadarChart,
+  buildMatchRadarAxes,
   buildRadarAxes,
 } from '@/components/insights/radar-chart';
 
@@ -36,6 +37,7 @@ export function InsightsCanvas({
   primaryTeamId,
   compareTeamId,
   fixtureStatus,
+  fixtureId,
   asOfDate,
   lookback,
   style,
@@ -44,6 +46,11 @@ export function InsightsCanvas({
   primaryTeamId: string | null;
   compareTeamId?: string | null;
   fixtureStatus?: Fixture['status'];
+  /** Match mode (owner call 2026-07-09): when set, BOTH polygons are
+   *  built from THIS fixture's Result — the shape of the match itself,
+   *  not the coming-in prev-10 aggregates. Primary must be the home
+   *  side. Pre-Match and team surfaces omit this and stay aggregate. */
+  fixtureId?: string;
   /** Freeze the aggregates to fixtures before this ISO timestamp —
    *  the pre-match pane passes kickoff so the radar reads as-of. */
   asOfDate?: string;
@@ -56,27 +63,41 @@ export function InsightsCanvas({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
 
+  const matchScoped = Boolean(fixtureId);
   const primaryTeam = useTeam(primaryTeamId ?? '');
   const compareTeam = useTeam(compareTeamId ?? '');
+  const result = useFixtureResult(fixtureId ?? '', fixtureStatus);
   const { data: primaryAgg, isLoading: primaryLoading } = useTeamAggregate(
-    primaryTeamId ?? '',
+    matchScoped ? '' : (primaryTeamId ?? ''),
     asOfDate,
     lookback,
   );
   const { data: compareAgg, isLoading: compareLoading } = useTeamAggregate(
-    compareTeamId ?? '',
+    matchScoped ? '' : (compareTeamId ?? ''),
     asOfDate,
     lookback,
   );
 
-  const primaryAxes = useMemo(() => buildRadarAxes(primaryAgg), [primaryAgg]);
-  const compareAxes = useMemo(() => buildRadarAxes(compareAgg), [compareAgg]);
+  const primaryAxes = useMemo(
+    () => (matchScoped ? (result.data ? buildMatchRadarAxes(result.data, 'home') : []) : buildRadarAxes(primaryAgg)),
+    [matchScoped, result.data, primaryAgg],
+  );
+  const compareAxes = useMemo(
+    () => (matchScoped ? (result.data ? buildMatchRadarAxes(result.data, 'away') : []) : buildRadarAxes(compareAgg)),
+    [matchScoped, result.data, compareAgg],
+  );
 
   const hasCompare = compareTeamId !== null && compareTeamId !== undefined && compareTeamId !== '';
-  const primaryReady = Boolean(primaryAgg && primaryAgg.gamesPlayed > 0);
-  const compareReady = Boolean(compareAgg && compareAgg.gamesPlayed > 0);
+  const primaryReady = matchScoped
+    ? primaryAxes.length > 0
+    : Boolean(primaryAgg && primaryAgg.gamesPlayed > 0);
+  const compareReady = matchScoped
+    ? compareAxes.length > 0
+    : Boolean(compareAgg && compareAgg.gamesPlayed > 0);
   const canRender = hasCompare ? primaryReady || compareReady : primaryReady;
-  const isLoading = primaryLoading || (hasCompare && compareLoading);
+  const isLoading = matchScoped
+    ? result.isLoading
+    : primaryLoading || (hasCompare && compareLoading);
 
   const primaryShort = primaryTeam.data?.short_name ?? primaryTeamId?.toUpperCase() ?? '—';
   const compareShort = compareTeam.data?.short_name ?? (compareTeamId ?? '').toUpperCase();
@@ -164,11 +185,19 @@ export function InsightsCanvas({
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={
-            <>
-              Both sides' eight-dimension shapes from their last 10 matches,
-              overlaid — where the polygons separate is where this match
-              will most likely be decided.
-            </>
+            matchScoped ? (
+              <>
+                Both sides' eight-dimension shapes from THIS match, overlaid —
+                where the polygons separate is where the game is being won
+                and lost. Live fixtures reshape as the numbers move.
+              </>
+            ) : (
+              <>
+                Both sides' eight-dimension shapes from their last 10 matches,
+                overlaid — where the polygons separate is where this match
+                will most likely be decided.
+              </>
+            )
           }
         />
       }

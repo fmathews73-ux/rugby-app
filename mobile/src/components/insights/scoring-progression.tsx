@@ -182,9 +182,11 @@ export function ScoringProgression({
       front={
         <View style={[styles.card, styles.cardFill]}>
       <View style={styles.headerRow}>
-        <CardTitle
-          title="Progression"
-        />
+        {/* Chart-title rule: Momentum/Progression centre like the
+            radar and 2x2 cards. */}
+        <View style={styles.titleCentreFill} pointerEvents="none">
+          <CardTitle title="Progression" />
+        </View>
         <View style={styles.headerRightGroup}>
           <Pressable
             onPress={() => setInfoOpen(true)}
@@ -500,12 +502,22 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    position: 'relative',
     // Standard air below the title/icon row (16pt total with gap).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
     gap: Spacing.two,
+  },
+  titleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   headerRightGroup: {
     flexDirection: 'row',

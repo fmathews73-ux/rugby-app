@@ -5,11 +5,8 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useTeam } from '@/api/hooks';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
-import { GapLadder, orderedGaps } from '@/components/insights/gap-ladder';
-import { TeamLandscape } from '@/components/insights/team-landscape';
-import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
-import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
-import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
+import { GapLadder } from '@/components/insights/gap-ladder';
+import { MatchPairMatrix } from '@/components/insights/match-pair-matrix';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { CombinedPointsPattern } from '@/components/insights/combined-points-pattern';
 import { ControlConversion } from '@/components/insights/control-conversion';
@@ -21,7 +18,6 @@ import {
 import { ScoringProgression } from '@/components/insights/scoring-progression';
 import { Spacing } from '@/constants/theme';
 import { useMatchAnalysis } from '@/hooks/use-match-analysis';
-import { useMatchPreview } from '@/hooks/use-match-preview';
 
 // ─── Analysis (Match Analysis) pane ──────────────────────────────────────────
 
@@ -41,7 +37,6 @@ import { useMatchPreview } from '@/hooks/use-match-preview';
 export function AnalysisPane({ fixture }: { fixture: Fixture }) {
   const carouselRef = useRef<CardCarouselHandle>(null);
   const { data: analysis } = useMatchAnalysis(fixture.id);
-  const { data: preview } = useMatchPreview(fixture.id);
   const homeTeam = useTeam(fixture.home_team_id);
   const awayTeam = useTeam(fixture.away_team_id);
   const homeCode = homeTeam.data?.short_name ?? fixture.home_team_id.toUpperCase();
@@ -52,12 +47,15 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
     const awayTeamId = fixture.away_team_id;
 
     const pages: React.ReactNode[] = [
-      // Summary — the match-scoped head-to-head radar.
+      // Summary — the head-to-head radar built from THIS match's
+      // Result (owner call 2026-07-09); the coming-in version lives on
+      // Pre-Match.
       <InsightsCanvas
         key="radar"
         primaryTeamId={homeTeamId}
         compareTeamId={awayTeamId}
         fixtureStatus={fixture.status}
+        fixtureId={fixture.id}
         style={styles.pageCard}
         read={analysis?.summary ?? null}
       />,
@@ -79,47 +77,96 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         style={styles.pageCard}
         read={analysis?.progression ?? null}
       />,
-      // The pre-match matrix block repeats here BY DESIGN (owner call
-      // 2026-07-09): same lens before and during the match —
-      // familiarity breeds value perception, and on completed
-      // fixtures the rolling window shows the dots this match moved.
-      <TeamLandscape
+      // The familiar matrix lens, fed by THIS MATCH's numbers and
+      // framed pair-relative (owner semantics 2026-07-09): crosshairs
+      // at the pair's midpoints, dots from the Result — the real-time
+      // compare-and-contrast to Pre-Match's coming-in versions.
+      <MatchPairMatrix
         key="landscape"
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
+        fixture={fixture}
+        title="Landscape"
+        purpose="This match’s control map: possession share against territory share, each side framed against the other — whoever holds the top-right is winning both the ball and the field tonight."
+        accessibilityLabel="Explain the match landscape matrix"
+        getAxes={(r, side) => ({
+          x: side === 'home' ? r.home_possession_percent : r.away_possession_percent,
+          y: side === 'home' ? r.home_territory_percent : r.away_territory_percent,
+        })}
+        quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'KEEP-BALL', bl: 'STARVED' }}
+        xCaption="POSSESSION % →"
+        yCaption="TERRITORY % →"
+        xUnit="%"
+        yUnit="%"
         style={styles.pageCard}
       />,
-      <ScoringRhythm
+      <MatchPairMatrix
         key="rhythm"
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
+        fixture={fixture}
+        title="Rhythm"
+        purpose="When this match’s points came: first-half scoring against second-half scoring, each side framed against the other. Dot positions settle at full-time."
+        accessibilityLabel="Explain the match rhythm matrix"
+        getAxes={(r, side) => {
+          const ht = side === 'home' ? r.half_time_home : r.half_time_away;
+          const ft = side === 'home' ? r.home_score : r.away_score;
+          return { x: ht, y: ft - ht };
+        }}
+        quadrants={{ tr: 'FULL EIGHTY', tl: 'SLOW BURNERS', br: 'FAST STARTERS', bl: 'MISFIRING' }}
+        xCaption="1ST-HALF POINTS →"
+        yCaption="2ND-HALF POINTS →"
         style={styles.pageCard}
       />,
-      <RedZoneMatrix
+      <MatchPairMatrix
         key="redzone"
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
+        fixture={fixture}
+        title="Red Zone"
+        purpose="This match’s red-zone ledger: visits to the 22 against the points each visit paid, each side framed against the other."
+        accessibilityLabel="Explain the match red-zone matrix"
+        getAxes={(r, side) => {
+          const entries = side === 'home' ? r.home_twenty_two_entries : r.away_twenty_two_entries;
+          const pts =
+            side === 'home'
+              ? r.home_points_from_twenty_two_entries
+              : r.away_points_from_twenty_two_entries;
+          return { x: entries, y: entries > 0 ? pts / entries : 0 };
+        }}
+        quadrants={{ tr: 'RELENTLESS', tl: 'CLINICAL', br: 'WASTEFUL', bl: 'BLUNT' }}
+        xCaption="22 ENTRIES →"
+        yCaption="POINTS PER VISIT →"
         style={styles.pageCard}
       />,
-      <DefensiveIntegrity
+      <MatchPairMatrix
         key="defence"
-        teamId={homeTeamId}
-        compareTeamId={awayTeamId}
+        fixture={fixture}
+        title="Defence"
+        purpose="This match’s line integrity: tackle completion against line breaks conceded (the opponent’s breaks — derived, never stored), each side framed against the other."
+        accessibilityLabel="Explain the match defence matrix"
+        getAxes={(r, side) => ({
+          x: side === 'home' ? r.home_tackle_success_percent : r.away_tackle_success_percent,
+          // Breaks conceded = the opponent's breaks (reconciliation
+          // principle); lower is better, so yHigherIsBetter=false
+          // flips it to plot upward.
+          y: side === 'home' ? r.away_line_breaks : r.home_line_breaks,
+        })}
+        yHigherIsBetter={false}
+        quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
+        xCaption="TACKLE SUCCESS % →"
+        yCaption="FEWER BREAKS CONCEDED →"
+        xUnit="%"
         style={styles.pageCard}
       />,
-      // H2H — the SAME coming-in ladder as Pre-Match (owner call
-      // 2026-07-09: the match pane repeats the pre-match lens; the
-      // this-match Gaps card it replaces lives on in match-h2h.tsx).
+      // H2H ladder fed by THIS match's Result (owner call 2026-07-09,
+      // superseding the coming-in repeat: a per-game 21.2 next to a
+      // match score read as a bug). Same seven rungs as Pre-Match.
+      // About-only back: the pre-match shape/keys narrative describes
+      // the coming-in gaps, not these bars.
       <GapLadder
         key="ladder"
-        gaps={orderedGaps(preview?.gaps ?? [])}
+        gaps={[]}
+        fixture={fixture}
         homeTeamId={homeTeamId}
         awayTeamId={awayTeamId}
         homeCode={homeCode}
         awayCode={awayCode}
-        asOfDate={fixture.kickoff_utc}
         style={styles.pageCard}
-        read={preview ? fitNarrative([preview.shape, preview.keys], 900) : null}
       />,
     ];
 
@@ -170,7 +217,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
     );
 
     return pages;
-  }, [fixture, homeCode, awayCode, analysis, preview]);
+  }, [fixture, homeCode, awayCode, analysis]);
 
   return (
     <View style={styles.analysisPaneStack}>

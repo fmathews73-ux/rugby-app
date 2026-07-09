@@ -9,7 +9,6 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
-import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -36,7 +35,6 @@ export function RedZoneMatrix({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
-  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -82,9 +80,9 @@ export function RedZoneMatrix({
           title="Red Zone"
           onClose={() => setInfoOpen(false)}
           read={
-            compareTeamId
-              ? fitNarrative([analysis.data?.redZone, compareAnalysis.data?.redZone], 900)
-              : analysis.data?.redZone
+            // Pair frame: tier-median reads no longer match the chart;
+            // About-only until pair-relative narratives exist.
+            compareTeamId ? undefined : analysis.data?.redZone
           }
           purpose={
             <>Every nation in the team’s tier plotted by red-zone visits against the points each visit pays — volume against conversion, from Relentless (both) to Blunt (neither). Around 2 points a visit is Test par. Dot size is the side’s points margin per game.</>
@@ -119,6 +117,7 @@ export function RedZoneMatrix({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          pairCentered={Boolean(compareTeamId)}
           quadrants={{ tr: 'RELENTLESS', tl: 'CLINICAL', br: 'WASTEFUL', bl: 'BLUNT' }}
           xCaption="22 ENTRIES /GAME →"
           yCaption="POINTS PER VISIT →"

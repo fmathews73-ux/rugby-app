@@ -232,7 +232,7 @@ export function PlayerMatchSheet({
           <Pressable
             onPress={() => {
               onClose();
-              router.push(`/teams/player/${pid}`);
+              router.push(`/teams/player/${pid}`, { withAnchor: true });
             }}
             accessibilityRole="button"
             style={({ pressed }) => [styles.profilePill, pressed && { opacity: 0.8 }]}>

@@ -34,6 +34,7 @@ export function MatrixChart({
   subjectId,
   subjectId2,
   subjectsOnly,
+  pairCentered,
   xUnit = '',
   yUnit = '',
   quadrants,
@@ -55,6 +56,11 @@ export function MatrixChart({
    *  e.g. '%' on share axes; omit for raw counts. */
   xUnit?: string;
   yUnit?: string;
+  /** Pair-relative frame (owner call 2026-07-09, Verdict semantics):
+   *  crosshairs sit at the TWO SUBJECTS' midpoints, not the tier
+   *  medians — each quadrant reads "wins this combination against the
+   *  opponent". Teams-surface matrices stay tier-median. */
+  pairCentered?: boolean;
   /** Quadrant labels, centred in each quadrant: top-right, top-left,
    *  bottom-right, bottom-left. */
   quadrants: { tr: string; tl: string; br: string; bl: string };
@@ -84,8 +90,11 @@ export function MatrixChart({
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
-  const midXVal = median(xs);
-  const midYVal = median(ys);
+  const pairFrame = Boolean(pairCentered && subjectId && subjectId2);
+  const pairA = pairFrame ? points.find((p) => p.id === subjectId) : null;
+  const pairB = pairFrame ? points.find((p) => p.id === subjectId2) : null;
+  const midXVal = pairA && pairB ? (pairA.x + pairB.x) / 2 : median(xs);
+  const midYVal = pairA && pairB ? (pairA.y + pairB.y) / 2 : median(ys);
   // Symmetric range around the median so the crosshair intersects at
   // the exact CENTRE of the plot — a skewed pool otherwise drags the
   // dashed cross off-centre. Dots keep their true quadrants; only the
@@ -93,10 +102,21 @@ export function MatrixChart({
   // Proportional headroom (15%) — a fixed pad crushed small-magnitude
   // scales (points-per-visit spreads under ±1) into the centre while
   // barely registering on ±10-point scales.
-  const xDev = Math.max(...xs.map((v) => Math.abs(v - midXVal)), 0);
-  const yDev = Math.max(...ys.map((v) => Math.abs(v - midYVal)), 0);
-  const xHalf = xDev > 0 ? xDev * 1.15 : 1;
-  const yHalf = yDev > 0 ? yDev * 1.15 : 1;
+  // Match mode (subjectsOnly) zooms the scale to the TWO subjects'
+  // deviations only — tier outliers no longer compress the pair, so
+  // the code and variance labels get room to breathe (owner catch
+  // 2026-07-09: Δ labels were colliding with nation codes). Crosshair
+  // stays median-centred, so quadrant calls and the title-on-axis
+  // alignment are untouched; extra headroom (35%) buys label air.
+  const subject = points.find((p) => p.id === subjectId);
+  const subject2 = subjectId2 ? points.find((p) => p.id === subjectId2) : null;
+  const scalePool =
+    subjectsOnly && subject && subject2 ? [subject, subject2] : points;
+  const xDev = Math.max(...scalePool.map((p) => Math.abs(p.x - midXVal)), 0);
+  const yDev = Math.max(...scalePool.map((p) => Math.abs(p.y - midYVal)), 0);
+  const headroom = subjectsOnly ? 1.35 : 1.15;
+  const xHalf = xDev > 0 ? xDev * headroom : 1;
+  const yHalf = yDev > 0 ? yDev * headroom : 1;
   const xMin = midXVal - xHalf;
   const xMax = midXVal + xHalf;
   const yMin = midYVal - yHalf;
@@ -110,8 +130,6 @@ export function MatrixChart({
 
   const midX = xOf(midXVal);
   const midY = yOf(midYVal);
-  const subject = points.find((p) => p.id === subjectId);
-  const subject2 = subjectId2 ? points.find((p) => p.id === subjectId2) : null;
 
   return (
     <View
@@ -162,9 +180,10 @@ export function MatrixChart({
           </SvgText>
         </Svg>
       ) : null}
-      {width > 0 && height > 0 ? (
+      {width > 0 && height > 0 && sizeLabel ? (
         /* Size key — dot radius carries points margin (matrix
-           convention); centred beneath the x caption. */
+           convention); centred beneath the x caption. Hidden when the
+           card has no size dimension (match-pair mode). */
         <View style={styles.sizeLegend} pointerEvents="none">
           <View style={styles.sizeDotLarge} />
           <Text style={styles.sizeLegendText}>{sizeLabel}</Text>
@@ -224,10 +243,10 @@ export function MatrixChart({
                     Colors.light.textSecondary;
                   return (
                     <>
-                      <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
-                      <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
-                      <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke="#C7CBD1" strokeWidth={0.8} />
-                      <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke="#C7CBD1" strokeWidth={0.8} />
+                      <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke={xCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                      <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke={xCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                      <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke={yCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                      <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke={yCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
                       <SvgText
                         x={xMid}
                         y={hy + 3}

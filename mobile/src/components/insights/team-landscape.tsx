@@ -9,7 +9,6 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
-import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -40,7 +39,6 @@ export function TeamLandscape({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
-  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -89,9 +87,9 @@ export function TeamLandscape({
           title="Landscape"
           onClose={() => setInfoOpen(false)}
           read={
-            compareTeamId
-              ? fitNarrative([analysis.data?.landscape, compareAnalysis.data?.landscape], 900)
-              : analysis.data?.landscape
+            // Pair frame: tier-median reads no longer match the chart;
+            // About-only until pair-relative narratives exist.
+            compareTeamId ? undefined : analysis.data?.landscape
           }
           purpose={
             <>Every nation in the team’s tier plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
@@ -126,6 +124,7 @@ export function TeamLandscape({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          pairCentered={Boolean(compareTeamId)}
           xUnit={"%"}
           yUnit={"%"}
           quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'KEEP-BALL', bl: 'STARVED' }}

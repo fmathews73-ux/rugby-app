@@ -9,7 +9,6 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
-import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -36,7 +35,6 @@ export function ScoringRhythm({
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
-  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
 
@@ -79,9 +77,9 @@ export function ScoringRhythm({
           title="Rhythm"
           onClose={() => setInfoOpen(false)}
           read={
-            compareTeamId
-              ? fitNarrative([analysis.data?.rhythm, compareAnalysis.data?.rhythm], 900)
-              : analysis.data?.rhythm
+            // Pair frame: tier-median reads no longer match the chart;
+            // About-only until pair-relative narratives exist.
+            compareTeamId ? undefined : analysis.data?.rhythm
           }
           purpose={
             <>Every nation in the team’s tier plotted by first-half scoring against second-half scoring — when the points come, from Eighty Minutes to Misfiring. Dot size is the side’s points margin per game.</>
@@ -116,6 +114,7 @@ export function ScoringRhythm({
           subjectId={teamId}
           subjectId2={compareTeamId}
           subjectsOnly={Boolean(compareTeamId)}
+          pairCentered={Boolean(compareTeamId)}
           quadrants={{ tr: 'FULL EIGHTY', tl: 'SLOW BURNERS', br: 'FAST STARTERS', bl: 'MISFIRING' }}
           xCaption="1ST-HALF POINTS /GAME →"
           yCaption="2ND-HALF POINTS →"

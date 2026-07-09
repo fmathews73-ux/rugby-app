@@ -250,10 +250,10 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
               const yCol = home.points >= away.points ? homeCol : awayCol;
               return (
                 <>
-                  <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
-                  <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke="#C7CBD1" strokeWidth={0.8} />
-                  <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke="#C7CBD1" strokeWidth={0.8} />
-                  <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke="#C7CBD1" strokeWidth={0.8} />
+                  <Line x1={hx} y1={hy} x2={xMid - xGapHalf * xDir} y2={hy} stroke={xCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                  <Line x1={xMid + xGapHalf * xDir} y1={hy} x2={ax2} y2={hy} stroke={xCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                  <Line x1={ax2} y1={hy} x2={ax2} y2={yMid - yGapHalf * yDir} stroke={yCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
+                  <Line x1={ax2} y1={yMid + yGapHalf * yDir} x2={ax2} y2={ay2} stroke={yCol} strokeWidth={0.8} strokeDasharray="0.1 3" strokeLinecap="round" />
                   <SvgText
                     x={xMid}
                     y={hy + 3}

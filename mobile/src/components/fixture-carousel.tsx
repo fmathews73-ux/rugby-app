@@ -203,7 +203,7 @@ export function FixtureCarousel() {
           return (
             <Pressable
               key={fx.id}
-              onPress={() => router.push(`/fixtures/${fx.id}`)}
+              onPress={() => router.push(`/fixtures/${fx.id}`, { withAnchor: true })}
               accessibilityRole="button"
               accessibilityLabel="Open fixture"
               style={({ pressed }) => [
