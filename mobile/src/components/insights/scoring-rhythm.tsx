@@ -9,6 +9,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -21,16 +22,27 @@ import { TIER_1_IDS } from '@/lib/tiers';
  */
 export function ScoringRhythm({
   teamId,
+  compareTeamId,
   style,
 }: {
   teamId: string;
+  /** Pre-match dual view — highlights both sides on the matrix and
+   *  joins both quadrant reads on the back. NOTE: the form-summary
+   *  read-model has no as-of param, so on COMPLETED fixtures this
+   *  shows current form, not kickoff-frozen form (acceptable drift,
+   *  flag if it matters at Phase 6). */
+  compareTeamId?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
+  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
   const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
+  const compareTeam = compareTeamId
+    ? (teams.data ?? []).find((t) => t.id === compareTeamId)
+    : null;
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -38,7 +50,11 @@ export function ScoringRhythm({
     // against ITS OWN tier — same philosophy as the tier-average
     // stats — so crosshairs are tier medians, not whole-pool ones.
     const rows = (summary.data ?? []).filter(
-      (s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId),
+      (s) =>
+        s.games_played > 0 &&
+        (TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId) ||
+          (compareTeamId != null &&
+            TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(compareTeamId))),
     );
     // Margin per game → 0..1 weight across the tier for dot size.
     const margins = rows.map(
@@ -56,7 +72,7 @@ export function ScoringRhythm({
       y: -(s.per_game.secondHalfPointsScored ?? 0),
       weight: (margins[i]! - minM) / span,
     }));
-  }, [summary.data, teams.data, teamId]);
+  }, [summary.data, teams.data, teamId, compareTeamId]);
 
   return (
     <FadeCard
@@ -67,9 +83,15 @@ export function ScoringRhythm({
           title="Rhythm"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.rhythm}
+          read={
+            compareTeamId
+              ? fitNarrative([analysis.data?.rhythm, compareAnalysis.data?.rhythm], 900)
+              : analysis.data?.rhythm
+          }
           purpose={
             <>Every nation in the team’s tier plotted by first-half scoring against second-half scoring — when the points come, from Eighty Minutes to Misfiring. Dot size is the side’s points margin per game.</>
           }
@@ -83,7 +105,9 @@ export function ScoringRhythm({
           title="Rhythm"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           centerTitle
         />
         <Pressable
@@ -104,6 +128,7 @@ export function ScoringRhythm({
         <MatrixChart
           points={points}
           subjectId={teamId}
+          subjectId2={compareTeamId}
           quadrants={{ tr: 'FULL EIGHTY', tl: 'SLOW BURNERS', br: 'FAST STARTERS', bl: 'MISFIRING' }}
           xCaption="1ST-HALF POINTS /GAME →"
           yCaption="2ND-HALF POINTS →"

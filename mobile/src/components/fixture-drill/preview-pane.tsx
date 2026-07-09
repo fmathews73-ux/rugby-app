@@ -9,6 +9,10 @@ import { fitNarrative } from '@/lib/fit-narrative';
 import { AxisHeadToHead } from '@/components/insights/axis-head-to-head';
 import { DangerWindows } from '@/components/insights/danger-windows';
 import { GapLadder } from '@/components/insights/gap-ladder';
+import { TeamLandscape } from '@/components/insights/team-landscape';
+import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
+import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
+import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
 import { Spacing } from '@/constants/theme';
 import { useMatchPreview, type PreviewAxisKey } from '@/hooks/use-match-preview';
@@ -79,6 +83,34 @@ export function PreviewPane({
         asOfDate={asOfDate}
         style={styles.pageCard}
         read={data ? fitNarrative([data.shape, data.keys], 900) : null}
+      />,
+      // Dual-highlight tier matrices (owner call 2026-07-09): context
+      // before numbers — where both game plans sit in the tier before
+      // the pair cards argue the head-to-head. Style clash, game
+      // script, conversion, line integrity.
+      <TeamLandscape
+        key="landscape"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <ScoringRhythm
+        key="rhythm"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <RedZoneMatrix
+        key="redzone"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
+      />,
+      <DefensiveIntegrity
+        key="defence"
+        teamId={homeTeamId}
+        compareTeamId={awayTeamId}
+        style={styles.pageCard}
       />,
     ];
 

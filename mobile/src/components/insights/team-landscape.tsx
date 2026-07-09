@@ -9,6 +9,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -25,16 +26,27 @@ import { TIER_1_IDS } from '@/lib/tiers';
  */
 export function TeamLandscape({
   teamId,
+  compareTeamId,
   style,
 }: {
   teamId: string;
+  /** Pre-match dual view — highlights both sides on the matrix and
+   *  joins both quadrant reads on the back. NOTE: the form-summary
+   *  read-model has no as-of param, so on COMPLETED fixtures this
+   *  shows current form, not kickoff-frozen form (acceptable drift,
+   *  flag if it matters at Phase 6). */
+  compareTeamId?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
+  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
   const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
+  const compareTeam = compareTeamId
+    ? (teams.data ?? []).find((t) => t.id === compareTeamId)
+    : null;
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -42,7 +54,15 @@ export function TeamLandscape({
       // Tier-scoped pool (owner call 2026-07-09): a side is measured
       // against ITS OWN tier — same philosophy as the tier-average
       // stats — so crosshairs are tier medians, not whole-pool ones.
-      .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
+      .filter(
+        (s) =>
+          s.games_played > 0 &&
+          // Union of both sides' tiers for cross-tier fixtures; the
+          // usual single-tier scope when they match (or no compare).
+          (TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId) ||
+            (compareTeamId != null &&
+              TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(compareTeamId))),
+      )
       .map((s, i, rows) => {
         // Margin per game → 0..1 weight for dot size (outcome as the
         // third axis, matrix convention): a big dot in Starved or a
@@ -62,7 +82,7 @@ export function TeamLandscape({
           weight: (margins[i]! - minM) / span,
         };
       });
-  }, [summary.data, teams.data, teamId]);
+  }, [summary.data, teams.data, teamId, compareTeamId]);
 
   return (
     <FadeCard
@@ -73,9 +93,15 @@ export function TeamLandscape({
           title="Landscape"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.landscape}
+          read={
+            compareTeamId
+              ? fitNarrative([analysis.data?.landscape, compareAnalysis.data?.landscape], 900)
+              : analysis.data?.landscape
+          }
           purpose={
             <>Every nation in the team’s tier plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
           }
@@ -89,7 +115,9 @@ export function TeamLandscape({
           title="Landscape"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           centerTitle
         />
         <Pressable
@@ -110,6 +138,7 @@ export function TeamLandscape({
         <MatrixChart
           points={points}
           subjectId={teamId}
+          subjectId2={compareTeamId}
           quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'KEEP-BALL', bl: 'STARVED' }}
           xCaption="POSSESSION % →"
           yCaption="TERRITORY % →"

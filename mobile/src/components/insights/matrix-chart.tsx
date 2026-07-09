@@ -32,6 +32,7 @@ export interface MatrixPoint {
 export function MatrixChart({
   points,
   subjectId,
+  subjectId2,
   quadrants,
   xCaption,
   yCaption,
@@ -40,6 +41,9 @@ export function MatrixChart({
 }: {
   points: readonly MatrixPoint[];
   subjectId: string;
+  /** Second highlighted subject (pre-match dual view) — rendered like
+   *  the primary, drawn beneath it so the primary wins overlaps. */
+  subjectId2?: string | null;
   /** Quadrant labels, centred in each quadrant: top-right, top-left,
    *  bottom-right, bottom-left. */
   quadrants: { tr: string; tl: string; br: string; bl: string };
@@ -96,6 +100,7 @@ export function MatrixChart({
   const midX = xOf(midXVal);
   const midY = yOf(midYVal);
   const subject = points.find((p) => p.id === subjectId);
+  const subject2 = subjectId2 ? points.find((p) => p.id === subjectId2) : null;
 
   return (
     <View
@@ -163,7 +168,7 @@ export function MatrixChart({
           <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
             {/* Pool dots first, subject on top. */}
             {points.map((p) =>
-              p.id === subjectId ? null : (
+              p.id === subjectId || p.id === subjectId2 ? null : (
                 <Circle
                   key={p.id}
                   cx={xOf(p.x)}
@@ -174,6 +179,25 @@ export function MatrixChart({
                 />
               ),
             )}
+            {subject2 ? (
+              <>
+                <Circle
+                  cx={xOf(subject2.x)}
+                  cy={yOf(subject2.y)}
+                  r={subject2.weight !== undefined ? 3.5 + subject2.weight * 3.5 : 4.5}
+                  fill={teamDotColor(subject2.id) ?? SUBJECT_COLOR}
+                />
+                <SvgText
+                  x={xOf(subject2.x)}
+                  y={yOf(subject2.y) >= padTop + 18 ? yOf(subject2.y) - 8 : yOf(subject2.y) + 14}
+                  fill={Colors.light.text}
+                  fontFamily="BarlowCondensed_700Bold_Italic"
+                  fontSize={11}
+                  textAnchor="middle">
+                  {subject2.code}
+                </SvgText>
+              </>
+            ) : null}
             {subject ? (
               <>
                 <Circle

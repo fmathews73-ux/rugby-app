@@ -9,6 +9,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
+import { fitNarrative } from '@/lib/fit-narrative';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
@@ -24,16 +25,27 @@ import { TIER_1_IDS } from '@/lib/tiers';
  */
 export function DefensiveIntegrity({
   teamId,
+  compareTeamId,
   style,
 }: {
   teamId: string;
+  /** Pre-match dual view — highlights both sides on the matrix and
+   *  joins both quadrant reads on the back. NOTE: the form-summary
+   *  read-model has no as-of param, so on COMPLETED fixtures this
+   *  shows current form, not kickoff-frozen form (acceptable drift,
+   *  flag if it matters at Phase 6). */
+  compareTeamId?: string | null;
   style?: StyleProp<ViewStyle>;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
   const analysis = useTeamAnalysis(teamId);
+  const compareAnalysis = useTeamAnalysis(compareTeamId ?? '');
   const summary = useTeamsFormSummary();
   const teams = useTeams();
   const subjectTeam = (teams.data ?? []).find((t) => t.id === teamId);
+  const compareTeam = compareTeamId
+    ? (teams.data ?? []).find((t) => t.id === compareTeamId)
+    : null;
 
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
@@ -41,7 +53,15 @@ export function DefensiveIntegrity({
       // Tier-scoped pool (owner call 2026-07-09): a side is measured
       // against ITS OWN tier — same philosophy as the tier-average
       // stats — so crosshairs are tier medians, not whole-pool ones.
-      .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
+      .filter(
+        (s) =>
+          s.games_played > 0 &&
+          // Union of both sides' tiers for cross-tier fixtures; the
+          // usual single-tier scope when they match (or no compare).
+          (TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId) ||
+            (compareTeamId != null &&
+              TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(compareTeamId))),
+      )
       .map((s, i, rows) => {
         // Points conceded per game → 0..1 weight (same normalisation
         // as the margin sizing): bigger dot = leakier defence.
@@ -56,7 +76,7 @@ export function DefensiveIntegrity({
           weight: (conceded[i]! - minC) / span,
         };
       });
-  }, [summary.data, teams.data, teamId]);
+  }, [summary.data, teams.data, teamId, compareTeamId]);
 
   return (
     <FadeCard
@@ -67,9 +87,15 @@ export function DefensiveIntegrity({
           title="Defence"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.defensiveIntegrity}
+          read={
+            compareTeamId
+              ? fitNarrative([analysis.data?.defensiveIntegrity, compareAnalysis.data?.defensiveIntegrity], 900)
+              : analysis.data?.defensiveIntegrity
+          }
           purpose={
             <>Every nation in the team’s tier plotted by tackle completion against line breaks conceded — missed tackles are the proximate cause of breaks, and completion under ~85% almost always shows on the scoreboard. Dot size is points conceded per game: bigger is leakier.</>
           }
@@ -83,7 +109,9 @@ export function DefensiveIntegrity({
           title="Defence"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
-          comparison="vs TIER AVG"
+          flagCode2={compareTeam?.flag_code}
+          code2={compareTeam?.short_name}
+          comparison={compareTeamId ? undefined : 'vs TIER AVG'}
           centerTitle
         />
         <Pressable
@@ -104,6 +132,7 @@ export function DefensiveIntegrity({
         <MatrixChart
           points={points}
           subjectId={teamId}
+          subjectId2={compareTeamId}
           quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
           xCaption="TACKLE SUCCESS % →"
           yCaption="FEWER BREAKS CONCEDED →"
