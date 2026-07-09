@@ -130,12 +130,11 @@ export default function FixtureDetailScreen() {
                   playerById={playerById}
                 />
               )}
-              {(tab === 'stats' || tab.startsWith('stat:')) && (
+              {tab === 'stats' && (
                 <StatsPane
                   fixture={fixture.data}
                   result={result.data ?? null}
                   resultLoading={result.isLoading}
-                  category={tab.startsWith('stat:') ? tab.slice('stat:'.length) : null}
                 />
               )}
               {tab === 'analysis' && (

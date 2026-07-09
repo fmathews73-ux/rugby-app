@@ -115,8 +115,17 @@ export function MatrixChart({
   const xDev = Math.max(...scalePool.map((p) => Math.abs(p.x - midXVal)), 0);
   const yDev = Math.max(...scalePool.map((p) => Math.abs(p.y - midYVal)), 0);
   const headroom = subjectsOnly ? 1.35 : 1.15;
-  const xHalf = xDev > 0 ? xDev * headroom : 1;
-  const yHalf = yDev > 0 ? yDev * headroom : 1;
+  // Pair-mode scale FLOOR (Verdict precedent, owner call 2026-07-09):
+  // without one, a 0.7-point gap zooms to fill the canvas and the
+  // quadrant lexicon brands near-equal teams DOMINANT/MISFIRING off
+  // statistical noise. The half-range never shrinks below 15% of the
+  // axis midpoint's magnitude, so near-level pairs hug the crosshair
+  // and read as "nothing between them"; genuinely lopsided pairs
+  // still fill the plot. Tier mode keeps the pool's real spread.
+  const xFloor = subjectsOnly ? Math.max(Math.abs(midXVal) * 0.15, 0.5) : 0;
+  const yFloor = subjectsOnly ? Math.max(Math.abs(midYVal) * 0.15, 0.5) : 0;
+  const xHalf = Math.max(xDev > 0 ? xDev * headroom : 1, xFloor);
+  const yHalf = Math.max(yDev > 0 ? yDev * headroom : 1, yFloor);
   const xMin = midXVal - xHalf;
   const xMax = midXVal + xHalf;
   const yMin = midYVal - yHalf;

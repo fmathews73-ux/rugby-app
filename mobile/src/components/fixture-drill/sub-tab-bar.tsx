@@ -1,22 +1,6 @@
 import { SegmentedTabs } from '@/components/segmented-tabs';
 
-/** Fixture stats categories as SIBLING pills after Stats (same
- *  grammar as the team hub's squad units / stat categories): a
- *  category pill is the Stats pane filtered to that one card; Stats
- *  shows all nine. Labels must match StatsPane's section titles. */
-export const FIXTURE_STAT_CATEGORIES = [
-  'Overview',
-  'Scoring',
-  'Quarters',
-  'Attack',
-  'Kicking',
-  'Set-Piece',
-  'Breakdown',
-  'Defence',
-  'Discipline',
-] as const;
-
-export type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'analysis' | `stat:${string}`;
+export type SubTab = 'preview' | 'overview' | 'lineup' | 'stats' | 'analysis';
 
 export const SUB_TABS: readonly { id: SubTab; label: string }[] = [
   // Narrative arc first, reference material after. Pre-Match leads
@@ -35,7 +19,6 @@ export const SUB_TABS: readonly { id: SubTab; label: string }[] = [
   { id: 'overview', label: 'Timeline' },
   { id: 'analysis', label: 'Match Analysis' },
   { id: 'stats', label: 'Stats' },
-  ...FIXTURE_STAT_CATEGORIES.map((label) => ({ id: `stat:${label}` as const, label })),
 ];
 
 /** Fixture-drill sub-tab strip — thin wrapper over the shared

@@ -49,15 +49,9 @@ const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] 
 // Squad and its six positional units as SIBLING pills — a unit pill
 // is simply the squad view filtered to that unit; Squad shows all.
 // Declared after POSITION_GROUPS, which it spreads.
-// Stats categories as SIBLING pills after Stats (same grammar as the
-// squad units, owner ask 2026-07-08): a category pill is the Stats
-// view filtered to that one card; Stats shows all five.
-const STAT_CATEGORY_LABELS = ['Attack', 'Kicking', 'Defence', 'Set piece', 'Discipline'] as const;
-
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
   { id: 'preview', label: 'Preview' },
   { id: 'stats', label: 'Stats' },
-  ...STAT_CATEGORY_LABELS.map((label) => ({ id: `stat:${label}`, label })),
   { id: 'squad', label: 'Squad' },
   ...POSITION_GROUPS.map((g) => ({ id: g.label, label: g.label })),
 ];
@@ -104,10 +98,7 @@ export default function TeamHubScreen() {
   // Squad view when the Squad pill OR any unit pill is active; a unit
   // pill filters to that unit, Squad shows all.
   const isSquadView = tab === 'squad' || POSITION_GROUPS.some((g) => g.label === tab);
-  // Stats view when the Stats pill OR any category pill is active; a
-  // category pill filters to that one card, Stats shows all.
-  const isStatsView = tab === 'stats' || tab.startsWith('stat:');
-  const statsCategory = tab.startsWith('stat:') ? tab.slice('stat:'.length) : null;
+  const isStatsView = tab === 'stats';
 
   const teams = useTeams();
   const team = useMemo(
@@ -339,7 +330,7 @@ export default function TeamHubScreen() {
           </>
         )}
 
-        {isStatsView && <TeamStatsTable teamId={teamId} category={statsCategory} />}
+        {isStatsView && <TeamStatsTable teamId={teamId} />}
 
       </FadingScrollView>
     </SafeAreaView>
@@ -420,7 +411,7 @@ const TIE_COLOR = Colors.light.textSecondary;
  * whether the gap favours the team (inverted-aware, so being UNDER
  * the tier average on penalties reads green).
  */
-function TeamStatsTable({ teamId, category }: { teamId: string; category?: string | null }) {
+function TeamStatsTable({ teamId }: { teamId: string }) {
   // Which category's card is flipped to its narrative back (fixture
   // Stats grammar) — null when every card shows its front.
   const [flippedLabel, setFlippedLabel] = useState<string | null>(null);
@@ -467,7 +458,7 @@ function TeamStatsTable({ teamId, category }: { teamId: string; category?: strin
       {/* ONE card per category, stacked (fixture Stats grammar) — each
           card flips to its About + Insights back; vertical scroll, not
           a carousel: stats are scan-and-compare reads. */}
-      {TIER_STAT_GROUPS.filter((g) => !category || g.label === category).map((group) => (
+      {TIER_STAT_GROUPS.map((group) => (
         <FadeCard
           key={group.label}
           flipped={flippedLabel === group.label}

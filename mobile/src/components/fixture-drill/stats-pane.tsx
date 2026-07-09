@@ -17,14 +17,10 @@ export function StatsPane({
   fixture,
   result,
   resultLoading,
-  category,
 }: {
   fixture: Fixture;
   result: Result | null;
   resultLoading: boolean;
-  /** When set, render only that section's card (a category sibling
-   *  pill is active); null/undefined renders the full stack. */
-  category?: string | null;
 }) {
   // Which category's card is FLIPPED to its narrative back; null when
   // every card shows its front.
@@ -250,7 +246,7 @@ export function StatsPane({
 
   return (
     <View style={styles.statsPaneStack}>
-      {sections.filter((sec) => !category || sec.title === category).map(renderCard)}
+      {sections.map(renderCard)}
     </View>
   );
 }
