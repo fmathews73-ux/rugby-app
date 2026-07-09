@@ -15,8 +15,11 @@ export interface MatrixPoint {
   code: string;
   /** Raw x value — larger plots further right. */
   x: number;
-  /** Raw y value — SMALLER plots higher (both current matrices use
-   *  lower-is-better y metrics: points conceded, penalties). */
+  /** Y value — SMALLER plots higher. Lower-is-better metrics
+   *  (conceded counts, penalties) feed RAW; higher-is-better metrics
+   *  MUST feed NEGATED by the caller. Verify against the bar-chart
+   *  numbers, not the picture — an eyeballed "fix" inverted every
+   *  match matrix once (2026-07-09). */
   y: number;
   /** Optional 0..1 size weight — dot radius scales with it (e.g.
    *  points margin on the Rhythm matrix). Omit for uniform dots. */

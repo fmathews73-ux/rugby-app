@@ -13,10 +13,10 @@ import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
  * Boot ROI matrix — does the kicking game buy the field it should?
- * x = kick metres per game, y = territory share (up = more field; fed
- * negated because the matrix plots smaller y higher). Top-right kicks
- * long AND lives in the right half; bottom-right kicks plenty and gets
- * nothing back — bad kicks or worse chases. Same pool data
+ * Axes owner-flipped 2026-07-09: x = territory share per game, y =
+ * kick metres per game (up = more boot; fed negated because the
+ * matrix plots smaller y higher). Top-left kicks plenty without
+ * buying field — bad kicks or worse chases. Same pool data
  * (/teams/form-summary, prev-10) and matrix grammar as the Landscape.
  */
 export function BootRoi({

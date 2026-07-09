@@ -13,8 +13,8 @@ import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
  * Possession matrix — does the ball convert to scoreboard? x =
- * possession share per game, y = points margin per game (up = winning
- * football; fed negated because the matrix plots smaller y higher).
+ * possession share per game, y = POINTS SCORED per game (up = more
+ * scoreboard; fed negated because the matrix plots smaller y higher).
  * Top-right turns its share into points; top-left wins WITHOUT the
  * ball; bottom-right holds it and has nothing to show. Tier-scoped
  * like every pool matrix (owner call 2026-07-09 — this replaced a

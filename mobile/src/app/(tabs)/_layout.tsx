@@ -47,6 +47,11 @@ export default function TabsLayout() {
         name="fixtures"
         options={{
           title: 'Fixtures',
+          // Tab grammar (owner call 2026-07-09): the Fixtures tab
+          // ALWAYS lands on the fixtures list — a drill left on the
+          // stack is popped when the tab blurs, so re-entering from
+          // any tab starts fresh.
+          popToTopOnBlur: true,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? 'calendar' : 'calendar-outline'} size={size} color={color} />
           ),

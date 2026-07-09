@@ -62,6 +62,7 @@ const MATCH_AXIS_HEADLINE: Record<string, (r: Result, side: 'home' | 'away') => 
       ? (pctOf(r.home_scrums_won, r.home_scrums_lost) + pctOf(r.home_lineouts_won, r.home_lineouts_lost)) / 2
       : (pctOf(r.away_scrums_won, r.away_scrums_lost) + pctOf(r.away_lineouts_won, r.away_lineouts_lost)) / 2,
   discipline: (r, s) => (s === 'home' ? r.home_penalties_conceded : r.away_penalties_conceded),
+  turnovers: (r, s) => (s === 'home' ? r.home_turnovers_won : r.away_turnovers_won),
   kicking: (r, s) => (s === 'home' ? r.home_kick_meters : r.away_kick_meters),
   territory: (r, s) => (s === 'home' ? r.home_territory_percent : r.away_territory_percent),
   possession: (r, s) => (s === 'home' ? r.home_possession_percent : r.away_possession_percent),

@@ -60,7 +60,7 @@ export function ControlConversion({
           title="Verdict"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>Territory and possession control set against points per 22 entry — did the side that ran the match actually bank it on the scoreboard?</>}
+          purpose={<>Possession share set against the points it bought — did the side that had the ball actually bank it on the scoreboard? Crosshairs sit at 50% possession and the match's points midpoint.</>}
         />
       }
       front={
