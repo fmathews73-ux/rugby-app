@@ -118,7 +118,7 @@ export function GapLadder({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="H2H"
+          title="Head to Head"
           onClose={() => setInfoOpen(false)}
           read={read}
           purpose={<>Seven core departments in the radar's order — field, strike, then the contest. The further a bar runs, the more one-sided that department has been over the last 10 matches.</>}
@@ -131,7 +131,7 @@ export function GapLadder({
       {/* Three slots: title left, toggle centred between title and
           icon, reader icon pinned right. */}
       <View style={styles.headerRow}>
-        <CardTitle title="H2H" />
+        <CardTitle title="Head to Head" />
         <CardHeaderActions
 
           onExplain={() => setInfoOpen(true)}

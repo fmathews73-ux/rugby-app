@@ -65,3 +65,27 @@ export function teamDotColor(teamId: string): string | undefined {
   const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
   return luminance > 0.85 ? jersey.secondary : jersey.primary;
 }
+
+export interface JerseyGlyph {
+  fill: string;
+  /** Trim colour drawn as an outline — only for white/near-white
+   *  shirts (ENG, FIJ), whose fill would vanish on a white card. */
+  border?: string;
+}
+
+/** Solid jersey-glyph colours: the squad primary, except white shirts
+ *  render white fill + secondary-colour border (owner call
+ *  2026-07-09: "the English jersey should be white fill, red
+ *  border"). */
+export function jerseyGlyphColors(teamId: string): JerseyGlyph | undefined {
+  const jersey = TEAM_JERSEY[teamId];
+  if (!jersey) return undefined;
+  const hex = jersey.primary.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.85
+    ? { fill: jersey.primary, border: jersey.secondary }
+    : { fill: jersey.primary };
+}

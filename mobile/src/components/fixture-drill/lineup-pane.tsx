@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { Coach, CoachRole, Fixture, LineUp, MatchOfficial, MatchOfficialRole, Player } from '@rugby-app/shared';
 
 import { useFixtureOfficials, useTeamCoachingStaff, useTeams } from '@/api/hooks';
+import { jerseyGlyphColors, type JerseyGlyph } from '@/lib/team-colors';
 import { PlayerMatchSheet } from '@/components/fixture-drill/player-match-sheet';
 import { LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
@@ -79,17 +80,19 @@ export function LineUpPane({
       <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
         <View style={styles.lineupHeaderSide}>
           {homeFlag ? <TeamFlagShield flagCode={homeFlag} width={24} /> : null}
-          <CapsJersey caps={totalCaps(startingRows, 'home')} />
+          <CapsJersey caps={totalCaps(startingRows, 'home')} glyph={jerseyGlyphColors(fixture.home_team_id)} />
         </View>
         <Text style={styles.categoryLabel}>Starting XV</Text>
         <View style={styles.lineupHeaderSide}>
-          <CapsJersey caps={totalCaps(startingRows, 'away')} mirrored />
+          <CapsJersey caps={totalCaps(startingRows, 'away')} glyph={jerseyGlyphColors(fixture.away_team_id)} mirrored />
           {awayFlag ? <TeamFlagShield flagCode={awayFlag} width={24} /> : null}
         </View>
       </View>
       <View style={styles.insetDivider} />
       {startingRows.map(({ home, away }, i) => (
         <LineUpCompareRow
+          homeGlyph={jerseyGlyphColors(fixture.home_team_id)}
+          awayGlyph={jerseyGlyphColors(fixture.away_team_id)}
           key={`start-${i}`}
           home={home}
           away={away}
@@ -101,17 +104,19 @@ export function LineUpPane({
       <View style={[styles.lineupSectionHeader, styles.lineupSectionHeaderSpread]}>
         <View style={styles.lineupHeaderSide}>
           {homeFlag ? <TeamFlagShield flagCode={homeFlag} width={24} /> : null}
-          <CapsJersey caps={totalCaps(benchRows, 'home')} />
+          <CapsJersey caps={totalCaps(benchRows, 'home')} glyph={jerseyGlyphColors(fixture.home_team_id)} />
         </View>
         <Text style={styles.categoryLabel}>Bench</Text>
         <View style={styles.lineupHeaderSide}>
-          <CapsJersey caps={totalCaps(benchRows, 'away')} mirrored />
+          <CapsJersey caps={totalCaps(benchRows, 'away')} glyph={jerseyGlyphColors(fixture.away_team_id)} mirrored />
           {awayFlag ? <TeamFlagShield flagCode={awayFlag} width={24} /> : null}
         </View>
       </View>
       <View style={styles.insetDivider} />
       {benchRows.map(({ home, away }, i) => (
         <LineUpCompareRow
+          homeGlyph={jerseyGlyphColors(fixture.home_team_id)}
+          awayGlyph={jerseyGlyphColors(fixture.away_team_id)}
           key={`bench-${i}`}
           home={home}
           away={away}
@@ -291,8 +296,30 @@ function formatPosition(pos: string): string {
 
 /** Small jersey glyph + caps count as a side-by-side pair; `mirrored`
  *  flips the order so the away edge reads value-then-shirt. */
-function CapsJersey({ caps, mirrored = false }: { caps: number; mirrored?: boolean }) {
-  const icon = <Ionicons name="shirt-outline" size={14} color={Colors.light.textSecondary} />;
+function CapsJersey({
+  caps,
+  mirrored = false,
+  glyph,
+}: {
+  caps: number;
+  mirrored?: boolean;
+  /** Squad glyph colours; grey outline fallback while teams load. */
+  glyph?: JerseyGlyph;
+}) {
+  // Solid shirt in the squad colour; white shirts (ENG, FIJ) add a
+  // trim-colour outline so the shape survives the white card.
+  const icon = glyph ? (
+    <View>
+      <Ionicons name="shirt" size={14} color={glyph.fill} />
+      {glyph.border ? (
+        <View style={styles.lineupJerseyBorder} pointerEvents="none">
+          <Ionicons name="shirt-outline" size={14} color={glyph.border} />
+        </View>
+      ) : null}
+    </View>
+  ) : (
+    <Ionicons name="shirt-outline" size={14} color={Colors.light.textSecondary} />
+  );
   const value = <Text style={styles.lineupCaps}>{caps}</Text>;
   return (
     <View style={styles.lineupCapsPair}>
@@ -307,11 +334,15 @@ function LineUpCompareRow({
   away,
   playerById,
   onPressPlayer,
+  homeGlyph,
+  awayGlyph,
 }: {
   home: LineUpEntry | null;
   away: LineUpEntry | null;
   playerById: Map<string, Player>;
   onPressPlayer: (playerId: string) => void;
+  homeGlyph?: JerseyGlyph;
+  awayGlyph?: JerseyGlyph;
 }) {
   // ONE shared shirt-number badge in the centre — both sides of a
   // compare row wear the same number, so it applies to both names
@@ -336,7 +367,7 @@ function LineUpCompareRow({
         disabled={!home}
         style={({ pressed }) => [styles.lineupSideLeft, pressed && { opacity: 0.6 }]}>
         {homeCaps !== undefined ? (
-          <CapsJersey caps={homeCaps} />
+          <CapsJersey caps={homeCaps} glyph={homeGlyph} />
         ) : null}
         <Text
           style={[styles.lineupPosPlayer, styles.lineupNameFlex, styles.lineupPosPlayerRight]}
@@ -355,7 +386,7 @@ function LineUpCompareRow({
           {awayLabel}
         </Text>
         {awayCaps !== undefined ? (
-          <CapsJersey caps={awayCaps} mirrored />
+          <CapsJersey caps={awayCaps} glyph={awayGlyph} mirrored />
         ) : null}
       </Pressable>
     </View>
@@ -535,15 +566,25 @@ const styles = StyleSheet.create({
     width: 22,
     height: 22,
     borderRadius: 11,
-    backgroundColor: '#F3F4F6',
+    // Option B trial: quiet white badge, hairline ring; the colour
+    // lives in the solid shirt glyphs instead.
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1.5,
+    borderColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: Spacing.three,
   },
   lineupNumberText: {
-    fontFamily: 'Barlow_500Medium',
+    // Scoreboard face — the shirt number is identity data.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
+  },
+  lineupJerseyBorder: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
   },
   lineupPosPlayer: {
     fontFamily: 'Barlow_500Medium',
