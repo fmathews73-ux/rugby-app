@@ -106,7 +106,7 @@ export function BootRoi({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'FIELD WINNERS', tl: 'EMPTY BOOT', br: 'CARRY GAME', bl: 'PINNED' }}
+          quadrants={{ tr: 'FIELD WINNERS', tl: 'KICKING IT BACK', br: 'CARRY GAME', bl: 'PINNED' }}
           xCaption="TERRITORY % →"
           yCaption="KICK METRES →"
         />

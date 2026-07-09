@@ -110,7 +110,7 @@ export function TeamLandscape({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'PHASE BUILDERS', bl: 'STARVED' }}
+          quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'KEEP-BALL', bl: 'STARVED' }}
           xCaption="POSSESSION % →"
           yCaption="TERRITORY % →"
         />

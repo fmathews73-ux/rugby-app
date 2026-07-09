@@ -104,7 +104,7 @@ export function ScoringRhythm({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'EIGHTY MINUTES', tl: 'SLOW BURNERS', br: 'FAST STARTERS', bl: 'MISFIRING' }}
+          quadrants={{ tr: 'FULL EIGHTY', tl: 'SLOW BURNERS', br: 'FAST STARTERS', bl: 'MISFIRING' }}
           xCaption="1ST-HALF POINTS /GAME →"
           yCaption="2ND-HALF POINTS →"
         />

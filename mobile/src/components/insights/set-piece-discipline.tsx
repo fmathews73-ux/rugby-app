@@ -12,13 +12,13 @@ import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
- * Set Piece & Discipline matrix — the CONTROL read to the Landscape's
- * OUTPUT read. x = combined scrum + lineout success (the platform),
- * y = penalties conceded per game inverted (up = cleaner). A side in
- * the top-right owns its own ball and gives nothing away; bottom-left
- * is feeding opponents possession AND position. Same pool data
- * (/teams/form-summary, prev-10) and the same matrix grammar as the
- * Team Landscape.
+ * Set Piece & Discipline matrix — the platform and what the platform
+ * costs at the whistle. x = combined scrum + lineout success, y =
+ * SCRUM penalties conceded per game inverted (up = cleaner) — the
+ * penalty split that belongs to this contest, so a side whose
+ * penalties all come at the breakdown no longer looks dirty here.
+ * Same pool data (/teams/form-summary, prev-10) and matrix grammar as
+ * the Team Landscape.
  */
 export function SetPieceDiscipline({
   teamId,
@@ -52,7 +52,7 @@ export function SetPieceDiscipline({
           id: s.team_id,
           code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
           x: (s.scrum_success_percent + s.lineout_success_percent) / 2,
-          y: s.penalties_conceded_per_game,
+          y: s.per_game.scrumPenaltiesConceded ?? 0,
           weight: (margins[i]! - minM) / span,
         };
       });
@@ -71,7 +71,7 @@ export function SetPieceDiscipline({
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.setPieceDiscipline}
           purpose={
-            <>Nations in the team’s tier plotted by set-piece success against penalties conceded — four quadrants from Controlled to Under Siege. Dot size is the side’s points margin per game.</>
+            <>Nations in the team’s tier plotted by set-piece success against scrum penalties conceded — four quadrants from Controlled to Under Siege. Dot size is the side’s points margin per game.</>
           }
         />
       }
@@ -104,9 +104,9 @@ export function SetPieceDiscipline({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CONTROLLED', tl: 'TIDY', br: 'HEAVY-HANDED', bl: 'UNDER SIEGE' }}
+          quadrants={{ tr: 'ROCK SOLID', tl: 'CREAKING', br: 'PINGED', bl: 'UNDER SIEGE' }}
           xCaption="SET-PIECE SUCCESS % →"
-          yCaption="FEWER PENALTIES →"
+          yCaption="FEWER SCRUM PENS →"
         />
       )}
 

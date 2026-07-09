@@ -225,6 +225,8 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       let entries22 = 0, pointsFrom22 = 0;
       let goalKicksMade = 0, goalKicksAttempted = 0;
       let firstHalfFor = 0, secondHalfFor = 0;
+      let lineBreaksConceded = 0;
+      let scrumPens = 0, breakdownPens = 0;
       let games = 0;
       for (const fx of completed) {
         const r = store.resultByFixture.get(fx.id);
@@ -248,10 +250,17 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
         lineoutWon += isHome ? r.home_lineouts_won : r.away_lineouts_won;
         lineoutLost += isHome ? r.home_lineouts_lost : r.away_lineouts_lost;
         pens += isHome ? r.home_penalties_conceded : r.away_penalties_conceded;
+        scrumPens += isHome ? r.home_scrum_penalties_conceded : r.away_scrum_penalties_conceded;
+        breakdownPens += isHome
+          ? r.home_breakdown_penalties_conceded
+          : r.away_breakdown_penalties_conceded;
         poss += isHome ? r.home_possession_percent : r.away_possession_percent;
         terr += isHome ? r.home_territory_percent : r.away_territory_percent;
         meters += isHome ? r.home_meters : r.away_meters;
         lineBreaks += isHome ? r.home_line_breaks : r.away_line_breaks;
+        // Derived from the opponent's row (reconciliation principle):
+        // a team's breaks conceded ARE the other side's breaks.
+        lineBreaksConceded += isHome ? r.away_line_breaks : r.home_line_breaks;
         kicksInPlay += isHome ? r.home_kicks_in_play : r.away_kicks_in_play;
         kickMeters += isHome ? r.home_kick_meters : r.away_kick_meters;
         tacklePct += isHome ? r.home_tackle_success_percent : r.away_tackle_success_percent;
@@ -303,6 +312,8 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           turnoversWon: toWon / g,
           turnoversConceded: toConceded / g,
           penaltiesConceded: pens / g,
+          scrumPenaltiesConceded: scrumPens / g,
+          breakdownPenaltiesConceded: breakdownPens / g,
           handlingErrors: errors / g,
           yellowCards: yellows / g,
           redCards: reds / g,
@@ -310,6 +321,7 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           // Ratio-of-sums, not average-of-ratios — a 2-entry game
           // shouldn't weigh as much as a 15-entry game.
           pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+          lineBreaksConceded: lineBreaksConceded / g,
           firstHalfPointsScored: firstHalfFor / g,
           secondHalfPointsScored: secondHalfFor / g,
           goalKickingPercent:

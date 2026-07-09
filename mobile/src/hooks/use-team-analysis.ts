@@ -56,6 +56,8 @@ export interface TeamAnalysis {
   /** "Set Piece & Discipline" — platform + whistle status, then the
    *  most pressing repair job. */
   setPieceDiscipline: string;
+  /** Defensive Integrity matrix read — completion vs breaks conceded. */
+  defensiveIntegrity: string;
   /** Red Zone matrix read — attack volume vs conversion. */
   redZone: string;
   /** Breakdown trade read — turnovers won vs the whistle count. */
@@ -113,6 +115,7 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
       rhythm: buildRhythm(team.name, teamId, agg, pool.data ?? []),
       possession: buildPossession(team.name, teamId, agg, pool.data ?? []),
       setPieceDiscipline: buildSetPieceDiscipline(team.name, agg),
+      defensiveIntegrity: buildDefensiveIntegrity(team.name, teamId, agg, pool.data ?? []),
       redZone: buildRedZone(team.name, teamId, agg, pool.data ?? []),
       breakdownTrade: buildBreakdownTrade(team.name, teamId, agg, pool.data ?? []),
       bootRoi: buildBootRoi(team.name, teamId, agg, pool.data ?? []),
@@ -489,7 +492,7 @@ function buildLandscape(
     return `${teamName} have lived in the kick-first quadrant: more of the field than the tier median on ${territory.toFixed(0)}% territory, taken without the ball at ${possession.toFixed(0)}% possession. Sides shaped like this play the match in the right half and ask the opponent to run out of it. ${extras}`;
   }
   if (ballAbove && !fieldAbove) {
-    return `The map places ${teamName} with the phase builders: ${possession.toFixed(0)}% of the ball, clear of the tier median, but only ${territory.toFixed(0)}% of the field. Keeping the ball in your own half moves the tackle count, not the scoreboard, so the exits decide what this shape is worth. ${extras}`;
+    return `The map places ${teamName} in the keep-ball quadrant: ${possession.toFixed(0)}% of the ball, clear of the tier median, but only ${territory.toFixed(0)}% of the field. Keeping the ball in your own half moves the tackle count, not the scoreboard, so the exits decide what this shape is worth. ${extras}`;
   }
   return `Against their tier ${teamName} have sat in the starved quadrant, short of the median on both counts: ${possession.toFixed(0)}% of the ball and ${territory.toFixed(0)}% of the field. Everything downstream gets harder from there, and the route out starts with winning the kicking exchange. ${extras}`;
 }
@@ -536,6 +539,41 @@ function poolMatrixParts(
   };
 }
 
+function buildDefensiveIntegrity(
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+): string {
+  const m = poolMatrixParts(teamId, pool, 'tackleSuccessPercent', 'lineBreaksConceded');
+  if (!m) {
+    return `The tier picture is still forming — too few sides have completed matches to read ${teamName}'s defensive line against. Four is the minimum for medians that mean anything.`;
+  }
+  const completion = agg.perGame.tackleSuccessPercent;
+  const breaks = agg.perGame.lineBreaksConceded;
+  const conceded = agg.perGame.pointsConceded;
+  const completes = completion > m.medX;
+  const tight = breaks < m.medY;
+  const extras = [
+    `To the crosshairs, completion runs ${fmt(Math.abs(completion - m.medX))} points ${completion >= m.medX ? 'above' : 'below'} the tier median and the breaks conceded ${fmt(Math.abs(breaks - m.medY))} a game ${breaks <= m.medY ? 'inside' : 'outside'} it.`,
+    `The dot size carries the bill: ${fmt(conceded)} points conceded a game.`,
+    completion < 85
+      ? `Completion is under the 85% line that almost always shows on the scoreboard.`
+      : `Completion sits above the 85% line where defences stop leaking points.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (completes && tight) {
+    return `${teamName} are the tier's wall: ${completion.toFixed(0)}% tackle completion and just ${fmt(breaks)} line breaks conceded a game. The tackles stick and nothing comes through — the defensive relationship working exactly as it should. ${extras}`;
+  }
+  if (completes && !tight) {
+    return `${teamName} are out of shape: ${completion.toFixed(0)}% completion — the tackles stick — yet ${fmt(breaks)} breaks a game still come through. When completion is fine and breaks are not, the problem is structural, not effort: spacing, numbers on the edge, or the seam around the ruck. ${extras}`;
+  }
+  if (!completes && tight) {
+    return `${teamName} are scrambling: completion of ${completion.toFixed(0)}% sits under the tier line, yet only ${fmt(breaks)} breaks a game get through. Scramble defence is surviving what the first tackle misses — admirable and unsustainable in equal measure. ${extras}`;
+  }
+  return `${teamName} are being broken open: ${completion.toFixed(0)}% completion and ${fmt(breaks)} line breaks conceded a game, wrong side of the tier on both. Missed tackles are the proximate cause of breaks, so the fix starts with the first collision, not the cover. ${extras}`;
+}
+
 const POOL_CAVEAT =
   'The crosshairs are tier medians from every side in the tier with completed matches, so the quadrant call moves as the tier plays.';
 
@@ -576,29 +614,28 @@ function buildBreakdownTrade(
   agg: Agg,
   pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
 ): string {
-  const m = poolMatrixParts(teamId, pool, 'turnoversWon', 'penaltiesConceded');
+  const m = poolMatrixParts(teamId, pool, 'turnoversWon', 'breakdownPenaltiesConceded');
   if (!m) {
     return `The pool picture is still forming — too few sides have completed matches to price ${teamName}'s breakdown trade. Four is the minimum for medians that mean anything.`;
   }
   const steals = agg.perGame.turnoversWon;
-  const pens = agg.perGame.penaltiesConceded;
+  const pens = agg.perGame.breakdownPenaltiesConceded;
   const thieving = steals > m.medX;
   const clean = pens < m.medY;
   const extras = [
-    `To the crosshairs, the steal count runs ${fmt(Math.abs(steals - m.medX))} ${steals >= m.medX ? 'above' : 'below'} the tier median and the penalty count ${fmt(Math.abs(pens - m.medY))} ${pens <= m.medY ? 'inside' : 'outside'} it.`,
-    `The whistle count here is ALL penalties until the breakdown-only split lands, so scrum and offside noise ride along.`,
+    `To the crosshairs, the steal count runs ${fmt(Math.abs(steals - m.medX))} ${steals >= m.medX ? 'above' : 'below'} the tier median and the breakdown-penalty count ${fmt(Math.abs(pens - m.medY))} ${pens <= m.medY ? 'inside' : 'outside'} it.`,
     POOL_CAVEAT,
   ].join(' ');
   if (thieving && clean) {
-    return `${teamName} own the clean-thieves quadrant: ${fmt(steals)} turnovers won a game at only ${fmt(pens)} penalties conceded — ball stolen without feeding the whistle, the rarest trade at the breakdown. ${extras}`;
+    return `${teamName} own the clean-thieves quadrant: ${fmt(steals)} turnovers won a game at only ${fmt(pens)} breakdown penalties conceded — ball stolen without feeding the whistle at the contest itself, the rarest trade at the breakdown. ${extras}`;
   }
   if (thieving && !clean) {
-    return `${teamName} are the gamblers of the breakdown map: ${fmt(steals)} steals a game, above the tier line, bought with ${fmt(pens)} penalties. The trade pays until a referee stops letting it, so the margin between this and the clean quadrant is discipline, not appetite. ${extras}`;
+    return `${teamName} are the gamblers of the breakdown map: ${fmt(steals)} steals a game, above the tier line, bought with ${fmt(pens)} breakdown penalties. The trade pays until a referee stops letting it, so the margin between this and the clean quadrant is discipline, not appetite. ${extras}`;
   }
   if (!thieving && clean) {
-    return `${teamName} sit in the passive quadrant: only ${fmt(steals)} turnovers won a game, but a tidy ${fmt(pens)} penalties conceded. The line stays out of trouble and out of the contest — pressure has to come from somewhere else in this shape. ${extras}`;
+    return `${teamName} sit in the passive quadrant: only ${fmt(steals)} turnovers won a game, but a tidy ${fmt(pens)} breakdown penalties conceded. The line stays out of trouble and out of the contest — pressure has to come from somewhere else in this shape. ${extras}`;
   }
-  return `${teamName} are being overrun at the breakdown: ${fmt(steals)} steals a game, under the tier line, while still conceding ${fmt(pens)} penalties. Paying the whistle without taking the ball is the worst end of the bargain, and it starts at the contact area. ${extras}`;
+  return `${teamName} are being overrun at the breakdown: ${fmt(steals)} steals a game, under the tier line, while still conceding ${fmt(pens)} breakdown penalties. Paying the whistle without taking the ball is the worst end of the bargain, and it starts at the contact area. ${extras}`;
 }
 
 function buildBootRoi(
@@ -626,7 +663,7 @@ function buildBootRoi(
     return `${teamName} hold the carry-game quadrant of the boot map: ${fmt(field)}% territory on only ${fmt(boot)} kick metres a game. The field position is being earned ball-in-hand, which costs more collisions but keeps possession — a deliberate trade, not a failing. ${extras}`;
   }
   if (kicksLots && !winsField) {
-    return `The map puts ${teamName} in the empty-boot quadrant: ${fmt(boot)} kick metres a game, above the tier line, for just ${fmt(field)}% territory. Kicking that much without winning field means the ball is coming straight back — the chase and the contest, not the distance, are the problem. ${extras}`;
+    return `The map has ${teamName} kicking it back: ${fmt(boot)} kick metres a game, above the tier line, for just ${fmt(field)}% territory. Kicking that much without winning field means the ball is coming straight back — the chase and the contest, not the distance, are the problem. ${extras}`;
   }
   return `${teamName} are pinned on the boot map: below the tier on kick metres at ${fmt(boot)} a game and on territory at ${fmt(field)}%. Without the boot or the field the exits stay under pressure, and every attack starts long. ${extras}`;
 }
@@ -663,7 +700,7 @@ function buildPossession(
     return `${teamName} are the tier's counter-punchers: ${fmt(scored)} points a game from only ${possession.toFixed(0)}% of the ball. Scoring without the share means the strike rate per touch is elite, and it only has to hold while the defence keeps the game close. ${extras}`;
   }
   if (ballAbove && !scoringAbove) {
-    return `The map calls ${teamName}'s share hollow ball: ${possession.toFixed(0)}% possession, above the tier line, producing just ${fmt(scored)} points a game. Holding the ball without scoring usually points at the red zone, and that is the next chart along. ${extras}`;
+    return `The map files ${teamName} under nothing to show: ${possession.toFixed(0)}% possession, above the tier line, producing just ${fmt(scored)} points a game. Holding the ball without scoring usually points at the red zone, and that is the next chart along. ${extras}`;
   }
   return `${teamName} are being shut out: below the tier on the ball at ${possession.toFixed(0)}% and on the scoreboard at ${fmt(scored)} a game. Neither share nor scoring is travelling, so the fix starts upstream with winning more and better ball. ${extras}`;
 }
@@ -697,6 +734,10 @@ function buildSetPieceDiscipline(name: string, agg: Agg): string {
       ? `The penalty count sits at ${fmt(g.penaltiesConceded)} a game, between the bands, liveable without being clean.`
       : undefined;
   const tail: string[] = [];
+  // Anchor the read to the chart's y-axis: the scrum-only split.
+  tail.push(
+    `The chart's whistle line is the scrum's own: ${fmt(g.scrumPenaltiesConceded)} scrum penalties a game inside a total of ${fmt(g.penaltiesConceded)}.`,
+  );
   if (g.yellowCards >= 0.05) {
     tail.push(
       `Cards add to the bill at ${fmt(g.yellowCards)} yellows a game${g.redCards >= 0.05 ? ` plus ${fmt(g.redCards)} reds` : ''}.`,

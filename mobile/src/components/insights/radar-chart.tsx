@@ -64,16 +64,19 @@ export function buildRadarAxesFromPerGame(g: Record<string, number> | undefined)
       { key: 'attack', label: 'Attack', value: 0, raw: '—' },
       { key: 'defence', label: 'Defence', value: 0, raw: '—' },
       { key: 'setPiece', label: 'Set-piece', value: 0, raw: '—' },
+      { key: 'turnovers', label: 'Turnovers', value: 0, raw: '—' },
       { key: 'discipline', label: 'Discipline', value: 0, raw: '—' },
       { key: 'kicking', label: 'Kicking', value: 0, raw: '—' },
       { key: 'territory', label: 'Territory', value: 0, raw: '—' },
       { key: 'possession', label: 'Possession', value: 0, raw: '—' },
-      { key: 'turnovers', label: 'Turnovers', value: 0, raw: '—' },
     ];
   }
   const setPiecePercent = ((g.scrumSuccessPercent ?? 0) + (g.lineoutSuccessPercent ?? 0)) / 2;
   const metersPerKick = g.kicksInPlay > 0 ? g.kickMeters / g.kicksInPlay : 0;
 
+  // Axis order = lobe grouping (owner call 2026-07-09): strike
+  // (Attack/Defence), contest (Set-piece/Turnovers/Discipline), field
+  // (Kicking/Territory/Possession, wrapping to Attack).
   return [
     {
       key: 'attack',
@@ -92,6 +95,12 @@ export function buildRadarAxesFromPerGame(g: Record<string, number> | undefined)
       label: 'Set-piece',
       value: clip01(setPiecePercent / AXIS_CEILINGS.setPiece),
       raw: `${setPiecePercent.toFixed(0)}% success`,
+    },
+    {
+      key: 'turnovers',
+      label: 'Turnovers',
+      value: clip01(g.turnoversWon / AXIS_CEILINGS.turnovers),
+      raw: `${g.turnoversWon.toFixed(1)} won/g`,
     },
     {
       key: 'discipline',
@@ -116,12 +125,6 @@ export function buildRadarAxesFromPerGame(g: Record<string, number> | undefined)
       label: 'Possession',
       value: clip01(g.possessionPercent / AXIS_CEILINGS.possession),
       raw: `${g.possessionPercent.toFixed(0)}% possession`,
-    },
-    {
-      key: 'turnovers',
-      label: 'Turnovers',
-      value: clip01(g.turnoversWon / AXIS_CEILINGS.turnovers),
-      raw: `${g.turnoversWon.toFixed(1)} won/g`,
     },
   ];
 }

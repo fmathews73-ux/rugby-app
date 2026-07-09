@@ -4,6 +4,7 @@ import { StyleSheet } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
 import { PossessionOutcome } from '@/components/insights/possession-outcome';
+import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
 import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
 import { BreakdownTrade } from '@/components/insights/breakdown-trade';
 import { BootRoi } from '@/components/insights/boot-roi';
@@ -63,6 +64,7 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
         <BootRoi key="boot" teamId={teamId} style={styles.pageCard} />,
         <RedZoneMatrix key="redzone" teamId={teamId} style={styles.pageCard} />,
         <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
+        <DefensiveIntegrity key="defence" teamId={teamId} style={styles.pageCard} />,
         <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
         <BreakdownTrade key="breakdown" teamId={teamId} style={styles.pageCard} />,
       ]}

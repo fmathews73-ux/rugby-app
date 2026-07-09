@@ -109,7 +109,7 @@ export function PossessionOutcome({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CONVERTERS', tl: 'COUNTER-PUNCHERS', br: 'HOLLOW BALL', bl: 'SHUT OUT' }}
+          quadrants={{ tr: 'CONVERTERS', tl: 'COUNTER-PUNCHERS', br: 'NOTHING TO SHOW', bl: 'SHUT OUT' }}
           xCaption="POSSESSION % →"
           yCaption="POINTS SCORED →"
         />

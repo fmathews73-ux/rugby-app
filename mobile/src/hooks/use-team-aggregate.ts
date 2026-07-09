@@ -43,6 +43,9 @@ export interface TeamAggregate {
     redCards: number;
     twentyTwoEntries: number;
     pointsPerTwentyTwoEntry: number;
+    lineBreaksConceded: number;
+    scrumPenaltiesConceded: number;
+    breakdownPenaltiesConceded: number;
     firstHalfPointsScored: number;
     secondHalfPointsScored: number;
     goalKickingPercent: number;
@@ -119,6 +122,8 @@ export function useTeamAggregate(
     // to the target team's perspective (home vs away in the raw Result).
     let ptsFor = 0, ptsAgainst = 0, triesFor = 0, triesAgainst = 0;
     let firstHalfFor = 0, secondHalfFor = 0;
+    let lineBreaksConceded = 0;
+    let scrumPens = 0, breakdownPens = 0;
     let poss = 0, terr = 0, meters = 0, lineBreaks = 0;
     let kicksInPlay = 0, kickMeters = 0;
     let scrumWon = 0, scrumLost = 0, lineoutWon = 0, lineoutLost = 0;
@@ -144,6 +149,11 @@ export function useTeamAggregate(
       terr += isHome ? result.home_territory_percent : result.away_territory_percent;
       meters += isHome ? result.home_meters : result.away_meters;
       lineBreaks += isHome ? result.home_line_breaks : result.away_line_breaks;
+      lineBreaksConceded += isHome ? result.away_line_breaks : result.home_line_breaks;
+      scrumPens += isHome ? result.home_scrum_penalties_conceded : result.away_scrum_penalties_conceded;
+      breakdownPens += isHome
+        ? result.home_breakdown_penalties_conceded
+        : result.away_breakdown_penalties_conceded;
       kicksInPlay += isHome ? result.home_kicks_in_play : result.away_kicks_in_play;
       kickMeters += isHome ? result.home_kick_meters : result.away_kick_meters;
       scrumWon += isHome ? result.home_scrums_won : result.away_scrums_won;
@@ -217,6 +227,9 @@ export function useTeamAggregate(
         twentyTwoEntries: entries22 / n,
         // Ratio-of-sums so light-entry games don't overweigh.
         pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+        lineBreaksConceded: lineBreaksConceded / n,
+        scrumPenaltiesConceded: scrumPens / n,
+        breakdownPenaltiesConceded: breakdownPens / n,
         firstHalfPointsScored: firstHalfFor / n,
         secondHalfPointsScored: secondHalfFor / n,
         goalKickingPercent:
@@ -257,6 +270,9 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   redCards: 0,
   twentyTwoEntries: 0,
   pointsPerTwentyTwoEntry: 0,
+  lineBreaksConceded: 0,
+  scrumPenaltiesConceded: 0,
+  breakdownPenaltiesConceded: 0,
   firstHalfPointsScored: 0,
   secondHalfPointsScored: 0,
   goalKickingPercent: 0,

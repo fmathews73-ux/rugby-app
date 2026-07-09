@@ -26,6 +26,13 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
       'Tight Test matches are usually lost by the leakier defence rather than won by the sharper attack — a tackle success rate below ~85% almost always shows up on the scoreboard.',
     ],
   },
+  'defensive-integrity': {
+    title: 'Defensive Integrity',
+    paragraphs: [
+      'Tackle completion set against the line breaks it prevents — missed tackles are the proximate cause of breaks, so the two travel together almost mechanically.',
+      'A completion rate below ~85% almost always shows up on the scoreboard; a side completing its tackles yet still conceding breaks has a structural problem, not an effort problem.',
+    ],
+  },
   'set-piece': {
     title: 'Set Piece',
     paragraphs: [

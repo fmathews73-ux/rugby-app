@@ -12,16 +12,17 @@ import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
- * Breakdown trade matrix — the jackal's bargain. x = turnovers won per
- * game, y = penalties conceded per game inverted (up = cleaner).
- * Top-right steals ball WITHOUT feeding the whistle; bottom-right buys
- * its turnovers with penalties; bottom-left gets neither ball nor
- * discipline. Same pool data (/teams/form-summary, prev-10) and matrix
- * grammar as the Team Landscape. Y is the BREAKDOWN-ONLY penalty
- * split — the jackal's bargain priced in its own currency: turnovers
- * won against the breakdown penalties paid to win them.
+ * Defensive Integrity matrix — the game's core defensive relationship:
+ * tackle completion is strongly negatively correlated with line breaks
+ * conceded, because missed tackles are the proximate cause of breaks.
+ * x = tackle success % (right = more complete), y = line breaks
+ * conceded per game (up = tighter line; raw value fed directly since
+ * the matrix plots smaller y higher). Dot size = points conceded per
+ * game (bigger = leakier — the size key says POINTS CONCEDED, not
+ * MARGIN). Breaks conceded are DERIVED from opponents' rows
+ * (reconciliation principle), never stored independently.
  */
-export function BreakdownTrade({
+export function DefensiveIntegrity({
   teamId,
   style,
 }: {
@@ -42,19 +43,17 @@ export function BreakdownTrade({
       // stats — so crosshairs are tier medians, not whole-pool ones.
       .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
       .map((s, i, rows) => {
-        // Margin per game → 0..1 weight for dot size (outcome as the
-        // third axis, matrix convention).
-        const margins = rows.map(
-          (r) => (r.per_game.pointsScored ?? 0) - (r.per_game.pointsConceded ?? 0),
-        );
-        const minM = Math.min(...margins, 0);
-        const span = Math.max(Math.max(...margins, 0) - minM, 1);
+        // Points conceded per game → 0..1 weight (same normalisation
+        // as the margin sizing): bigger dot = leakier defence.
+        const conceded = rows.map((r) => r.per_game.pointsConceded ?? 0);
+        const minC = Math.min(...conceded, 0);
+        const span = Math.max(Math.max(...conceded, 0) - minC, 1);
         return {
           id: s.team_id,
           code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
-          x: s.per_game.turnoversWon ?? 0,
-          y: s.per_game.breakdownPenaltiesConceded ?? 0,
-          weight: (margins[i]! - minM) / span,
+          x: s.per_game.tackleSuccessPercent ?? 0,
+          y: s.per_game.lineBreaksConceded ?? 0,
+          weight: (conceded[i]! - minC) / span,
         };
       });
   }, [summary.data, teams.data, teamId]);
@@ -65,14 +64,14 @@ export function BreakdownTrade({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Breakdown"
+          title="Defence"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.breakdownTrade}
+          read={analysis.data?.defensiveIntegrity}
           purpose={
-            <>Every nation in the team’s tier plotted by turnovers won against breakdown penalties conceded — the jackal’s bargain priced in its own currency: turnovers won against breakdown penalties paid, from Clean Thieves to Overrun. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier plotted by tackle completion against line breaks conceded — missed tackles are the proximate cause of breaks, and completion under ~85% almost always shows on the scoreboard. Dot size is points conceded per game: bigger is leakier.</>
           }
         />
       }
@@ -81,7 +80,7 @@ export function BreakdownTrade({
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <CardTitle
-          title="Breakdown"
+          title="Defence"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
@@ -92,7 +91,7 @@ export function BreakdownTrade({
           style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Explain the breakdown trade matrix">
+          accessibilityLabel="Explain the defensive integrity matrix">
           <FlipTrigger />
         </Pressable>
       </View>
@@ -105,9 +104,10 @@ export function BreakdownTrade({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CLEAN THIEVES', tl: 'PASSIVE', br: 'GAMBLERS', bl: 'OVERRUN' }}
-          xCaption="TURNOVERS WON /GAME →"
-          yCaption="FEWER BREAKDOWN PENS →"
+          quadrants={{ tr: 'THE WALL', tl: 'SCRAMBLERS', br: 'OUT OF SHAPE', bl: 'BROKEN OPEN' }}
+          xCaption="TACKLE SUCCESS % →"
+          yCaption="FEWER BREAKS CONCEDED →"
+          sizeLabel="POINTS CONCEDED"
         />
       )}
 

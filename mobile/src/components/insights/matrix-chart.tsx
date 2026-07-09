@@ -35,6 +35,7 @@ export function MatrixChart({
   quadrants,
   xCaption,
   yCaption,
+  sizeLabel = 'MARGIN',
   minHeight = 200,
 }: {
   points: readonly MatrixPoint[];
@@ -43,6 +44,9 @@ export function MatrixChart({
    *  bottom-right, bottom-left. */
   quadrants: { tr: string; tl: string; br: string; bl: string };
   xCaption: string;
+  /** Size-key label — dot radius meaning varies per card (default
+   *  MARGIN; Defence uses POINTS CONCEDED). */
+  sizeLabel?: string;
   /** Rotated left-edge caption, reading upward — the arrow should
    *  describe what increases towards the TOP of the chart. */
   yCaption: string;
@@ -147,7 +151,7 @@ export function MatrixChart({
            convention); centred beneath the x caption. */
         <View style={styles.sizeLegend} pointerEvents="none">
           <View style={styles.sizeDotLarge} />
-          <Text style={styles.sizeLegendText}>MARGIN</Text>
+          <Text style={styles.sizeLegendText}>{sizeLabel}</Text>
         </View>
       ) : null}
       {width > 0 && height > 0 ? (
