@@ -43,6 +43,8 @@ export interface TeamAggregate {
     redCards: number;
     twentyTwoEntries: number;
     pointsPerTwentyTwoEntry: number;
+    firstHalfPointsScored: number;
+    secondHalfPointsScored: number;
     goalKickingPercent: number;
     /** Contestable kicks put up per game. */
     contestablesDelivered: number;
@@ -116,6 +118,7 @@ export function useTeamAggregate(
     // Sum every metric across all completed fixtures, orienting each field
     // to the target team's perspective (home vs away in the raw Result).
     let ptsFor = 0, ptsAgainst = 0, triesFor = 0, triesAgainst = 0;
+    let firstHalfFor = 0, secondHalfFor = 0;
     let poss = 0, terr = 0, meters = 0, lineBreaks = 0;
     let kicksInPlay = 0, kickMeters = 0;
     let scrumWon = 0, scrumLost = 0, lineoutWon = 0, lineoutLost = 0;
@@ -128,6 +131,12 @@ export function useTeamAggregate(
     for (const { result, fixture } of results) {
       const isHome = fixture.home_team_id === teamId;
       ptsFor += isHome ? result.home_score : result.away_score;
+      {
+        const ht = isHome ? result.half_time_home : result.half_time_away;
+        const ft = isHome ? result.home_score : result.away_score;
+        firstHalfFor += ht;
+        secondHalfFor += ft - ht;
+      }
       ptsAgainst += isHome ? result.away_score : result.home_score;
       triesFor += isHome ? result.home_tries : result.away_tries;
       triesAgainst += isHome ? result.away_tries : result.home_tries;
@@ -208,6 +217,8 @@ export function useTeamAggregate(
         twentyTwoEntries: entries22 / n,
         // Ratio-of-sums so light-entry games don't overweigh.
         pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+        firstHalfPointsScored: firstHalfFor / n,
+        secondHalfPointsScored: secondHalfFor / n,
         goalKickingPercent:
           goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
         contestablesDelivered: aerialDelivered / n,
@@ -246,6 +257,8 @@ const EMPTY_PER_GAME: TeamAggregate['perGame'] = {
   redCards: 0,
   twentyTwoEntries: 0,
   pointsPerTwentyTwoEntry: 0,
+  firstHalfPointsScored: 0,
+  secondHalfPointsScored: 0,
   goalKickingPercent: 0,
   contestablesDelivered: 0,
   deliveredWonPercent: 0,

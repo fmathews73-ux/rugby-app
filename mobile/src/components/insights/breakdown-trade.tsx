@@ -12,18 +12,15 @@ import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
- * Team Landscape — the strategy-matrix view of the international pool.
- * Every nation with completed matches is a dot: x = possession share,
- * y = territory share (up = more territory; fed negated because the
- * matrix plots smaller y higher), crosshairs at the pool medians —
- * who controls the BALL against who controls the FIELD (owner call
- * 2026-07-09, replacing the points scored/conceded axes). Four quadrants tell you
- * what kind of side lives where; the subject team is highlighted so
- * the reader sees its neighbourhood, not just its numbers. Data comes
- * from the /teams/form-summary read-model (prev-10 window, one fetch
- * for the whole pool).
+ * Breakdown trade matrix — the jackal's bargain. x = turnovers won per
+ * game, y = penalties conceded per game inverted (up = cleaner).
+ * Top-right steals ball WITHOUT feeding the whistle; bottom-right buys
+ * its turnovers with penalties; bottom-left gets neither ball nor
+ * discipline. Same pool data (/teams/form-summary, prev-10) and matrix
+ * grammar as the Team Landscape. Y uses TOTAL penalties until the
+ * read-model carries the breakdown-only split.
  */
-export function TeamLandscape({
+export function BreakdownTrade({
   teamId,
   style,
 }: {
@@ -45,8 +42,7 @@ export function TeamLandscape({
       .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
       .map((s, i, rows) => {
         // Margin per game → 0..1 weight for dot size (outcome as the
-        // third axis, matrix convention): a big dot in Starved or a
-        // small one among the Controllers is the anomaly worth a look.
+        // third axis, matrix convention).
         const margins = rows.map(
           (r) => (r.per_game.pointsScored ?? 0) - (r.per_game.pointsConceded ?? 0),
         );
@@ -55,10 +51,8 @@ export function TeamLandscape({
         return {
           id: s.team_id,
           code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
-          x: s.per_game.possessionPercent ?? s.possession_percent,
-          // Negated: the matrix plots smaller y higher, territory is
-          // higher-is-better.
-          y: -(s.per_game.territoryPercent ?? 0),
+          x: s.per_game.turnoversWon ?? 0,
+          y: s.penalties_conceded_per_game,
           weight: (margins[i]! - minM) / span,
         };
       });
@@ -70,14 +64,14 @@ export function TeamLandscape({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Landscape"
+          title="Breakdown"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.landscape}
+          read={analysis.data?.breakdownTrade}
           purpose={
-            <>Every nation in the team’s tier plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier plotted by turnovers won against penalties conceded — the breakdown bargain, from Clean Thieves (steals without whistles) to Overrun (neither ball nor discipline). Dot size is the side’s points margin per game.</>
           }
         />
       }
@@ -86,7 +80,7 @@ export function TeamLandscape({
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <CardTitle
-          title="Landscape"
+          title="Breakdown"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
@@ -97,7 +91,7 @@ export function TeamLandscape({
           style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Explain the team landscape matrix">
+          accessibilityLabel="Explain the breakdown trade matrix">
           <FlipTrigger />
         </Pressable>
       </View>
@@ -110,9 +104,9 @@ export function TeamLandscape({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'PHASE BUILDERS', bl: 'STARVED' }}
-          xCaption="POSSESSION % →"
-          yCaption="TERRITORY % →"
+          quadrants={{ tr: 'CLEAN THIEVES', tl: 'PASSIVE', br: 'GAMBLERS', bl: 'OVERRUN' }}
+          xCaption="TURNOVERS WON /GAME →"
+          yCaption="FEWER PENALTIES →"
         />
       )}
 

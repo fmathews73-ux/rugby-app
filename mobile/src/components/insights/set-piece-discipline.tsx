@@ -9,6 +9,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAnalysis } from '@/hooks/use-team-analysis';
+import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
  * Set Piece & Discipline matrix — the CONTROL read to the Landscape's
@@ -35,14 +36,27 @@ export function SetPieceDiscipline({
   const points = useMemo(() => {
     const codeById = new Map((teams.data ?? []).map((t) => [t.id, t.short_name]));
     return (summary.data ?? [])
-      .filter((s) => s.games_played > 0)
-      .map((s) => ({
-        id: s.team_id,
-        code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
-        x: (s.scrum_success_percent + s.lineout_success_percent) / 2,
-        y: s.penalties_conceded_per_game,
-      }));
-  }, [summary.data, teams.data]);
+      // Tier-scoped pool (owner call 2026-07-09): a side is measured
+      // against ITS OWN tier — same philosophy as the tier-average
+      // stats — so crosshairs are tier medians, not whole-pool ones.
+      .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
+      .map((s, i, rows) => {
+        // Margin per game → 0..1 weight for dot size (outcome as the
+        // third axis, matrix convention).
+        const margins = rows.map(
+          (r) => (r.per_game.pointsScored ?? 0) - (r.per_game.pointsConceded ?? 0),
+        );
+        const minM = Math.min(...margins, 0);
+        const span = Math.max(Math.max(...margins, 0) - minM, 1);
+        return {
+          id: s.team_id,
+          code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
+          x: (s.scrum_success_percent + s.lineout_success_percent) / 2,
+          y: s.penalties_conceded_per_game,
+          weight: (margins[i]! - minM) / span,
+        };
+      });
+  }, [summary.data, teams.data, teamId]);
 
   return (
     <FadeCard
@@ -53,10 +67,11 @@ export function SetPieceDiscipline({
           title="Set-Piece"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
+          comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.setPieceDiscipline}
           purpose={
-            <>Nations plotted by set-piece success against penalties conceded — four quadrants from Controlled to Under Siege.</>
+            <>Nations in the team’s tier plotted by set-piece success against penalties conceded — four quadrants from Controlled to Under Siege. Dot size is the side’s points margin per game.</>
           }
         />
       }
@@ -68,9 +83,12 @@ export function SetPieceDiscipline({
           title="Set-Piece"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
+          comparison="vs TIER AVG"
+          centerTitle
         />
         <Pressable
           onPress={() => setInfoOpen(true)}
+          style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
           accessibilityLabel="Explain the set-piece and discipline matrix">
@@ -116,12 +134,18 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   headerRow: {
+    position: 'relative',
     // Standard air below the title/icon row so charts never creep
     // into the header (with the card gap: 16pt total).
     marginBottom: Spacing.two,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+  },
+  headerTrigger: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   sectionLabel: {
     // Same card-header treatment as the Teams landing cards.

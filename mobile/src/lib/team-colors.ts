@@ -49,3 +49,19 @@ export const TEAM_JERSEY: Record<string, JerseyColors> = {
   ken: { primary: '#C8102E', secondary: '#006B3F' }, // simbas red & green
   bra: { primary: '#FFCC29', secondary: '#00843D' }, // tupis yellow & green
 };
+
+/**
+ * Chart-dot colour for a team — the jersey primary, unless it is too
+ * light to read on a white card (England / Fiji white shirts), in
+ * which case the secondary carries the identity.
+ */
+export function teamDotColor(teamId: string): string | undefined {
+  const jersey = TEAM_JERSEY[teamId];
+  if (!jersey) return undefined;
+  const hex = jersey.primary.replace('#', '');
+  const r = parseInt(hex.slice(0, 2), 16);
+  const g = parseInt(hex.slice(2, 4), 16);
+  const b = parseInt(hex.slice(4, 6), 16);
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+  return luminance > 0.85 ? jersey.secondary : jersey.primary;
+}

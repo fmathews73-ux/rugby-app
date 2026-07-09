@@ -52,7 +52,14 @@ export const AXIS_CEILINGS = {
 };
 
 export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
-  if (!data) {
+  return buildRadarAxesFromPerGame(data?.perGame);
+}
+
+/** Same normalisation from a bare per-game record — lets a TIER
+ *  AVERAGE (mean of the tier's per_game sheets) run through the exact
+ *  scales the subject uses, so reference polygons are honest. */
+export function buildRadarAxesFromPerGame(g: Record<string, number> | undefined): RadarAxis[] {
+  if (!g) {
     return [
       { key: 'attack', label: 'Attack', value: 0, raw: '—' },
       { key: 'defence', label: 'Defence', value: 0, raw: '—' },
@@ -64,8 +71,7 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       { key: 'turnovers', label: 'Turnovers', value: 0, raw: '—' },
     ];
   }
-  const g = data.perGame;
-  const setPiecePercent = (g.scrumSuccessPercent + g.lineoutSuccessPercent) / 2;
+  const setPiecePercent = ((g.scrumSuccessPercent ?? 0) + (g.lineoutSuccessPercent ?? 0)) / 2;
   const metersPerKick = g.kicksInPlay > 0 ? g.kickMeters / g.kicksInPlay : 0;
 
   return [
@@ -163,6 +169,8 @@ export function RadarChart({
   fillColor = RADAR_FILL,
   compareStrokeColor = RADAR_AWAY_COLOR,
   compareFillColor = RADAR_AWAY_FILL,
+  referenceAxes,
+  flatFillOpacity,
 }: {
   axes: readonly RadarAxis[];
   compareAxes?: readonly RadarAxis[] | null;
@@ -177,6 +185,12 @@ export function RadarChart({
    *  fill token. Rendered with the same opacity as the primary fill so
    *  overlap regions naturally darken via blending. */
   compareFillColor?: string;
+  /** Tier-average axes (same normalisation as `axes`) — drawn as the
+   *  dashed reference polygon in single-team mode. */
+  referenceAxes?: readonly RadarAxis[] | null;
+  /** Flat-fill mode (Profile card): solid fillColor at this opacity
+   *  instead of the radial gradient. */
+  flatFillOpacity?: number;
 }) {
   // Radar geometry — grown 30% from the original 260×240 / r=82 layout so
   // the hexagon dominates the Team Profile card rather than sitting in the
@@ -204,10 +218,16 @@ export function RadarChart({
     ? compareAxes.map((ax, i) => pointOn(i, r * ax.value))
     : null;
   const comparePath = compareVerts ? smoothClosedPath(compareVerts) : null;
-  const referencePoints = axes
-    .map((_, i) => pointOn(i, r * 0.5))
-    .map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`)
-    .join(' ');
+  // Honest benchmark (owner catch 2026-07-09): the reference polygon
+  // sits at the TIER AVERAGE per axis when supplied — an irregular
+  // shape, because averages differ per metric. The old constant-0.5
+  // octagon was scale chrome masquerading as an average. 0.5 remains
+  // only as the no-data fallback.
+  // Smoothed like the team line — the tier average is a data curve,
+  // not grid chrome, so it takes the same Bézier treatment.
+  const referencePath = smoothClosedPath(
+    axes.map((ax, i) => pointOn(i, r * (referenceAxes?.[i]?.value ?? 0.5))),
+  );
 
   // Gradient IDs derive from the fill colour so two radars with the
   // same palette share a definition and different palettes never
@@ -251,11 +271,11 @@ export function RadarChart({
           />
         );
       })}
-      {/* 50%-reference hexagon only shows in single-team mode. In
+      {/* Reference polygon only shows in single-team mode. In
           two-team overlay mode the second polygon IS the reference. */}
       {!comparePath ? (
-        <Polygon
-          points={referencePoints}
+        <Path
+          d={referencePath}
           fill="none"
           stroke={REFERENCE_COLOR}
           strokeWidth={1}
@@ -321,7 +341,8 @@ export function RadarChart({
           ) : null}
           <Path
             d={teamPath}
-            fill={`url(#${primaryGradientId}-data)`}
+            fill={flatFillOpacity !== undefined ? fillColor : `url(#${primaryGradientId}-data)`}
+            fillOpacity={flatFillOpacity ?? 1}
             stroke={strokeColor}
             strokeWidth={1}
           />

@@ -1,8 +1,9 @@
 import { useMemo } from 'react';
 
 import { useLatestRanking, useRankingHistory, useTeams, useTeamsFormSummary } from '@/api/hooks';
+import { TIER_1_IDS } from '@/lib/tiers';
 import { useTeamAggregate } from '@/hooks/use-team-aggregate';
-import { useTeamPointsPattern, type TeamPointsPattern } from '@/hooks/use-team-points-pattern';
+import { type TeamPointsPattern } from '@/hooks/use-team-points-pattern';
 import { useTeamMatchSeries } from '@/hooks/use-team-match-series';
 import { useTeamRecentForm, type FormOutcome } from '@/hooks/use-team-recent-form';
 
@@ -48,8 +49,6 @@ export interface TeamAnalysis {
   ranking: string;
   /** "Team Landscape" — pool-relative standing, quadrant named. */
   landscape: string;
-  /** "Team Efficiency KPIs" — the per-game profile: attack, defence. */
-  kpis: string;
   /** "Scoring Rhythm" — quarter-timing read (explicit when even). */
   rhythm: string;
   /** "Possession vs Outcome" — how the wins arrive. */
@@ -57,6 +56,12 @@ export interface TeamAnalysis {
   /** "Set Piece & Discipline" — platform + whistle status, then the
    *  most pressing repair job. */
   setPieceDiscipline: string;
+  /** Red Zone matrix read — attack volume vs conversion. */
+  redZone: string;
+  /** Breakdown trade read — turnovers won vs the whistle count. */
+  breakdownTrade: string;
+  /** Boot ROI read — kick metres vs territory bought. */
+  bootRoi: string;
   /** "Discipline Trend" — the per-match penalty habit and direction. */
   disciplineTrend: string;
   /** "Aerial Contest" — contestable kicks delivered/received won-rates
@@ -79,8 +84,6 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
   // can say whether the window is running above or below it.
   const seasonAggregate = useTeamAggregate(teamId);
   // Quarter-timing patterns — same prev-10 window as every other read.
-  const scoredPattern = useTeamPointsPattern(teamId, 'scored', undefined, WINDOW);
-  const concededPattern = useTeamPointsPattern(teamId, 'conceded', undefined, WINDOW);
   // Pool context for the Landscape read + per-match possession/margin
   // pairs for the Possession read — same windows as their charts.
   const pool = useTeamsFormSummary();
@@ -107,10 +110,12 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
       form: buildForm(team.name, form.outcomes, agg, seasonAggregate.data),
       ranking: buildRanking(team.name, rankSeries),
       landscape: buildLandscape(team.name, teamId, agg, pool.data ?? []),
-      kpis: buildKpis(agg),
-      rhythm: buildRhythm(scoredPattern.data, concededPattern.data),
-      possession: buildPossession(team.name, series.data),
+      rhythm: buildRhythm(team.name, teamId, agg, pool.data ?? []),
+      possession: buildPossession(team.name, teamId, agg, pool.data ?? []),
       setPieceDiscipline: buildSetPieceDiscipline(team.name, agg),
+      redZone: buildRedZone(team.name, teamId, agg, pool.data ?? []),
+      breakdownTrade: buildBreakdownTrade(team.name, teamId, agg, pool.data ?? []),
+      bootRoi: buildBootRoi(team.name, teamId, agg, pool.data ?? []),
       disciplineTrend: buildDisciplineTrend(team.name, series.data),
       aerial: buildAerial(team.name, agg),
     };
@@ -121,8 +126,6 @@ export function useTeamAnalysis(teamId: string): UseTeamAnalysisResult {
     form.outcomes,
     aggregate.data,
     seasonAggregate.data,
-    scoredPattern.data,
-    concededPattern.data,
     pool.data,
     series.data,
     teamId,
@@ -324,35 +327,6 @@ function buildRanking(name: string, series: readonly number[]): string {
 
 const QUARTER_LABELS = ['first quarter', 'second quarter', 'third quarter', 'final quarter'] as const;
 
-/** "Team Efficiency KPIs" — the per-game statistical profile. */
-function buildKpis(agg: Agg): string {
-  const g = agg.perGame;
-  const parts: string[] = [];
-  parts.push(
-    `In attack the side turn ${Math.round(g.possessionPercent)}% possession into ${fmt(g.tries)} tries a game.`,
-  );
-  parts.push(`Ball in hand, the carry game covers ${Math.round(g.metersMade)} metres a match.`);
-  parts.push(
-    `The ${fmt(g.lineBreaks)} line breaks a game measure how often those carries actually split the defence.`,
-  );
-  parts.push(
-    `The defensive ledger reads ${fmt(g.triesConceded)} tries conceded a game behind a ${Math.round(g.tackleSuccessPercent)}% tackle completion.`,
-  );
-  parts.push(
-    `Territory pressure has been cashed at ${fmt(g.pointsPerTwentyTwoEntry)} points per visit across ${fmt(g.twentyTwoEntries)} entries into the opposition 22 a game.`,
-  );
-  parts.push(
-    `Off the tee, ${Math.round(g.goalKickingPercent)}% of the shots at goal have gone over.`,
-  );
-  parts.push(
-    `Ball security runs to ${fmt(g.handlingErrors)} handling errors and ${fmt(g.turnoversConceded)} turnovers conceded a game, with ${fmt(g.turnoversWon)} won back at the contact area.`,
-  );
-  parts.push(
-    `Those are the baselines every match performance gets measured against.`,
-  );
-  return parts.join(' ');
-}
-
 /** Tier-1 aerial baselines — mirror the synthetic generator's band
  *  (regather 25-60% of own contestables). Replace with live pool
  *  averages at real-data cutover, same as the KPI card's T1 marks. */
@@ -403,65 +377,41 @@ function buildAerial(teamName: string, agg: Agg): string {
   return parts.join(' ');
 }
 
-/** "Scoring Rhythm" — the quarter-timing read; explicit when even. */
+/**
+ * Rhythm matrix read — first-half vs second-half scoring inside the
+ * tier, with the margin (the chart's dot size) as supporting context.
+ */
 function buildRhythm(
-  scored: TeamPointsPattern | undefined,
-  conceded: TeamPointsPattern | undefined,
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
 ): string {
-  const scoredSkew = timingSkew(scored);
-  const concededSkew = timingSkew(conceded);
-  const hasScored = scored !== undefined && scored.gamesUsed > 0;
-  const hasConceded = conceded !== undefined && conceded.gamesUsed > 0;
-  const parts: string[] = [];
-  if (scoredSkew) {
-    parts.push(
-      `The scoring carries a clock, with ${scoredSkew.pct}% of the points arriving in the ${QUARTER_LABELS[scoredSkew.quarter]}.`,
-    );
+  const m = poolMatrixParts(teamId, pool, 'firstHalfPointsScored', 'secondHalfPointsScored');
+  if (!m) {
+    return `The tier picture is still forming — too few sides have completed matches to read ${teamName}'s scoring rhythm against. Four is the minimum for medians that mean anything.`;
   }
-  if (concededSkew) {
-    parts.push(
-      `The soft period sits in the ${QUARTER_LABELS[concededSkew.quarter]}, which absorbs ${concededSkew.pct}% of the points conceded.`,
-    );
+  const firstHalf = agg.perGame.firstHalfPointsScored;
+  const secondHalf = agg.perGame.secondHalfPointsScored;
+  const margin = agg.perGame.pointsScored - agg.perGame.pointsConceded;
+  const fastStart = firstHalf > m.medX;
+  const strongFinish = secondHalf > m.medY;
+  const marginPhrase = `${margin >= 0 ? 'plus' : 'minus'}-${fmt(Math.abs(margin))}`;
+  const extras = [
+    `To the crosshairs, the first-half output runs ${fmt(Math.abs(firstHalf - m.medX))} points ${firstHalf >= m.medX ? 'above' : 'below'} the tier median and the second-half output ${fmt(Math.abs(secondHalf - m.medY))} ${secondHalf >= m.medY ? 'above' : 'below'} it.`,
+    `The dot size carries the outcome: this side's margin runs ${marginPhrase} a game.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (fastStart && strongFinish) {
+    return `${teamName} score for the full eighty: ${fmt(firstHalf)} points a game before the interval and ${fmt(secondHalf)} after it, both above the tier line. There is no cheap twenty minutes against a profile like this. ${extras}`;
   }
-  if (parts.length === 0) {
-    parts.push(
-      `No quarter habit stands out at either end — the points have arrived and leaked evenly across the eighty, which reads as consistency rather than a window to attack.`,
-    );
-    if (!hasScored && !hasConceded) return parts[0]!;
-    parts.push(
-      `Evenness of this kind denies opponents a target window, and that is its own kind of edge.`,
-    );
-  } else if (scoredSkew && concededSkew && scoredSkew.quarter === concededSkew.quarter) {
-    parts.push(`The same window carries both stories, which makes it the quarter the match lives or dies in.`);
+  if (!fastStart && strongFinish) {
+    return `${teamName} are the tier's slow burners: ${fmt(firstHalf)} first-half points a game, under the tier line, then ${fmt(secondHalf)} after the break. The scoring arrives once the game loosens, so the first job against them is not to be level at the hour. ${extras}`;
   }
-
-  // Half-splits and the quiet period — supporting detail in trim order.
-  if (hasScored) {
-    const q = scored.avgPercentByQuarter;
-    const beforeBreak = Math.round(q[0] + q[1]);
-    parts.push(
-      `Split by halves, ${beforeBreak}% of the scoring has arrived before the interval and the rest after it.`,
-    );
-    let quiet = 0;
-    for (let i = 1; i < 4; i++) {
-      if (q[i]! < q[quiet]!) quiet = i;
-    }
-    parts.push(
-      `The quietest attacking period has been the ${QUARTER_LABELS[quiet]}, carrying just ${Math.round(q[quiet]!)}% of the points scored.`,
-    );
+  if (fastStart && !strongFinish) {
+    return `${teamName} are fast starters: ${fmt(firstHalf)} points a game before half-time, above the tier line, fading to ${fmt(secondHalf)} after it. The pattern rewards opponents who stay in touch to the interval and back their bench. ${extras}`;
   }
-  if (hasConceded) {
-    const c = conceded.avgPercentByQuarter;
-    parts.push(
-      `At the other end, ${Math.round(c[2] + c[3])}% of the points conceded have come after half-time.`,
-    );
-  }
-  if (hasScored) {
-    parts.push(
-      `Every match weighs equally in the pattern regardless of scoreline, averaged across ${scored.gamesUsed} completed fixtures.`,
-    );
-  }
-  return parts.join(' ');
+  return `${teamName} are misfiring on rhythm: ${fmt(firstHalf)} points a game in the first half and ${fmt(secondHalf)} in the second, short of the tier on both. No period of the match is currently producing, which usually points upstream at platform and position rather than at finishing. ${extras}`;
 }
 
 function timingSkew(
@@ -488,7 +438,9 @@ function buildLandscape(
   agg: Agg,
   pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
 ): string {
-  const peers = pool.filter((r) => r.games_played > 0);
+  const peers = pool.filter(
+    (r) => r.games_played > 0 && TIER_1_IDS.has(r.team_id) === TIER_1_IDS.has(teamId),
+  );
   if (peers.length < 4) {
     return `The pool picture is still forming — too few sides have a meaningful sample to place ${teamName} against. Four sides with completed matches is the minimum for medians that mean anything, so the quadrant call stays blank rather than guessed.`;
   }
@@ -497,117 +449,223 @@ function buildLandscape(
     const mid = Math.floor(sorted.length / 2);
     return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
   };
-  const medFor = median(peers.map((r) => r.per_game.pointsScored ?? 0));
-  const medAgainst = median(peers.map((r) => r.per_game.pointsConceded ?? 0));
-  const attack = agg.perGame.pointsScored;
-  const defence = agg.perGame.pointsConceded;
-  const attackAbove = attack > medFor;
-  const defenceTight = defence < medAgainst;
+  const medPoss = median(peers.map((r) => r.per_game.possessionPercent ?? 0));
+  const medTerr = median(peers.map((r) => r.per_game.territoryPercent ?? 0));
+  const possession = agg.perGame.possessionPercent;
+  const territory = agg.perGame.territoryPercent;
+  const ballAbove = possession > medPoss;
+  const fieldAbove = territory > medTerr;
 
   // Shared supporting context, appended to every quadrant verdict in
   // trim order: exact deltas to the crosshairs, pool position counts,
   // then the sample caveat.
   const others = peers.filter((r) => r.team_id !== teamId);
-  const scoreMore = others.filter((r) => (r.per_game.pointsScored ?? 0) > attack).length;
-  const concedeLess = others.filter((r) => (r.per_game.pointsConceded ?? 0) < defence).length;
-  const attackGap = attack - medFor;
-  const defenceGap = medAgainst - defence; // positive = tighter than median
-  const scoreMoreBit =
-    scoreMore === 0
-      ? `No other side in the pool scores more heavily`
-      : scoreMore === 1
-        ? `Only one of the ${others.length} other sides scores more heavily`
-        : `${scoreMore} of the ${others.length} other sides score more heavily`;
-  const concedeLessBit =
-    concedeLess === 0
-      ? `none concedes less`
-      : concedeLess === 1
-        ? `one concedes less`
-        : `${concedeLess} concede less`;
+  const moreBall = others.filter((r) => (r.per_game.possessionPercent ?? 0) > possession).length;
+  const moreField = others.filter((r) => (r.per_game.territoryPercent ?? 0) > territory).length;
+  const moreBallBit =
+    moreBall === 0
+      ? `No other side in the pool keeps more of the ball`
+      : moreBall === 1
+        ? `Only one of the ${others.length} other sides keeps more of the ball`
+        : `${moreBall} of the ${others.length} other sides keep more of the ball`;
+  const moreFieldBit =
+    moreField === 0
+      ? `none holds more of the field`
+      : moreField === 1
+        ? `one holds more of the field`
+        : `${moreField} hold more of the field`;
+  const landscapeMargin = agg.perGame.pointsScored - agg.perGame.pointsConceded;
   const extras = [
-    `Measured to the crosshairs, the attack sits ${fmt(Math.abs(attackGap))} points a game ${attackGap >= 0 ? 'above' : 'below'} the pool median and the defence ${fmt(Math.abs(defenceGap))} ${defenceGap >= 0 ? 'inside' : 'outside'} it.`,
-    `${scoreMoreBit}, and ${concedeLessBit}.`,
-    `Those medians are drawn from ${peers.length} sides with completed matches, so the crosshairs shift as the pool plays and the quadrant call is only as current as the latest round.`,
+    `Measured to the crosshairs, the ball share sits ${fmt(Math.abs(possession - medPoss))} points ${possession >= medPoss ? 'above' : 'below'} the tier median and the territory share ${fmt(Math.abs(territory - medTerr))} ${territory >= medTerr ? 'above' : 'below'} it.`,
+    `The dot size carries the outcome: the margin runs ${landscapeMargin >= 0 ? 'plus' : 'minus'}-${fmt(Math.abs(landscapeMargin))} a game.`,
+    `${moreBallBit}, and ${moreFieldBit}.`,
+    `Those medians are drawn from the ${peers.length} sides in the tier with completed matches, so the crosshairs shift as the tier plays and the quadrant call is only as current as the latest round.`,
   ].join(' ');
 
-  if (attackAbove && defenceTight) {
-    return `Set against the whole pool, ${teamName} have held the complete quadrant: ${attack.toFixed(1)} a game scored against a median of ${medFor.toFixed(1)}, with the defence also inside the pool line. Owning both halves of the map is rare, and it is what separates contenders from good sides. ${extras}`;
+  if (ballAbove && fieldAbove) {
+    return `Set against their tier, ${teamName} have held the controllers' quadrant: ${possession.toFixed(0)}% of the ball against a median of ${medPoss.toFixed(0)}%, with the territory share also above the tier line. Owning the ball and the field at once is how matches get played on your terms. ${extras}`;
   }
-  if (!attackAbove && defenceTight) {
-    return `${teamName} have lived in the grinders' quadrant: the defence has stayed tighter than the pool median while the attack has run at ${attack.toFixed(1)} a game, short of the median ${medFor.toFixed(1)}. Sides shaped like this stay in matches — the question has been finding the points to win them. ${extras}`;
+  if (!ballAbove && fieldAbove) {
+    return `${teamName} have lived in the kick-first quadrant: more of the field than the tier median on ${territory.toFixed(0)}% territory, taken without the ball at ${possession.toFixed(0)}% possession. Sides shaped like this play the match in the right half and ask the opponent to run out of it. ${extras}`;
   }
-  if (attackAbove && !defenceTight) {
-    return `The map places ${teamName} with the entertainers: ${attack.toFixed(1)} a game scored, clear of the pool median, but ${defence.toFixed(1)} shipped the other way. Matches like theirs have been decided by whichever end of the pitch blinks first. ${extras}`;
+  if (ballAbove && !fieldAbove) {
+    return `The map places ${teamName} with the phase builders: ${possession.toFixed(0)}% of the ball, clear of the tier median, but only ${territory.toFixed(0)}% of the field. Keeping the ball in your own half moves the tackle count, not the scoreboard, so the exits decide what this shape is worth. ${extras}`;
   }
-  return `Against the pool ${teamName} have sat in the exposed quadrant — below the median with the ball and leakier than it without: ${attack.toFixed(1)} for, ${defence.toFixed(1)} against. Every route out of that corner starts with the defence. ${extras}`;
+  return `Against their tier ${teamName} have sat in the starved quadrant, short of the median on both counts: ${possession.toFixed(0)}% of the ball and ${territory.toFixed(0)}% of the field. Everything downstream gets harder from there, and the route out starts with winning the kicking exchange. ${extras}`;
 }
 
 /**
- * How the team wins — the Possession vs Outcome scatter in prose:
- * whether wins have come with the majority of the ball or without it,
- * and whether possession has been converting at all.
+ * Pool-matrix builder shared by the three correlated-pair reads (Red
+ * Zone, Breakdown trade, Boot ROI) — quadrant verdict in the chart's
+ * own vocabulary first, crosshair deltas and pool counts after, sample
+ * caveat last (trim order per spec §5.7).
+ */
+function poolMatrixParts(
+  teamId: string,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+  xKey: string,
+  yKey: string,
+): {
+  peers: typeof pool;
+  medX: number;
+  medY: number;
+  aboveX: (v: number) => number;
+  aboveY: (v: number) => number;
+} | null {
+  // Tier-scoped peers — the matrices measure a side against ITS OWN
+  // tier (owner call 2026-07-09), so the narrative medians must match
+  // the chart's crosshairs.
+  const peers = pool.filter(
+    (r) => r.games_played > 0 && TIER_1_IDS.has(r.team_id) === TIER_1_IDS.has(teamId),
+  );
+  if (peers.length < 4) return null;
+  const median = (xs: number[]): number => {
+    const sorted = [...xs].sort((a, b) => a - b);
+    const mid = Math.floor(sorted.length / 2);
+    return sorted.length % 2 ? sorted[mid]! : (sorted[mid - 1]! + sorted[mid]!) / 2;
+  };
+  const medX = median(peers.map((r) => r.per_game[xKey] ?? 0));
+  const medY = median(peers.map((r) => r.per_game[yKey] ?? 0));
+  const others = peers.filter((r) => r.team_id !== teamId);
+  return {
+    peers,
+    medX,
+    medY,
+    aboveX: (v: number) => others.filter((r) => (r.per_game[xKey] ?? 0) > v).length,
+    aboveY: (v: number) => others.filter((r) => (r.per_game[yKey] ?? 0) > v).length,
+  };
+}
+
+const POOL_CAVEAT =
+  'The crosshairs are tier medians from every side in the tier with completed matches, so the quadrant call moves as the tier plays.';
+
+function buildRedZone(
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+): string {
+  const m = poolMatrixParts(teamId, pool, 'twentyTwoEntries', 'pointsPerTwentyTwoEntry');
+  if (!m) {
+    return `The pool picture is still forming — too few sides have completed matches to place ${teamName}'s red-zone game against. Four is the minimum for medians that mean anything.`;
+  }
+  const entries = agg.perGame.twentyTwoEntries;
+  const yieldPer = agg.perGame.pointsPerTwentyTwoEntry;
+  const often = entries > m.medX;
+  const clinical = yieldPer > m.medY;
+  const extras = [
+    `Measured to the crosshairs, the visit count sits ${fmt(Math.abs(entries - m.medX))} ${entries >= m.medX ? 'above' : 'below'} the tier median and the yield ${fmt(Math.abs(yieldPer - m.medY))} points a visit ${yieldPer >= m.medY ? 'above' : 'below'} it.`,
+    `Test par is around 2 points a visit; 3 and up is clinical.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (often && clinical) {
+    return `${teamName} hold the relentless quadrant of the red-zone map: ${fmt(entries)} visits to the opposition 22 a game, cashed at ${fmt(yieldPer)} points each — volume and conversion at once, which is how scoreboards run away. ${extras}`;
+  }
+  if (!often && clinical) {
+    return `${teamName} sit with the clinical sides: only ${fmt(entries)} red-zone visits a game, but ${fmt(yieldPer)} points banked per trip. They do not knock often, and they rarely leave empty-handed — the ceiling is simply getting there more. ${extras}`;
+  }
+  if (often && !clinical) {
+    return `The map puts ${teamName} in the wasteful quadrant: ${fmt(entries)} visits a game, above the tier line, paying just ${fmt(yieldPer)} points each. The territory work is done and the points are being left behind the goal line — the most fixable shape on this chart. ${extras}`;
+  }
+  return `${teamName} sit in the blunt corner of the red-zone map: ${fmt(entries)} visits a game and ${fmt(yieldPer)} points a visit, short of the tier on both. Nothing downstream fixes an attack that neither arrives nor converts; the route out starts with field position. ${extras}`;
+}
+
+function buildBreakdownTrade(
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+): string {
+  const m = poolMatrixParts(teamId, pool, 'turnoversWon', 'penaltiesConceded');
+  if (!m) {
+    return `The pool picture is still forming — too few sides have completed matches to price ${teamName}'s breakdown trade. Four is the minimum for medians that mean anything.`;
+  }
+  const steals = agg.perGame.turnoversWon;
+  const pens = agg.perGame.penaltiesConceded;
+  const thieving = steals > m.medX;
+  const clean = pens < m.medY;
+  const extras = [
+    `To the crosshairs, the steal count runs ${fmt(Math.abs(steals - m.medX))} ${steals >= m.medX ? 'above' : 'below'} the tier median and the penalty count ${fmt(Math.abs(pens - m.medY))} ${pens <= m.medY ? 'inside' : 'outside'} it.`,
+    `The whistle count here is ALL penalties until the breakdown-only split lands, so scrum and offside noise ride along.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (thieving && clean) {
+    return `${teamName} own the clean-thieves quadrant: ${fmt(steals)} turnovers won a game at only ${fmt(pens)} penalties conceded — ball stolen without feeding the whistle, the rarest trade at the breakdown. ${extras}`;
+  }
+  if (thieving && !clean) {
+    return `${teamName} are the gamblers of the breakdown map: ${fmt(steals)} steals a game, above the tier line, bought with ${fmt(pens)} penalties. The trade pays until a referee stops letting it, so the margin between this and the clean quadrant is discipline, not appetite. ${extras}`;
+  }
+  if (!thieving && clean) {
+    return `${teamName} sit in the passive quadrant: only ${fmt(steals)} turnovers won a game, but a tidy ${fmt(pens)} penalties conceded. The line stays out of trouble and out of the contest — pressure has to come from somewhere else in this shape. ${extras}`;
+  }
+  return `${teamName} are being overrun at the breakdown: ${fmt(steals)} steals a game, under the tier line, while still conceding ${fmt(pens)} penalties. Paying the whistle without taking the ball is the worst end of the bargain, and it starts at the contact area. ${extras}`;
+}
+
+function buildBootRoi(
+  teamName: string,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
+): string {
+  const m = poolMatrixParts(teamId, pool, 'kickMeters', 'territoryPercent');
+  if (!m) {
+    return `The pool picture is still forming — too few sides have completed matches to price ${teamName}'s kicking return. Four is the minimum for medians that mean anything.`;
+  }
+  const boot = agg.perGame.kickMeters;
+  const field = agg.perGame.territoryPercent;
+  const kicksLots = boot > m.medX;
+  const winsField = field > m.medY;
+  const extras = [
+    `To the crosshairs, the boot output runs ${fmt(Math.abs(boot - m.medX))} metres ${boot >= m.medX ? 'above' : 'below'} the tier median and the territory share ${fmt(Math.abs(field - m.medY))} points ${field >= m.medY ? 'above' : 'below'} it.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (kicksLots && winsField) {
+    return `${teamName} sit with the field winners: ${fmt(boot)} kick metres a game converted into ${fmt(field)}% territory — the boot is buying exactly the ground it should, and the match gets played in the right half. ${extras}`;
+  }
+  if (!kicksLots && winsField) {
+    return `${teamName} hold the carry-game quadrant of the boot map: ${fmt(field)}% territory on only ${fmt(boot)} kick metres a game. The field position is being earned ball-in-hand, which costs more collisions but keeps possession — a deliberate trade, not a failing. ${extras}`;
+  }
+  if (kicksLots && !winsField) {
+    return `The map puts ${teamName} in the empty-boot quadrant: ${fmt(boot)} kick metres a game, above the tier line, for just ${fmt(field)}% territory. Kicking that much without winning field means the ball is coming straight back — the chase and the contest, not the distance, are the problem. ${extras}`;
+  }
+  return `${teamName} are pinned on the boot map: below the tier on kick metres at ${fmt(boot)} a game and on territory at ${fmt(field)}%. Without the boot or the field the exits stay under pressure, and every attack starts long. ${extras}`;
+}
+
+/**
+ * Possession matrix read — does ball share convert to points scored,
+ * inside the tier; the margin (the chart's dot size) rides as context.
  */
 function buildPossession(
   teamName: string,
-  series: readonly { outcome: 'W' | 'L' | 'D'; margin: number; possessionPercent: number }[] | undefined,
+  teamId: string,
+  agg: Agg,
+  pool: readonly { team_id: string; games_played: number; per_game: Record<string, number> }[],
 ): string {
-  const rows = series ?? [];
-  if (rows.length === 0) {
-    return `Not enough completed matches yet to read how ${teamName} use the ball.`;
+  const m = poolMatrixParts(teamId, pool, 'possessionPercent', 'pointsScored');
+  if (!m) {
+    return `The tier picture is still forming — too few sides have completed matches to place ${teamName}'s use of the ball against. Four is the minimum for medians that mean anything.`;
   }
-  const wins = rows.filter((r) => r.outcome === 'W');
-  const losses = rows.filter((r) => r.outcome === 'L');
-  const avg = (xs: number[]) => xs.reduce((a, b) => a + b, 0) / Math.max(1, xs.length);
-  const avgPossAll = avg(rows.map((r) => r.possessionPercent));
-
-  // Supporting detail shared by every branch, in trim order: overall
-  // share, what the wins paid, what the defeats cost, then colour.
-  const extras: string[] = [];
-  extras.push(
-    `Averaged over all ${rows.length} completed matches the share of ball is ${avgPossAll.toFixed(0)}%.`,
-  );
-  if (wins.length > 0) {
-    const maxWin = Math.max(...wins.map((r) => r.margin));
-    extras.push(
-      `Winning days have paid at ${fmt(avg(wins.map((r) => r.margin)))} points a time, the best of them by ${maxWin}.`,
-    );
+  const possession = agg.perGame.possessionPercent;
+  const scored = agg.perGame.pointsScored;
+  const margin = agg.perGame.pointsScored - agg.perGame.pointsConceded;
+  const ballAbove = possession > m.medX;
+  const scoringAbove = scored > m.medY;
+  const marginPhrase = `${margin >= 0 ? 'plus' : 'minus'}-${fmt(Math.abs(margin))}`;
+  const extras = [
+    `To the crosshairs, the ball share runs ${fmt(Math.abs(possession - m.medX))} points ${possession >= m.medX ? 'above' : 'below'} the tier median and the scoring ${fmt(Math.abs(scored - m.medY))} a game ${scored >= m.medY ? 'above' : 'below'} it.`,
+    `The dot size carries the outcome: the margin runs ${marginPhrase} a game.`,
+    POOL_CAVEAT,
+  ].join(' ');
+  if (ballAbove && scoringAbove) {
+    return `${teamName} sit with the tier's converters: ${possession.toFixed(0)}% of the ball turned into ${fmt(scored)} points a game. Share and scoring pointing the same way is exactly what this chart wants to see. ${extras}`;
   }
-  if (losses.length > 0) {
-    const worstLoss = Math.min(...losses.map((r) => r.margin));
-    extras.push(
-      `The ${losses.length} defeat${losses.length === 1 ? ' has' : 's have'} cost ${fmt(Math.abs(avg(losses.map((r) => r.margin))))} points on average, the heaviest by ${Math.abs(worstLoss)}.`,
-    );
+  if (!ballAbove && scoringAbove) {
+    return `${teamName} are the tier's counter-punchers: ${fmt(scored)} points a game from only ${possession.toFixed(0)}% of the ball. Scoring without the share means the strike rate per touch is elite, and it only has to hold while the defence keeps the game close. ${extras}`;
   }
-  extras.push(
-    `Possession only counts when it converts, and the scatter is a map of when it has and when it has not.`,
-  );
-
-  if (wins.length === 0) {
-    const core =
-      avgPossAll >= 50
-        ? `No wins in the window, and not for lack of ball: ${teamName} have averaged ${avgPossAll.toFixed(0)}% possession across the run. That is the wasted-ball corner of the map — control without conversion — and it is the most fixable failure mode in rugby.`
-        : `No wins in the window, and the shape of the map says why: ${teamName} have been outplayed for ball (${avgPossAll.toFixed(0)}% on average) and outscored with it. Until the possession share recovers, everything else is patching.`;
-    return [core, ...extras].join(' ');
+  if (ballAbove && !scoringAbove) {
+    return `The map calls ${teamName}'s share hollow ball: ${possession.toFixed(0)}% possession, above the tier line, producing just ${fmt(scored)} points a game. Holding the ball without scoring usually points at the red zone, and that is the next chart along. ${extras}`;
   }
-
-  const winsWithBall = wins.filter((r) => r.possessionPercent >= 50).length;
-  const avgPossWins = avg(wins.map((r) => r.possessionPercent));
-  const lossesWithBall = losses.filter((r) => r.possessionPercent >= 50);
-  const wastedBall =
-    losses.length > 0 && lossesWithBall.length >= Math.ceil(losses.length / 2);
-
-  let core: string;
-  if (winsWithBall === wins.length) {
-    core = `Every win in the window has come with the majority of the ball (${avgPossWins.toFixed(0)}% on average) — ${teamName} have won by taking control first and asking questions after.`;
-  } else if (winsWithBall === 0) {
-    core = `The wins have all come WITHOUT the ball — ${avgPossWins.toFixed(0)}% possession on average in victory. ${teamName} have been a counter-punching side: soak, strike, scoreboard.`;
-  } else {
-    core = `${winsWithBall} of ${wins.length} wins have come with the majority of the ball, the rest on the counter — ${teamName} have shown they can win the match both ways, which is the hardest profile to plan against.`;
-  }
-  if (wastedBall) {
-    core = `${core} The warning sits on the other side of the map: most of the defeats have come WITH the ball, and possession that doesn't convert is an invitation.`;
-  }
-  return [core, ...extras].join(' ');
+  return `${teamName} are being shut out: below the tier on the ball at ${possession.toFixed(0)}% and on the scoreboard at ${fmt(scored)} a game. Neither share nor scoring is travelling, so the fix starts upstream with winning more and better ball. ${extras}`;
 }
 
 /** "Set Piece & Discipline" — platform + whistle status, closed by

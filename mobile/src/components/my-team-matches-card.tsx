@@ -98,36 +98,10 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
   return (
     <View style={padded ? styles.page : undefined}>
       <View style={styles.card}>
+        {/* Last Match FIRST (owner call 2026-07-09) — it sits under
+            the chart carousel, so the result the charts describe leads
+            and the upcoming fixture follows. */}
         <NavSection
-          onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`) : undefined}>
-          {nextMatch && myTeamInfo ? (
-            <>
-              {/* Section identity folded into the date line — no
-                  separate header (owner call 2026-07-07). Title case,
-                  not uppercase. */}
-              <Text style={styles.dateCentered}>
-                {nextMatch.status === 'scheduled'
-                  ? `Next Match · ${formatFixtureDate(nextMatch)} · Upcoming`
-                  : `Next Match · ${formatFixtureDate(nextMatch)}`}
-              </Text>
-              <FixtureLine
-                fixture={nextMatch}
-                teamId={teamId}
-                myTeam={myTeamInfo}
-                oppTeam={teamById.get(
-                  nextMatch.home_team_id === teamId ? nextMatch.away_team_id : nextMatch.home_team_id,
-                )}
-                competition={compById.get(nextMatch.competition_id)}
-                chevron
-              />
-            </>
-          ) : (
-            <Text style={styles.mutedRow}>Next Match · no upcoming fixtures</Text>
-          )}
-        </NavSection>
-
-        <NavSection
-          divider
           onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`) : undefined}>
           {lastMatch && myTeamInfo ? (
             <>
@@ -146,6 +120,32 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
             </>
           ) : (
             <Text style={styles.mutedRow}>Last Match · no completed fixtures</Text>
+          )}
+        </NavSection>
+
+        <NavSection
+          divider
+          onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`) : undefined}>
+          {nextMatch && myTeamInfo ? (
+            <>
+              <Text style={styles.dateCentered}>
+                {nextMatch.status === 'scheduled'
+                  ? `Next Match · ${formatFixtureDate(nextMatch)} · Upcoming`
+                  : `Next Match · ${formatFixtureDate(nextMatch)}`}
+              </Text>
+              <FixtureLine
+                fixture={nextMatch}
+                teamId={teamId}
+                myTeam={myTeamInfo}
+                oppTeam={teamById.get(
+                  nextMatch.home_team_id === teamId ? nextMatch.away_team_id : nextMatch.home_team_id,
+                )}
+                competition={compById.get(nextMatch.competition_id)}
+                chevron
+              />
+            </>
+          ) : (
+            <Text style={styles.mutedRow}>Next Match · no upcoming fixtures</Text>
           )}
         </NavSection>
       </View>

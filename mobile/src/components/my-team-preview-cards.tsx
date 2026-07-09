@@ -3,14 +3,13 @@ import { useFocusEffect } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
-import { AerialContest } from '@/components/insights/aerial-contest';
-import { DisciplineTrend } from '@/components/insights/discipline-trend';
-import { EfficiencyKpis } from '@/components/insights/efficiency-kpis';
-import { ExtendedMomentum } from '@/components/insights/extended-momentum';
 import { PossessionOutcome } from '@/components/insights/possession-outcome';
-import { RankingTrajectory } from '@/components/insights/ranking-trajectory';
+import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
+import { BreakdownTrade } from '@/components/insights/breakdown-trade';
+import { BootRoi } from '@/components/insights/boot-roi';
 import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
 import { SetPieceDiscipline } from '@/components/insights/set-piece-discipline';
+import { TrajectoryCard } from '@/components/insights/trajectory-card';
 import { TeamLandscape } from '@/components/insights/team-landscape';
 import { TeamProfileCard } from '@/components/my-team-profile-card';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
@@ -54,29 +53,20 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
     // scoped to the selected team.
     <CardCarousel
       ref={carouselRef}
+      // Four movements (owner call 2026-07-09): identity/results/status,
+      // then the control block (ball & field), the attack block, and
+      // the contact-and-costs closer. Efficiency was CUT — pure
+      // duplication of the dedicated cards + the Stats pills.
       pages={[
         <TeamProfileCard key="profile" teamId={teamId} style={styles.pageCard} />,
-        <ExtendedMomentum
-          key="form"
-          teamId={teamId}
-          style={styles.pageCard}
-        />,
-        <RankingTrajectory
-          key="ranking"
-          teamId={teamId}
-          style={styles.pageCard}
-        />,
+        <TrajectoryCard key="trajectory" teamId={teamId} style={styles.pageCard} />,
         <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
-        <EfficiencyKpis
-          key="kpis"
-          teamId={teamId}
-          style={styles.pageCard}
-        />,
-        <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
         <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
-        <AerialContest key="aerial" teamId={teamId} style={styles.pageCard} />,
+        <BootRoi key="boot" teamId={teamId} style={styles.pageCard} />,
+        <RedZoneMatrix key="redzone" teamId={teamId} style={styles.pageCard} />,
+        <ScoringRhythm key="rhythm" teamId={teamId} style={styles.pageCard} />,
         <SetPieceDiscipline key="setpiece" teamId={teamId} style={styles.pageCard} />,
-        <DisciplineTrend key="discipline" teamId={teamId} style={styles.pageCard} />,
+        <BreakdownTrade key="breakdown" teamId={teamId} style={styles.pageCard} />,
       ]}
     />
   );

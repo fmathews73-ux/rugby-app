@@ -17,6 +17,7 @@ export function NarrativeBack({
   code,
   flagCode2,
   code2,
+  comparison,
   purpose,
   read,
   onClose,
@@ -28,6 +29,7 @@ export function NarrativeBack({
   code?: string | null;
   flagCode2?: string | null;
   code2?: string | null;
+  comparison?: string | null;
   purpose: ReactNode;
   read?: string | null;
   onClose: () => void;
@@ -52,8 +54,21 @@ export function NarrativeBack({
   return (
     <View style={styles.backCard}>
       <View style={styles.headerRow}>
-        <CardTitle title={title} flagCode={flagCode} code={code} flagCode2={flagCode2} code2={code2} />
-        <Pressable onPress={onClose} hitSlop={12} accessibilityRole="button" accessibilityLabel="Back to chart">
+        <CardTitle
+          title={title}
+          flagCode={flagCode}
+          code={code}
+          flagCode2={flagCode2}
+          code2={code2}
+          comparison={comparison}
+          centerTitle
+        />
+        <Pressable
+          onPress={onClose}
+          style={styles.headerClose}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel="Back to chart">
           <Ionicons name="arrow-back-circle-outline" size={18} color={Colors.light.textSecondary} />
         </Pressable>
       </View>
@@ -168,8 +183,13 @@ const styles = StyleSheet.create({
   headerRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    position: 'relative',
     marginBottom: Spacing.two,
+  },
+  headerClose: {
+    position: 'absolute',
+    right: 0,
+    top: 0,
   },
   backBody: { flex: 1, overflow: 'hidden' },
   eyebrow: {

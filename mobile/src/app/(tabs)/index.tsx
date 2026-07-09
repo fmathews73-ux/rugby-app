@@ -65,8 +65,11 @@ export default function HomeScreen() {
         }>
         <FixtureCarousel />
         <TeamSelectorCard />
-        <MyTeamMatchesCard />
+        {/* Charts above the matches card (owner call 2026-07-09) — the
+            BI carousel is the page's main event; fixtures follow as
+            reference. */}
         <MyTeamPreviewCards />
+        <MyTeamMatchesCard />
       </FadingScrollView>
     </SafeAreaView>
   );

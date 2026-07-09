@@ -8,6 +8,7 @@ import type { Fixture, Team } from '@rugby-app/shared';
 import { useFixtureResult, useTeams } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
+import { teamDotColor } from '@/lib/team-colors';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -132,9 +133,14 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
   // X: symmetric around the 50% crosshair. Y: spans the two scores with
   // headroom; the crosshair sits at the points midpoint so one side is
   // always above and one below (unless level).
-  const possSpread = Math.max(8, Math.abs(home.possession - 50), Math.abs(away.possession - 50)) + 3;
+  // Proportional 15% headroom on the real deviation (matrix
+  // convention); absolute floors stay so two close dots don't zoom
+  // into noise.
+  const possDev = Math.max(Math.abs(home.possession - 50), Math.abs(away.possession - 50));
+  const possSpread = Math.max(8, possDev * 1.15);
   const yMid = (home.points + away.points) / 2;
-  const ySpread = Math.max(6, Math.abs(home.points - yMid), Math.abs(away.points - yMid)) + 4;
+  const yDev = Math.max(Math.abs(home.points - yMid), Math.abs(away.points - yMid));
+  const ySpread = Math.max(6, yDev * 1.15);
 
   const plotBottom = height - padBottom;
   const xOf = (poss: number) =>
@@ -215,8 +221,8 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
           pointerEvents="none"
           style={{ position: 'absolute', top: 0, left: 0, opacity: ink }}>
           <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
-            {dot(home, HOME_COLOR)}
-            {dot(away, AWAY_COLOR)}
+            {dot(home, teamDotColor(home.team.id) ?? HOME_COLOR)}
+            {dot(away, teamDotColor(away.team.id) ?? AWAY_COLOR)}
           </Svg>
         </Animated.View>
       ) : null}

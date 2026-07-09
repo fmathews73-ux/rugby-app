@@ -224,6 +224,7 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       let toWon = 0, toConceded = 0, errors = 0, yellows = 0, reds = 0;
       let entries22 = 0, pointsFrom22 = 0;
       let goalKicksMade = 0, goalKicksAttempted = 0;
+      let firstHalfFor = 0, secondHalfFor = 0;
       let games = 0;
       for (const fx of completed) {
         const r = store.resultByFixture.get(fx.id);
@@ -231,6 +232,14 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
         const isHome = fx.home_team_id === team.id;
         games++;
         ptsFor += isHome ? r.home_score : r.away_score;
+        {
+          // Half splits from the half-time line — first-half points
+          // are the HT score, second-half the remainder.
+          const ht = isHome ? r.half_time_home : r.half_time_away;
+          const ft = isHome ? r.home_score : r.away_score;
+          firstHalfFor += ht;
+          secondHalfFor += ft - ht;
+        }
         ptsAgainst += isHome ? r.away_score : r.home_score;
         triesFor += isHome ? r.home_tries : r.away_tries;
         triesAgainst += isHome ? r.away_tries : r.home_tries;
@@ -301,6 +310,8 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           // Ratio-of-sums, not average-of-ratios — a 2-entry game
           // shouldn't weigh as much as a 15-entry game.
           pointsPerTwentyTwoEntry: entries22 > 0 ? pointsFrom22 / entries22 : 0,
+          firstHalfPointsScored: firstHalfFor / g,
+          secondHalfPointsScored: secondHalfFor / g,
           goalKickingPercent:
             goalKicksAttempted > 0 ? (goalKicksMade / goalKicksAttempted) * 100 : 0,
         },

@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Animated, StyleSheet, View } from 'react-native';
+import { Animated, StyleSheet, View, Text } from 'react-native';
 import Svg, { Circle, Line, Text as SvgText } from 'react-native-svg';
 
 
 import { useChartInk } from '@/components/insights/use-chart-ink';
+import { teamDotColor } from '@/lib/team-colors';
 import { Colors } from '@/constants/theme';
 
 const SUBJECT_COLOR = '#059669';
@@ -17,6 +18,9 @@ export interface MatrixPoint {
   /** Raw y value — SMALLER plots higher (both current matrices use
    *  lower-is-better y metrics: points conceded, penalties). */
   y: number;
+  /** Optional 0..1 size weight — dot radius scales with it (e.g.
+   *  points margin on the Rhythm matrix). Omit for uniform dots. */
+  weight?: number;
 }
 
 /**
@@ -51,9 +55,13 @@ export function MatrixChart({
   const width = canvas.w;
   const height = canvas.h;
   const padLeft = 18;
-  const padRight = 10;
+  // Symmetric with padLeft so the centred crosshair lands on the exact
+  // card centre — the header title centre-aligns to it.
+  const padRight = 18;
   const padTop = 14;
-  const padBottom = 18;
+  // Bottom band holds the x caption AND the margin size key stacked
+  // beneath it — the plot shifts up to make the room.
+  const padBottom = 34;
 
   const xs = points.map((p) => p.x);
   const ys = points.map((p) => p.y);
@@ -63,8 +71,13 @@ export function MatrixChart({
   // the exact CENTRE of the plot — a skewed pool otherwise drags the
   // dashed cross off-centre. Dots keep their true quadrants; only the
   // scale is centred.
-  const xHalf = Math.max(...xs.map((v) => Math.abs(v - midXVal)), 0) + 2;
-  const yHalf = Math.max(...ys.map((v) => Math.abs(v - midYVal)), 0) + 2;
+  // Proportional headroom (15%) — a fixed pad crushed small-magnitude
+  // scales (points-per-visit spreads under ±1) into the centre while
+  // barely registering on ±10-point scales.
+  const xDev = Math.max(...xs.map((v) => Math.abs(v - midXVal)), 0);
+  const yDev = Math.max(...ys.map((v) => Math.abs(v - midYVal)), 0);
+  const xHalf = xDev > 0 ? xDev * 1.15 : 1;
+  const yHalf = yDev > 0 ? yDev * 1.15 : 1;
   const xMin = midXVal - xHalf;
   const xMax = midXVal + xHalf;
   const yMin = midYVal - yHalf;
@@ -111,7 +124,7 @@ export function MatrixChart({
           </SvgText>
 
           {/* X-axis caption. */}
-          <SvgText x={(padLeft + width - padRight) / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
+          <SvgText x={(padLeft + width - padRight) / 2} y={height - 18} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             {xCaption}
           </SvgText>
           {/* Y-axis caption — rotated, reading upward along the left
@@ -130,6 +143,14 @@ export function MatrixChart({
         </Svg>
       ) : null}
       {width > 0 && height > 0 ? (
+        /* Size key — dot radius carries points margin (matrix
+           convention); centred beneath the x caption. */
+        <View style={styles.sizeLegend} pointerEvents="none">
+          <View style={styles.sizeDotLarge} />
+          <Text style={styles.sizeLegendText}>MARGIN</Text>
+        </View>
+      ) : null}
+      {width > 0 && height > 0 ? (
         /* Dot layer — the whole pool plus the subject's dot and code
            fade in over the static frame. */
         <Animated.View
@@ -139,12 +160,24 @@ export function MatrixChart({
             {/* Pool dots first, subject on top. */}
             {points.map((p) =>
               p.id === subjectId ? null : (
-                <Circle key={p.id} cx={xOf(p.x)} cy={yOf(p.y)} r={2.5} fill={POOL_COLOR} opacity={0.55} />
+                <Circle
+                  key={p.id}
+                  cx={xOf(p.x)}
+                  cy={yOf(p.y)}
+                  r={p.weight !== undefined ? 2 + p.weight * 3 : 2.5}
+                  fill={teamDotColor(p.id) ?? POOL_COLOR}
+                  opacity={0.55}
+                />
               ),
             )}
             {subject ? (
               <>
-                <Circle cx={xOf(subject.x)} cy={yOf(subject.y)} r={4.5} fill={SUBJECT_COLOR} />
+                <Circle
+                  cx={xOf(subject.x)}
+                  cy={yOf(subject.y)}
+                  r={subject.weight !== undefined ? 3.5 + subject.weight * 3.5 : 4.5}
+                  fill={teamDotColor(subject.id) ?? SUBJECT_COLOR}
+                />
                 <SvgText
                   x={xOf(subject.x)}
                   y={yOf(subject.y) >= padTop + 18 ? yOf(subject.y) - 8 : yOf(subject.y) + 14}
@@ -172,5 +205,28 @@ function median(values: number[]): number {
 const styles = StyleSheet.create({
   chartFill: {
     flex: 1,
+  },
+  sizeLegend: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 3,
+  },
+  sizeDotLarge: {
+    width: 9,
+    height: 9,
+    borderRadius: 999,
+    backgroundColor: '#9CA3AF',
+  },
+  sizeLegendText: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: 8,
+    letterSpacing: 0.4,
+    color: Colors.light.textSecondary,
+    marginLeft: 2,
   },
 });

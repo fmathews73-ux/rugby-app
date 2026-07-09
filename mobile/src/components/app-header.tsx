@@ -56,9 +56,11 @@ export function AppHeader() {
         <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby Metrics">
           {/* Tilted to echo the wordmark's italic axis. */}
           <View style={styles.logoTilt}>
-            {/* Same fingerprint mark as the card triggers — identity
-                black beside the wordmark, still (no spin) in the
-                header. */}
+            {/* Fingerprint brand mark — identity black beside the
+                wordmark, still (no motion) in the header. A ball-print
+                composite (fingerprint clipped in the ball silhouette)
+                was trialled 2026-07-09 and dropped: at header size it
+                never stopped reading as a plain print. */}
             <Ionicons name="finger-print-outline" size={22} color={Colors.light.text} />
           </View>
           <Text style={styles.wordmarkMain}>RUGBYMETRICS</Text>

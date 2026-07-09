@@ -12,18 +12,14 @@ import { useTeamAnalysis } from '@/hooks/use-team-analysis';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 /**
- * Team Landscape — the strategy-matrix view of the international pool.
- * Every nation with completed matches is a dot: x = possession share,
- * y = territory share (up = more territory; fed negated because the
- * matrix plots smaller y higher), crosshairs at the pool medians —
- * who controls the BALL against who controls the FIELD (owner call
- * 2026-07-09, replacing the points scored/conceded axes). Four quadrants tell you
- * what kind of side lives where; the subject team is highlighted so
- * the reader sees its neighbourhood, not just its numbers. Data comes
- * from the /teams/form-summary read-model (prev-10 window, one fetch
- * for the whole pool).
+ * Boot ROI matrix — does the kicking game buy the field it should?
+ * x = kick metres per game, y = territory share (up = more field; fed
+ * negated because the matrix plots smaller y higher). Top-right kicks
+ * long AND lives in the right half; bottom-right kicks plenty and gets
+ * nothing back — bad kicks or worse chases. Same pool data
+ * (/teams/form-summary, prev-10) and matrix grammar as the Landscape.
  */
-export function TeamLandscape({
+export function BootRoi({
   teamId,
   style,
 }: {
@@ -45,8 +41,7 @@ export function TeamLandscape({
       .filter((s) => s.games_played > 0 && TIER_1_IDS.has(s.team_id) === TIER_1_IDS.has(teamId))
       .map((s, i, rows) => {
         // Margin per game → 0..1 weight for dot size (outcome as the
-        // third axis, matrix convention): a big dot in Starved or a
-        // small one among the Controllers is the anomaly worth a look.
+        // third axis, matrix convention).
         const margins = rows.map(
           (r) => (r.per_game.pointsScored ?? 0) - (r.per_game.pointsConceded ?? 0),
         );
@@ -55,10 +50,11 @@ export function TeamLandscape({
         return {
           id: s.team_id,
           code: codeById.get(s.team_id) ?? s.team_id.toUpperCase(),
-          x: s.per_game.possessionPercent ?? s.possession_percent,
-          // Negated: the matrix plots smaller y higher, territory is
-          // higher-is-better.
-          y: -(s.per_game.territoryPercent ?? 0),
+          // Axes flipped (owner call 2026-07-09): territory along the
+          // bottom, boot output up — negated because the matrix plots
+          // smaller y higher.
+          x: s.per_game.territoryPercent ?? 0,
+          y: -(s.per_game.kickMeters ?? 0),
           weight: (margins[i]! - minM) / span,
         };
       });
@@ -70,14 +66,14 @@ export function TeamLandscape({
       flipped={infoOpen}
       back={
         <NarrativeBack
-          title="Landscape"
+          title="Territory"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
           onClose={() => setInfoOpen(false)}
-          read={analysis.data?.landscape}
+          read={analysis.data?.bootRoi}
           purpose={
-            <>Every nation in the team’s tier plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier plotted by kick metres against territory share — what the boot costs against the field it buys, territory along the bottom axis, from Field Winners to Pinned. Dot size is the side’s points margin per game.</>
           }
         />
       }
@@ -86,7 +82,7 @@ export function TeamLandscape({
       {/* Title left, utility info icon pinned right on the same line. */}
       <View style={styles.headerRow}>
         <CardTitle
-          title="Landscape"
+          title="Territory"
           flagCode={subjectTeam?.flag_code}
           code={subjectTeam?.short_name}
           comparison="vs TIER AVG"
@@ -97,7 +93,7 @@ export function TeamLandscape({
           style={styles.headerTrigger}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Explain the team landscape matrix">
+          accessibilityLabel="Explain the kicking return matrix">
           <FlipTrigger />
         </Pressable>
       </View>
@@ -110,9 +106,9 @@ export function TeamLandscape({
         <MatrixChart
           points={points}
           subjectId={teamId}
-          quadrants={{ tr: 'CONTROLLERS', tl: 'KICK-FIRST', br: 'PHASE BUILDERS', bl: 'STARVED' }}
-          xCaption="POSSESSION % →"
-          yCaption="TERRITORY % →"
+          quadrants={{ tr: 'FIELD WINNERS', tl: 'EMPTY BOOT', br: 'CARRY GAME', bl: 'PINNED' }}
+          xCaption="TERRITORY % →"
+          yCaption="KICK METRES →"
         />
       )}
 
