@@ -9,7 +9,6 @@ import { BreakdownTrade } from '@/components/insights/breakdown-trade';
 import { BootRoi } from '@/components/insights/boot-roi';
 import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
 import { SetPieceDiscipline } from '@/components/insights/set-piece-discipline';
-import { TrajectoryCard } from '@/components/insights/trajectory-card';
 import { TeamLandscape } from '@/components/insights/team-landscape';
 import { TeamProfileCard } from '@/components/my-team-profile-card';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
@@ -59,7 +58,6 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
       // duplication of the dedicated cards + the Stats pills.
       pages={[
         <TeamProfileCard key="profile" teamId={teamId} style={styles.pageCard} />,
-        <TrajectoryCard key="trajectory" teamId={teamId} style={styles.pageCard} />,
         <TeamLandscape key="landscape" teamId={teamId} style={styles.pageCard} />,
         <PossessionOutcome key="possession" teamId={teamId} style={styles.pageCard} />,
         <BootRoi key="boot" teamId={teamId} style={styles.pageCard} />,
