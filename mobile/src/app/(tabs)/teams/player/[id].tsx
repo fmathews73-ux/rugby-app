@@ -6,9 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { usePlayer, usePlayerPercentiles, useTeam, useTeams } from '@/api/hooks';
-import { JerseyAvatar } from '@/components/jersey-avatar';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { TEAM_JERSEY } from '@/lib/team-colors';
+import { CapsJerseyBadge, SquadBarbell, SquadMan } from '@/components/squad-jersey';
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
@@ -108,7 +107,7 @@ export default function PlayerCardScreen() {
               mark + nameplate), meta stack centred in the remaining
               right-hand space — NOT under the name. */}
           <View style={styles.heroIdentityGroup}>
-            <JerseyAvatar jersey={TEAM_JERSEY[p.team_id]} size={40} />
+            <CapsJerseyBadge teamId={p.team_id} caps={p.cap_count} />
             {/* First name over surname — the squad list's two-line
                 stack at hero scale. */}
             <View style={styles.heroNameStack}>
@@ -124,10 +123,15 @@ export default function PlayerCardScreen() {
             <Text style={styles.heroMetaText}>
               {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
             </Text>
-            <Text style={styles.heroMetaText}>
-              {p.height_cm} cm · {p.weight_kg} kg
-            </Text>
-            <Text style={styles.heroMetaText}>{p.cap_count} caps</Text>
+            {/* Measurables then career (owner call 2026-07-09): body
+                line first, caps on its own line beneath. Units stay —
+                icons alone aren't self-describing. */}
+            <View style={styles.heroCapsRow}>
+              <SquadMan teamId={p.team_id} />
+              <Text style={styles.heroMetaText}> {p.height_cm} cm · </Text>
+              <SquadBarbell teamId={p.team_id} />
+              <Text style={styles.heroMetaText}> {p.weight_kg} kg</Text>
+            </View>
           </View>
         </View>
       </View>
@@ -1040,6 +1044,11 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
     textTransform: 'uppercase',
+  },
+  // Jersey-and-caps pair — same icon+value grammar as the team hero.
+  heroCapsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   // Meta stack — quiet lines (position · age, measurables · caps,
   // team) left-aligned in the right-hand space.

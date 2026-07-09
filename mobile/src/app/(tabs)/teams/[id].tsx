@@ -18,13 +18,12 @@ import { FadingScrollView } from '@/components/fading-scroll-view';
 import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
+import { CapsJerseyBadge, SquadBarbell, SquadJersey, SquadMan } from '@/components/squad-jersey';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { JerseyAvatar } from '@/components/jersey-avatar';
 import { WORLD_CUP_WINS, TROPHY_COLOR } from '@/lib/honours';
-import { TEAM_JERSEY, jerseyGlyphColors } from '@/lib/team-colors';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
@@ -53,26 +52,6 @@ const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
   { id: 'stats', label: 'Stats' },
   { id: 'squad', label: 'Squad' },
 ];
-
-/** Squad-colour jersey at meta size — the Line-Up's CapsJersey
- *  treatment (solid shirt in the squad fill, trim-colour outline
- *  overlay for white shirts) at the 12pt icon register. */
-function SquadJersey({ teamId }: { teamId: string }) {
-  const glyph = jerseyGlyphColors(teamId);
-  if (!glyph) {
-    return <Ionicons name="shirt-outline" size={12} color={Colors.light.textSecondary} />;
-  }
-  return (
-    <View>
-      <Ionicons name="shirt" size={12} color={glyph.fill} />
-      {glyph.border ? (
-        <View style={styles.squadJerseyBorder} pointerEvents="none">
-          <Ionicons name="shirt-outline" size={12} color={glyph.border} />
-        </View>
-      ) : null}
-    </View>
-  );
-}
 
 /** Human position labels for the player rows. */
 const POSITION_LABELS: Record<Position, string> = {
@@ -712,7 +691,6 @@ function PlayerRow({
   onPress: () => void;
 }) {
   const age = ageFrom(player.date_of_birth);
-  const jersey = TEAM_JERSEY[teamId];
   return (
     <Pressable
       onPress={onPress}
@@ -721,7 +699,7 @@ function PlayerRow({
           sits. Teams with a jersey-colour entry get the coloured shirt
           badge (colours are factual — no crests, register #28);
           everyone else keeps the anonymous grey glyph. */}
-      <JerseyAvatar jersey={jersey} size={40} />
+      <CapsJerseyBadge teamId={teamId} caps={player.cap_count} />
       {/* First name over surname — two short lines instead of one
           truncated one now the chevron shares the row. */}
       <View style={styles.playerNameStack}>
@@ -736,9 +714,13 @@ function PlayerRow({
         <Text style={styles.playerMeta}>
           {POSITION_LABELS[player.primary_position]} · {age}
         </Text>
+        {/* Player-hero strap, broadcast order: body -> career
+            (height · weight · caps). */}
         <View style={styles.playerCapsRow}>
-          <SquadJersey teamId={teamId} />
-          <Text style={styles.playerMeta}>{player.cap_count}</Text>
+          <SquadMan teamId={teamId} />
+          <Text style={styles.playerMeta}> {player.height_cm} cm · </Text>
+          <SquadBarbell teamId={teamId} />
+          <Text style={styles.playerMeta}> {player.weight_kg} kg</Text>
         </View>
       </View>
       <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
@@ -932,13 +914,14 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
-  squadJerseyBorder: { position: 'absolute', top: 0, left: 0 },
   heroMetaSecondIcon: { marginLeft: 8 },
-  // Jersey-and-caps pair — same icon+value grammar as the unit header.
+  // Measurables lines — icon+value pairs WITH units (owner call
+  // 2026-07-09: icons alone aren't self-describing); caps sit on
+  // their own third line.
   playerCapsRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 4,
+    gap: 2,
   },
   // Header totals hug the card's RIGHT edge (owner call 2026-07-09)
   // — the card padding gives the same inset the title has on the left.
@@ -947,9 +930,10 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   playerMetaStack: {
-    // Narrow meta column pushed toward the card's right edge —
-    // maximum room for full surnames, meta still one aligned column.
-    width: 120,
+    // Meta column sized for the full measurables strap (body/barbell/
+    // jersey glyphs + values); names flex in what remains and
+    // ellipsise past it.
+    width: 130,
     marginLeft: Spacing.two,
     alignItems: 'flex-start',
     gap: 2,
