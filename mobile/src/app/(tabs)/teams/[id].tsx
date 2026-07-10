@@ -23,7 +23,6 @@ import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { WORLD_CUP_WINS, TROPHY_COLOR } from '@/lib/honours';
 import { TIER_1_IDS } from '@/lib/tiers';
 
 
@@ -117,7 +116,11 @@ export default function TeamHubScreen() {
 
   // Last-5 form-guide dots (newest first) — same window and grammar as
   // the TeamHeroRow surfaces.
-  const { outcomes } = useTeamRecentForm(teamId, 5);
+  // Prev-10 window drives BOTH the record tiles and the dot sequence
+  // beneath them — one window, one story (owner call 2026-07-10).
+  const { outcomes: outcomes10 } = useTeamRecentForm(teamId, 10);
+  const wins = outcomes10.filter((o) => o === 'W').length;
+  const losses = outcomes10.filter((o) => o === 'L').length;
 
   const squadSections = useMemo(() => {
     if (!players.data) return [];
@@ -179,53 +182,60 @@ export default function TeamHubScreen() {
           centred between the identity anchors, Last 5 + WC glyphs in
           the venue slot. */}
       <View style={styles.identityHeader}>
-        {/* Date slot: the trophy cabinet (owner call 2026-07-10) —
-            full team name stands in for nations without a title. */}
-        {WORLD_CUP_WINS[teamId] ? (
-          <View style={styles.heroVenueRow}>
-            <Text style={styles.heroPositionLine}>World Champions · </Text>
-            {Array.from({ length: WORLD_CUP_WINS[teamId]! }).map((_, i) => (
-              <Ionicons key={i} name="trophy" size={12} color={TROPHY_COLOR} />
-            ))}
-          </View>
-        ) : (
-          <Text style={styles.heroPositionLine}>{team.name}</Text>
-        )}
+        {/* Date slot: the universal rank line (owner call 2026-07-10
+            — trophies removed; the cabinet lives on the directory
+            rows' hero ledger only). */}
+        <View style={styles.heroVenueRow}>
+          <Text style={styles.heroPositionLine}>
+            {rankRow
+              ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts`
+              : 'Unranked'}
+          </Text>
+        </View>
         <View style={styles.heroRow}>
           <View style={styles.heroIdentityGroup}>
             <TeamFlagShield flagCode={team.flag_code} width={FlagSize.medium} />
             <Text style={styles.heroName}>{team.short_name}</Text>
           </View>
           <View style={styles.heroMetaStack}>
-            {/* World Rugby ranking as the score pair (owner call
-                2026-07-10): position and points. */}
+            {/* Prev-10 record in the MATCH SCORE pairing (owner call
+                2026-07-10): the leading side takes the winner box
+                (dark tile, inverse text), the trailing side the quiet
+                grey — level records sit both-quiet like a draw. */}
             <View style={styles.heroScoreRow}>
-              <View style={[styles.heroScoreBox, styles.heroRankBox]}>
-                {/* Superscript # — small glyph top-aligned beside the
-                    xl rank digits. */}
-                <Text style={styles.heroRankHash}>{rankRow ? 'RANK#' : ''}</Text>
-                <Text style={styles.heroScoreText}>
-                  {rankRow ? String(rankRow.rank).padStart(2, '0') : '—'}
+              <View style={[styles.heroScoreBox, wins > losses && styles.heroScoreBoxWinner]}>
+                <Text style={[styles.heroScoreText, wins > losses && styles.heroScoreTextWinner]}>
+                  {wins}
+                  <Text style={[styles.heroScoreUnit, wins > losses && styles.heroScoreTextWinner]}> W</Text>
                 </Text>
               </View>
-              <View style={[styles.heroScoreBox, styles.heroRankBox]}>
-                <Text style={styles.heroRankHash}>{rankRow ? 'PTS' : ''}</Text>
-                <Text style={styles.heroScoreText}>
-                  {rankRow ? rankRow.points.toFixed(1) : '—'}
+              <View style={[styles.heroScoreBox, losses > wins && styles.heroScoreBoxWinner]}>
+                <Text style={[styles.heroScoreText, losses > wins && styles.heroScoreTextWinner]}>
+                  {losses}
+                  <Text style={[styles.heroScoreUnit, losses > wins && styles.heroScoreTextWinner]}> L</Text>
                 </Text>
               </View>
             </View>
           </View>
+          {/* Away-side mirror of shield+code: the CAP VALUE in the
+              nation-code face beside a glyph-only jersey (owner call
+              2026-07-10, matching the directory rows). */}
           <View style={styles.heroBadgeSlot}>
-            <CapsJerseyBadge teamId={teamId} caps={squadTotals.caps} />
+            <Text style={styles.heroName}>{squadTotals.caps.toLocaleString('en-GB')}</Text>
+            <CapsJerseyBadge
+              teamId={teamId}
+              caps={0}
+              size={FlagSize.medium / 0.9045}
+              hideNumber
+            />
           </View>
         </View>
-        {/* Venue slot: form dots and the trophy cabinet on one line. */}
+        {/* Venue slot: the SEQUENCE behind the W/L tiles — last 10,
+            newest first. */}
         <View style={styles.heroVenueRow}>
-          {outcomes.length > 0 ? (
+          {outcomes10.length > 0 ? (
             <>
-              <Text style={styles.heroPositionLine}>Last {outcomes.length} · </Text>
-              {outcomes.map((o, i) => (
+              {outcomes10.map((o, i) => (
                 <View
                   key={i}
                   style={[
@@ -270,8 +280,10 @@ export default function TeamHubScreen() {
                   {/* Category-card header — icon + label left, unit
                       caps/players meta right, mirroring the Teams
                       landing's MY TEAM / TIER cards. */}
-                  <View style={styles.cardHeaderRow}>
-                    <View style={styles.squadTitleGroup}>
+                  <View style={styles.squadHeaderRow}>
+                    {/* Title CENTRED over the row (owner call
+                        2026-07-10); unit totals stay right-pinned. */}
+                    <View style={styles.squadTitleCentreFill} pointerEvents="none">
                       <Text style={styles.sectionLabel}>{section.label}</Text>
                     </View>
                     <View style={styles.groupMetaColumn}>
@@ -280,8 +292,6 @@ export default function TeamHubScreen() {
                         <Text style={styles.sectionLabel}>
                           {section.caps.toLocaleString('en-GB')}
                         </Text>
-                        <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.squadMetaSecondIcon} />
-                        <Text style={styles.sectionLabel}>{section.players.length}</Text>
                       </View>
                     </View>
                   </View>
@@ -289,14 +299,21 @@ export default function TeamHubScreen() {
                       the section header; the whisper-grey row
                       separators live on each player row. */}
                   <View style={styles.squadHeaderDivider} />
-                  {section.players.map((p) => (
-                    <PlayerRow
-                      key={p.id}
-                      player={p}
-                      teamId={teamId}
-                      onPress={() => router.push(`/teams/player/${p.id}`)}
-                    />
-                  ))}
+                  {/* Zero-gap block: the card's 8pt child gap was
+                      adding to the rows' own 16pt padding, spacing
+                      squad rows 40pt apart vs the fixtures' 32. */}
+                  <View>
+                    {section.players.map((p) => (
+                      <PlayerRow
+                        key={p.id}
+                        player={p}
+                        teamId={teamId}
+                        flagCode={team.flag_code}
+                        teamCode={team.short_name}
+                        onPress={() => router.push(`/teams/player/${p.id}`)}
+                      />
+                    ))}
+                  </View>
                 </View>
               ))
             )}
@@ -664,59 +681,75 @@ function formatStat(v: number, percent?: boolean): string {
 function PlayerRow({
   player,
   teamId,
+  flagCode,
+  teamCode,
   onPress,
 }: {
   player: Player;
   teamId: string;
+  flagCode: string;
+  teamCode: string;
   onPress: () => void;
 }) {
   return (
     <Pressable
       onPress={onPress}
       style={({ pressed }) => [styles.playerRow, pressed && styles.playerRowPressed]}>
-      {/* Teams-landing row grammar: 40pt avatar where the flag ball
-          sits. Teams with a jersey-colour entry get the coloured shirt
-          badge (colours are factual — no crests, register #28);
-          everyone else keeps the anonymous grey glyph. */}
-      <CapsJerseyBadge teamId={teamId} caps={player.cap_count} />
-      {/* First name over surname — two short lines instead of one
-          truncated one now the chevron shares the row. */}
-      <View style={styles.playerNameStack}>
-        <Text style={styles.playerName} numberOfLines={1}>
-          {givenNames(player.name)}
-        </Text>
-        <Text style={styles.playerName} numberOfLines={1}>
-          {surname(player.name)}
-        </Text>
-      </View>
-      <View style={styles.playerMetaStack}>
-        {/* Measurables in the hero's score-tile register at row scale
-            (owner call 2026-07-10) — the tiles column down the card
-            makes size comparison across the unit a glance. Position
-            text dropped: the unit title carries the category and the
-            player hero the exact position. */}
-        <View style={styles.playerTileRow}>
-          <View style={styles.playerTile}>
-            <Text style={styles.playerTileText}>
-              {ageFrom(player.date_of_birth)}
-              <Text style={styles.playerTileUnit}> YRS</Text>
+      {/* Fixture-row geometry (owner call 2026-07-10): centred
+          matchup cluster + meta line beneath, chevron absolute at the
+          edge. Identity = caps-on-jersey badge + two-line nameplate;
+          middle = the YRS/CM/KG boxes in the row score register. */}
+      <View style={styles.playerMatchupRow}>
+        {/* EDGE-ANCHORED wings (owner catch 2026-07-10): equal flexes
+            put every jersey on one left edge and every shield on one
+            right edge, with the box pair dead-centre — a centred
+            cluster drifted with name length. */}
+        <View style={styles.playerLeftWing}>
+          {/* Row-shield-height rule: badge = FlagSize.row ÷ 0.9045. */}
+          <CapsJerseyBadge
+            teamId={teamId}
+            caps={player.cap_count}
+            size={FlagSize.row / 0.9045}
+          />
+          <View style={styles.playerNameStack}>
+            <Text style={styles.playerName} numberOfLines={1}>
+              {givenNames(player.name)}
             </Text>
-          </View>
-          <View style={styles.playerTile}>
-            <Text style={styles.playerTileText}>
-              {player.height_cm}
-              <Text style={styles.playerTileUnit}> CM</Text>
-            </Text>
-          </View>
-          <View style={styles.playerTile}>
-            <Text style={styles.playerTileText}>
-              {player.weight_kg}
-              <Text style={styles.playerTileUnit}> KG</Text>
+            <Text style={styles.playerName} numberOfLines={1}>
+              {surname(player.name)}
             </Text>
           </View>
         </View>
+        {/* Away anchor — CODE then shield, right-edge flush. */}
+        <View style={styles.playerRightWing}>
+          <Text style={styles.playerTeamCode}>{teamCode}</Text>
+          <View style={styles.playerFlagWrap}>
+            <TeamFlagShield flagCode={flagCode} width={FlagSize.row} />
+          </View>
+        </View>
+        <View style={styles.playerMiddle}>
+          {/* Two boxes, not three — age lives on the meta line
+              (player-hero parity; the YRS box duplicated it). */}
+          <View style={styles.playerScoreBox}>
+            <Text style={styles.playerScoreText}>
+              {player.height_cm}
+              <Text style={styles.playerUnitText}> CM</Text>
+            </Text>
+          </View>
+          <View style={styles.playerScoreBox}>
+            <Text style={styles.playerScoreText}>
+              {player.weight_kg}
+              <Text style={styles.playerUnitText}> KG</Text>
+            </Text>
+          </View>
+        </View>
+        <View style={styles.playerRowChevron}>
+          <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
+        </View>
       </View>
-      <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
+      <Text style={styles.playerMetaLine}>
+        {POSITION_LABELS[player.primary_position]} · {ageFrom(player.date_of_birth)}
+      </Text>
     </Pressable>
   );
 }
@@ -833,8 +866,10 @@ const styles = StyleSheet.create({
   },
   heroBadgeSlot: {
     width: 88,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: Spacing.two,
   },
   heroTrophyRow: {
     flexDirection: 'row',
@@ -870,9 +905,10 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   heroScoreBox: {
-    // FIXED equal width — the rank and points tiles must match
-    // regardless of content (owner call 2026-07-10).
-    width: 72,
+    // Hug the numerals broadcast-bug style — the match score box /
+    // player CM-KG anatomy (owner call 2026-07-10, superseding the
+    // fixed-width trial).
+    minWidth: ScoreBoxSize.card.width,
     height: ScoreBoxSize.card.height,
     borderRadius: ScoreBoxSize.card.borderRadius,
     backgroundColor: '#F3F4F6',
@@ -885,19 +921,8 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xl,
     color: Colors.light.textSecondary,
   },
-  heroRankBox: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    justifyContent: 'center',
-    paddingTop: 4,
-  },
-  heroRankHash: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: 8,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    marginTop: 2,
-  },
+  heroScoreBoxWinner: { backgroundColor: Colors.light.textSecondary },
+  heroScoreTextWinner: { color: Colors.light.textInverse },
   heroScoreUnit: {
     fontFamily: 'Barlow_500Medium',
     fontSize: 8,
@@ -926,6 +951,21 @@ const styles = StyleSheet.create({
     height: StyleSheet.hairlineWidth,
     backgroundColor: '#C7CBD1',
   },
+  squadHeaderRow: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  squadTitleCentreFill: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
   cardHeaderRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -950,27 +990,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
   },
-  squadMetaSecondIcon: { marginLeft: 6 },
   playerRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingVertical: Spacing.two + 2,
+    // Fixture-row geometry: 16pt vertical padding, 4pt band gap.
+    paddingVertical: Spacing.three,
+    gap: 4,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#F3F4F6',
   },
   playerRowPressed: { opacity: 0.6 },
+  // Wings intrinsic at the edges, box pair ABSOLUTE-CENTRED over the
+  // row (owner catch 2026-07-10: unequal wings shoved a flexed middle
+  // off-centre) — jerseys flush left, shields flush right of a
+  // reserved chevron lane, boxes dead-centre on the card.
+  playerMatchupRow: {
+    position: 'relative',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    // Chevron lane — the shield stops here, the chevron owns the edge.
+    paddingRight: 18,
+  },
+  playerLeftWing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  playerRightWing: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  // Budgeted so the longest surnames clear the centred box pair.
   playerNameStack: {
-    // Flexible column so the fixed-width meta stack beside it always
-    // starts at the same x — meta text forms one left-aligned column
-    // down the card regardless of name length.
-    flex: 1,
+    maxWidth: 66,
   },
   playerName: {
     // Identity register — the condensed face in black, same as the
     // nation codes; names ARE identity data.
     fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
+    // Hero proportion law: name = code × (md 14 / xl 22) ≈ 0.64.
+    // Row code is lg 16 → name 16 × 0.64 ≈ 10 (xs).
+    fontSize: TextSize.xs,
     textTransform: 'uppercase',
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
@@ -982,32 +1042,52 @@ const styles = StyleSheet.create({
   // Measurables lines — icon+value pairs WITH units (owner call
   // 2026-07-09: icons alone aren't self-describing); caps sit on
   // their own third line.
-  // Row-scale score tiles (44×22 row register, units inside) — the
-  // hero's CM/KG pair one size down.
-  playerTileRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.two,
-  },
-  playerTile: {
-    minWidth: 44,
-    height: 22,
-    borderRadius: 4,
+  playerScoreBox: {
+    ...ScoreBoxSize.row,
+    minWidth: ScoreBoxSize.row.width + 10,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 6,
+    paddingHorizontal: 3,
   },
-  playerTileText: {
+  playerScoreText: {
+    fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
     color: Colors.light.textSecondary,
   },
-  playerTileUnit: {
+  playerUnitText: {
     fontFamily: 'Barlow_500Medium',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+  },
+  playerTeamCode: {
+    // 24pt-shield rule: sport-display face at lg beside row shields.
+    width: 40,
+    textAlign: 'center',
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.text,
+  },
+  playerFlagWrap: {
+    width: FlagSize.row,
+    height: FlagSize.row,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playerRowChevron: {
+    position: 'absolute',
+    right: -4,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  playerMetaLine: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
   },
   // Header totals hug the card's RIGHT edge (owner call 2026-07-09)
   // — the card padding gives the same inset the title has on the left.
@@ -1015,13 +1095,18 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.two,
     alignItems: 'flex-end',
   },
-  // Tile trio takes its intrinsic width, pinned toward the chevron —
-  // the stale 130pt strap column was squeezing three 44pt tiles.
-  // Names flex in what remains and ellipsise past it.
-  playerMetaStack: {
-    marginLeft: Spacing.two,
-    alignItems: 'flex-end',
-    gap: 2,
+  // Fixed-width middle slot — the fixture row's score column, three
+  // boxes wide.
+  playerMiddle: {
+    position: 'absolute',
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
   empty: {
     fontSize: TextSize.sm,

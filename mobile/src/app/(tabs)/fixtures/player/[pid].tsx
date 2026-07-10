@@ -207,15 +207,20 @@ export default function PlayerMatchScreen() {
           {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
         </Text>
         <View style={styles.heroRow}>
-          {/* Nation anchors the HOME side (owner flip 2026-07-10):
-              shield then code — the match hero's home anatomy. */}
+          {/* Player anchors the HOME side (owner flip 2026-07-10 pm):
+              caps jersey then nameplate — the home anatomy. */}
           <View style={styles.heroIdentityGroup}>
-            {team.data ? (
-              <TeamFlagShield flagCode={team.data.flag_code} width={FlagSize.medium} />
-            ) : null}
-            <Text style={styles.heroCode}>
-              {team.data?.short_name ?? p.team_id.toUpperCase()}
-            </Text>
+            {/* Sized to the shield's true rendered height (width 40 ÷
+                0.9045 aspect ≈ 44pt) so the two anchors stand level. */}
+            <CapsJerseyBadge teamId={p.team_id} caps={p.cap_count} size={FlagSize.medium / 0.9045} />
+            <View style={styles.heroNameStack}>
+              <Text style={styles.heroName} numberOfLines={1}>
+                {givenNames(p.name)}
+              </Text>
+              <Text style={styles.heroName} numberOfLines={1}>
+                {surname(p.name)}
+              </Text>
+            </View>
           </View>
           <View style={styles.heroMetaStack}>
             {/* Measurables as the match hero's score pair — centred
@@ -236,18 +241,15 @@ export default function PlayerMatchScreen() {
               </View>
             </View>
           </View>
-          {/* Player anchors the AWAY side: nameplate then the caps
-              jersey — the away-side mirror. */}
+          {/* Nation anchors the AWAY side: code then shield — the
+              match hero's away mirror. */}
           <View style={styles.heroNationGroup}>
-            <View style={styles.heroNameStack}>
-              <Text style={styles.heroName} numberOfLines={1}>
-                {givenNames(p.name)}
-              </Text>
-              <Text style={styles.heroName} numberOfLines={1}>
-                {surname(p.name)}
-              </Text>
-            </View>
-            <CapsJerseyBadge teamId={p.team_id} caps={p.cap_count} />
+            <Text style={styles.heroCode}>
+              {team.data?.short_name ?? p.team_id.toUpperCase()}
+            </Text>
+            {team.data ? (
+              <TeamFlagShield flagCode={team.data.flag_code} width={FlagSize.medium} />
+            ) : null}
           </View>
         </View>
         {/* Venue-line slot of the match hero — DUMMY copy until the

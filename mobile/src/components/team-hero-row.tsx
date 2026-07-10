@@ -3,28 +3,23 @@ import { StyleSheet, Text, View } from 'react-native';
 
 import type { Team } from '@rugby-app/shared';
 
-import { Ionicons } from '@expo/vector-icons';
-
+import { CapsJerseyBadge } from '@/components/squad-jersey';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { useTeamPlayers } from '@/api/hooks';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
-import { TROPHY_COLOR, WORLD_CUP_WINS } from '@/lib/honours';
 
-const FORM_LOOKBACK = 5;
-
-// Same outcome trio as FormCircles / the Form chart.
-const WIN_COLOR = '#059669';
-const LOSS_COLOR = '#DC2626';
-const DRAW_COLOR = '#9CA3AF';
+// One window, one story — prev-10 record.
+const FORM_LOOKBACK = 10;
 
 /**
- * Compact row-scale version of the drill-hero grammar, shared by every
- * "my team" identity surface (Teams directory My Team card, Home Team
- * Selector, Team Picker rows): flag + CODE anchored left, two quiet
- * meta lines stacked left-aligned in the remaining space (world rank ·
- * points · trophies, then the last-5 record as text), optional
- * accessory pinned right. The dot-strip form visual stays off these
- * rows — the record line is the summary, the dots live in Preview.
+ * EXACT clone of the fixtures-list row geometry (owner call
+ * 2026-07-10: "as close as possible to the fixtures row list items"):
+ * centred cluster of [24pt shield][lg code, fixed 40 slot][fixed 96
+ * middle: W/L boxes in the ScoreBoxSize.row register with the match
+ * pairing][caps + 24pt-scale jersey], then the rank line in the
+ * fixture row's metaText register. Chevron rides absolutely at the
+ * right edge like rowChevron. Dot sequence removed (owner call).
  */
 export function TeamHeroRow({
   team,
@@ -37,91 +32,123 @@ export function TeamHeroRow({
   right?: ReactNode;
 }) {
   const { outcomes } = useTeamRecentForm(team.id, FORM_LOOKBACK);
+  const wins = outcomes.filter((o) => o === 'W').length;
+  const losses = outcomes.filter((o) => o === 'L').length;
+  const players = useTeamPlayers(team.id);
+  const caps = (players.data ?? []).reduce((sum, pl) => sum + pl.cap_count, 0);
 
   return (
-    <View style={styles.row}>
-      <View style={styles.identityGroup}>
-        <TeamFlagShield flagCode={team.flag_code} width={FlagSize.medium} />
-        <Text style={styles.code}>{team.short_name}</Text>
-      </View>
-      <View style={styles.metaStack}>
-        <Text style={styles.metaText}>
-          {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
-        </Text>
-        {outcomes.length > 0 ? (
-          // Result sequence as bare colour dots (newest first, matching
-          // the old FormCircles convention) — sized to sit inside the
-          // meta line's height so the row rhythm doesn't change.
-          <View style={styles.recordRow}>
-            <Text style={styles.metaText}>Last {outcomes.length} · </Text>
-            {outcomes.map((o, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.recordDot,
-                  {
-                    backgroundColor:
-                      o === 'W' ? WIN_COLOR : o === 'L' ? LOSS_COLOR : DRAW_COLOR,
-                  },
-                ]}
-              />
-            ))}
+    <View style={styles.rowOuter}>
+      <View style={styles.matchupRow}>
+        <View style={styles.flagWrap}>
+          <TeamFlagShield flagCode={team.flag_code} width={FlagSize.row} />
+        </View>
+        <Text style={styles.teamCode}>{team.short_name}</Text>
+        <View style={styles.middle}>
+          <View style={[styles.scoreBoxSmall, wins > losses && styles.scoreBoxSmallWinner]}>
+            <Text style={[styles.scoreBoxSmallText, wins > losses && styles.scoreBoxSmallTextWinner]}>
+              {wins}
+              <Text style={[styles.unitText, wins > losses && styles.scoreBoxSmallTextWinner]}> W</Text>
+            </Text>
           </View>
-        ) : null}
-        {WORLD_CUP_WINS[team.id] ? (
-          <View style={styles.recordRow}>
-            <Text style={styles.metaText}>WC · </Text>
-            {Array.from({ length: WORLD_CUP_WINS[team.id]! }).map((_, i) => (
-              <Ionicons key={i} name="trophy" size={10} color={TROPHY_COLOR} />
-            ))}
+          <View style={[styles.scoreBoxSmall, losses > wins && styles.scoreBoxSmallWinner]}>
+            <Text style={[styles.scoreBoxSmallText, losses > wins && styles.scoreBoxSmallTextWinner]}>
+              {losses}
+              <Text style={[styles.unitText, losses > wins && styles.scoreBoxSmallTextWinner]}> L</Text>
+            </Text>
           </View>
-        ) : null}
+        </View>
+        <Text style={styles.capsText}>{caps > 0 ? caps.toLocaleString('en-GB') : '—'}</Text>
+        <View style={styles.flagWrap}>
+          <CapsJerseyBadge teamId={team.id} caps={0} size={FlagSize.row / 0.9045} hideNumber />
+        </View>
+        {right ? <View style={styles.rowChevron}>{right}</View> : null}
       </View>
-      {right}
+      <Text style={styles.metaText}>
+        {rankRow
+          ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts`
+          : 'Unranked'}
+      </Text>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: Spacing.three,
+  rowOuter: {
+    // Callers wrap this in a ROW Pressable — flex to claim its width.
+    flex: 1,
+    gap: 4,
   },
-  identityGroup: {
+  matchupRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.two,
   },
-  code: {
-    // Sport-display moment: Barlow Condensed Bold Italic — the family
-    // file carries the weight, so no fontWeight (RN would fake-bold it).
+  flagWrap: {
+    width: FlagSize.row,
+    height: FlagSize.row,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  teamCode: {
+    // 24pt-shield rule: sport-display face at lg beside row shields.
+    width: 40,
+    textAlign: 'center',
     fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.xl,
-    letterSpacing: TextTracking.wide,
+    fontSize: TextSize.lg,
     color: Colors.light.text,
   },
-  metaStack: {
-    flex: 1,
-    alignItems: 'flex-start',
-    gap: Spacing.one,
-    paddingLeft: Spacing.three,
+  // Fixed-width middle slot — the fixture row's score column.
+  middle: {
+    width: 96,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+  },
+  scoreBoxSmall: {
+    ...ScoreBoxSize.row,
+    minWidth: ScoreBoxSize.row.width + 6,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 3,
+  },
+  scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
+  scoreBoxSmallText: {
+    fontSize: TextSize.lg,
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    color: Colors.light.textSecondary,
+  },
+  scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
+  unitText: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: 7,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+  },
+  // Away-side mirror of the code slot — caps count in the same
+  // register beside the jersey glyph.
+  capsText: {
+    width: 40,
+    textAlign: 'center',
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.lg,
+    color: Colors.light.text,
+  },
+  rowChevron: {
+    position: 'absolute',
+    right: -Spacing.two,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   metaText: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
-    fontVariant: ['tabular-nums'],
-  },
-  recordRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  // 7pt dots — small enough to live inside the meta line's height.
-  recordDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 999,
+    textAlign: 'center',
   },
 });

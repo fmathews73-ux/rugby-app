@@ -58,10 +58,14 @@ export function CapsJerseyBadge({
   teamId,
   caps,
   size = 40,
+  hideNumber = false,
 }: {
   teamId: string;
   caps: number;
   size?: number;
+  /** Glyph-only mode — row-scale jerseys are too small to hold a
+   *  four-digit squad total; the count rides beside them instead. */
+  hideNumber?: boolean;
 }) {
   const glyph = jerseyGlyphColors(teamId);
   const numberColor = glyph ? (glyph.border ?? '#FFFFFF') : Colors.light.textSecondary;
@@ -79,6 +83,7 @@ export function CapsJerseyBadge({
       ) : (
         <Ionicons name="shirt-outline" size={size} color={Colors.light.textSecondary} />
       )}
+      {hideNumber ? null : (
       <View style={styles.badgeFill} pointerEvents="none">
         {/* Nudged into the shirt's torso — the glyph's collar shifts
             its optical centre below the box centre. */}
@@ -92,6 +97,7 @@ export function CapsJerseyBadge({
           {caps}
         </Text>
       </View>
+      )}
     </View>
   );
 }

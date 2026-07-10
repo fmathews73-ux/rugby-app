@@ -229,7 +229,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: Spacing.four,
-    paddingVertical: Spacing.two + 4,
+    // Fixture-row geometry: same 16pt vertical padding.
+    paddingVertical: Spacing.three,
     gap: Spacing.three,
   },
   teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
