@@ -18,7 +18,7 @@ import { FadingScrollView } from '@/components/fading-scroll-view';
 import { TeamPreviewBlock } from '@/components/my-team-preview-cards';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
-import { CapsJerseyBadge, SquadBarbell, SquadJersey, SquadMan } from '@/components/squad-jersey';
+import { CapsJerseyBadge, SquadJersey } from '@/components/squad-jersey';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -652,7 +652,6 @@ function PlayerRow({
   teamId: string;
   onPress: () => void;
 }) {
-  const age = ageFrom(player.date_of_birth);
   return (
     <Pressable
       onPress={onPress}
@@ -673,16 +672,30 @@ function PlayerRow({
         </Text>
       </View>
       <View style={styles.playerMetaStack}>
-        <Text style={styles.playerMeta}>
-          {POSITION_LABELS[player.primary_position]} · {age}
-        </Text>
-        {/* Player-hero strap, broadcast order: body -> career
-            (height · weight · caps). */}
-        <View style={styles.playerCapsRow}>
-          <SquadMan teamId={teamId} />
-          <Text style={styles.playerMeta}> {player.height_cm} cm · </Text>
-          <SquadBarbell teamId={teamId} />
-          <Text style={styles.playerMeta}> {player.weight_kg} kg</Text>
+        {/* Measurables in the hero's score-tile register at row scale
+            (owner call 2026-07-10) — the tiles column down the card
+            makes size comparison across the unit a glance. Position
+            text dropped: the unit title carries the category and the
+            player hero the exact position. */}
+        <View style={styles.playerTileRow}>
+          <View style={styles.playerTile}>
+            <Text style={styles.playerTileText}>
+              {ageFrom(player.date_of_birth)}
+              <Text style={styles.playerTileUnit}> YRS</Text>
+            </Text>
+          </View>
+          <View style={styles.playerTile}>
+            <Text style={styles.playerTileText}>
+              {player.height_cm}
+              <Text style={styles.playerTileUnit}> CM</Text>
+            </Text>
+          </View>
+          <View style={styles.playerTile}>
+            <Text style={styles.playerTileText}>
+              {player.weight_kg}
+              <Text style={styles.playerTileUnit}> KG</Text>
+            </Text>
+          </View>
         </View>
       </View>
       <Ionicons name="chevron-forward" size={16} color="#C7CBD1" />
@@ -900,10 +913,32 @@ const styles = StyleSheet.create({
   // Measurables lines — icon+value pairs WITH units (owner call
   // 2026-07-09: icons alone aren't self-describing); caps sit on
   // their own third line.
-  playerCapsRow: {
+  // Row-scale score tiles (44×22 row register, units inside) — the
+  // hero's CM/KG pair one size down.
+  playerTileRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: Spacing.two,
+  },
+  playerTile: {
+    minWidth: 44,
+    height: 22,
+    borderRadius: 4,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 6,
+  },
+  playerTileText: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    color: Colors.light.textSecondary,
+  },
+  playerTileUnit: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: 7,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
   },
   // Header totals hug the card's RIGHT edge (owner call 2026-07-09)
   // — the card padding gives the same inset the title has on the left.
@@ -911,13 +946,12 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.two,
     alignItems: 'flex-end',
   },
+  // Tile trio takes its intrinsic width, pinned toward the chevron —
+  // the stale 130pt strap column was squeezing three 44pt tiles.
+  // Names flex in what remains and ellipsise past it.
   playerMetaStack: {
-    // Meta column sized for the full measurables strap (body/barbell/
-    // jersey glyphs + values); names flex in what remains and
-    // ellipsise past it.
-    width: 130,
     marginLeft: Spacing.two,
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
     gap: 2,
   },
   empty: {
