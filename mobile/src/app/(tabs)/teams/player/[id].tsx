@@ -9,6 +9,7 @@ import { usePlayer, usePlayerPercentiles, useTeam, useTeams } from '@/api/hooks'
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { CapsJerseyBadge, SquadBarbell, SquadMan } from '@/components/squad-jersey';
 import { CardCarousel } from '@/components/card-carousel';
+import { PlayerMatrixCard } from '@/components/insights/player-matrix-card';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
@@ -147,7 +148,9 @@ export default function PlayerCardScreen() {
             isForward={isForward}
           />
         )}
-        {tab === 'stats' && <PlayerStatsTable playerId={playerId} />}
+        {tab === 'stats' && (
+          <PlayerStatsPane playerId={playerId} isForward={isForward} />
+        )}
       </FadingScrollView>
     </SafeAreaView>
   );
@@ -192,24 +195,151 @@ function PlayerPreviewBlock({
               style={styles.pageCard}
               read={profileRead}
             />,
-            ...(isForward ? FORWARD_CATEGORY_ORDER : BACK_CATEGORY_ORDER).map(
-              (key) => {
-                const cat = SCOUT_CATEGORIES[key]!;
-                return (
-                  <ScoutingCard
-                    key={key}
-                    title={cat.title}
-                    purpose={cat.purpose}
+            // Style-of-player matrices (owner calls 2026-07-10): the
+            // tier-matrix grammar at player scale vs the ten most-used
+            // players in his position group. SHARED duo first (work
+            // rate and ball security read the same in any shirt
+            // number), then the role set — backs aren't measured in
+            // pack currency.
+            <PlayerMatrixCard
+              key="engine"
+              playerId={playerId}
+              teamId={teamId}
+              title="Engine"
+              purpose="The two-way work-rate map: the ten most-used players in his position plotted by carries against tackles per game, him in his squad colour — top-right does both jobs, bottom-left is along for the ride. Dot size is minutes played."
+              accessibilityLabel="Explain the engine matrix"
+              xAxis={{ field: 'carries' }}
+              yAxis={{ field: 'tackles_made' }}
+              quadrants={{ tr: 'WORKHORSES', tl: 'STOPPERS', br: 'CARRIERS', bl: 'PASSENGERS' }}
+              xCaption="CARRIES /GAME →"
+              yCaption="TACKLES /GAME →"
+              style={styles.pageCard}
+            />,
+            <PlayerMatrixCard
+              key="hands"
+              playerId={playerId}
+              teamId={teamId}
+              title="Hands"
+              purpose="Ball security under volume: touches per game (carries plus passes) against handling errors, vs the ten most-used players in his position — safe hands are busy AND tidy; butterfingers pay for their volume. Fewer errors plots higher. Dot size is minutes played."
+              accessibilityLabel="Explain the hands matrix"
+              xAxis={{ sum: ['carries', 'passes'] }}
+              yAxis={{ field: 'handling_errors' }}
+              yLowerIsBetter
+              quadrants={{ tr: 'SAFE HANDS', tl: 'TIDY', br: 'BUTTERFINGERS', bl: 'LIABILITIES' }}
+              xCaption="TOUCHES /GAME →"
+              yCaption="FEWER ERRORS →"
+              style={styles.pageCard}
+            />,
+            ...(isForward
+              ? [
+                  <PlayerMatrixCard
+                    key="punch"
                     playerId={playerId}
-                    metrics={cat.metrics}
+                    teamId={teamId}
+                    title="Carries"
+                    purpose="Volume against yield among the ten most-used players in his position: carries per game against the metres each carry buys — the wrecking ball carries often AND far; hard yards is honest graft that gains little. Dot size is minutes played."
+                    accessibilityLabel="Explain the carries matrix"
+                    xAxis={{ field: 'carries' }}
+                    yAxis={{ ratio: ['metres_carried', 'carries'] }}
+                    quadrants={{ tr: 'WRECKING BALLS', tl: 'EXPLOSIVE', br: 'HARD YARDS', bl: 'ON THE FRINGES' }}
+                    xCaption="CARRIES /GAME →"
+                    yCaption="METRES PER CARRY →"
                     style={styles.pageCard}
-                  />
-                );
-              },
-            ),
+                  />,
+                  <PlayerMatrixCard
+                    key="jackal"
+                    playerId={playerId}
+                    teamId={teamId}
+                    title="Jackal"
+                    purpose="The breakdown trade among the ten most-used players in his position: ruck arrivals per game against turnovers won — the clean thief attends AND steals; body work hits every ruck for little return. Dot size is minutes played."
+                    accessibilityLabel="Explain the jackal matrix"
+                    xAxis={{ field: 'rucks_hit' }}
+                    yAxis={{ field: 'turnovers_won' }}
+                    quadrants={{ tr: 'CLEAN THIEVES', tl: 'POACHERS', br: 'BODY WORK', bl: 'BYSTANDERS' }}
+                    xCaption="RUCK ARRIVALS /GAME →"
+                    yCaption="TURNOVERS WON /GAME →"
+                    style={styles.pageCard}
+                  />,
+                ]
+              : [
+                  <PlayerMatrixCard
+                    key="strike"
+                    playerId={playerId}
+                    teamId={teamId}
+                    title="Strike"
+                    purpose="The line-breaking threat among the ten most-used players in his position: defenders beaten per game against clean breaks — top-right beats his man AND finds the hole; the ghost slips through without contact. Dot size is minutes played."
+                    accessibilityLabel="Explain the strike matrix"
+                    xAxis={{ field: 'defenders_beaten' }}
+                    yAxis={{ field: 'clean_breaks' }}
+                    quadrants={{ tr: 'LINE BREAKERS', tl: 'GHOSTS', br: 'HARD TO HANDLE', bl: 'CONTAINED' }}
+                    xCaption="DEFENDERS BEATEN /GAME →"
+                    yCaption="CLEAN BREAKS /GAME →"
+                    style={styles.pageCard}
+                  />,
+                  <PlayerMatrixCard
+                    key="playmaker"
+                    playerId={playerId}
+                    teamId={teamId}
+                    title="Playmaker"
+                    purpose="Distribution against creation among the ten most-used players in his position: passes per game against try assists — the puppet master moves the ball AND makes tries; the link man keeps it moving without the final touch. Dot size is minutes played."
+                    accessibilityLabel="Explain the playmaker matrix"
+                    xAxis={{ field: 'passes' }}
+                    yAxis={{ field: 'try_assists' }}
+                    quadrants={{ tr: 'PUPPET MASTERS', tl: 'CLINICAL', br: 'LINK MEN', bl: 'BIT PART' }}
+                    xCaption="PASSES /GAME →"
+                    yCaption="TRY ASSISTS /GAME →"
+                    style={styles.pageCard}
+                  />,
+                  <PlayerMatrixCard
+                    key="boot"
+                    playerId={playerId}
+                    teamId={teamId}
+                    title="Boot"
+                    purpose="Kicking volume against yield among the ten most-used players in his position: kicks from hand per game against the metres each kick buys — the launcher kicks often AND long; the short game trades distance for contestables. Dot size is minutes played."
+                    accessibilityLabel="Explain the boot matrix"
+                    xAxis={{ field: 'kicks_from_hand' }}
+                    yAxis={{ ratio: ['kick_metres', 'kicks_from_hand'] }}
+                    quadrants={{ tr: 'LAUNCHERS', tl: 'LONG RANGE', br: 'SHORT GAME', bl: 'BALL IN HAND' }}
+                    xCaption="KICKS FROM HAND /GAME →"
+                    yCaption="METRES PER KICK →"
+                    style={styles.pageCard}
+                  />,
+                ]),
           ]}
         />
       </View>
+    </View>
+  );
+}
+
+// ─── Stats pane (peer bars + reference table) ──────────────────────────────
+
+/** Stats = the numbers pane (owner call 2026-07-10): the four
+ *  category peer-bar cards, STACKED (stats are never carousels) —
+ *  the original three-column table is deleted; the bars ARE the
+ *  record now. Profile keeps shape and style (radar + matrices). */
+function PlayerStatsPane({
+  playerId,
+  isForward,
+}: {
+  playerId: string;
+  isForward: boolean;
+}) {
+  return (
+    <View style={styles.profileStack}>
+      {(isForward ? FORWARD_CATEGORY_ORDER : BACK_CATEGORY_ORDER).map((key) => {
+        const cat = SCOUT_CATEGORIES[key]!;
+        return (
+          <ScoutingCard
+            key={key}
+            title={cat.title}
+            purpose={cat.purpose}
+            playerId={playerId}
+            metrics={cat.metrics}
+            style={styles.stackCard}
+          />
+        );
+      })}
     </View>
   );
 }
@@ -610,145 +740,6 @@ function SeasonCard({
   );
 }
 
-// ─── Stats table ────────────────────────────────────────────────────────────
-
-const NUM_COL_WIDTH = 52;
-
-const STAT_GROUPS: readonly {
-  label: string;
-  rows: readonly { field: PlayerStatField; label: string }[];
-}[] = [
-  {
-    label: 'Attack',
-    rows: [
-      { field: 'tries', label: 'Tries' },
-      { field: 'try_assists', label: 'Try assists' },
-      { field: 'points', label: 'Points' },
-      { field: 'carries', label: 'Carries' },
-      { field: 'metres_carried', label: 'Metres carried' },
-      { field: 'clean_breaks', label: 'Clean breaks' },
-      { field: 'defenders_beaten', label: 'Defenders beaten' },
-      { field: 'offloads', label: 'Offloads' },
-      { field: 'passes', label: 'Passes' },
-      { field: 'handling_errors', label: 'Handling errors' },
-    ],
-  },
-  {
-    label: 'Kicking',
-    rows: [
-      { field: 'conversions', label: 'Conversions' },
-      { field: 'penalty_goals', label: 'Penalty goals' },
-      { field: 'drop_goals', label: 'Drop goals' },
-      { field: 'kicks_from_hand', label: 'Kicks from hand' },
-      { field: 'kick_metres', label: 'Kick metres' },
-    ],
-  },
-  {
-    label: 'Defence',
-    rows: [
-      { field: 'tackles_made', label: 'Tackles made' },
-      { field: 'missed_tackles', label: 'Missed tackles' },
-      { field: 'turnovers_won', label: 'Turnovers won' },
-    ],
-  },
-  {
-    label: 'Breakdown & set piece',
-    rows: [
-      { field: 'rucks_hit', label: 'Rucks hit' },
-      { field: 'lineout_takes', label: 'Lineout takes' },
-      { field: 'lineout_steals', label: 'Lineout steals' },
-    ],
-  },
-  {
-    label: 'Discipline',
-    rows: [
-      { field: 'penalties_conceded', label: 'Penalties conceded' },
-      { field: 'yellow_cards', label: 'Yellow cards' },
-      { field: 'red_cards', label: 'Red cards' },
-    ],
-  },
-];
-
-/**
- * Full numeric record for the Stats pane — every sheet field grouped by
- * category with total, per-game, and per-80 columns. The numbers-first
- * counterpart to the Insights pane's percentile read.
- */
-function PlayerStatsTable({ playerId }: { playerId: string }) {
-  const [infoOpen, setInfoOpen] = useState(false);
-  const { data, isLoading } = usePlayerAggregate(playerId);
-
-  return (
-    <FadeCard
-      flipped={infoOpen}
-      back={
-        <NarrativeBack
-          title="Statistics"
-          onClose={() => setInfoOpen(false)}
-          purpose={
-            <>
-              The season record: Total is the raw sum, /game divides by
-              appearances, /80 scales to a full-match rate — the fairest
-              comparison, since a 25-minute bench shift is not punished
-              for shorter time on the pitch.
-            </>
-          }
-        />
-      }
-      front={
-        <View style={[styles.card, styles.cardFill]}>
-      <View style={styles.headerRow}>
-        <Text style={styles.sectionLabel}>Statistics</Text>
-        <Pressable
-          onPress={() => setInfoOpen(true)}
-          hitSlop={10}
-          accessibilityRole="button"
-          accessibilityLabel="Explain the statistics columns">
-          <FlipTrigger />
-        </Pressable>
-      </View>
-
-      {isLoading && !data ? (
-        <Text style={styles.empty}>Loading…</Text>
-      ) : !data || data.appearances === 0 ? (
-        <Text style={styles.empty}>No appearances yet.</Text>
-      ) : (
-        <>
-          {STAT_GROUPS.map((group) => (
-            <View key={group.label} style={styles.statGroup}>
-              {/* Column heads ride every category row so the scale is
-                  never off-screen mid-scroll (owner call 2026-07-10). */}
-              <View style={styles.statColHeadRow}>
-                <Text style={[styles.statGroupLabel, styles.statLabelSpacer]}>
-                  {group.label}
-                </Text>
-                <Text style={styles.statColHead}>Total</Text>
-                <Text style={styles.statColHead}>/game</Text>
-                <Text style={styles.statColHead}>/80</Text>
-              </View>
-              {group.rows.map((row) => (
-                <View key={row.field} style={styles.statRow}>
-                  <Text style={styles.statRowLabel}>{row.label}</Text>
-                  <Text style={styles.statCell}>{data.totals[row.field]}</Text>
-                  <Text style={styles.statCell}>{formatPer80(round1(data.perGame[row.field]))}</Text>
-                  <Text style={styles.statCell}>{formatPer80(round1(data.per80[row.field]))}</Text>
-                </View>
-              ))}
-            </View>
-          ))}
-        </>
-      )}
-
-        </View>
-      }
-    />
-  );
-}
-
-function round1(v: number): number {
-  return Math.round(v * 10) / 10;
-}
-
 function givenNames(full: string): string {
   const i = full.lastIndexOf(' ');
   return i === -1 ? full : full.slice(0, i);
@@ -768,10 +759,6 @@ function ageFrom(dobIso: string): number {
     (now.getMonth() === dob.getMonth() && now.getDate() < dob.getDate());
   if (beforeBirthday) age--;
   return age;
-}
-
-function formatPer80(v: number): string {
-  return Number.isInteger(v) ? String(v) : v.toFixed(1);
 }
 
 const styles = StyleSheet.create({
@@ -1089,48 +1076,6 @@ const styles = StyleSheet.create({
   // Trend
 
   // Stats table
-  statColHeadRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    marginTop: Spacing.one,
-  },
-  statLabelSpacer: { flex: 1 },
-  statColHead: {
-    width: NUM_COL_WIDTH,
-    textAlign: 'right',
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.xs,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  statGroup: {
-    gap: 6,
-    marginTop: Spacing.two,
-  },
-  statGroupLabel: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
-  statRow: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-  },
-  statRowLabel: {
-    flex: 1,
-    fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-  },
-  statCell: {
-    width: NUM_COL_WIDTH,
-    textAlign: 'right',
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    fontVariant: ['tabular-nums'],
-  },
 
   // Analysis narrative — same grammar as the match analysis card:
   // fixed-gap stack, small-caps centred mini-labels, prose beneath.

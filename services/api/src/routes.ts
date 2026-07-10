@@ -504,6 +504,7 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       // bars read per-game vs the average peer (owner call 2026-07-09:
       // per-80/percentile framing was analyst-grade mental fatigue).
       const gameRatesByPlayer = new Map<string, Record<string, number>>();
+      const minutesByPlayer = new Map<string, number>();
       let subjectAppearances = 0;
 
       for (const p of store.players) {
@@ -537,6 +538,7 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
         }
         ratesByPlayer.set(p.id, rates);
         gameRatesByPlayer.set(p.id, gameRates);
+        minutesByPlayer.set(p.id, minutes);
       }
 
       const subjectRates = ratesByPlayer.get(subject.id);
@@ -549,6 +551,7 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
           appearances: 0,
           peers: ratesByPlayer.size,
           metrics: [],
+          pool: [],
         };
       }
 
@@ -576,6 +579,13 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
         appearances: subjectAppearances,
         peers: peerRates.length,
         metrics,
+        // Per-GAME pool rates — the matrix dot cloud (per-game keeps
+        // the fan framing; minutes carry fairness via dot size).
+        pool: [...gameRatesByPlayer.entries()].map(([playerId, rates]) => ({
+          player_id: playerId,
+          minutes: minutesByPlayer.get(playerId) ?? 0,
+          rates,
+        })),
       };
     },
   );

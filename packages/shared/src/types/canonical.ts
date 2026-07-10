@@ -432,6 +432,14 @@ export interface PlayerPercentiles {
      *  reference the profile bars run against. */
     peer_avg: number;
   }[];
+  /** The qualifying peer pool's own per-GAME rates (subject included)
+   *  — the dot cloud behind the player matrices. Minutes drive dot
+   *  size so cameos read smaller than starters. */
+  pool: {
+    player_id: PlayerId;
+    minutes: number;
+    rates: Record<string, number>;
+  }[];
 }
 
 /**

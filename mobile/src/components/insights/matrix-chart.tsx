@@ -44,6 +44,7 @@ export function MatrixChart({
   xCaption,
   yCaption,
   sizeLabel = 'MARGIN',
+  subjectColor,
   minHeight = 200,
 }: {
   points: readonly MatrixPoint[];
@@ -74,6 +75,9 @@ export function MatrixChart({
   /** Rotated left-edge caption, reading upward — the arrow should
    *  describe what increases towards the TOP of the chart. */
   yCaption: string;
+  /** Subject dot colour override — player matrices pass the SQUAD
+   *  colour (subject ids are player ids, so teamDotColor misses). */
+  subjectColor?: string;
   minHeight?: number;
 }) {
   const [canvas, setCanvas] = useState({ w: 0, h: 0 });
@@ -308,7 +312,7 @@ export function MatrixChart({
                   cx={xOf(subject.x)}
                   cy={yOf(subject.y)}
                   r={subject.weight !== undefined ? 3.5 + subject.weight * 3.5 : 4.5}
-                  fill={teamDotColor(subject.id) ?? SUBJECT_COLOR}
+                  fill={subjectColor ?? teamDotColor(subject.id) ?? SUBJECT_COLOR}
                 />
                 <SvgText
                   x={xOf(subject.x)}
