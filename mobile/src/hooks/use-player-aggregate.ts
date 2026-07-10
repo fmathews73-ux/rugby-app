@@ -44,6 +44,9 @@ export interface PlayerAggregate {
   /** Sheets in the window where the player actually took the field
    *  (minutes_played > 0). Unused-bench sheets don't count. */
   appearances: number;
+  /** Matchday-23 selections — every sheet on file, INCLUDING unused
+   *  bench (minutes 0). Season-scope funnel stat: selected ≥ apps. */
+  selections: number;
   /** Of those appearances, how many were starts. */
   starts: number;
   minutesTotal: number;
@@ -99,6 +102,7 @@ export function usePlayerAggregate(
     if (!history.data) return undefined;
     // History arrives kickoff-DESC from the server. Filter to actual
     // appearances, apply the asOfDate freeze, then take the window.
+    const selections = history.data.length;
     let sheets = history.data.filter((s) => s.minutes_played > 0);
     if (asOfDate) {
       sheets = sheets.filter((s) => {
@@ -114,6 +118,7 @@ export function usePlayerAggregate(
       return {
         playerId,
         appearances: 0,
+        selections,
         starts: 0,
         minutesTotal: 0,
         totals: emptyStats(),
@@ -141,6 +146,7 @@ export function usePlayerAggregate(
     return {
       playerId,
       appearances: sheets.length,
+      selections,
       starts,
       minutesTotal,
       totals,

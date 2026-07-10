@@ -84,19 +84,76 @@ export interface ScoutCategory {
   metrics: readonly ScoutMetric[];
 }
 
-// Comprehensive scouting categories (owner call 2026-07-09): every
-// PlayerMatchStats field the feed supplies (Opta RU7 floor + the two
-// Superscout-backed counts), grouped by the schema's own taxonomy —
-// nothing curated away. Zero rows still render (row permanence).
+// Radar dimensions — the six lobes of the player Profile radar, each
+// a composite of display percentiles. Independent of the CARD deck
+// (owner call 2026-07-10: cards regrouped for balance, lobes keep the
+// six-department shape).
+export const RADAR_DIMENSIONS: readonly {
+  key: string;
+  label: string;
+  metrics: readonly ScoutMetric[];
+}[] = [
+  { key: 'scoring', label: 'Scoring', metrics: [
+    { field: 'tries', label: 'Tries' },
+    { field: 'try_assists', label: 'Try assists' },
+    { field: 'points', label: 'Points' },
+  ] },
+  { key: 'attack', label: 'Attack', metrics: [
+    { field: 'carries', label: 'Carries' },
+    { field: 'metres_carried', label: 'Metres carried' },
+    { field: 'clean_breaks', label: 'Clean breaks' },
+    { field: 'defenders_beaten', label: 'Defenders beaten' },
+    { field: 'offloads', label: 'Offloads' },
+    { field: 'passes', label: 'Passes' },
+    { field: 'handling_errors', label: 'Handling errors', inverted: true },
+  ] },
+  { key: 'kicking', label: 'Kicking', metrics: [
+    { field: 'conversions', label: 'Conversions' },
+    { field: 'penalty_goals', label: 'Penalty goals' },
+    { field: 'drop_goals', label: 'Drop goals' },
+    { field: 'kicks_from_hand', label: 'Kicks from hand' },
+    { field: 'kick_metres', label: 'Kick metres' },
+  ] },
+  { key: 'defence', label: 'Defence', metrics: [
+    { field: 'tackles_made', label: 'Tackles made' },
+    { field: 'missed_tackles', label: 'Missed tackles', inverted: true },
+    { field: 'turnovers_won', label: 'Turnovers won' },
+  ] },
+  { key: 'contest', label: 'Breakdown', metrics: [
+    { field: 'rucks_hit', label: 'Rucks hit' },
+    { field: 'lineout_takes', label: 'Lineout takes' },
+    { field: 'lineout_steals', label: 'Lineout steals' },
+  ] },
+  { key: 'discipline', label: 'Discipline', metrics: [
+    { field: 'penalties_conceded', label: 'Penalties conceded', inverted: true },
+    { field: 'yellow_cards', label: 'Yellow cards', inverted: true },
+    { field: 'red_cards', label: 'Red cards', inverted: true },
+  ] },
+];
+
+/** One scouting category card. */
+export interface ScoutCategory {
+  title: string;
+  /** About copy for the card back. */
+  purpose: string;
+  metrics: readonly ScoutMetric[];
+}
+
+// The card DECK — four balanced cards (owner call 2026-07-10: the
+// 3-row cards drowned in white space), max SEVEN rows each (the
+// 416pt anchor's ceiling), all 24 feed-backed fields present.
 export const SCOUT_CATEGORIES: Record<string, ScoutCategory> = {
   scoring: {
     title: 'Scoring',
     purpose:
-      'The scoreboard ledger — tries, the passes that made them and total points, per game against the average player in his position.',
+      'Every way the points arrive — tries, the passes that made them, and the goal kicks landed — per game against the average player in his position.',
     metrics: [
       { field: 'tries', label: 'Tries' },
       { field: 'try_assists', label: 'Try assists' },
       { field: 'points', label: 'Points' },
+      { field: 'conversions', label: 'Conversions' },
+      { field: 'penalty_goals', label: 'Penalty goals' },
+      { field: 'drop_goals', label: 'Drop goals' },
     ],
   },
   attack: {
@@ -113,43 +170,26 @@ export const SCOUT_CATEGORIES: Record<string, ScoutCategory> = {
       { field: 'handling_errors', label: 'Handling errors', inverted: true },
     ],
   },
-  kicking: {
-    title: 'Kicking',
+  contest: {
+    title: 'Defence & Breakdown',
     purpose:
-      'The boot — goal kicks landed, kicks from hand and the metres they bought, per game against the average player in his position.',
-    metrics: [
-      { field: 'conversions', label: 'Conversions' },
-      { field: 'penalty_goals', label: 'Penalty goals' },
-      { field: 'drop_goals', label: 'Drop goals' },
-      { field: 'kicks_from_hand', label: 'Kicks from hand' },
-      { field: 'kick_metres', label: 'Kick metres' },
-    ],
-  },
-  defence: {
-    title: 'Defence',
-    purpose:
-      'The denying numbers — tackle volume, the ones that slipped and the ball stolen back, per game against the average player in his position. On missed tackles the lower number wins the green.',
+      'The contact contest — tackle volume and the ones that slipped, plus the ball won at ruck and lineout, per game against the average player in his position. On missed tackles the lower number wins the green.',
     metrics: [
       { field: 'tackles_made', label: 'Tackles made' },
       { field: 'missed_tackles', label: 'Missed tackles', inverted: true },
       { field: 'turnovers_won', label: 'Turnovers won' },
-    ],
-  },
-  contest: {
-    title: 'Breakdown & Set-Piece',
-    purpose:
-      'The contest work — ruck arrivals, lineout ball won and lineout ball stolen, per game against the average player in his position.',
-    metrics: [
       { field: 'rucks_hit', label: 'Rucks hit' },
       { field: 'lineout_takes', label: 'Lineout takes' },
       { field: 'lineout_steals', label: 'Lineout steals' },
     ],
   },
-  discipline: {
-    title: 'Discipline',
+  management: {
+    title: 'Game Management',
     purpose:
-      'The giveaway ledger — penalties and cards, per game against the average player in his position. The lower number wins the green on every row.',
+      'The boot and the whistle — kicks from hand and the metres they bought, against the penalties and cards given away, per game against the average player in his position. On the giveaway rows the lower number wins the green.',
     metrics: [
+      { field: 'kicks_from_hand', label: 'Kicks from hand' },
+      { field: 'kick_metres', label: 'Kick metres' },
       { field: 'penalties_conceded', label: 'Penalties conceded', inverted: true },
       { field: 'yellow_cards', label: 'Yellow cards', inverted: true },
       { field: 'red_cards', label: 'Red cards', inverted: true },
@@ -157,24 +197,19 @@ export const SCOUT_CATEGORIES: Record<string, ScoutCategory> = {
   },
 };
 
-// Category order leads with the role's bread and butter — forwards
-// read contact-first, backs read strike-first. Same six cards either
-// way (row permanence at card scale).
+// Deck order leads with the role's bread and butter — forwards read
+// contact-first, backs read strike-first.
 export const FORWARD_CATEGORY_ORDER = [
   'attack',
-  'defence',
   'contest',
   'scoring',
-  'kicking',
-  'discipline',
+  'management',
 ] as const;
 export const BACK_CATEGORY_ORDER = [
   'attack',
   'scoring',
-  'kicking',
-  'defence',
+  'management',
   'contest',
-  'discipline',
 ] as const;
 
 // Role-based trend metrics for the Form sparklines.

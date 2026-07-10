@@ -98,13 +98,11 @@ export default function FixtureDetailScreen() {
           <SubTabBar tab={tab} onSelect={handleSubTabSelect} />
           <FadingScrollView
             ref={scrollRef}
-            contentContainerStyle={[
-              styles.scroll,
-              // Carousel panes are viewport-fitted by design — dropping
-              // the big bottom inset means they no longer "overflow" by
-              // padding alone, so the edge fades stay off their dots.
-              (tab === 'preview' || tab === 'analysis') && styles.scrollCarouselPane,
-            ]}>
+            // Standard bottom inset on EVERY pane (owner call
+            // 2026-07-10): carousel panes overflow like the rest, so
+            // the edge fade reads consistently across all drills — the
+            // earlier viewport-fit (fade kept off the dots) is retired.
+            contentContainerStyle={styles.scroll}>
             <View style={styles.pane}>
               {tab === 'preview' && (
                 <PreviewPane
@@ -153,7 +151,6 @@ export default function FixtureDetailScreen() {
 const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: 'transparent' },
   scroll: { paddingBottom: PAGE_BOTTOM_INSET },
-  scrollCarouselPane: { paddingBottom: Spacing.two },
   // gap matches the app-wide 16pt inter-card rhythm (each pane renders
   // one stack today, but any future sibling gets the standard gap).
   pane: { paddingHorizontal: Spacing.four, paddingTop: Spacing.three, gap: Spacing.three },
