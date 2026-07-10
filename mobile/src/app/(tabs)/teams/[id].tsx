@@ -728,16 +728,18 @@ function PlayerRow({
           {/* Two boxes, not three — age lives on the meta line
               (player-hero parity; the YRS box duplicated it). */}
           <View style={styles.playerScoreBox}>
-            <Text style={styles.playerScoreText}>
-              {player.height_cm}
-              <Text style={styles.playerUnitText}> CM</Text>
-            </Text>
+            <Text style={styles.playerScoreText}>{player.height_cm}</Text>
+            <View style={styles.playerUnitStack}>
+              <Text style={styles.playerUnitText}>C</Text>
+              <Text style={styles.playerUnitText}>M</Text>
+            </View>
           </View>
           <View style={styles.playerScoreBox}>
-            <Text style={styles.playerScoreText}>
-              {player.weight_kg}
-              <Text style={styles.playerUnitText}> KG</Text>
-            </Text>
+            <Text style={styles.playerScoreText}>{player.weight_kg}</Text>
+            <View style={styles.playerUnitStack}>
+              <Text style={styles.playerUnitText}>K</Text>
+              <Text style={styles.playerUnitText}>G</Text>
+            </View>
           </View>
         </View>
         <View style={styles.playerRowChevron}>
@@ -1048,10 +1050,12 @@ const styles = StyleSheet.create({
   // their own third line.
   playerScoreBox: {
     ...ScoreBoxSize.row,
-    minWidth: ScoreBoxSize.row.width + 10,
+    minWidth: ScoreBoxSize.row.width + 6,
     backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 1,
     paddingHorizontal: 3,
   },
   playerScoreText: {
@@ -1059,10 +1063,16 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
   },
+  // Unit letters stacked VERTICALLY beside the digits (owner call
+  // 2026-07-10: the inline suffix overlapped on device and widened
+  // the tile).
+  playerUnitStack: {
+    justifyContent: 'center',
+  },
   playerUnitText: {
     fontFamily: 'Barlow_500Medium',
-    fontSize: 7,
-    letterSpacing: TextTracking.wide,
+    fontSize: 6,
+    lineHeight: 7,
     color: Colors.light.textSecondary,
   },
   playerTeamCode: {

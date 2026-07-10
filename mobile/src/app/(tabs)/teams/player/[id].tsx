@@ -137,16 +137,18 @@ export default function PlayerCardScreen() {
                 row like the date line (owner call 2026-07-10). */}
             <View style={styles.heroScoreRow}>
               <View style={styles.heroScoreBox}>
-                <Text style={styles.heroScoreText}>
-                  {p.height_cm}
-                  <Text style={styles.heroScoreUnit}> CM</Text>
-                </Text>
+                <Text style={styles.heroScoreText}>{p.height_cm}</Text>
+                <View style={styles.heroUnitStack}>
+                  <Text style={styles.heroScoreUnit}>C</Text>
+                  <Text style={styles.heroScoreUnit}>M</Text>
+                </View>
               </View>
               <View style={styles.heroScoreBox}>
-                <Text style={styles.heroScoreText}>
-                  {p.weight_kg}
-                  <Text style={styles.heroScoreUnit}> KG</Text>
-                </Text>
+                <Text style={styles.heroScoreText}>{p.weight_kg}</Text>
+                <View style={styles.heroUnitStack}>
+                  <Text style={styles.heroScoreUnit}>K</Text>
+                  <Text style={styles.heroScoreUnit}>G</Text>
+                </View>
               </View>
             </View>
           </View>
@@ -1013,19 +1015,27 @@ const styles = StyleSheet.create({
     height: ScoreBoxSize.card.height,
     borderRadius: ScoreBoxSize.card.borderRadius,
     backgroundColor: '#F3F4F6',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    gap: 2,
+    paddingHorizontal: 5,
   },
   heroScoreText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
     color: Colors.light.textSecondary,
   },
+  // Unit letters stacked VERTICALLY beside the digits (owner call
+  // 2026-07-10: the inline " CM" suffix overlapped on device and
+  // widened the tile).
+  heroUnitStack: {
+    justifyContent: 'center',
+  },
   heroScoreUnit: {
     fontFamily: 'Barlow_500Medium',
-    fontSize: 8,
-    letterSpacing: TextTracking.wide,
+    fontSize: 7,
+    lineHeight: 8,
     color: Colors.light.textSecondary,
   },
   // Date-line slot of the match hero — the position rides above the
