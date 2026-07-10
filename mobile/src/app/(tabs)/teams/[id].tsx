@@ -1,12 +1,12 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useRef, useState } from 'react';
+import { Fragment, useMemo, useRef, useState } from 'react';
 import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
 
-import { useLatestRanking, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
+import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { TeamMatchesCard } from '@/components/my-team-matches-card';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
@@ -27,11 +27,6 @@ import { TIER_1_IDS } from '@/lib/tiers';
 
 
 type TeamTab = string;
-
-// Hero outcome-dot colours — same trio as FormCircles.
-const HERO_WIN = '#059669';
-const HERO_LOSS = '#DC2626';
-const HERO_DRAW = '#9CA3AF';
 
 /** Position → squad-section grouping, in traditional team-sheet order. */
 const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] }[] = [
@@ -114,13 +109,18 @@ export default function TeamHubScreen() {
     [rankings.data, teamId],
   );
 
-  // Last-5 form-guide dots (newest first) — same window and grammar as
-  // the TeamHeroRow surfaces.
-  // Prev-10 window drives BOTH the record tiles and the dot sequence
-  // beneath them — one window, one story (owner call 2026-07-10).
+  // Prev-10 window drives the W/D/L record tiles — same window and
+  // grammar as the TeamHeroRow surfaces (owner call 2026-07-10).
   const { outcomes: outcomes10 } = useTeamRecentForm(teamId, 10);
   const wins = outcomes10.filter((o) => o === 'W').length;
+  const draws = outcomes10.filter((o) => o === 'D').length;
   const losses = outcomes10.filter((o) => o === 'L').length;
+
+  const coachingStaff = useTeamCoachingStaff(teamId);
+  const headCoach = useMemo(
+    () => (coachingStaff.data ?? []).find((c) => c.role === 'head-coach') ?? null,
+    [coachingStaff.data],
+  );
 
   const squadSections = useMemo(() => {
     if (!players.data) return [];
@@ -198,21 +198,27 @@ export default function TeamHubScreen() {
             <Text style={styles.heroName}>{team.short_name}</Text>
           </View>
           <View style={styles.heroMetaStack}>
-            {/* Prev-10 record in the MATCH SCORE pairing (owner call
-                2026-07-10): the leading side takes the winner box
-                (dark tile, inverse text), the trailing side the quiet
-                grey — level records sit both-quiet like a draw. */}
+            {/* W/L pairing corrected (owner call 2026-07-10): the
+                dark tile ALWAYS sits on the W box — wins are the
+                identity number; the L box stays quiet regardless of
+                which count is higher. */}
             <View style={styles.heroScoreRow}>
-              <View style={[styles.heroScoreBox, wins > losses && styles.heroScoreBoxWinner]}>
-                <Text style={[styles.heroScoreText, wins > losses && styles.heroScoreTextWinner]}>
+              <View style={[styles.heroScoreBox, styles.heroScoreBoxWinner]}>
+                <Text style={[styles.heroScoreText, styles.heroScoreTextWinner]}>
                   {wins}
-                  <Text style={[styles.heroScoreUnit, wins > losses && styles.heroScoreTextWinner]}> W</Text>
+                  <Text style={[styles.heroScoreUnit, styles.heroScoreTextWinner]}> W</Text>
                 </Text>
               </View>
-              <View style={[styles.heroScoreBox, losses > wins && styles.heroScoreBoxWinner]}>
-                <Text style={[styles.heroScoreText, losses > wins && styles.heroScoreTextWinner]}>
+              <View style={styles.heroScoreBox}>
+                <Text style={styles.heroScoreText}>
+                  {draws}
+                  <Text style={styles.heroScoreUnit}> D</Text>
+                </Text>
+              </View>
+              <View style={styles.heroScoreBox}>
+                <Text style={styles.heroScoreText}>
                   {losses}
-                  <Text style={[styles.heroScoreUnit, losses > wins && styles.heroScoreTextWinner]}> L</Text>
+                  <Text style={styles.heroScoreUnit}> L</Text>
                 </Text>
               </View>
             </View>
@@ -230,24 +236,11 @@ export default function TeamHubScreen() {
             />
           </View>
         </View>
-        {/* Venue slot: the SEQUENCE behind the W/L tiles — last 10,
-            newest first. */}
+        {/* Venue slot: head coach line (owner call 2026-07-10 —
+            replaced the last-10 dot sequence). */}
         <View style={styles.heroVenueRow}>
-          {outcomes10.length > 0 ? (
-            <>
-              {outcomes10.map((o, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.heroRecordDot,
-                    {
-                      backgroundColor:
-                        o === 'W' ? HERO_WIN : o === 'L' ? HERO_LOSS : HERO_DRAW,
-                    },
-                  ]}
-                />
-              ))}
-            </>
+          {headCoach ? (
+            <Text style={styles.heroPositionLine}>Head Coach · {headCoach.name}</Text>
           ) : null}
         </View>
       </View>
@@ -303,15 +296,19 @@ export default function TeamHubScreen() {
                       adding to the rows' own 16pt padding, spacing
                       squad rows 40pt apart vs the fixtures' 32. */}
                   <View>
-                    {section.players.map((p) => (
-                      <PlayerRow
-                        key={p.id}
-                        player={p}
-                        teamId={teamId}
-                        flagCode={team.flag_code}
-                        teamCode={team.short_name}
-                        onPress={() => router.push(`/teams/player/${p.id}`)}
-                      />
+                    {section.players.map((p, i) => (
+                      <Fragment key={p.id}>
+                        <PlayerRow
+                          player={p}
+                          teamId={teamId}
+                          flagCode={team.flag_code}
+                          teamCode={team.short_name}
+                          onPress={() => router.push(`/teams/player/${p.id}`)}
+                        />
+                        {i < section.players.length - 1 ? (
+                          <View style={styles.playerInsetDivider} />
+                        ) : null}
+                      </Fragment>
                     ))}
                   </View>
                 </View>
@@ -881,11 +878,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 5,
   },
-  heroRecordDot: {
-    width: 7,
-    height: 7,
-    borderRadius: 999,
-  },
   heroPositionLine: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
@@ -898,11 +890,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.one,
   },
-  // Match hero's card score-box register — W/L record pair.
+  // Match hero's card score-box register — W/D/L record trio.
+  // Tighter gap + tile padding than the two-box form so three tiles
+  // sit comfortably between the hero wings.
   heroScoreRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    gap: 6,
   },
   heroScoreBox: {
     // Hug the numerals broadcast-bug style — the match score box /
@@ -914,7 +908,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 8,
+    paddingHorizontal: 6,
   },
   heroScoreText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
@@ -994,8 +988,14 @@ const styles = StyleSheet.create({
     // Fixture-row geometry: 16pt vertical padding, 4pt band gap.
     paddingVertical: Spacing.three,
     gap: 4,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+  },
+  // Row separator matching the fixtures/teams lists — chrome-grey
+  // inset hairline BETWEEN rows only (owner call 2026-07-10),
+  // replacing the whisper-grey full-width borderBottom.
+  playerInsetDivider: {
+    height: StyleSheet.hairlineWidth,
+    backgroundColor: '#C7CBD1',
+    marginHorizontal: Spacing.three,
   },
   playerRowPressed: { opacity: 0.6 },
   // Wings intrinsic at the edges, box pair ABSOLUTE-CENTRED over the
@@ -1007,8 +1007,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    // Chevron lane — the shield stops here, the chevron owns the edge.
-    paddingRight: 18,
+    // Symmetric 12pt inset pulls the wings toward the centre for the
+    // teams-row density (owner call 2026-07-10); the right side adds
+    // the 18pt chevron lane on top — the chevron itself stays absolute
+    // at the row edge, outside the inset.
+    paddingLeft: 12,
+    paddingRight: 30,
   },
   playerLeftWing: {
     flexDirection: 'row',

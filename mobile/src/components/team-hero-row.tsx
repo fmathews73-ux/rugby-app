@@ -33,6 +33,7 @@ export function TeamHeroRow({
 }) {
   const { outcomes } = useTeamRecentForm(team.id, FORM_LOOKBACK);
   const wins = outcomes.filter((o) => o === 'W').length;
+  const draws = outcomes.filter((o) => o === 'D').length;
   const losses = outcomes.filter((o) => o === 'L').length;
   const players = useTeamPlayers(team.id);
   const caps = (players.data ?? []).reduce((sum, pl) => sum + pl.cap_count, 0);
@@ -45,16 +46,25 @@ export function TeamHeroRow({
         </View>
         <Text style={styles.teamCode}>{team.short_name}</Text>
         <View style={styles.middle}>
-          <View style={[styles.scoreBoxSmall, wins > losses && styles.scoreBoxSmallWinner]}>
-            <Text style={[styles.scoreBoxSmallText, wins > losses && styles.scoreBoxSmallTextWinner]}>
+          {/* Dark treatment lives on the W box ALWAYS (owner call
+              2026-07-09 sim date): wins are the identity number, the
+              L box stays quiet whatever the record. */}
+          <View style={[styles.scoreBoxSmall, styles.scoreBoxSmallWinner]}>
+            <Text style={[styles.scoreBoxSmallText, styles.scoreBoxSmallTextWinner]}>
               {wins}
-              <Text style={[styles.unitText, wins > losses && styles.scoreBoxSmallTextWinner]}> W</Text>
+              <Text style={[styles.unitText, styles.scoreBoxSmallTextWinner]}> W</Text>
             </Text>
           </View>
-          <View style={[styles.scoreBoxSmall, losses > wins && styles.scoreBoxSmallWinner]}>
-            <Text style={[styles.scoreBoxSmallText, losses > wins && styles.scoreBoxSmallTextWinner]}>
+          <View style={styles.scoreBoxSmall}>
+            <Text style={styles.scoreBoxSmallText}>
+              {draws}
+              <Text style={styles.unitText}> D</Text>
+            </Text>
+          </View>
+          <View style={styles.scoreBoxSmall}>
+            <Text style={styles.scoreBoxSmallText}>
               {losses}
-              <Text style={[styles.unitText, losses > wins && styles.scoreBoxSmallTextWinner]}> L</Text>
+              <Text style={styles.unitText}> L</Text>
             </Text>
           </View>
         </View>
@@ -99,13 +109,14 @@ const styles = StyleSheet.create({
     fontSize: TextSize.lg,
     color: Colors.light.text,
   },
-  // Fixed-width middle slot — the fixture row's score column.
+  // Fixed-width middle slot — the fixture row's score column,
+  // widened with a tighter gap to seat the W/D/L trio.
   middle: {
-    width: 96,
+    width: 112,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
+    gap: 4,
   },
   scoreBoxSmall: {
     ...ScoreBoxSize.row,

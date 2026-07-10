@@ -448,12 +448,14 @@ const styles = StyleSheet.create({
     paddingBottom: Spacing.two,
   },
   cardHeaderText: {
-    // Date header, not a chart-card title — Barlow Bold is reserved
-    // for chart/graph cards; dates sit in the meta register, title
-    // case ("Saturday · 4 Jul 2026").
-    fontFamily: 'Barlow_500Medium',
-    fontSize: TextSize.sm,
+    // Section-title register (owner call 2026-07-10): date headers
+    // sit in the same condensed grey caps as the TIER 1 NATIONS /
+    // FRONT ROW group titles.
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
+    textTransform: 'uppercase',
   },
   row: {
     paddingHorizontal: Spacing.four,
