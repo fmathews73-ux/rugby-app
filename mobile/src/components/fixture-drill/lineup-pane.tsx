@@ -1,12 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useState } from 'react';
+import { useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Coach, CoachRole, Fixture, LineUp, MatchOfficial, MatchOfficialRole, Player } from '@rugby-app/shared';
 
 import { useFixtureOfficials, useTeamCoachingStaff, useTeams } from '@/api/hooks';
 import { jerseyGlyphColors, type JerseyGlyph } from '@/lib/team-colors';
-import { PlayerMatchSheet } from '@/components/fixture-drill/player-match-sheet';
 import { LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
@@ -28,7 +27,15 @@ export function LineUpPane({
   const awayCoaches = useTeamCoachingStaff(fixture.away_team_id);
   const officials = useFixtureOfficials(fixture.id);
   // Player whose match-scoped stat sheet is open in the bottom modal.
-  const [sheetPlayerId, setSheetPlayerId] = useState<string | null>(null);
+  // Player taps push the match-sheet ROUTE (owner call 2026-07-10 —
+  // the bottom-sheet modal was the app's last modal drill); back
+  // returns here to the Line-Up.
+  const router = useRouter();
+  const openPlayer = (pid: string) =>
+    router.push({
+      pathname: '/fixtures/player/[pid]',
+      params: { pid, fixtureId: fixture.id },
+    });
   const teams = useTeams();
   const homeFlag = teams.data?.find((t) => t.id === fixture.home_team_id)?.flag_code;
   const awayFlag = teams.data?.find((t) => t.id === fixture.away_team_id)?.flag_code;
@@ -97,7 +104,7 @@ export function LineUpPane({
           home={home}
           away={away}
           playerById={playerById}
-          onPressPlayer={setSheetPlayerId}
+          onPressPlayer={openPlayer}
         />
       ))}
 
@@ -121,7 +128,7 @@ export function LineUpPane({
           home={home}
           away={away}
           playerById={playerById}
-          onPressPlayer={setSheetPlayerId}
+          onPressPlayer={openPlayer}
         />
       ))}
 
@@ -156,13 +163,6 @@ export function LineUpPane({
         </>
       ) : null}
 
-      {/* Match-scoped player stat sheet — opened by tapping any XV or
-          bench player name above. */}
-            <PlayerMatchSheet
-        fixture={fixture}
-        playerId={sheetPlayerId}
-        onClose={() => setSheetPlayerId(null)}
-      />
     </View>
   );
 }

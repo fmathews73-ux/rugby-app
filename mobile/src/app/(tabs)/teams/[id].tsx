@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
 
-import { useLatestRanking, useTeamCoachingStaff, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
+import { useLatestRanking, useTeamPlayers, useTeams, useTeamsFormSummary } from '@/api/hooks';
 import { TeamMatchesCard } from '@/components/my-team-matches-card';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { CardTitle } from '@/components/card-title';
@@ -109,12 +109,6 @@ export default function TeamHubScreen() {
 
   const players = useTeamPlayers(teamId);
 
-  const staff = useTeamCoachingStaff(teamId);
-  const headCoach = useMemo(
-    () => staff.data?.find((c) => c.role === 'head-coach') ?? null,
-    [staff.data],
-  );
-
   const rankings = useLatestRanking();
   const rankRow = useMemo(
     () => rankings.data?.rows.find((r) => r.team_id === teamId) ?? null,
@@ -190,45 +184,42 @@ export default function TeamHubScreen() {
             <Text style={styles.heroName}>{team.short_name}</Text>
           </View>
           <View style={styles.heroMetaStack}>
-            {headCoach ? (
-              <Text style={styles.heroMetaText}>Head Coach · {headCoach.name}</Text>
-            ) : null}
-            <Text style={styles.heroMetaText}>
-              {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
-            </Text>
-            {WORLD_CUP_WINS[teamId] ? (
-              <View style={styles.heroTrophyRow}>
-                <Text style={styles.heroMetaText}>World Champions · </Text>
-                {Array.from({ length: WORLD_CUP_WINS[teamId]! }).map((_, i) => (
-                  <Ionicons key={i} name="trophy" size={12} color={TROPHY_COLOR} />
-                ))}
-              </View>
-            ) : null}
-            {squadTotals.players > 0 ? (
-              <View style={styles.heroRecordRow}>
-                <SquadJersey teamId={teamId} />
-                <Text style={styles.heroMetaText}> {squadTotals.caps.toLocaleString('en-GB')}</Text>
-                <Ionicons name="people-outline" size={12} color={Colors.light.textSecondary} style={styles.heroMetaSecondIcon} />
-                <Text style={styles.heroMetaText}> {squadTotals.players}</Text>
-              </View>
-            ) : null}
-            {outcomes.length > 0 ? (
-              <View style={styles.heroRecordRow}>
-                <Text style={styles.heroMetaText}>Last {outcomes.length} · </Text>
-                {outcomes.map((o, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.heroRecordDot,
-                      {
-                        backgroundColor:
-                          o === 'W' ? HERO_WIN : o === 'L' ? HERO_LOSS : HERO_DRAW,
-                      },
-                    ]}
-                  />
-                ))}
-              </View>
-            ) : null}
+            <View style={styles.heroMetaInner}>
+              <Text style={styles.heroMetaText}>
+                {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
+              </Text>
+              {outcomes.length > 0 ? (
+                <View style={styles.heroRecordRow}>
+                  <Text style={styles.heroMetaText}>Last {outcomes.length} · </Text>
+                  {outcomes.map((o, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.heroRecordDot,
+                        {
+                          backgroundColor:
+                            o === 'W' ? HERO_WIN : o === 'L' ? HERO_LOSS : HERO_DRAW,
+                        },
+                      ]}
+                    />
+                  ))}
+                </View>
+              ) : null}
+              {WORLD_CUP_WINS[teamId] ? (
+                <View style={styles.heroRecordRow}>
+                  <Text style={styles.heroMetaText}>WC · </Text>
+                  {Array.from({ length: WORLD_CUP_WINS[teamId]! }).map((_, i) => (
+                    <Ionicons key={i} name="trophy" size={12} color={TROPHY_COLOR} />
+                  ))}
+                </View>
+              ) : null}
+            </View>
+          </View>
+          {/* Right identity anchor — the SQUAD'S caps worn on the
+              shirt (owner call 2026-07-10): the player hero's badge,
+              opposite-handed, replacing the caps/players text row. */}
+          <View style={styles.heroBadgeSlot}>
+            <CapsJerseyBadge teamId={teamId} caps={squadTotals.caps} />
           </View>
         </View>
       </View>
@@ -768,16 +759,24 @@ const styles = StyleSheet.create({
     borderBottomColor: '#E5E7EB',
   },
   // Single hero row: identity group left, meta stack filling the right.
+  // Match-hero symmetry (owner call 2026-07-10): identity slots at
+  // the wings, wider centre for the meta ledger — same slot recipe as
+  // the player heroes and matchupTopRow.
   heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'stretch',
-    gap: Spacing.three,
+    gap: Spacing.two,
   },
+  // FIXED equal wings (owner symmetry call): flex shares let the
+  // wider shield+code side starve the centre — fixed 100pt wings keep
+  // the anchors symmetric AND the rank ledger on one line.
   heroIdentityGroup: {
+    width: 88,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
+    justifyContent: 'center',
+    gap: Spacing.two,
   },
   heroName: {
     // 40pt-shield rule: nation codes beside a medium shield use the
@@ -789,11 +788,24 @@ const styles = StyleSheet.create({
   },
   // Meta stack — the two quiet lines (head coach; rank · points ·
   // trophies) left-aligned one above the other in the right-hand space.
+  // Meta block sits in the match hero's score slot: the BLOCK is
+  // centred between the two identity anchors, but its lines LEFT-ALIGN
+  // to each other (owner call 2026-07-10) so Rank/Last 5/WC read as
+  // one ledger.
   heroMetaStack: {
     flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.one,
+  },
+  heroBadgeSlot: {
+    width: 88,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  heroMetaInner: {
     alignItems: 'flex-start',
     gap: Spacing.one,
-    paddingLeft: Spacing.four,
   },
   heroTrophyRow: {
     flexDirection: 'row',
@@ -885,7 +897,6 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
-  heroMetaSecondIcon: { marginLeft: 8 },
   // Measurables lines — icon+value pairs WITH units (owner call
   // 2026-07-09: icons alone aren't self-describing); caps sit on
   // their own third line.

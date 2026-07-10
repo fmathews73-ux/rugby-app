@@ -82,7 +82,13 @@ export function CapsJerseyBadge({
       <View style={styles.badgeFill} pointerEvents="none">
         {/* Nudged into the shirt's torso — the glyph's collar shifts
             its optical centre below the box centre. */}
-        <Text style={[styles.badgeCaps, { color: numberColor, fontSize: size * 0.33 }]}>
+        <Text
+          style={[
+            styles.badgeCaps,
+            // Squad-total badges carry four digits — shrink to fit
+            // the shirt torso.
+            { color: numberColor, fontSize: size * (caps >= 1000 ? 0.24 : 0.33) },
+          ]}>
           {caps}
         </Text>
       </View>

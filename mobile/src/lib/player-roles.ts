@@ -33,6 +33,25 @@ export const POSITION_LABELS: Record<Position, string> = {
   fullback: 'Fullback',
 };
 
+/** Peer pools for positional comparison — a prop's numbers are only
+ *  meaningful against other front-rowers. Mirrors the server's
+ *  percentile grouping. */
+export const POSITION_GROUP_MEMBERS: Record<string, readonly Position[]> = {
+  'front-row': ['loose-head-prop', 'hooker', 'tight-head-prop'],
+  locks: ['lock'],
+  'back-row': ['blindside-flanker', 'openside-flanker', 'number-8'],
+  'half-backs': ['scrum-half', 'fly-half'],
+  centres: ['inside-centre', 'outside-centre'],
+  'back-three': ['left-wing', 'right-wing', 'fullback'],
+};
+
+export function positionGroupOf(position: Position): string {
+  for (const [group, members] of Object.entries(POSITION_GROUP_MEMBERS)) {
+    if (members.includes(position)) return group;
+  }
+  return 'back-three';
+}
+
 export const GROUP_LABELS: Record<string, string> = {
   'front-row': 'front-rowers',
   locks: 'locks',

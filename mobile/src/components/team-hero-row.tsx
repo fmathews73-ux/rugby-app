@@ -48,14 +48,6 @@ export function TeamHeroRow({
         <Text style={styles.metaText}>
           {rankRow ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts` : 'Unranked'}
         </Text>
-        {WORLD_CUP_WINS[team.id] ? (
-          <View style={styles.recordRow}>
-            <Text style={styles.metaText}>World Champions · </Text>
-            {Array.from({ length: WORLD_CUP_WINS[team.id]! }).map((_, i) => (
-              <Ionicons key={i} name="trophy" size={10} color={TROPHY_COLOR} />
-            ))}
-          </View>
-        ) : null}
         {outcomes.length > 0 ? (
           // Result sequence as bare colour dots (newest first, matching
           // the old FormCircles convention) — sized to sit inside the
@@ -73,6 +65,14 @@ export function TeamHeroRow({
                   },
                 ]}
               />
+            ))}
+          </View>
+        ) : null}
+        {WORLD_CUP_WINS[team.id] ? (
+          <View style={styles.recordRow}>
+            <Text style={styles.metaText}>WC · </Text>
+            {Array.from({ length: WORLD_CUP_WINS[team.id]! }).map((_, i) => (
+              <Ionicons key={i} name="trophy" size={10} color={TROPHY_COLOR} />
             ))}
           </View>
         ) : null}

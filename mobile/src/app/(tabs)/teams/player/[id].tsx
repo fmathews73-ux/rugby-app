@@ -7,7 +7,7 @@ import Svg, { Circle, G, Line, Rect, Text as SvgText } from 'react-native-svg';
 
 import { usePlayer, usePlayerPercentiles, useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { CapsJerseyBadge, SquadBarbell, SquadMan } from '@/components/squad-jersey';
+import { CapsJerseyBadge } from '@/components/squad-jersey';
 import { CardCarousel } from '@/components/card-carousel';
 import { PlayerMatrixCard } from '@/components/insights/player-matrix-card';
 import { LegendChip } from '@/components/insights/legend-chip';
@@ -20,7 +20,7 @@ import { CountUpTSpan, CountUpValue } from '@/components/insights/count-up-value
 import { RadarChart } from '@/components/insights/radar-chart';
 import { teamDotColor } from '@/lib/team-colors';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { FadingScrollView } from '@/components/fading-scroll-view';
@@ -52,7 +52,7 @@ const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
   // Insights and Analysis pills retired 2026-07-07.
   { id: 'preview', label: 'Profile' },
   { id: 'stats', label: 'Stats' },
-  { id: 'season', label: 'Season' },
+  { id: 'season', label: 'Season KPIs' },
 ];
 
 /**
@@ -69,6 +69,10 @@ export default function PlayerCardScreen() {
   const scrollRef = useRef<ScrollView>(null);
 
   const player = usePlayer(playerId);
+  const team = useTeam(player.data?.team_id ?? '');
+  // Season workload for the hero's venue-line slot — starts appear
+  // nowhere else in the app.
+  const heroAgg = usePlayerAggregate(playerId);
   // Same resolve-to-top gesture as the fixture drill's sub-tabs.
   const handleTabSelect = (next: PlayerTab) => {
     setTab(next);
@@ -105,14 +109,45 @@ export default function PlayerCardScreen() {
             list's jersey avatar right — one identity mark from list to
             hero. Real headshots remain a Phase 6 image-rights item
             (register #5/#28); the jersey swaps out for them then. */}
+        <Text style={styles.heroPositionLine}>
+          {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
+        </Text>
         <View style={styles.heroRow}>
           {/* Team-hero composition: identity group left (40pt jersey
               mark + nameplate), meta stack centred in the remaining
               right-hand space — NOT under the name. */}
+          {/* Nation anchors the HOME side (owner flip 2026-07-10):
+              shield then code — the match hero's home anatomy. */}
           <View style={styles.heroIdentityGroup}>
-            <CapsJerseyBadge teamId={p.team_id} caps={p.cap_count} />
-            {/* First name over surname — the squad list's two-line
-                stack at hero scale. */}
+            {team.data ? (
+              <TeamFlagShield flagCode={team.data.flag_code} width={FlagSize.medium} />
+            ) : null}
+            <Text style={styles.heroCode}>
+              {team.data?.short_name ?? p.team_id.toUpperCase()}
+            </Text>
+          </View>
+          <View style={styles.heroMetaStack}>
+            {/* Measurables as the match hero's score pair — centred
+                with the anchors; the position line rides above the
+                row like the date line (owner call 2026-07-10). */}
+            <View style={styles.heroScoreRow}>
+              <View style={styles.heroScoreBox}>
+                <Text style={styles.heroScoreText}>
+                  {p.height_cm}
+                  <Text style={styles.heroScoreUnit}> CM</Text>
+                </Text>
+              </View>
+              <View style={styles.heroScoreBox}>
+                <Text style={styles.heroScoreText}>
+                  {p.weight_kg}
+                  <Text style={styles.heroScoreUnit}> KG</Text>
+                </Text>
+              </View>
+            </View>
+          </View>
+          {/* Player anchors the AWAY side: nameplate then the caps
+              jersey — the away-side mirror. */}
+          <View style={styles.heroNationGroup}>
             <View style={styles.heroNameStack}>
               <Text style={styles.heroName} numberOfLines={1}>
                 {givenNames(p.name)}
@@ -121,22 +156,16 @@ export default function PlayerCardScreen() {
                 {surname(p.name)}
               </Text>
             </View>
-          </View>
-          <View style={styles.heroMetaStack}>
-            <Text style={styles.heroMetaText}>
-              {POSITION_LABELS[p.primary_position]} · {ageFrom(p.date_of_birth)}
-            </Text>
-            {/* Measurables then career (owner call 2026-07-09): body
-                line first, caps on its own line beneath. Units stay —
-                icons alone aren't self-describing. */}
-            <View style={styles.heroCapsRow}>
-              <SquadMan teamId={p.team_id} />
-              <Text style={styles.heroMetaText}> {p.height_cm} cm · </Text>
-              <SquadBarbell teamId={p.team_id} />
-              <Text style={styles.heroMetaText}> {p.weight_kg} kg</Text>
-            </View>
+            <CapsJerseyBadge teamId={p.team_id} caps={p.cap_count} />
           </View>
         </View>
+        {/* Venue-line slot of the match hero — DUMMY copy until the
+            owner picks this line's content. */}
+        <Text style={styles.heroPositionLine}>
+          {heroAgg.data
+            ? `${heroAgg.data.starts} starts · ${heroAgg.data.appearances - heroAgg.data.starts} from bench · ${heroAgg.data.minutesTotal} mins`
+            : '—'}
+        </Text>
       </View>
       <SegmentedTabs tabs={PLAYER_TABS} active={tab} onSelect={handleTabSelect} />
 
@@ -878,16 +907,24 @@ const styles = StyleSheet.create({
     // height so all three drills measure identically.
     minHeight: DRILL_HERO_MIN_HEIGHT,
     justifyContent: 'center',
+    gap: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
   },
   // Single hero row: identity group left, meta stack filling the right
   // — the same treatment as the team drill hero.
+  // Match-hero symmetry (owner call 2026-07-10): three EQUAL slots —
+  // identity · meta · nation — each centred in its third, same row
+  // gap and inner padding as matchupTopRow.
   heroRow: {
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'stretch',
+    // Match hero's symmetric breathing above/below the anchor row.
+    marginTop: Spacing.three,
+    marginBottom: Spacing.three,
     gap: Spacing.three,
+    paddingHorizontal: Spacing.two,
   },
   // Form bar canvas fills the card's remaining height (measured in
   // real pixels — no viewBox stretch).
@@ -896,19 +933,22 @@ const styles = StyleSheet.create({
     gap: 0,
   },
   heroIdentityGroup: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.three,
-    // Nameplates run long ("FELIX ORMSBY" two-line) — cap the identity
-    // group so the meta stack keeps its column, mirroring the team
-    // hero's balance.
-    maxWidth: '55%',
+    justifyContent: 'center',
+    gap: Spacing.two,
   },
+  // Meta CENTRES between the two identity anchors — the score-slot
+  // position of the match hero.
   heroMetaStack: {
-    flex: 1,
-    alignItems: 'flex-start',
+    // Wider centre slot — the outer identity slots stay EQUAL so the
+    // hero keeps its symmetry, but the meta column gets the room long
+    // position names need on one line.
+    flex: 1.5,
+    alignItems: 'center',
+    justifyContent: 'center',
     gap: Spacing.one,
-    paddingLeft: Spacing.four,
   },
   // Preview-block bleed: unwraps the pane padding (carousel pages
   // re-apply the card column internally) and carries the 16pt rhythm.
@@ -926,9 +966,10 @@ const styles = StyleSheet.create({
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
   heroName: {
-    // Player identity in the nation-code face — the jersey nameplate.
+    // Squad-row nameplate register (owner call 2026-07-10) — the same
+    // face and size as the player rows in the team squad table.
     fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.xl,
+    fontSize: TextSize.md,
     letterSpacing: TextTracking.wide,
     color: Colors.light.text,
     textTransform: 'uppercase',
@@ -940,6 +981,59 @@ const styles = StyleSheet.create({
   },
   // Meta stack — quiet lines (position · age, measurables · caps,
   // team) left-aligned in the right-hand space.
+  // Right identity anchor — the match hero's away-side anatomy
+  // (code then shield), owner call 2026-07-10: player heroes read
+  // like the matchup hero with the player as the home side.
+  heroNationGroup: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: Spacing.two,
+  },
+  heroCode: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.text,
+  },
+  // Match-score tile pair for the measurables — with the match
+  // hero's symmetric 16pt breathing room above and below the tiles.
+  heroScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.two,
+  },
+  // Match hero's card score-box register (ScoreBoxSize.card + xl
+  // digits) — one score anatomy across every hero.
+  heroScoreBox: {
+    minWidth: ScoreBoxSize.card.width,
+    height: ScoreBoxSize.card.height,
+    borderRadius: ScoreBoxSize.card.borderRadius,
+    backgroundColor: '#F3F4F6',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 8,
+  },
+  heroScoreText: {
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.xl,
+    color: Colors.light.textSecondary,
+  },
+  heroScoreUnit: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: 8,
+    letterSpacing: TextTracking.wide,
+    color: Colors.light.textSecondary,
+  },
+  // Date-line slot of the match hero — the position rides above the
+  // anchor row, centred.
+  heroPositionLine: {
+    fontFamily: 'Barlow_500Medium',
+    fontSize: TextSize.sm,
+    color: Colors.light.textSecondary,
+    textAlign: 'center',
+  },
   heroMetaText: {
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,

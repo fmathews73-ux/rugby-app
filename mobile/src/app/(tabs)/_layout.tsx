@@ -74,9 +74,9 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="standings"
         options={{
-          title: 'Standings',
+          title: 'Tables',
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'list' : 'list-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'podium' : 'podium-outline'} size={size} color={color} />
           ),
         }}
       />
