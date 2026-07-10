@@ -140,7 +140,9 @@ export default function PlayerCardScreen() {
       <SegmentedTabs tabs={PLAYER_TABS} active={tab} onSelect={handleTabSelect} />
 
       <FadingScrollView ref={scrollRef} contentContainerStyle={styles.scroll}>
-        {tab === 'season' && <SeasonPane playerId={playerId} teamId={p.team_id} />}
+        {tab === 'season' && (
+          <SeasonPane playerId={playerId} teamId={p.team_id} isForward={isForward} />
+        )}
         {tab === 'preview' && (
           <PlayerPreviewBlock
             playerId={playerId}
@@ -346,13 +348,22 @@ function PlayerStatsPane({
 
 // ─── Season pane ────────────────────────────────────────────────────────────
 
-function SeasonPane({ playerId, teamId }: { playerId: string; teamId: string }) {
+function SeasonPane({
+  playerId,
+  teamId,
+  isForward,
+}: {
+  playerId: string;
+  teamId: string;
+  isForward: boolean;
+}) {
   const analysis = usePlayerAnalysis(playerId);
   return (
     <View style={styles.profileStack}>
       <SeasonCard
         playerId={playerId}
         teamId={teamId}
+        isForward={isForward}
         style={styles.stackCard}
         read={analysis.data?.season ?? null}
       />
@@ -648,11 +659,13 @@ function PlayerRadarCard({
 function SeasonCard({
   playerId,
   teamId,
+  isForward,
   style,
   read,
 }: {
   playerId: string;
   teamId: string;
+  isForward: boolean;
   style?: StyleProp<ViewStyle>;
   /** Season narrative for the flip back. */
   read?: string | null;
@@ -666,22 +679,40 @@ function SeasonCard({
     const t = data.totals;
     // Row 1 is the selection funnel (owner call 2026-07-10):
     // picked in the 23 → took the field → time on the pitch.
-    // 3×4 grid: funnel row, scoreboard row, carry row, contact row.
-    return [
+    // 3×4 grid, ROLE-FLAVOURED below the universal funnel row
+    // (owner call 2026-07-10): forwards ledger in contact/set-piece
+    // currency, backs in strike/boot currency.
+    const funnel = [
       { label: 'SELECTED', value: data.selections },
       { label: 'APPS', value: data.appearances },
       { label: 'MINUTES', value: data.minutesTotal },
-      { label: 'POINTS', value: t.points },
-      { label: 'TRIES', value: t.tries },
-      { label: 'ASSISTS', value: t.try_assists },
-      { label: 'METRES', value: t.metres_carried },
-      { label: 'BREAKS', value: t.clean_breaks },
-      { label: 'DEF. BEATEN', value: t.defenders_beaten },
-      { label: 'TACKLES', value: t.tackles_made },
-      { label: 'TURNOVERS WON', value: t.turnovers_won },
-      { label: 'OFFLOADS', value: t.offloads },
     ];
-  }, [data]);
+    return isForward
+      ? [
+          ...funnel,
+          { label: 'POINTS', value: t.points },
+          { label: 'TRIES', value: t.tries },
+          { label: 'CARRIES', value: t.carries },
+          { label: 'METRES', value: t.metres_carried },
+          { label: 'TACKLES', value: t.tackles_made },
+          { label: 'TURNOVERS WON', value: t.turnovers_won },
+          { label: 'RUCKS HIT', value: t.rucks_hit },
+          { label: 'LINEOUT TAKES', value: t.lineout_takes },
+          { label: 'OFFLOADS', value: t.offloads },
+        ]
+      : [
+          ...funnel,
+          { label: 'POINTS', value: t.points },
+          { label: 'TRIES', value: t.tries },
+          { label: 'ASSISTS', value: t.try_assists },
+          { label: 'METRES', value: t.metres_carried },
+          { label: 'BREAKS', value: t.clean_breaks },
+          { label: 'DEF. BEATEN', value: t.defenders_beaten },
+          { label: 'KICK METRES', value: t.kick_metres },
+          { label: 'PASSES', value: t.passes },
+          { label: 'OFFLOADS', value: t.offloads },
+        ];
+  }, [data, isForward]);
 
   return (
     <FadeCard
