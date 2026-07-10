@@ -69,7 +69,7 @@ export function BootRoi({
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.bootRoi}
           purpose={
-            <>Every nation in the team’s tier plotted by kick metres against territory share — what the boot costs against the field it buys, territory along the bottom axis, from Field Winners to Pinned. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by kick metres against territory share — what the boot costs against the field it buys, territory along the bottom axis, from Field Winners to Pinned. Dot size is the side’s points margin per game.</>
           }
         />
       }

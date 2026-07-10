@@ -92,7 +92,7 @@ export function TeamLandscape({
             compareTeamId ? undefined : analysis.data?.landscape
           }
           purpose={
-            <>Every nation in the team’s tier plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by possession share against territory share — who controls the ball against who controls the field, from Controllers (both) to Starved (neither). Dot size is the side’s points margin per game.</>
           }
         />
       }

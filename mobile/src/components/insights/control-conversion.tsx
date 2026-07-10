@@ -75,7 +75,7 @@ export function ControlConversion({
           onPress={() => setInfoOpen(true)}
           hitSlop={10}
           accessibilityRole="button"
-          accessibilityLabel="Read the control versus conversion analysis">
+          accessibilityLabel="Explain the verdict chart">
           <FlipTrigger />
         </Pressable>
       </View>
@@ -155,8 +155,8 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
           x={x}
           y={y >= padTop + 18 ? y - 8 : y + 14}
           fill={Colors.light.text}
-          fontSize={9}
-          fontWeight="700"
+          fontFamily="BarlowCondensed_700Bold_Italic"
+          fontSize={11}
           textAnchor="middle">
           {side.team.short_name}
         </SvgText>
@@ -179,20 +179,20 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
           <Line x1={midX} y1={padTop} x2={midX} y2={plotBottom} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
 
           {/* Quadrant labels — whisper-grey, centred in each quadrant. */}
-          <SvgText x={(midX + width - padX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             DOMINANT
           </SvgText>
-          <SvgText x={(padX + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
-            CLINICAL
+          <SvgText x={(padX + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
+            RUTHLESS
           </SvgText>
-          <SvgText x={(midX + width - padX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(midX + width - padX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             STERILE
           </SvgText>
-          <SvgText x={(padX + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontSize={8} fontWeight="700" textAnchor="middle">
+          <SvgText x={(padX + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
             OUTCLASSED
           </SvgText>
 
-          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontSize={8} fontWeight="700" letterSpacing={0.4} textAnchor="middle">
+          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             POSSESSION % →
           </SvgText>
           {/* Y-axis caption — rotated, reading upward. */}
@@ -200,8 +200,8 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
             x={8}
             y={(padTop + plotBottom) / 2}
             fill={Colors.light.textSecondary}
-            fontSize={8}
-            fontWeight="700"
+            fontFamily="Barlow_500Medium"
+            fontSize={9}
             letterSpacing={0.4}
             textAnchor="middle"
             transform={`rotate(-90, 8, ${(padTop + plotBottom) / 2})`}>

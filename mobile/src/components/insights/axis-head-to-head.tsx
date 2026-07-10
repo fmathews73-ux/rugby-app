@@ -42,7 +42,7 @@ const PAIR_ROW_ORDER: Record<string, readonly string[]> = {
   ],
   // Platform first, then the giveaway ladder in ESCALATING cost:
   // lost ball → penalties → ten minutes → the game.
-  'Set Piece & Discipline': [
+  'Set-Piece & Discipline': [
     'scrumSuccessPercent',
     'lineoutSuccessPercent',
     'handlingErrors',

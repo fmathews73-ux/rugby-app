@@ -67,7 +67,7 @@ export function SetPieceDiscipline({
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.setPieceDiscipline}
           purpose={
-            <>Nations in the team’s tier plotted by set-piece success against scrum penalties conceded — four quadrants from Controlled to Under Siege. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by set-piece success against scrum penalties conceded — four quadrants from Rock Solid to Under Siege. Dot size is the side’s points margin per game.</>
           }
         />
       }

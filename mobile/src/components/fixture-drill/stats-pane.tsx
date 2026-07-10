@@ -115,7 +115,7 @@ export function StatsPane({
           away: Math.round((result.away_points_from_twenty_two_entries / Math.max(1, result.away_twenty_two_entries)) * 10) / 10,
           premium: false,
         },
-        { label: 'Meters made', home: result.home_meters, away: result.away_meters, premium: true },
+        { label: 'Metres made', home: result.home_meters, away: result.away_meters, premium: true },
         { label: 'Post-contact metres', home: result.home_post_contact_metres, away: result.away_post_contact_metres, premium: true },
         { label: 'Line breaks', home: result.home_line_breaks, away: result.away_line_breaks, premium: true },
         { label: 'Defenders beaten', home: result.home_defenders_beaten, away: result.away_defenders_beaten, premium: true },
@@ -132,7 +132,7 @@ export function StatsPane({
       stats: [
         { label: 'Kicks in play', home: result.home_kicks_in_play, away: result.away_kicks_in_play, premium: true },
         { label: 'Kicks to touch', home: result.home_kicks_to_touch, away: result.away_kicks_to_touch, premium: true },
-        { label: 'Kick metres gained', home: result.home_kick_meters, away: result.away_kick_meters, premium: true },
+        { label: 'Kick metres', home: result.home_kick_meters, away: result.away_kick_meters, premium: true },
         { label: '50/22 kicks', home: result.home_fifty_twenty_twos, away: result.away_fifty_twenty_twos, premium: true },
         // Aerial contest — a side's receptions derive from the
         // OPPONENT's delivered contestables (register #33).
@@ -527,7 +527,7 @@ const styles = StyleSheet.create({
   // Value tiles — the quiet losing-score pairing (light fill, grey
   // Barlow digits), matching every other bar chart's value rail.
   statValueBox: {
-    width: 36,
+    width: 44,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',

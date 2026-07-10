@@ -10,6 +10,7 @@ import { TeamFlagShield } from '@/components/team-flag-shield';
 import { CapsJerseyBadge, SquadBarbell, SquadMan } from '@/components/squad-jersey';
 import { CardCarousel } from '@/components/card-carousel';
 import { PlayerMatrixCard } from '@/components/insights/player-matrix-card';
+import { LegendChip } from '@/components/insights/legend-chip';
 import { fitNarrative } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
@@ -253,11 +254,11 @@ function PlayerPreviewBlock({
                     playerId={playerId}
                     teamId={teamId}
                     title="Jackal"
-                    purpose="The breakdown trade among the ten most-used players in his position: ruck arrivals per game against turnovers won — the clean thief attends AND steals; body work hits every ruck for little return. Dot size is minutes played."
+                    purpose="The breakdown trade among the ten most-used players in his position: ruck arrivals per game against turnovers won — the pickpocket attends AND steals; body work hits every ruck for little return. Dot size is minutes played."
                     accessibilityLabel="Explain the jackal matrix"
                     xAxis={{ field: 'rucks_hit' }}
                     yAxis={{ field: 'turnovers_won' }}
-                    quadrants={{ tr: 'CLEAN THIEVES', tl: 'POACHERS', br: 'BODY WORK', bl: 'BYSTANDERS' }}
+                    quadrants={{ tr: 'PICKPOCKETS', tl: 'POACHERS', br: 'BODY WORK', bl: 'BYSTANDERS' }}
                     xCaption="RUCK ARRIVALS /GAME →"
                     yCaption="TURNOVERS WON /GAME →"
                     style={styles.pageCard}
@@ -287,7 +288,7 @@ function PlayerPreviewBlock({
                     accessibilityLabel="Explain the playmaker matrix"
                     xAxis={{ field: 'passes' }}
                     yAxis={{ field: 'try_assists' }}
-                    quadrants={{ tr: 'PUPPET MASTERS', tl: 'CLINICAL', br: 'LINK MEN', bl: 'BIT PART' }}
+                    quadrants={{ tr: 'PUPPET MASTERS', tl: 'KILLER PASS', br: 'LINK MEN', bl: 'BIT PART' }}
                     xCaption="PASSES /GAME →"
                     yCaption="TRY ASSISTS /GAME →"
                     style={styles.pageCard}
@@ -615,7 +616,7 @@ function PlayerRadarCard({
               onPress={() => setInfoOpen(true)}
               hitSlop={10}
               accessibilityRole="button"
-              accessibilityLabel="Read the player scouting report">
+              accessibilityLabel="Explain the player profile radar">
               <FlipTrigger />
             </Pressable>
           </View>
@@ -635,10 +636,10 @@ function PlayerRadarCard({
               {/* Bottom-centred legend — team-Profile grammar, the
                   player's SURNAME as the label (owner call 2026-07-10). */}
               <View style={styles.radarLegend}>
-                <View style={[styles.radarLegendSwatch, { backgroundColor: teamDotColor(teamId) }]} />
-                <Text style={styles.radarLegendText}>
-                  {player.data ? surname(player.data.name) : ''}
-                </Text>
+                <LegendChip
+                  label={player.data ? surname(player.data.name) : ''}
+                  color={teamDotColor(teamId) ?? Colors.light.textSecondary}
+                />
               </View>
             </>
           )}
@@ -796,7 +797,7 @@ const styles = StyleSheet.create({
   // Mini score tiles — match-score convention (winner dark/white when
   // above the reference, quiet light/grey otherwise).
   valueBox: {
-    width: 36,
+    width: 44,
     height: 22,
     borderRadius: 4,
     backgroundColor: '#F3F4F6',
@@ -1014,7 +1015,8 @@ const styles = StyleSheet.create({
   headerRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    // CardHeaderActions hard rule: fixed 16pt gap before the trigger.
+    gap: Spacing.three,
   },
   peerTag: {
     fontFamily: 'Barlow_500Medium',
@@ -1027,19 +1029,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-  },
-  radarLegendSwatch: {
-    width: 9,
-    height: 9,
-    borderRadius: 999,
-    opacity: 0.45,
-  },
-  radarLegendText: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: 8,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   radarHeaderRow: {
     position: 'relative',

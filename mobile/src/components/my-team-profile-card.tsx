@@ -4,6 +4,7 @@ import { Pressable, StyleSheet, type StyleProp, Text, View, type ViewStyle } fro
 
 import { BackStrong, FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { RadarChart, buildRadarAxes } from '@/components/insights/radar-chart';
+import { LegendChip } from '@/components/insights/legend-chip';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeam } from '@/api/hooks';
@@ -98,12 +99,10 @@ function Populated({
             /* Bottom-centred legend — Progression grammar: team fill
                swatch + code, dashed marker + TIER AVG. */
             <View style={styles.legend}>
-              <View style={styles.legendItem}>
-                <View style={[styles.legendSwatch, { backgroundColor: teamDotColor(teamId) }]} />
-                <Text style={styles.legendText}>
-                  {team.data?.short_name ?? teamId.toUpperCase()}
-                </Text>
-              </View>
+              <LegendChip
+                label={team.data?.short_name ?? teamId.toUpperCase()}
+                color={teamDotColor(teamId) ?? Colors.light.textSecondary}
+              />
             </View>
           ) : (
             <Text style={styles.empty}>
@@ -180,27 +179,9 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.three,
   },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendSwatch: {
-    width: 9,
-    height: 9,
-    borderRadius: 999,
-    opacity: 0.45,
-  },
   // Dashed tier-average marker — a short dashed rule matching the
   // reference curve.
   // Matrix size-legend register — one legend voice across the cards.
-  legendText: {
-    fontFamily: 'Barlow_500Medium',
-    fontSize: 8,
-    letterSpacing: 0.4,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
-  },
   empty: {
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,

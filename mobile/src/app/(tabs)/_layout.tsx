@@ -61,6 +61,11 @@ export default function TabsLayout() {
         name="teams"
         options={{
           title: 'Teams',
+          // Same tab grammar as Fixtures (owner call 2026-07-10): the
+          // Teams tab ALWAYS re-enters on the directory — any drill
+          // left on the stack pops when the tab blurs, so the back
+          // button walks a fresh hierarchy, never stale history.
+          popToTopOnBlur: true,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? 'people' : 'people-outline'} size={size} color={color} />
           ),

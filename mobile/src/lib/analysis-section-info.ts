@@ -34,7 +34,7 @@ export const AXIS_INFO: Record<string, SectionInfo> = {
     ],
   },
   'set-piece': {
-    title: 'Set Piece',
+    title: 'Set-Piece',
     paragraphs: [
       'Scrum and lineout success — the platforms the game restarts from. Winning your own ball is expected; losing it is a turnover in prime position.',
       'Most Test tries trace back to set-piece launch. A creaking lineout or scrum leaks both possession and penalties, so a set-piece edge tends to compound across 80 minutes.',
@@ -101,7 +101,7 @@ export const PRE_MATCH_AXIS_PAIRS: readonly {
   keys: readonly [string, string];
 }[] = [
   { title: 'Attack & Defence', keys: ['attack', 'defence'] },
-  { title: 'Set Piece & Discipline', keys: ['set-piece', 'discipline'] },
+  { title: 'Set-Piece & Discipline', keys: ['set-piece', 'discipline'] },
   { title: 'Kicking & Territory', keys: ['kicking', 'territory'] },
   // Aerial rides directly behind Kicking & Territory — it is that
   // card's detail view (the contestable slice of the kicking game).
@@ -122,7 +122,7 @@ export const PAIR_PURPOSES: Record<string, { preview: string; match: string }> =
     match:
       'This match\u2019s strike ledger: attacking output against tackle work, live while the game runs and settled at full-time. Each bar is the toggled side\u2019s number against the other side\u2019s dark tick.',
   },
-  'Set Piece & Discipline': {
+  'Set-Piece & Discipline': {
     preview:
       'The platform game coming in: scrum and lineout returns set against the penalty ledger, from the last 10. A side that wins its own ball but keeps conceding penalties hands the platform straight back.',
     match:

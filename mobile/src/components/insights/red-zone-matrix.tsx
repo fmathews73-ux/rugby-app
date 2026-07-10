@@ -85,7 +85,7 @@ export function RedZoneMatrix({
             compareTeamId ? undefined : analysis.data?.redZone
           }
           purpose={
-            <>Every nation in the team’s tier plotted by red-zone visits against the points each visit pays — volume against conversion, from Relentless (both) to Blunt (neither). Around 2 points a visit is Test par. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by 22 entries against the points each entry pays — volume against conversion, from Relentless (both) to Blunt (neither). Around 2 points an entry is Test par. Dot size is the side’s points margin per game.</>
           }
         />
       }
@@ -120,7 +120,7 @@ export function RedZoneMatrix({
           pairCentered={Boolean(compareTeamId)}
           quadrants={{ tr: 'RELENTLESS', tl: 'CLINICAL', br: 'WASTEFUL', bl: 'BLUNT' }}
           xCaption="22 ENTRIES /GAME →"
-          yCaption="POINTS PER VISIT →"
+          yCaption="POINTS PER ENTRY →"
         />
       )}
 

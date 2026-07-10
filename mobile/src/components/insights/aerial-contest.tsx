@@ -117,7 +117,7 @@ export function AerialContest({
                 onPress={() => setInfoOpen(true)}
                 hitSlop={10}
                 accessibilityRole="button"
-                accessibilityLabel="Read the aerial contest analysis">
+                accessibilityLabel="Explain the aerial contest chart">
                 <FlipTrigger />
               </Pressable>
             </View>

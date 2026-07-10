@@ -5,6 +5,7 @@ import Svg, { ClipPath, Defs, Line, Path, Rect, Text as SvgText } from 'react-na
 
 import { useFixture, useTeam, useFixtureEvents } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { LegendChip } from '@/components/insights/legend-chip';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { useChartInk } from '@/components/insights/use-chart-ink';
@@ -87,7 +88,7 @@ export function CombinedPointsPattern({
           title="Momentum"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>Both sides' weighted attacking activity as ONE net curve — above the line the home side has the match by the throat, below it the away side does.</>}
+          purpose={<>Both sides' weighted attacking activity in THIS match as ONE net curve — above the line the home side has the game by the throat, below it the away side does.</>}
         />
       }
       front={
@@ -103,7 +104,7 @@ export function CombinedPointsPattern({
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Read the momentum analysis">
+            accessibilityLabel="Explain the momentum chart">
             <FlipTrigger />
           </Pressable>
         </View>
@@ -135,15 +136,6 @@ export function CombinedPointsPattern({
         </View>
       }
     />
-  );
-}
-
-function LegendChip({ label, color }: { label: string; color: string }) {
-  return (
-    <View style={styles.legendItem}>
-      <View style={[styles.legendSwatch, { backgroundColor: color }]} />
-      <Text style={styles.legendText}>{label}</Text>
-    </View>
   );
 }
 
@@ -313,8 +305,8 @@ function MomentumMirror({
           x={xForMinute(m.minute)}
           y={12}
           fill={Colors.light.textSecondary}
-          fontSize={10}
-          fontWeight="700"
+          fontFamily="Barlow_500Medium"
+          fontSize={9}
           textAnchor={
             m.minute === 0 ? 'start' : m.minute === total ? 'end' : 'middle'
           }>
@@ -330,8 +322,8 @@ function MomentumMirror({
           x={xForMinute(m)}
           y={height - 6}
           fill={Colors.light.textSecondary}
-          fontSize={10}
-          fontWeight="600"
+          fontFamily="Barlow_500Medium"
+          fontSize={9}
           textAnchor={m === 0 ? 'start' : m === total ? 'end' : 'middle'}>
           {`${m}'`}
         </SvgText>
@@ -465,23 +457,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.three,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  legendSwatch: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-  },
-  legendText: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   // Fills the card height the carousel grants (tallest-sibling
   // normalisation); minHeight preserves the original canvas in

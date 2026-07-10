@@ -64,14 +64,14 @@ const field =
  *  totals here). */
 const MATCH_PAIR_ROWS: Record<string, readonly RowDef[]> = {
   'Attack & Defence': [
-    { label: 'Points', get: field('home_score', 'away_score') },
+    { label: 'Points scored', get: field('home_score', 'away_score') },
     { label: 'Tries', get: field('home_tries', 'away_tries') },
     { label: 'Metres made', get: field('home_meters', 'away_meters') },
     { label: 'Line breaks', get: field('home_line_breaks', 'away_line_breaks') },
     { label: 'Defenders beaten', get: field('home_defenders_beaten', 'away_defenders_beaten') },
     { label: 'Tackle success', get: field('home_tackle_success_percent', 'away_tackle_success_percent'), percent: true },
   ],
-  'Set Piece & Discipline': [
+  'Set-Piece & Discipline': [
     { label: 'Scrum success', get: scrumPct, percent: true },
     { label: 'Lineout success', get: lineoutPct, percent: true },
     { label: 'Penalties conceded', get: field('home_penalties_conceded', 'away_penalties_conceded'), inverted: true },
@@ -140,7 +140,7 @@ export const MATCH_AXIS_PAIRS: readonly {
   keys: readonly AxisKey[];
 }[] = [
   { title: 'Attack & Defence', keys: ['attack', 'defence'] },
-  { title: 'Set Piece & Discipline', keys: ['setPiece', 'discipline'] },
+  { title: 'Set-Piece & Discipline', keys: ['setPiece', 'discipline'] },
   { title: 'Kicking & Territory', keys: ['kicking', 'territory'] },
   // Aerial rides behind Kicking & Territory (pre-match order); no
   // match axis narratives exist for it, so its back is About-only.
@@ -363,7 +363,7 @@ const styles = StyleSheet.create({
   },
   rowBlock: { gap: 4 },
   rowLabel: {
-    fontSize: TextSize.xs,
+    fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
   rowLine: {

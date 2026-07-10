@@ -68,7 +68,7 @@ export function BreakdownTrade({
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.breakdownTrade}
           purpose={
-            <>Every nation in the team’s tier plotted by turnovers won against breakdown penalties conceded — the jackal’s bargain priced in its own currency: turnovers won against breakdown penalties paid, from Clean Thieves to Overrun. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by the jackal’s bargain priced in its own currency — turnovers won against breakdown penalties paid, from Clean Thieves to Overrun. Dot size is the side’s points margin per game.</>
           }
         />
       }

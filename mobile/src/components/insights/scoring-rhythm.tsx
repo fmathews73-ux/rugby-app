@@ -82,7 +82,7 @@ export function ScoringRhythm({
             compareTeamId ? undefined : analysis.data?.rhythm
           }
           purpose={
-            <>Every nation in the team’s tier plotted by first-half scoring against second-half scoring — when the points come, from Eighty Minutes to Misfiring. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by first-half scoring against second-half scoring — when the points come, from Full Eighty to Misfiring. Dot size is the side’s points margin per game.</>
           }
         />
       }

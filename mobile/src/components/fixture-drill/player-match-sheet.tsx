@@ -232,7 +232,17 @@ export function PlayerMatchSheet({
           <Pressable
             onPress={() => {
               onClose();
-              router.push(`/teams/player/${pid}`, { withAnchor: true });
+              // Build the REAL hierarchy beneath the player card:
+              // directory (anchor) -> hub on Squad -> player, so the
+              // back button walks player -> squad -> directory (owner
+              // call 2026-07-10: after a player, browse squadmates).
+              if (player.data) {
+                router.push(
+                  { pathname: '/teams/[id]', params: { id: player.data.team_id, tab: 'squad' } },
+                  { withAnchor: true },
+                );
+              }
+              router.push(`/teams/player/${pid}`);
             }}
             accessibilityRole="button"
             style={({ pressed }) => [styles.profilePill, pressed && { opacity: 0.8 }]}>

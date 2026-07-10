@@ -118,7 +118,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         key="redzone"
         fixture={fixture}
         title="Red Zone"
-        purpose="This match’s red-zone ledger: visits to the 22 against the points each visit paid, each side framed against the other."
+        purpose="This match’s red-zone ledger: 22 entries against the points each entry paid, each side framed against the other."
         accessibilityLabel="Explain the match red-zone matrix"
         getAxes={(r, side) => {
           const entries = side === 'home' ? r.home_twenty_two_entries : r.away_twenty_two_entries;
@@ -130,7 +130,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
         }}
         quadrants={{ tr: 'RELENTLESS', tl: 'CLINICAL', br: 'WASTEFUL', bl: 'BLUNT' }}
         xCaption="22 ENTRIES →"
-        yCaption="POINTS PER VISIT →"
+        yCaption="POINTS PER ENTRY →"
         style={styles.pageCard}
       />,
       <MatchPairMatrix
@@ -172,7 +172,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
 
     for (const pair of MATCH_AXIS_PAIRS) {
       // Pair reads: the pair's opener paragraph (attack-pattern for
-      // Attack & Defence, platform for Set Piece & Discipline) ahead of
+      // Attack & Defence, platform for Set-Piece & Discipline) ahead of
       // its two axis narratives — same assembly the accordion used.
       const narratives = (analysis?.axes ?? [])
         .filter((ax) => pair.keys.includes(ax.key))
@@ -180,7 +180,7 @@ export function AnalysisPane({ fixture }: { fixture: Fixture }) {
       const opener =
         pair.title === 'Attack & Defence'
           ? analysis?.attackPattern
-          : pair.title === 'Set Piece & Discipline'
+          : pair.title === 'Set-Piece & Discipline'
             ? analysis?.platform
             : null;
       const paragraphs = [...(opener ? [opener] : []), ...narratives];

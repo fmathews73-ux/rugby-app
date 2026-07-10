@@ -17,6 +17,7 @@ import type { Fixture, MatchEvent } from '@rugby-app/shared';
 import { useFixtureEvents, useTeam } from '@/api/hooks';
 import { LineFadeRibbon } from '@/components/insights/line-fade-ribbon';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { LegendChip } from '@/components/insights/legend-chip';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpTSpan } from '@/components/insights/count-up-value';
@@ -176,7 +177,7 @@ export function ScoringProgression({
           title="Progression"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>The scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
+          purpose={<>THIS match's scoreboard as a race chart — cumulative points minute by minute. The vertical gap between the lines is the story; where it widens is where the match moved.</>}
         />
       }
       front={
@@ -192,7 +193,7 @@ export function ScoringProgression({
             onPress={() => setInfoOpen(true)}
             hitSlop={10}
             accessibilityRole="button"
-            accessibilityLabel="Read the scoring progression analysis">
+            accessibilityLabel="Explain the scoring progression chart">
             <FlipTrigger />
           </Pressable>
         </View>
@@ -244,8 +245,8 @@ export function ScoringProgression({
           <SvgText
             x={scaleX(HALF_TIME_MIN)}
             y={12}
-            fontSize={8}
-            fontWeight="700"
+            fontFamily="Barlow_500Medium"
+            fontSize={9}
             fill={Colors.light.textSecondary}
             textAnchor="middle">
             HT
@@ -259,8 +260,8 @@ export function ScoringProgression({
               key={`xl-${t}`}
               x={scaleX(t)}
               y={CHART_H - 8}
+              fontFamily="Barlow_500Medium"
               fontSize={9}
-              fontWeight="500"
               fill="#9CA3AF"
               textAnchor="middle">
               {t === FULL_TIME_MIN ? "80'" : `${t}'`}
@@ -350,18 +351,14 @@ export function ScoringProgression({
       {/* Bottom-centred colour legend — same spot and dot grammar as
           the Profile radar's. */}
       <View style={styles.legend}>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendSwatch, { backgroundColor: homeColor }]} />
-          <Text style={styles.legendText}>
-            {homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
-          </Text>
-        </View>
-        <View style={styles.legendItem}>
-          <View style={[styles.legendSwatch, { backgroundColor: awayColor }]} />
-          <Text style={styles.legendText}>
-            {awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
-          </Text>
-        </View>
+        <LegendChip
+          label={homeTeam.data?.short_name ?? homeTeamId.toUpperCase()}
+          color={homeColor}
+        />
+        <LegendChip
+          label={awayTeam.data?.short_name ?? awayTeamId.toUpperCase()}
+          color={awayColor}
+        />
       </View>
         </View>
       }
@@ -536,23 +533,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.three,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 5,
-  },
-  legendSwatch: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-  },
-  legendText: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   // Fills the card height the carousel grants (tallest-sibling
   // normalisation); minHeight preserves the original canvas in

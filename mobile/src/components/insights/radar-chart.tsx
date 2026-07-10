@@ -58,7 +58,7 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
     return [
       { key: 'attack', label: 'Attack', value: 0, raw: '—' },
       { key: 'defence', label: 'Defence', value: 0, raw: '—' },
-      { key: 'setPiece', label: 'Set-piece', value: 0, raw: '—' },
+      { key: 'setPiece', label: 'Set-Piece', value: 0, raw: '—' },
       { key: 'turnovers', label: 'Turnovers', value: 0, raw: '—' },
       { key: 'discipline', label: 'Discipline', value: 0, raw: '—' },
       { key: 'kicking', label: 'Kicking', value: 0, raw: '—' },
@@ -87,7 +87,7 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
     },
     {
       key: 'setPiece',
-      label: 'Set-piece',
+      label: 'Set-Piece',
       value: clip01(setPiecePercent / AXIS_CEILINGS.setPiece),
       raw: `${setPiecePercent.toFixed(0)}% success`,
     },
@@ -147,7 +147,7 @@ export function buildMatchRadarAxes(result: Result, side: 'home' | 'away'): Rada
   return [
     { key: 'attack', label: 'Attack', value: clip01(score / AXIS_CEILINGS.attack), raw: `${score} pts` },
     { key: 'defence', label: 'Defence', value: clip01(1 - conceded / AXIS_CEILINGS.defence), raw: `${conceded} pts conceded` },
-    { key: 'setPiece', label: 'Set-piece', value: clip01(setPiecePercent / AXIS_CEILINGS.setPiece), raw: `${setPiecePercent.toFixed(0)}% success` },
+    { key: 'setPiece', label: 'Set-Piece', value: clip01(setPiecePercent / AXIS_CEILINGS.setPiece), raw: `${setPiecePercent.toFixed(0)}% success` },
     { key: 'turnovers', label: 'Turnovers', value: clip01(turnovers / AXIS_CEILINGS.turnovers), raw: `${turnovers} won` },
     { key: 'discipline', label: 'Discipline', value: clip01(1 - pens / AXIS_CEILINGS.discipline), raw: `${pens} pens` },
     { key: 'kicking', label: 'Kicking', value: clip01(metersPerKick / AXIS_CEILINGS.kicking), raw: `${metersPerKick.toFixed(0)} m/kick` },

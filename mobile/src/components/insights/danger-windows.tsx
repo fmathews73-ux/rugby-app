@@ -66,7 +66,7 @@ export function DangerWindows({
           title="Danger"
           onClose={() => setInfoOpen(false)}
           read={read}
-          purpose={<>Each side's average points scored (up, green) and conceded (down, red) per 20-minute window — where one team's strong quarter lands on the other's weak one is where the match can swing.</>}
+          purpose={<>Each side's average points scored (up, green) and conceded (down, red) per 20-minute window over their last 10 — where one team's strong quarter lands on the other's weak one is where the match can swing.</>}
         />
       }
       front={

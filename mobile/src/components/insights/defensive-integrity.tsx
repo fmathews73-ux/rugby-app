@@ -89,7 +89,7 @@ export function DefensiveIntegrity({
             compareTeamId ? undefined : analysis.data?.defensiveIntegrity
           }
           purpose={
-            <>Every nation in the team’s tier plotted by tackle completion against line breaks conceded — missed tackles are the proximate cause of breaks, and completion under ~85% almost always shows on the scoreboard. Dot size is points conceded per game: bigger is leakier.</>
+            <>Every nation in the team’s tier over the last 10 plotted by tackle completion against line breaks conceded — missed tackles are the proximate cause of breaks, and completion under ~85% almost always shows on the scoreboard. Dot size is points conceded per game: bigger is leakier.</>
           }
         />
       }

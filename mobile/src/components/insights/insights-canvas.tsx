@@ -6,6 +6,7 @@ import type { Fixture } from '@rugby-app/shared';
 
 import { useFixtureResult, useTeam } from '@/api/hooks';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { LegendChip } from '@/components/insights/legend-chip';
 import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { teamDotColor } from '@/lib/team-colors';
@@ -205,15 +206,6 @@ export function InsightsCanvas({
   );
 }
 
-function LegendChip({ label, color }: { label: string; color: string }) {
-  return (
-    <View style={styles.legendChip}>
-      <View style={[styles.legendSwatch, { backgroundColor: color }]} />
-      <Text style={styles.legendLabel}>{label}</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   // Front face fills the flip container (grow-only).
   cardFill: { flexGrow: 1 },
@@ -267,23 +259,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: Spacing.three,
-  },
-  legendChip: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  legendSwatch: {
-    width: 8,
-    height: 8,
-    borderRadius: 999,
-  },
-  legendLabel: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: TextSize.md,
-    letterSpacing: TextTracking.wide,
-    color: Colors.light.textSecondary,
-    textTransform: 'uppercase',
   },
   empty: {
     fontSize: TextSize.sm,

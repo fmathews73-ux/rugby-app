@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useRef, useState } from 'react';
-import { Animated, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Player, Position } from '@rugby-app/shared';
@@ -82,10 +82,15 @@ const POSITION_LABELS: Record<Position, string> = {
  * Trajectory, Efficiency KPIs) plus the position-grouped squad list.
  */
 export default function TeamHubScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id, tab: tabParam } = useLocalSearchParams<{ id: string; tab?: string }>();
   const router = useRouter();
   const teamId = id ?? '';
-  const [tab, setTab] = useState<TeamTab>('preview');
+  // Deep-links may request a landing pane (e.g. the player card's
+  // back path builds a hub-on-Squad beneath itself, owner call
+  // 2026-07-10: after a player, users browse squadmates).
+  const [tab, setTab] = useState<TeamTab>(
+    tabParam === 'squad' || tabParam === 'stats' ? tabParam : 'preview',
+  );
   const scrollRef = useRef<ScrollView>(null);
 
   // Same resolve-to-top gesture as the fixture drill's sub-tabs.
@@ -93,7 +98,6 @@ export default function TeamHubScreen() {
     setTab(next);
     scrollRef.current?.scrollTo({ y: 0, animated: true });
   };
-  const [squadInfoOpen, setSquadInfoOpen] = useState(false);
   const isSquadView = tab === 'squad';
   const isStatsView = tab === 'stats';
 
@@ -247,41 +251,6 @@ export default function TeamHubScreen() {
 
         {isSquadView && (
           <>
-            <Modal
-              visible={squadInfoOpen}
-              transparent
-              animationType="fade"
-              onRequestClose={() => setSquadInfoOpen(false)}>
-              <Pressable style={styles.modalBackdrop} onPress={() => setSquadInfoOpen(false)}>
-                <Pressable style={styles.modalCard} onPress={() => {}}>
-                  <View style={styles.modalHeader}>
-                    <Text style={styles.modalTitle}>Squad</Text>
-                    <Pressable
-                      onPress={() => setSquadInfoOpen(false)}
-                      hitSlop={10}
-                      accessibilityLabel="Close">
-                      <Ionicons name="close" size={20} color={Colors.light.text} />
-                    </Pressable>
-                  </View>
-                  <Text style={styles.modalBody}>
-                    The full player pool grouped into positional units in
-                    team-sheet order — front row through to the back three. The{' '}
-                    <Ionicons name="shirt-outline" size={12} color={Colors.light.text} />{' '}
-                    figure is the unit&apos;s combined <Text style={styles.modalStrong}>caps</Text>{' '}
-                    (international appearances) and the{' '}
-                    <Ionicons name="people-outline" size={12} color={Colors.light.text} />{' '}
-                    figure its player count.
-                  </Text>
-                  <Text style={styles.modalBody}>
-                    Compare the units&apos; caps to see where the experience is
-                    concentrated: a pack carrying most of the caps points to a
-                    forward-led, set-piece side; caps loaded in the back line
-                    suggest the attacking know-how lives out wide. Units light on
-                    caps are where a coach is blooding the next generation.
-                  </Text>
-                </Pressable>
-              </Pressable>
-            </Modal>
             {players.isLoading ? (
               <Text style={styles.empty}>Loading…</Text>
             ) : visibleSections.length === 0 ? (
@@ -380,7 +349,7 @@ const TIER_STAT_GROUPS: readonly {
     rows: [
       { field: 'twentyTwoEntries', label: '22 entries' },
       { field: 'pointsPerTwentyTwoEntry', label: 'Points per 22 entry' },
-      { field: 'metersMade', label: 'Meters made' },
+      { field: 'metersMade', label: 'Metres made' },
       { field: 'postContactMetres', label: 'Post-contact metres' },
       { field: 'lineBreaks', label: 'Line breaks' },
       { field: 'defendersBeaten', label: 'Defenders beaten' },
@@ -396,7 +365,7 @@ const TIER_STAT_GROUPS: readonly {
     rows: [
       { field: 'kicksInPlay', label: 'Kicks in play' },
       { field: 'kicksToTouch', label: 'Kicks to touch' },
-      { field: 'kickMeters', label: 'Kick metres gained' },
+      { field: 'kickMeters', label: 'Kick metres' },
       { field: 'fiftyTwentyTwos', label: '50/22 kicks' },
       { field: 'contestableKicks', label: 'Contestables kicked' },
       { field: 'contestableKicksWon', label: 'Own kicks regathered' },
@@ -432,13 +401,13 @@ const TIER_STAT_GROUPS: readonly {
       { field: 'tackleSuccessPercent', label: 'Tackle success %', percent: true },
       { field: 'dominantTackles', label: 'Dominant tackles' },
       { field: 'turnoversWon', label: 'Turnovers won' },
+      { field: 'turnoversConceded', label: 'Turnovers conceded', inverted: true },
     ],
   },
   {
     label: 'Discipline',
-    description: 'The giveaway ledger per game over the last 10 — turnovers, the penalty count and its causes, errors and cards, against the tier average. Lower is the win on every row.',
+    description: 'The giveaway ledger per game over the last 10 — the penalty count and its causes, errors and cards, against the tier average. Lower is the win on every row.',
     rows: [
-      { field: 'turnoversConceded', label: 'Turnovers conceded', inverted: true },
       { field: 'penaltiesConceded', label: 'Penalties conceded', inverted: true },
       { field: 'scrumPenaltiesConceded', label: 'Scrum penalties', inverted: true },
       { field: 'breakdownPenaltiesConceded', label: 'Breakdown penalties', inverted: true },
@@ -971,7 +940,7 @@ const styles = StyleSheet.create({
   tierHeaderRightGroup: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.two,
+    gap: Spacing.three,
   },
   tierStatList: {
     gap: Spacing.two + 4,
@@ -1043,43 +1012,4 @@ const styles = StyleSheet.create({
   },
   tierBarCentreGap: { width: 4 },
 
-  // Modal
-  modalBackdrop: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    justifyContent: 'center',
-    paddingHorizontal: Spacing.four,
-  },
-  modalCard: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
-    padding: Spacing.four,
-    gap: Spacing.two,
-    shadowColor: '#000',
-    shadowOpacity: 0.15,
-    shadowRadius: 16,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  modalTitle: {
-    fontFamily: 'Barlow_600SemiBold',
-    fontSize: TextSize.lg,
-    color: Colors.light.text,
-  },
-  modalBody: {
-    fontSize: TextSize.sm,
-    color: Colors.light.text,
-    lineHeight: 20,
-  },
-  modalStrong: {
-    fontWeight: TextWeight.bold,
-    color: Colors.light.text,
-  },
 });

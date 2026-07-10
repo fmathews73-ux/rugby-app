@@ -72,7 +72,7 @@ export function PossessionOutcome({
           onClose={() => setInfoOpen(false)}
           read={analysis.data?.possession}
           purpose={
-            <>Every nation in the team’s tier plotted by possession share against points scored per game — when they have the ball, do they score — from Converters to Shut Out. Dot size is the side’s points margin per game.</>
+            <>Every nation in the team’s tier over the last 10 plotted by possession share against points scored per game — when they have the ball, do they score — from Converters to Shut Out. Dot size is the side’s points margin per game.</>
           }
         />
       }
