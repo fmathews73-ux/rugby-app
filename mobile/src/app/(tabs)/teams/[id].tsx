@@ -48,7 +48,9 @@ const POSITION_GROUPS: readonly { label: string; positions: readonly Position[] 
 // sibling pills were retired along with the stats category pills —
 // the squad cards ARE the units, so the pills only duplicated them.
 const TEAM_TABS: readonly { id: TeamTab; label: string }[] = [
-  { id: 'preview', label: 'Preview' },
+  // Labelled Profile (owner call 2026-07-10, matching the player
+  // card): the pane is the team's profile read, not a fixture preview.
+  { id: 'preview', label: 'Profile' },
   { id: 'stats', label: 'Stats' },
   { id: 'squad', label: 'Squad' },
 ];

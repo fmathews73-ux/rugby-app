@@ -14,7 +14,7 @@ import { ScoringRhythm } from '@/components/insights/scoring-rhythm';
 import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
 import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
 import { InsightsCanvas } from '@/components/insights/insights-canvas';
-import { Spacing } from '@/constants/theme';
+import { PAGE_CARD_MIN_HEIGHT, Spacing } from '@/constants/theme';
 import { useMatchPreview, type PreviewAxisKey } from '@/hooks/use-match-preview';
 import { PRE_MATCH_AXIS_PAIRS } from '@/lib/analysis-section-info';
 
@@ -177,5 +177,5 @@ const styles = StyleSheet.create({
   // Taller than natural content: fills the drill viewport so the
   // carousel dots land just above the tab bar, mirroring Home's
   // resting position. Tune this number against the device.
-  pageCard: { flex: 1, minHeight: 400 },
+  pageCard: { flex: 1, minHeight: PAGE_CARD_MIN_HEIGHT },
 });

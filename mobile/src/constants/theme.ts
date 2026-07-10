@@ -97,7 +97,21 @@ export const Spacing = {
  *  the footer tab bar with consistent air app-wide. */
 export const PAGE_BOTTOM_INSET = 60;
 
-export const DRILL_HERO_MIN_HEIGHT = 140;
+// Must sit ABOVE the fixture hero's intrinsic content (~152pt: date +
+// flags/score + venue bands) or it degrades to a floor and the team /
+// player heroes render shorter, shifting every card's bottom edge
+// (owner catch 2026-07-10 — same failure class as the card anchor).
+export const DRILL_HERO_MIN_HEIGHT = 156;
+
+// App-wide insight-card height (owner call 2026-07-10): every chart
+// card — carousel pages on Pre-Match / Match Analysis / Home / team
+// Profile AND the player Profile's stacked cards — stands the same
+// height. This must sit ABOVE the tallest intrinsic card (the 7-row
+// pair cards / ladder, ~410pt) or it degrades to a floor and panes
+// visibly jump when switching pills (400 did exactly that: Pre-Match
+// equalised to ~410 while an upcoming Match Analysis sat at 400).
+// Content shorter than the anchor distributes or top-aligns inside.
+export const PAGE_CARD_MIN_HEIGHT = 416;
 
 export const PillStrip = {
   /** Pill label: 12pt bold, wide tracking. */

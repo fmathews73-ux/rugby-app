@@ -17,7 +17,7 @@ import { CountUpTSpan, CountUpValue } from '@/components/insights/count-up-value
 import { RadarChart } from '@/components/insights/radar-chart';
 import { teamDotColor } from '@/lib/team-colors';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { FadingScrollView } from '@/components/fading-scroll-view';
@@ -43,13 +43,12 @@ const BAD_COLOR = StatusColor.live;
 type PlayerTab = 'season' | 'preview' | 'stats';
 
 const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
-  // Season leads (owner call 2026-07-10): the totals ledger is the
-  // landing read; Profile is the scouting deck (radar + six peer-bar
-  // category cards); Stats stays as the dense reference table.
+  // Profile leads (owner call 2026-07-10, reversing Season-first from
+  // the day before): scouting deck lands, Season totals close the bar.
   // Insights and Analysis pills retired 2026-07-07.
-  { id: 'season', label: 'Season' },
   { id: 'preview', label: 'Profile' },
   { id: 'stats', label: 'Stats' },
+  { id: 'season', label: 'Season' },
 ];
 
 /**
@@ -62,7 +61,7 @@ const PLAYER_TABS: readonly { id: PlayerTab; label: string }[] = [
 export default function PlayerCardScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const playerId = id ?? '';
-  const [tab, setTab] = useState<PlayerTab>('season');
+  const [tab, setTab] = useState<PlayerTab>('preview');
   const scrollRef = useRef<ScrollView>(null);
 
   const player = usePlayer(playerId);
@@ -187,6 +186,7 @@ function PlayerPreviewBlock({
           playerId={playerId}
           teamId={teamId}
           isForward={isForward}
+          style={styles.stackCard}
           read={profileRead}
         />,
         // Comprehensive scouting deck (owner call 2026-07-09): six
@@ -203,7 +203,7 @@ function PlayerPreviewBlock({
                 purpose={cat.purpose}
                 playerId={playerId}
                 metrics={cat.metrics}
-
+                style={styles.stackCard}
               />
             );
           },
@@ -219,7 +219,11 @@ function SeasonPane({ playerId }: { playerId: string }) {
   const analysis = usePlayerAnalysis(playerId);
   return (
     <View style={styles.profileStack}>
-      <SeasonCard playerId={playerId} read={analysis.data?.season ?? null} />
+      <SeasonCard
+        playerId={playerId}
+        style={styles.stackCard}
+        read={analysis.data?.season ?? null}
+      />
     </View>
   );
 }
@@ -427,11 +431,13 @@ function PlayerRadarCard({
   playerId,
   teamId,
   isForward,
+  style,
   read,
 }: {
   playerId: string;
   teamId: string;
   isForward: boolean;
+  style?: StyleProp<ViewStyle>;
   /** Full scouting narrative for the flip back. */
   read?: string | null;
 }) {
@@ -463,6 +469,7 @@ function PlayerRadarCard({
 
   return (
     <FadeCard
+      style={style}
       flipped={infoOpen}
       back={
         <NarrativeBack
@@ -958,6 +965,9 @@ const styles = StyleSheet.create({
   // grammar): one card per scouting category, Form and Season beneath
   // — carousel retired on this pane.
   profileStack: { gap: Spacing.three },
+  // Uniform card height (PAGE_CARD_MIN_HEIGHT anchor) — the stack has
+  // no carousel equalization, so every card carries it explicitly.
+  stackCard: { minHeight: PAGE_CARD_MIN_HEIGHT },
   // Portrait photo slot — sized to carry visual weight in the 140pt
   // hero rather than reading as an afterthought chip.
   heroName: {
@@ -983,7 +993,14 @@ const styles = StyleSheet.create({
   },
 
   // Scouting
-  scoutList: { gap: Spacing.two, marginTop: Spacing.one },
+  // Rows distribute across the anchored card height (ladder grammar)
+  // instead of pooling whitespace at the bottom.
+  scoutList: {
+    flexGrow: 1,
+    justifyContent: 'space-evenly',
+    gap: Spacing.two,
+    marginTop: Spacing.one,
+  },
   peerLabelRow: { alignItems: 'center' },
   peerBarRow: {
     flexDirection: 'row',

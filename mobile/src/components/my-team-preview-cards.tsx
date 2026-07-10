@@ -3,6 +3,7 @@ import { useFocusEffect } from 'expo-router';
 import { StyleSheet } from 'react-native';
 
 import { CardCarousel, type CardCarouselHandle } from '@/components/card-carousel';
+import { PAGE_CARD_MIN_HEIGHT } from '@/constants/theme';
 import { PossessionOutcome } from '@/components/insights/possession-outcome';
 import { DefensiveIntegrity } from '@/components/insights/defensive-integrity';
 import { RedZoneMatrix } from '@/components/insights/red-zone-matrix';
@@ -75,5 +76,8 @@ export function TeamPreviewBlock({ teamId }: { teamId: string }) {
 const styles = StyleSheet.create({
   pageCard: {
     flex: 1,
+    // Uniform card anchor — same floor as the fixture panes so the
+    // Home / team-hub cards stand exactly as tall as Pre-Match's.
+    minHeight: PAGE_CARD_MIN_HEIGHT,
   },
 });

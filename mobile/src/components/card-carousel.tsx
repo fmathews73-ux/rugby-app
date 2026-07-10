@@ -15,7 +15,7 @@ import {
   View,
 } from 'react-native';
 
-import { Colors, Spacing } from '@/constants/theme';
+import { PAGE_CARD_MIN_HEIGHT, Colors, Spacing } from '@/constants/theme';
 
 /**
  * Paged card carousel — full-screen-width pages with the app-wide 24pt
@@ -149,6 +149,9 @@ export const CardCarousel = forwardRef<
 const styles = StyleSheet.create({
   page: {
     paddingHorizontal: Spacing.four,
+    // Uniform card height app-wide (PAGE_CARD_MIN_HEIGHT anchor) —
+    // cards flexGrow to fill the page, charts absorb the slack.
+    minHeight: PAGE_CARD_MIN_HEIGHT,
   },
   dotsRow: {
     flexDirection: 'row',

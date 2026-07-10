@@ -16,7 +16,7 @@ import {
   MatchAxisH2H,
 } from '@/components/insights/match-h2h';
 import { ScoringProgression } from '@/components/insights/scoring-progression';
-import { Spacing } from '@/constants/theme';
+import { PAGE_CARD_MIN_HEIGHT, Spacing } from '@/constants/theme';
 import { useMatchAnalysis } from '@/hooks/use-match-analysis';
 
 // ─── Analysis (Match Analysis) pane ──────────────────────────────────────────
@@ -238,5 +238,5 @@ const styles = StyleSheet.create({
   carouselBleed: { marginHorizontal: -Spacing.four },
   // Same viewport-filling floor as the Pre-Match pane — the dots land
   // just above the tab bar, mirroring Home's resting position.
-  pageCard: { flex: 1, minHeight: 400 },
+  pageCard: { flex: 1, minHeight: PAGE_CARD_MIN_HEIGHT },
 });
