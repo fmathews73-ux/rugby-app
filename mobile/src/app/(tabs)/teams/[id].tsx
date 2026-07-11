@@ -209,7 +209,7 @@ export default function TeamHubScreen() {
                   <Text style={[styles.heroScoreUnit, styles.heroScoreTextWinner]}> W</Text>
                 </Text>
               </View>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, styles.heroScoreBoxDraw]}>
                 <Text style={styles.heroScoreText}>
                   {draws}
                   <Text style={styles.heroScoreUnit}> D</Text>
@@ -918,6 +918,13 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   heroScoreBoxWinner: { backgroundColor: Colors.light.textSecondary },
+  // Draw tile: white with the chrome hairline-grey keyline — its own
+  // state between the dark W and quiet L.
+  heroScoreBoxDraw: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#C7CBD1',
+  },
   heroScoreTextWinner: { color: Colors.light.textInverse },
   heroScoreUnit: {
     fontFamily: 'Barlow_500Medium',

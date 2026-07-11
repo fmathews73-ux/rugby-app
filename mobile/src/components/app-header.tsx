@@ -35,18 +35,10 @@ export function AppHeader() {
           <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
         </Pressable>
       ) : (
-        // Top-level screens: menu entry point (drawer TBD) — mirrors
-        // the avatar's 28pt outline treatment on the right.
-        <Pressable
-          onPress={() => {
-            // TODO: open the app menu once its surface is defined.
-          }}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel="Menu"
-          style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
-          <Ionicons name="menu-outline" size={28} color={Colors.light.textSecondary} />
-        </Pressable>
+        // Hamburger REMOVED (owner call 2026-07-11): footer tabs carry
+        // all primary nav; secondary surfaces live under the avatar.
+        // Empty spacer keeps the wordmark centred.
+        <View style={[styles.slot, styles.leftSlot]} />
       )}
 
       <View style={styles.centreSlot}>
@@ -70,11 +62,10 @@ export function AppHeader() {
           entry (register #25, deferred) will need a new home when it
           lands. */}
       <Pressable
-        onPress={() => {
-          // TODO: navigate to /profile once the screen is defined
-          // (register #15, Phase 4).
-        }}
+        onPress={() => router.push('/account')}
         hitSlop={8}
+        accessibilityRole="button"
+        accessibilityLabel="Account and settings"
         style={({ pressed }) => [styles.slot, styles.rightSlot, pressed && styles.slotPressed]}>
         <Ionicons name="person-circle-outline" size={28} color={Colors.light.textSecondary} />
       </Pressable>

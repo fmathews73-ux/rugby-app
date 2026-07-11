@@ -1001,23 +1001,23 @@
     "status": "scheduled"
   },
   {
-    "id": "rc26-r2-nzl-arg-2",
+    "id": "rc26-r2-nzl-aus",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 2",
     "home_team_id": "nzl",
-    "away_team_id": "arg",
+    "away_team_id": "aus",
     "kickoff_utc": "2026-08-15T07:05:00Z",
     "venue": "Eden Park",
     "status": "scheduled"
   },
   {
-    "id": "rc26-r2-rsa-aus-2",
+    "id": "rc26-r2-rsa-arg",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 2",
     "home_team_id": "rsa",
-    "away_team_id": "aus",
+    "away_team_id": "arg",
     "kickoff_utc": "2026-08-15T15:00:00Z",
     "venue": "Emirates Airline Park",
     "status": "scheduled"
@@ -1045,25 +1045,25 @@
     "status": "scheduled"
   },
   {
-    "id": "rc26-r4-aus-arg-2",
+    "id": "rc26-r4-aus-nzl",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 4",
     "home_team_id": "aus",
-    "away_team_id": "arg",
+    "away_team_id": "nzl",
     "kickoff_utc": "2026-09-05T09:45:00Z",
     "venue": "Allianz Stadium",
     "status": "scheduled"
   },
   {
-    "id": "rc26-r4-nzl-rsa-2",
+    "id": "rc26-r4-arg-rsa",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 4",
-    "home_team_id": "nzl",
+    "home_team_id": "arg",
     "away_team_id": "rsa",
-    "kickoff_utc": "2026-09-05T07:05:00Z",
-    "venue": "Eden Park",
+    "kickoff_utc": "2026-09-05T20:10:00Z",
+    "venue": "Estadio Único Madre de Ciudades",
     "status": "scheduled"
   },
   {
@@ -1089,25 +1089,25 @@
     "status": "scheduled"
   },
   {
-    "id": "rc26-r6-arg-nzl-2",
+    "id": "rc26-r6-arg-aus",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 6",
     "home_team_id": "arg",
-    "away_team_id": "nzl",
+    "away_team_id": "aus",
     "kickoff_utc": "2026-09-26T20:10:00Z",
     "venue": "Estadio Único Madre de Ciudades",
     "status": "scheduled"
   },
   {
-    "id": "rc26-r6-aus-rsa-2",
+    "id": "rc26-r6-rsa-nzl",
     "competition_id": "rugby-championship",
     "season_id": "rugby-championship-2026",
     "round": "Round 6",
-    "home_team_id": "aus",
-    "away_team_id": "rsa",
-    "kickoff_utc": "2026-09-26T09:45:00Z",
-    "venue": "Allianz Stadium",
+    "home_team_id": "rsa",
+    "away_team_id": "nzl",
+    "kickoff_utc": "2026-09-26T15:00:00Z",
+    "venue": "Emirates Airline Park",
     "status": "scheduled"
   },
   {

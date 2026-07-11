@@ -304,20 +304,20 @@ const RUGBY_CHAMPIONSHIP_2026: CompetitionBundle = (() => {
       fx('rc26-r1-nzl-arg', cid, sid, 'Round 1', 'nzl', 'arg', '2026-08-08T07:05:00Z'),
       fx('rc26-r1-rsa-aus', cid, sid, 'Round 1', 'rsa', 'aus', '2026-08-08T15:00:00Z'),
       // Round 2 (Aug 15)
-      fx('rc26-r2-nzl-arg-2', cid, sid, 'Round 2', 'nzl', 'arg', '2026-08-15T07:05:00Z'),
-      fx('rc26-r2-rsa-aus-2', cid, sid, 'Round 2', 'rsa', 'aus', '2026-08-15T15:00:00Z'),
+      fx('rc26-r2-nzl-aus', cid, sid, 'Round 2', 'nzl', 'aus', '2026-08-15T07:05:00Z'),
+      fx('rc26-r2-rsa-arg', cid, sid, 'Round 2', 'rsa', 'arg', '2026-08-15T15:00:00Z'),
       // Round 3 (Aug 29)
       fx('rc26-r3-aus-arg', cid, sid, 'Round 3', 'aus', 'arg', '2026-08-29T09:45:00Z'),
       fx('rc26-r3-nzl-rsa', cid, sid, 'Round 3', 'nzl', 'rsa', '2026-08-29T07:05:00Z'),
       // Round 4 (Sep 5)
-      fx('rc26-r4-aus-arg-2', cid, sid, 'Round 4', 'aus', 'arg', '2026-09-05T09:45:00Z'),
-      fx('rc26-r4-nzl-rsa-2', cid, sid, 'Round 4', 'nzl', 'rsa', '2026-09-05T07:05:00Z'),
+      fx('rc26-r4-aus-nzl', cid, sid, 'Round 4', 'aus', 'nzl', '2026-09-05T09:45:00Z'),
+      fx('rc26-r4-arg-rsa', cid, sid, 'Round 4', 'arg', 'rsa', '2026-09-05T20:10:00Z'),
       // Round 5 (Sep 19)
       fx('rc26-r5-arg-nzl', cid, sid, 'Round 5', 'arg', 'nzl', '2026-09-19T20:10:00Z'),
       fx('rc26-r5-aus-rsa', cid, sid, 'Round 5', 'aus', 'rsa', '2026-09-19T09:45:00Z'),
       // Round 6 (Sep 26)
-      fx('rc26-r6-arg-nzl-2', cid, sid, 'Round 6', 'arg', 'nzl', '2026-09-26T20:10:00Z'),
-      fx('rc26-r6-aus-rsa-2', cid, sid, 'Round 6', 'aus', 'rsa', '2026-09-26T09:45:00Z'),
+      fx('rc26-r6-arg-aus', cid, sid, 'Round 6', 'arg', 'aus', '2026-09-26T20:10:00Z'),
+      fx('rc26-r6-rsa-nzl', cid, sid, 'Round 6', 'rsa', 'nzl', '2026-09-26T15:00:00Z'),
     ],
   };
 })();

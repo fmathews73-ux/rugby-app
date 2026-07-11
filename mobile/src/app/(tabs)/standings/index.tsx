@@ -202,7 +202,7 @@ function TableRow({
               <Text style={[styles.unitText, styles.scoreBoxSmallTextWinner]}> W</Text>
             </Text>
           </View>
-          <View style={styles.scoreBoxSmall}>
+          <View style={[styles.scoreBoxSmall, styles.scoreBoxSmallDraw]}>
             <Text style={styles.scoreBoxSmallText}>
               {row.drawn}
               <Text style={styles.unitText}> D</Text>
@@ -343,6 +343,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
+  // Draw tile: white with the chrome hairline-grey keyline — its own
+  // state between the dark W and quiet L (teams-row parity).
+  scoreBoxSmallDraw: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#C7CBD1',
+  },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',

@@ -2184,50 +2184,50 @@
     "role": "tmo"
   },
   {
-    "id": "rc26-r2-nzl-arg-2-official-1",
-    "fixture_id": "rc26-r2-nzl-arg-2",
+    "id": "rc26-r2-nzl-aus-official-1",
+    "fixture_id": "rc26-r2-nzl-aus",
     "name": "Zac Norwood",
     "role": "referee"
   },
   {
-    "id": "rc26-r2-nzl-arg-2-official-2",
-    "fixture_id": "rc26-r2-nzl-arg-2",
+    "id": "rc26-r2-nzl-aus-official-2",
+    "fixture_id": "rc26-r2-nzl-aus",
     "name": "Patrick Kingsford",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r2-nzl-arg-2-official-3",
-    "fixture_id": "rc26-r2-nzl-arg-2",
+    "id": "rc26-r2-nzl-aus-official-3",
+    "fixture_id": "rc26-r2-nzl-aus",
     "name": "George Merrick",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r2-nzl-arg-2-official-4",
-    "fixture_id": "rc26-r2-nzl-arg-2",
+    "id": "rc26-r2-nzl-aus-official-4",
+    "fixture_id": "rc26-r2-nzl-aus",
     "name": "Elliot Pemberton",
     "role": "tmo"
   },
   {
-    "id": "rc26-r2-rsa-aus-2-official-1",
-    "fixture_id": "rc26-r2-rsa-aus-2",
+    "id": "rc26-r2-rsa-arg-official-1",
+    "fixture_id": "rc26-r2-rsa-arg",
     "name": "Bruno Oakden",
     "role": "referee"
   },
   {
-    "id": "rc26-r2-rsa-aus-2-official-2",
-    "fixture_id": "rc26-r2-rsa-aus-2",
+    "id": "rc26-r2-rsa-arg-official-2",
+    "fixture_id": "rc26-r2-rsa-arg",
     "name": "Daniel Denholm",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r2-rsa-aus-2-official-3",
-    "fixture_id": "rc26-r2-rsa-aus-2",
+    "id": "rc26-r2-rsa-arg-official-3",
+    "fixture_id": "rc26-r2-rsa-arg",
     "name": "Oliver Crestwood",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r2-rsa-aus-2-official-4",
-    "fixture_id": "rc26-r2-rsa-aus-2",
+    "id": "rc26-r2-rsa-arg-official-4",
+    "fixture_id": "rc26-r2-rsa-arg",
     "name": "Ryan Kingsford",
     "role": "tmo"
   },
@@ -2280,50 +2280,50 @@
     "role": "tmo"
   },
   {
-    "id": "rc26-r4-aus-arg-2-official-1",
-    "fixture_id": "rc26-r4-aus-arg-2",
+    "id": "rc26-r4-aus-nzl-official-1",
+    "fixture_id": "rc26-r4-aus-nzl",
     "name": "Quinn Portway",
     "role": "referee"
   },
   {
-    "id": "rc26-r4-aus-arg-2-official-2",
-    "fixture_id": "rc26-r4-aus-arg-2",
+    "id": "rc26-r4-aus-nzl-official-2",
+    "fixture_id": "rc26-r4-aus-nzl",
     "name": "Yannick Ingleby",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r4-aus-arg-2-official-3",
-    "fixture_id": "rc26-r4-aus-arg-2",
+    "id": "rc26-r4-aus-nzl-official-3",
+    "fixture_id": "rc26-r4-aus-nzl",
     "name": "Harry Kilbride",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r4-aus-arg-2-official-4",
-    "fixture_id": "rc26-r4-aus-arg-2",
+    "id": "rc26-r4-aus-nzl-official-4",
+    "fixture_id": "rc26-r4-aus-nzl",
     "name": "Ulrich Quenton",
     "role": "tmo"
   },
   {
-    "id": "rc26-r4-nzl-rsa-2-official-1",
-    "fixture_id": "rc26-r4-nzl-rsa-2",
+    "id": "rc26-r4-arg-rsa-official-1",
+    "fixture_id": "rc26-r4-arg-rsa",
     "name": "Alex Langford",
     "role": "referee"
   },
   {
-    "id": "rc26-r4-nzl-rsa-2-official-2",
-    "fixture_id": "rc26-r4-nzl-rsa-2",
+    "id": "rc26-r4-arg-rsa-official-2",
+    "fixture_id": "rc26-r4-arg-rsa",
     "name": "Callum Yardley",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r4-nzl-rsa-2-official-3",
-    "fixture_id": "rc26-r4-nzl-rsa-2",
+    "id": "rc26-r4-arg-rsa-official-3",
+    "fixture_id": "rc26-r4-arg-rsa",
     "name": "Julian Crestwood",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r4-nzl-rsa-2-official-4",
-    "fixture_id": "rc26-r4-nzl-rsa-2",
+    "id": "rc26-r4-arg-rsa-official-4",
+    "fixture_id": "rc26-r4-arg-rsa",
     "name": "Marcus Kilbride",
     "role": "tmo"
   },
@@ -2376,50 +2376,50 @@
     "role": "tmo"
   },
   {
-    "id": "rc26-r6-arg-nzl-2-official-1",
-    "fixture_id": "rc26-r6-arg-nzl-2",
+    "id": "rc26-r6-arg-aus-official-1",
+    "fixture_id": "rc26-r6-arg-aus",
     "name": "Ethan Crestwood",
     "role": "referee"
   },
   {
-    "id": "rc26-r6-arg-nzl-2-official-2",
-    "fixture_id": "rc26-r6-arg-nzl-2",
+    "id": "rc26-r6-arg-aus-official-2",
+    "fixture_id": "rc26-r6-arg-aus",
     "name": "Elliot Harwood",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r6-arg-nzl-2-official-3",
-    "fixture_id": "rc26-r6-arg-nzl-2",
+    "id": "rc26-r6-arg-aus-official-3",
+    "fixture_id": "rc26-r6-arg-aus",
     "name": "Bruno Ravenscroft",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r6-arg-nzl-2-official-4",
-    "fixture_id": "rc26-r6-arg-nzl-2",
+    "id": "rc26-r6-arg-aus-official-4",
+    "fixture_id": "rc26-r6-arg-aus",
     "name": "George Bramley",
     "role": "tmo"
   },
   {
-    "id": "rc26-r6-aus-rsa-2-official-1",
-    "fixture_id": "rc26-r6-aus-rsa-2",
+    "id": "rc26-r6-rsa-nzl-official-1",
+    "fixture_id": "rc26-r6-rsa-nzl",
     "name": "Finn Grayling",
     "role": "referee"
   },
   {
-    "id": "rc26-r6-aus-rsa-2-official-2",
-    "fixture_id": "rc26-r6-aus-rsa-2",
+    "id": "rc26-r6-rsa-nzl-official-2",
+    "fixture_id": "rc26-r6-rsa-nzl",
     "name": "Daniel Langford",
     "role": "assistant-referee-1"
   },
   {
-    "id": "rc26-r6-aus-rsa-2-official-3",
-    "fixture_id": "rc26-r6-aus-rsa-2",
+    "id": "rc26-r6-rsa-nzl-official-3",
+    "fixture_id": "rc26-r6-rsa-nzl",
     "name": "Yannick Ormsby",
     "role": "assistant-referee-2"
   },
   {
-    "id": "rc26-r6-aus-rsa-2-official-4",
-    "fixture_id": "rc26-r6-aus-rsa-2",
+    "id": "rc26-r6-rsa-nzl-official-4",
+    "fixture_id": "rc26-r6-rsa-nzl",
     "name": "Bruno Jennings",
     "role": "tmo"
   },

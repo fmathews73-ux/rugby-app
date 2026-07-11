@@ -55,7 +55,7 @@ export function TeamHeroRow({
               <Text style={[styles.unitText, styles.scoreBoxSmallTextWinner]}> W</Text>
             </Text>
           </View>
-          <View style={styles.scoreBoxSmall}>
+          <View style={[styles.scoreBoxSmall, styles.scoreBoxSmallDraw]}>
             <Text style={styles.scoreBoxSmallText}>
               {draws}
               <Text style={styles.unitText}> D</Text>
@@ -127,6 +127,13 @@ const styles = StyleSheet.create({
     paddingHorizontal: 3,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
+  // Draw tile: white with the chrome hairline-grey keyline — reads as
+  // its own state between the dark W and quiet L.
+  scoreBoxSmallDraw: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#C7CBD1',
+  },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
