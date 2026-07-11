@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 
 import type { Coach, CoachRole, Fixture, LineUp, MatchOfficial, MatchOfficialRole, Player } from '@rugby-app/shared';
@@ -31,9 +31,19 @@ export function LineUpPane({
   // the bottom-sheet modal was the app's last modal drill); back
   // returns here to the Line-Up.
   const router = useRouter();
+  // Stack-aware push: the fixture drill is hosted in the Fixtures,
+  // Tables AND Teams stacks (standings/fixture and teams/fixture
+  // re-exports); the player page must open in whichever stack we're
+  // standing in so back walks the same chain down.
+  const pathname = usePathname();
+  const playerPathname = pathname.startsWith('/standings')
+    ? '/standings/player/[pid]'
+    : pathname.startsWith('/teams')
+      ? '/teams/fixture-player/[pid]'
+      : '/fixtures/player/[pid]';
   const openPlayer = (pid: string) =>
     router.push({
-      pathname: '/fixtures/player/[pid]',
+      pathname: playerPathname,
       params: { pid, fixtureId: fixture.id },
     });
   const teams = useTeams();

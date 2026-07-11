@@ -1,5 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { usePathname, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useQuery } from '@tanstack/react-query';
@@ -42,6 +42,15 @@ export function TeamMatchesCard({ teamId }: { teamId: string }) {
 
 function Populated({ teamId, padded = false }: { teamId: string; padded?: boolean }) {
   const router = useRouter();
+  // Stack-aware push: on a team hub the match opens INSIDE the Teams
+  // stack (teams/fixture/[id] re-export) so back returns to the hub;
+  // on Home (no stack of its own) it keeps the anchored cross-tab
+  // push into Fixtures.
+  const pathname = usePathname();
+  const openFixture = (fixtureId: string) =>
+    pathname.startsWith('/teams')
+      ? router.push(`/teams/fixture/${fixtureId}`)
+      : router.push(`/fixtures/${fixtureId}`, { withAnchor: true });
   const team = useTeam(teamId);
   const allTeams = useTeams();
   const competitions = useCompetitions();
@@ -102,7 +111,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
             the chart carousel, so the result the charts describe leads
             and the upcoming fixture follows. */}
         <NavSection
-          onPress={lastMatch ? () => router.push(`/fixtures/${lastMatch.id}`, { withAnchor: true }) : undefined}>
+          onPress={lastMatch ? () => openFixture(lastMatch.id) : undefined}>
           {lastMatch && myTeamInfo ? (
             <>
               <Text style={styles.dateCentered}>{`Last Match · ${formatFixtureDate(lastMatch)}`}</Text>
@@ -125,7 +134,7 @@ function Populated({ teamId, padded = false }: { teamId: string; padded?: boolea
 
         <NavSection
           divider
-          onPress={nextMatch ? () => router.push(`/fixtures/${nextMatch.id}`, { withAnchor: true }) : undefined}>
+          onPress={nextMatch ? () => openFixture(nextMatch.id) : undefined}>
           {nextMatch && myTeamInfo ? (
             <>
               <Text style={styles.dateCentered}>

@@ -75,15 +75,14 @@ export default function TabsLayout() {
         name="standings"
         options={{
           title: 'Tables',
+          // Same tab grammar as Fixtures/Teams: re-entering the tab
+          // always lands on the standings; drills pop on blur.
+          popToTopOnBlur: true,
           tabBarIcon: ({ color, size, focused }) => (
             <Ionicons name={focused ? 'podium' : 'podium-outline'} size={size} color={color} />
           ),
         }}
       />
-      {/* Rankings removed from the footer (owner call 2026-07-09);
-          href: null keeps the route alive for deep links while hiding
-          the tab — world-rank data still surfaces on hero rows. */}
-      <Tabs.Screen name="rankings" options={{ href: null }} />
       <Tabs.Screen
         name="predictor"
         options={{
