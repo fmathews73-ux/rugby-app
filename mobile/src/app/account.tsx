@@ -10,7 +10,8 @@ import { PageGradient } from '@/components/page-gradient';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { TeamPickerModal } from '@/components/team-picker-modal';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
-import { Colors, FlagSize, PAGE_BOTTOM_INSET, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { resetWelcomeSeen } from '@/hooks/use-welcome-seen';
+import { Colors, FlagSize, PAGE_BOTTOM_INSET, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
 
 /**
  * Account & settings (PRD register #15 — skeleton, owner call
@@ -62,7 +63,7 @@ export default function AccountScreen() {
                   <Text style={styles.teamCode}>{myTeam.short_name}</Text>
                 </View>
               ) : (
-                <Text style={styles.valueText}>Not set</Text>
+                <Text style={styles.valueText}>Select team</Text>
               )
             }
           />
@@ -82,6 +83,27 @@ export default function AccountScreen() {
           <SettingsRow label="Terms of Service" onPress={() => router.push('/legal/terms')} />
           <SettingsRow label="Version" accessory={<Text style={styles.valueText}>{version}</Text>} />
         </SettingsCard>
+
+        {/* Sign out (Phase 0: no real session — re-gates the welcome
+            screen). Destructive register per design-system §5.2. */}
+        <View style={styles.card}>
+          <Pressable
+            onPress={() => {
+              // Until real auth lands, signing out clears the whole
+              // local "session" — including My Team — so every
+              // walk-through starts from a clean slate (owner call
+              // 2026-07-11). With Firebase Auth this becomes
+              // signOut() + preference sync teardown.
+              setMyTeamId(null);
+              resetWelcomeSeen();
+              router.replace('/welcome');
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Sign out"
+            style={({ pressed }) => [styles.signOutRow, pressed && styles.rowPressed]}>
+            <Text style={styles.signOutText}>Sign out</Text>
+          </Pressable>
+        </View>
 
         {__DEV__ ? (
           <Text style={styles.footerMeta}>Development build · synthetic data</Text>
@@ -258,6 +280,15 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.text,
+  },
+  signOutRow: {
+    alignItems: 'center',
+    paddingVertical: Spacing.three,
+  },
+  signOutText: {
+    fontFamily: 'Barlow_600SemiBold',
+    fontSize: 14,
+    color: StatusColor.live,
   },
   footerMeta: {
     textAlign: 'center',

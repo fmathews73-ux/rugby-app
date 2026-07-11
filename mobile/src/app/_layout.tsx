@@ -8,6 +8,7 @@ import { StyleSheet, useColorScheme, View } from 'react-native';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 
 import { DevModeBanner } from '@/components/dev-mode-banner';
+import { useWelcomeSeen } from '@/hooks/use-welcome-seen';
 
 SplashScreen.preventAutoHideAsync();
 
@@ -21,6 +22,12 @@ SplashScreen.preventAutoHideAsync();
  */
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+
+  // First-launch welcome gate (owner call 2026-07-11, skippable) —
+  // declarative Stack.Protected guards below. An imperative
+  // router.replace from this layout looped the navigator (update-
+  // depth crash); protected routes are the supported pattern.
+  const welcomeSeen = useWelcomeSeen();
 
   // Display font (Barlow Condensed Bold Italic — nation codes and
   // other sport-display moments) loads at runtime; the brand wordmark
@@ -63,7 +70,7 @@ export default function RootLayout() {
   // wordmark and card titles were stuck on the fallback face.
   // Proceed on error too — a failed font load falls back to system
   // faces rather than hanging on a blank screen forever.
-  if (!fontsLoaded && !fontError) return null;
+  if ((!fontsLoaded && !fontError) || welcomeSeen === undefined) return null;
 
   return (
     <QueryClientProvider client={queryClient}>
@@ -74,7 +81,12 @@ export default function RootLayout() {
             </SafeAreaView>
             <View style={styles.appBody}>
               <Stack>
-                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Protected guard={welcomeSeen === false}>
+                  <Stack.Screen name="welcome" options={{ headerShown: false }} />
+                </Stack.Protected>
+                <Stack.Protected guard={welcomeSeen !== false}>
+                  <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                </Stack.Protected>
               </Stack>
             </View>
           </SafeAreaProvider>
