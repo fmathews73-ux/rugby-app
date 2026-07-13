@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   coachingRole: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     textAlign: 'center',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
@@ -488,7 +488,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   coachingName: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     flex: 1,
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
@@ -507,14 +507,14 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   officialRole: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
     textTransform: 'uppercase',
   },
   officialName: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     flexShrink: 1,
@@ -567,7 +567,7 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   lineupCaps: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
@@ -597,7 +597,7 @@ const styles = StyleSheet.create({
     left: 0,
   },
   lineupPosPlayer: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     // Row text matches the Stats card label pattern: sm regular
     // textSecondary. Bold weight is reserved for the numeric read (shirt
     // number) so numbers pop and names sit as legible context around them.

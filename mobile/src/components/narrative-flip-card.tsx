@@ -146,7 +146,7 @@ const BODY_LINE_HEIGHT = 18;
 // (~15) + its top spacing (Spacing.two = 8) + bottom margin (4).
 const READ_EYEBROW_HEIGHT = 27;
 
-const strongStyle = { fontFamily: 'Barlow_600SemiBold', color: Colors.light.text };
+const strongStyle = { fontFamily: 'WorkSans_600SemiBold', color: Colors.light.text };
 
 const styles = StyleSheet.create({
   backCard: {
@@ -190,9 +190,9 @@ const styles = StyleSheet.create({
   eyebrowSpaced: { marginTop: Spacing.two },
   readFill: { flex: 1 },
   // Matches the hero meta register (competition · venue line):
-  // Barlow_500Medium sm in textSecondary.
+  // WorkSans_500Medium sm in textSecondary.
   body: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     lineHeight: BODY_LINE_HEIGHT,
     color: Colors.light.textSecondary,

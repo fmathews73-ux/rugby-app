@@ -303,7 +303,7 @@ export function RadarChart({
             x={labelP.x}
             y={labelP.y + 3}
             fill={Colors.light.textSecondary}
-              fontFamily="Barlow_500Medium"
+              fontFamily="WorkSans_500Medium"
               fontSize={12}
             textAnchor="middle">
             {ax.label}

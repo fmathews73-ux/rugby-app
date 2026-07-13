@@ -178,7 +178,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   draftText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   sectionBody: {
-    fontFamily: 'Barlow_400Regular',
+    fontFamily: 'WorkSans_400Regular',
     fontSize: TextSize.md,
     lineHeight: 21,
     color: Colors.light.text,

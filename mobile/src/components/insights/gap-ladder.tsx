@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   rowValueSuffix: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },

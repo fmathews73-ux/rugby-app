@@ -198,7 +198,7 @@ const styles = StyleSheet.create({
   // meta (competition · round · venue) at the bottom. Same token as the
   // drill hero's `headerLine`.
   headerLine: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

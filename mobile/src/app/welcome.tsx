@@ -419,7 +419,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   strapline: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
   },
   buttonText: {
-    fontFamily: 'Barlow_600SemiBold',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 14,
     color: '#FFFFFF',
   },
@@ -526,7 +526,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   sheetButtonText: {
-    fontFamily: 'Barlow_600SemiBold',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 14,
     color: Colors.light.text,
   },
@@ -535,7 +535,7 @@ const styles = StyleSheet.create({
   },
   sheetNote: {
     textAlign: 'center',
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
@@ -546,7 +546,7 @@ const styles = StyleSheet.create({
   },
   legalText: {
     textAlign: 'center',
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     lineHeight: 15,
     color: 'rgba(255,255,255,0.8)',

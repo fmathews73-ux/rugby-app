@@ -245,7 +245,7 @@ export function ScoringProgression({
           <SvgText
             x={scaleX(HALF_TIME_MIN)}
             y={12}
-            fontFamily="Barlow_500Medium"
+            fontFamily="WorkSans_500Medium"
             fontSize={9}
             fill={Colors.light.textSecondary}
             textAnchor="middle">
@@ -260,7 +260,7 @@ export function ScoringProgression({
               key={`xl-${t}`}
               x={scaleX(t)}
               y={CHART_H - 8}
-              fontFamily="Barlow_500Medium"
+              fontFamily="WorkSans_500Medium"
               fontSize={9}
               fill="#9CA3AF"
               textAnchor="middle">

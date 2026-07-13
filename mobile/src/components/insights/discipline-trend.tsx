@@ -167,10 +167,10 @@ function TrendChart({
           {/* Band reference lines + flush-left labels. */}
           <Line x1={padLeft} y1={yOf(PENS_LOW)} x2={width - padRight} y2={yOf(PENS_LOW)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
           <Line x1={padLeft} y1={yOf(PENS_HIGH)} x2={width - padRight} y2={yOf(PENS_HIGH)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
-          <SvgText x={0} y={yOf(PENS_LOW) + 3} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} textAnchor="start">
+          <SvgText x={0} y={yOf(PENS_LOW) + 3} fill={Colors.light.textSecondary} fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="start">
             {PENS_LOW}
           </SvgText>
-          <SvgText x={0} y={yOf(PENS_HIGH) + 3} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} textAnchor="start">
+          <SvgText x={0} y={yOf(PENS_HIGH) + 3} fill={Colors.light.textSecondary} fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="start">
             {PENS_HIGH}
           </SvgText>
           {/* The team's average — dotted, darker than the reference
@@ -188,7 +188,7 @@ function TrendChart({
             x={0}
             y={yOf(avg) - 4}
             fill={Colors.light.textSecondary}
-            fontFamily="Barlow_500Medium"
+            fontFamily="WorkSans_500Medium"
             fontSize={9}
             textAnchor="start">
             avg

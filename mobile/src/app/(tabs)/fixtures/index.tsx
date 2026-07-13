@@ -460,7 +460,9 @@ const styles = StyleSheet.create({
   row: {
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
-    gap: 4,
+    // Band gap 8 (owner call 2026-07-13, was 4) — score row to meta
+    // line, matching the Home cards' air.
+    gap: Spacing.two,
   },
   // Standalone inset divider — chevron-chrome grey with the 16pt side
   // inset used by the picker and Next/Last Match cards.
@@ -545,5 +547,5 @@ const styles = StyleSheet.create({
   statusMidLive: { color: StatusColor.live, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   statusMidHalfTime: { color: StatusColor.warning, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   metaText: {
-    fontFamily: 'Barlow_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
+    fontFamily: 'WorkSans_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 });

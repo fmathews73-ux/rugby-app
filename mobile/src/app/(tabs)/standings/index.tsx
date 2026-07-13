@@ -276,10 +276,11 @@ const styles = StyleSheet.create({
   },
 
   row: {
-    // Fixture-row rhythm: 24pt sides, 16pt vertical.
+    // Fixture-row rhythm: 24pt sides, 16pt vertical, 8pt band gap
+    // (owner call 2026-07-13, was 4).
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
-    gap: 4,
+    gap: Spacing.two,
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   matchupRow: {
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   unitText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -369,7 +370,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   ptsUnit: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -383,7 +384,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metaText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

@@ -305,7 +305,7 @@ function MomentumMirror({
           x={xForMinute(m.minute)}
           y={12}
           fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
+          fontFamily="WorkSans_500Medium"
           fontSize={9}
           textAnchor={
             m.minute === 0 ? 'start' : m.minute === total ? 'end' : 'middle'
@@ -322,7 +322,7 @@ function MomentumMirror({
           x={xForMinute(m)}
           y={height - 6}
           fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
+          fontFamily="WorkSans_500Medium"
           fontSize={9}
           textAnchor={m === 0 ? 'start' : m === total ? 'end' : 'middle'}>
           {`${m}'`}

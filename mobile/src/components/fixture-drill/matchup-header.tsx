@@ -298,5 +298,5 @@ const styles = StyleSheet.create({
   pillText: { fontSize: TextSize.xs, fontWeight: TextWeight.bold, letterSpacing: TextTracking.wide },
   pillDotSlot: { justifyContent: 'center' },
   headerLine: {
-    fontFamily: 'Barlow_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
+    fontFamily: 'WorkSans_500Medium', fontSize: TextSize.sm, color: Colors.light.textSecondary, textAlign: 'center' },
 });

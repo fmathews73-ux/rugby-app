@@ -280,7 +280,7 @@ const styles = StyleSheet.create({
   },
   valueTextWin: { color: Colors.light.textInverse },
   suffix: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },

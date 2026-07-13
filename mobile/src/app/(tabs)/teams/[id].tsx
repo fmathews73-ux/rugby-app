@@ -881,7 +881,7 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   heroPositionLine: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
@@ -927,13 +927,13 @@ const styles = StyleSheet.create({
   },
   heroScoreTextWinner: { color: Colors.light.textInverse },
   heroScoreUnit: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 8,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
   },
   heroMetaText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     fontVariant: ['tabular-nums'],
@@ -994,9 +994,10 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   playerRow: {
-    // Fixture-row geometry: 16pt vertical padding, 4pt band gap.
+    // Fixture-row geometry: 16pt vertical padding, 8pt band gap
+    // (owner call 2026-07-13, was 4 — app-wide row air increase).
     paddingVertical: Spacing.three,
-    gap: 4,
+    gap: Spacing.two,
   },
   // Row separator matching the fixtures/teams lists — chrome-grey
   // inset hairline BETWEEN rows only (owner call 2026-07-10),
@@ -1077,7 +1078,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   playerUnitText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 6,
     lineHeight: 7,
     color: Colors.light.textSecondary,
@@ -1105,7 +1106,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   playerMetaLine: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
@@ -1151,7 +1152,7 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   statLegendText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -1178,7 +1179,7 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
   },
   tierStatLabel: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

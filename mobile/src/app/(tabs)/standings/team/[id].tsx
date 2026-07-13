@@ -259,9 +259,10 @@ const styles = StyleSheet.create({
   },
 
   row: {
+    // 8pt band gap (owner call 2026-07-13, was 4).
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.three,
-    gap: 4,
+    gap: Spacing.two,
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   matchupRow: {
@@ -343,7 +344,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metaText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

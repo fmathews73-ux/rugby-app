@@ -293,7 +293,7 @@ const styles = StyleSheet.create({
   // Centered "Section · date · state" line at the top of each hero
   // block — matches the FixtureCarouselCard's date position.
   dateCentered: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
   },
   fixtureMeta: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

@@ -952,7 +952,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   heroScoreUnit: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 7,
     lineHeight: 8,
     color: Colors.light.textSecondary,
@@ -960,13 +960,13 @@ const styles = StyleSheet.create({
   // Date-line slot of the match hero — the position rides above the
   // anchor row, centred.
   heroPositionLine: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',
   },
   heroMetaText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
@@ -1010,7 +1010,7 @@ const styles = StyleSheet.create({
     gap: Spacing.three,
   },
   normTag: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -1121,7 +1121,7 @@ const styles = StyleSheet.create({
     color: Colors.light.text,
   },
   ledgerLabel: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.xs,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

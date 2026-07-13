@@ -508,7 +508,7 @@ const styles = StyleSheet.create({
   },
   statBlock: { gap: 6 },
   statLabel: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     // Muted — the label is context, the numbers on either side are the
     // read. Lets the values pop visually without shouting.

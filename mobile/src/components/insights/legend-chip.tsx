@@ -4,7 +4,7 @@ import { Colors } from '@/constants/theme';
 
 /**
  * THE legend register (matrix size-key voice, owner-settled): 9px
- * swatch at 45% opacity, Barlow_500Medium 8 uppercase in secondary
+ * swatch at 45% opacity, WorkSans_500Medium 8 uppercase in secondary
  * grey. Every chart legend renders through this — local copies
  * drifted into condensed faces and full-opacity swatches (2026-07-10
  * consistency audit, finding 4).
@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
     opacity: 0.45,
   },
   text: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 8,
     letterSpacing: 0.4,
     color: Colors.light.textSecondary,

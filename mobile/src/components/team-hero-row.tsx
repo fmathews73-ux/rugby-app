@@ -86,8 +86,9 @@ export function TeamHeroRow({
 const styles = StyleSheet.create({
   rowOuter: {
     // Callers wrap this in a ROW Pressable — flex to claim its width.
+    // Band gap 8 app-wide (owner call 2026-07-13, was 4).
     flex: 1,
-    gap: 4,
+    gap: Spacing.two,
   },
   matchupRow: {
     flexDirection: 'row',
@@ -141,7 +142,7 @@ const styles = StyleSheet.create({
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   unitText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -164,7 +165,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   metaText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
     textAlign: 'center',

@@ -261,7 +261,7 @@ function TrajectoryChart({
             x={0}
             y={rankToY(r) + 3}
             fill={Colors.light.textSecondary}
-            fontFamily="Barlow_500Medium"
+            fontFamily="WorkSans_500Medium"
             fontSize={9}
             textAnchor="start">
             {r}
@@ -274,7 +274,7 @@ function TrajectoryChart({
           x={plotLeft}
           y={height - 4}
           fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
+          fontFamily="WorkSans_500Medium"
           fontSize={9}
           textAnchor="start">
           {formatMonth(first.date)}
@@ -285,7 +285,7 @@ function TrajectoryChart({
           x={plotRight}
           y={height - 4}
           fill={Colors.light.textSecondary}
-          fontFamily="Barlow_500Medium"
+          fontFamily="WorkSans_500Medium"
           fontSize={9}
           textAnchor="end">
           {formatMonth(last.date)}

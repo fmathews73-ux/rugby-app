@@ -179,20 +179,20 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
           <Line x1={midX} y1={padTop} x2={midX} y2={plotBottom} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
 
           {/* Quadrant labels — whisper-grey, centred in each quadrant. */}
-          <SvgText x={(midX + width - padX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
+          <SvgText x={(midX + width - padX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="middle">
             DOMINANT
           </SvgText>
-          <SvgText x={(padX + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
+          <SvgText x={(padX + midX) / 2} y={(padTop + midY) / 2 + 3} fill="#D1D5DB" fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="middle">
             RUTHLESS
           </SvgText>
-          <SvgText x={(midX + width - padX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
+          <SvgText x={(midX + width - padX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="middle">
             STERILE
           </SvgText>
-          <SvgText x={(padX + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="Barlow_500Medium" fontSize={9} textAnchor="middle">
+          <SvgText x={(padX + midX) / 2} y={(midY + plotBottom) / 2 + 3} fill="#D1D5DB" fontFamily="WorkSans_500Medium" fontSize={9} textAnchor="middle">
             OUTCLASSED
           </SvgText>
 
-          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="Barlow_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
+          <SvgText x={width / 2} y={height - 4} fill={Colors.light.textSecondary} fontFamily="WorkSans_500Medium" fontSize={9} letterSpacing={0.4} textAnchor="middle">
             POSSESSION % →
           </SvgText>
           {/* Y-axis caption — rotated, reading upward. */}
@@ -200,7 +200,7 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
             x={8}
             y={(padTop + plotBottom) / 2}
             fill={Colors.light.textSecondary}
-            fontFamily="Barlow_500Medium"
+            fontFamily="WorkSans_500Medium"
             fontSize={9}
             letterSpacing={0.4}
             textAnchor="middle"
@@ -258,7 +258,7 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
                     x={xMid}
                     y={hy + 3}
                     fill={xCol}
-                    fontFamily="Barlow_500Medium"
+                    fontFamily="WorkSans_500Medium"
                     fontSize={8}
                     letterSpacing={0.4}
                     textAnchor="middle">
@@ -268,7 +268,7 @@ function QuadrantChart({ home, away }: { home: SidePoint; away: SidePoint }) {
                     x={ax2}
                     y={yMid + 3}
                     fill={yCol}
-                    fontFamily="Barlow_500Medium"
+                    fontFamily="WorkSans_500Medium"
                     fontSize={8}
                     letterSpacing={0.4}
                     textAnchor="middle">

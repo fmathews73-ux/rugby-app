@@ -17,6 +17,11 @@ import { TIER_1_IDS } from '@/lib/tiers';
  * SCRUM penalties conceded per game inverted (up = cleaner) — the
  * penalty split that belongs to this contest, so a side whose
  * penalties all come at the breakdown no longer looks dirty here.
+ * Known asymmetry (owner-accepted 2026-07-13): x blends scrum+lineout
+ * but y bills scrum only — lineout penalty causes aren't in the
+ * canonical split (scrum/breakdown/offside). Phase 6 provider
+ * validation: if the feed tags lineout pens, add the field and widen
+ * y to true set-piece penalties.
  * Same pool data (/teams/form-summary, prev-10) and matrix grammar as
  * the Team Landscape.
  */

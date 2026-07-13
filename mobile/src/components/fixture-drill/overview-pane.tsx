@@ -404,7 +404,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   eventMinute: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     width: 48,
     textAlign: 'center',
     fontSize: TextSize.sm,
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     letterSpacing: TextTracking.wide,
   },
   eventLabel: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     flexShrink: 1,
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   subLabelWrap: { gap: 2, flexShrink: 1 },
   subLabelWrapRight: { alignItems: 'flex-end' },
   subLabelLine: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },

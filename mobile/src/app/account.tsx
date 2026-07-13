@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   rowPressed: { backgroundColor: Colors.light.backgroundElement },
   rowLabel: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.md,
     color: Colors.light.text,
   },
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   valueText: {
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },
@@ -286,13 +286,13 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
   },
   signOutText: {
-    fontFamily: 'Barlow_600SemiBold',
+    fontFamily: 'WorkSans_600SemiBold',
     fontSize: 14,
     color: StatusColor.live,
   },
   footerMeta: {
     textAlign: 'center',
-    fontFamily: 'Barlow_500Medium',
+    fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     color: Colors.light.textSecondary,
   },

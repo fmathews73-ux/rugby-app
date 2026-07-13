@@ -77,7 +77,7 @@ Any value between `0` and `1.0` is indistinguishable — collapse to the two abo
 
 - **Default:** system UI (`Fonts.sans` → San Francisco on iOS, Roboto on Android). Set once at the root, not per-style.
 - **Sport-display face:** `BarlowCondensed_700Bold_Italic` (`@expo-google-fonts/barlow-condensed`, SIL OFL — app-embedding safe; loaded at runtime in `src/app/_layout.tsx`, splash-gated so no fallback flash). This is the "broadcast bug" voice: nation codes, match scores, kickoff times, FT/HT annotations, **and all card/section titles** (see §8). The file carries the weight — **never add `fontWeight` beside it** (RN would fake-bold the face).
-- **Supporting register:** `Barlow_500Medium` is the meta/label voice — meta lines, pill labels, chart annotations, unit suffixes (`CM` / `KG` / `W` / `L` / `%`). `Barlow_600SemiBold` is reserved for **action pills only**. Colour separates registers, not weight: the same condensed face is identity in black and titles/values in grey (§8).
+- **Supporting family: Work Sans** (owner call 2026-07-13 — replaced Barlow app-wide; rounder and wider, giving the condensed display face air instead of echoing its compression). `WorkSans_500Medium` is the meta/label voice — meta lines, pill labels, chart annotations, unit suffixes (`CM` / `KG` / `W` / `L` / `%`); `WorkSans_600SemiBold` is reserved for **action pills/buttons only**; `WorkSans_400Regular` for long-form prose (legal pages). Colour separates registers, not weight: the same condensed face is identity in black and titles/values in grey (§8).
 - **Numbers in the system font (points, table stats):** every *system-font* style that renders numeric data MUST include `fontVariant: ['tabular-nums']` — "29 · 21" and "18 · 31" render at the same width. Barlow Condensed styles drop `tabular-nums` (not guaranteed by the font); they only ever render centred single values inside fixed tiles, where digit alignment is moot.
 - **Monospace (`Fonts.mono`):** currently unused in production screens. If needed, reserve for full-monospaced text (code blocks, terminal-style displays) — not for score digits.
 
@@ -154,8 +154,8 @@ Every interactive/identity element sits in exactly one of three registers:
 | Register | Colour | What lives here |
 |---|---|---|
 | **Identity** | `Colors.light.text` (black) | Nation codes, winning-score treatment, titles, the *active* footer tab |
-| **Functional** | `Colors.light.textSecondary` | Nav icons (footer inactive, header avatar), header back disc fill, meta text, kickoff times, losing scores, FT labels, *selected* pill fills (white label on top), accordion expand chevrons |
-| **Chrome** | `#C7CBD1` | Pure pressability affordances: `chevron-forward` disclosure cues (16pt), Team-Selector list icon |
+| **Functional** | `Colors.light.textSecondary` | Header back glyph, meta text, kickoff times, losing scores, FT labels, *selected* pill fills (white label on top) |
+| **Chrome** | `#C7CBD1` | Pure pressability affordances: `chevron-forward` disclosure cues (16pt), Team-Selector list icon, **inactive footer tabs and the header avatar** (moved from functional grey 2026-07-13 — quiet-but-tappable chrome unifies on one shade; the wordmark owns the header) |
 
 The disclosure chevron spec: `Ionicons chevron-forward, size 16, #C7CBD1`, pinned to the right edge of every navigational row (team rows, player rows, fixture rows, Next/Last Match cards) and vertically centred **on the shield/matchup line**, not on the whole row — absolute-positioned in the row's right gutter so centred clusters keep their symmetry.
 
@@ -227,7 +227,7 @@ Dimensions are tuned to the Barlow Condensed digits — tiles hug the numerals b
 **Fill / text pairing:**
 - Winner box: `Colors.light.textSecondary` fill + `Colors.light.textInverse` (white) text.
 - Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.textSecondary` text.
-- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with D and L always quiet, regardless of which count is higher. Applies to the teams-directory rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `Barlow_500Medium` suffix.
+- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with D and L always quiet, regardless of which count is higher. Applies to the teams-directory rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `WorkSans_500Medium` suffix.
 - Face: `BarlowCondensed_700Bold_Italic` (no `fontWeight`, no `tabular-nums` — see §3).
 - Text size: `TextSize.lg` for `row`, `TextSize.xl` for `card` — same size as the neighbouring nation codes.
 
@@ -320,14 +320,14 @@ Small tap-target icons that annotate or reset a section — the info-icon that o
 
 ## 8. Section titles & date grammar
 
-**One title register app-wide** (owner-settled 2026-07-08, extended to date headers 2026-07-10): `BarlowCondensed_700Bold_Italic`, `TextSize.md` (14pt), `TextTracking.wide`, `textTransform: 'uppercase'`, `Colors.light.textSecondary`. This covers card titles (one-word names: Profile · Form · Momentum …), squad unit headers (FRONT ROW), directory group headers (TIER 1 NATIONS), **and the fixtures-list date headers** (SAT · 11 JUL 2026). Grey condensed caps say "wayfinding"; the same face in black says "identity". Never set titles in `Barlow_500Medium` or system bold — metrics grab attention, not titles.
+**One title register app-wide** (owner-settled 2026-07-08, extended to date headers 2026-07-10): `BarlowCondensed_700Bold_Italic`, `TextSize.md` (14pt), `TextTracking.wide`, `textTransform: 'uppercase'`, `Colors.light.textSecondary`. This covers card titles (one-word names: Profile · Form · Momentum …), squad unit headers (FRONT ROW), directory group headers (TIER 1 NATIONS), **and the fixtures-list date headers** (SAT · 11 JUL 2026). Grey condensed caps say "wayfinding"; the same face in black says "identity". Never set titles in `WorkSans_500Medium` or system bold — metrics grab attention, not titles.
 
 **Date grammar:**
 - Upcoming fixtures: plain date + ` · Upcoming` — **no** "Today"/"Tomorrow" relative labels.
 - Kickoff clocks are always device-local via `formatKickoffTime` — never `slice(11,16)` on the UTC string.
 - Scheduled rows show the kickoff time in the score slot (clock = data-in-waiting, one register below the codes).
 
-**Pill rule:** filter pills 12pt / action pills 14pt, both `Barlow_500Medium` (action pills may use `Barlow_600SemiBold`); the *selected* pill fills `Colors.light.textSecondary` with a white label — selection is a functional-register state, never black.
+**Pill rule:** filter pills 12pt / action pills 14pt, both `WorkSans_500Medium` (action pills may use `WorkSans_600SemiBold`); the *selected* pill fills `Colors.light.textSecondary` with a white label — selection is a functional-register state, never black.
 
 ---
 
@@ -335,7 +335,7 @@ Small tap-target icons that annotate or reset a section — the info-icon that o
 
 **One list-row anatomy app-wide**, cloned from the fixtures list (owner-locked 2026-07-10). Reference implementation: `fixtures/index.tsx` rows; clones: `team-hero-row.tsx` (Teams directory / picker / Home selector) and the squad `PlayerRow` in `teams/[id].tsx`.
 
-- **Two bands, gap 4:** the matchup line, then a centred meta line in the `metaText` register (`Barlow_500Medium`, `TextSize.sm`, `textSecondary`).
+- **Two bands, gap 8** (`Spacing.two`; widened from 4 on 2026-07-13 with the Work Sans move — the rounder secondary earns more air): the matchup line, then a centred meta line in the `metaText` register (`WorkSans_500Medium`, `TextSize.sm`, `textSecondary`).
 - **Row padding:** `paddingVertical: Spacing.three` (16pt). Rows are separated **only** by the chrome-grey inset hairline (`#C7CBD1`, `StyleSheet.hairlineWidth`, `marginHorizontal: Spacing.three`) rendered *between* rows — never after the last row, and never a full-width whisper-grey borderBottom. Cards must NOT add a child `gap` around rows (it stacks with the rows' own padding).
 - **Anchors:** 24pt shields (`FlagSize.row`) in fixed 24pt wraps; codes in the display face at `TextSize.lg` inside fixed width-40 centred slots.
 - **Middle column:** fixed-width, centred, `ScoreBoxSize.row` boxes (fixtures: 96pt / two boxes; teams W-D-L trio: 112pt, gap 4).

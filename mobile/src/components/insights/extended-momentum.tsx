@@ -275,7 +275,7 @@ function MarginBars({
                   x={0}
                   y={gy + 3}
                   fill={Colors.light.textSecondary}
-                  fontFamily="Barlow_500Medium"
+                  fontFamily="WorkSans_500Medium"
                   fontSize={9}
                   textAnchor="start">
                   {g > 0 ? `+${g}` : String(g)}
