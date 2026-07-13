@@ -6,7 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Path } from 'react-native-svg';
+import Svg, { Defs, Line, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 import { ChartDoodleBackdrop } from '@/components/chart-doodle-backdrop';
 import { markWelcomeSeen } from '@/hooks/use-welcome-seen';
@@ -46,15 +46,61 @@ function GoogleG({ size = 16 }: { size?: number }) {
   );
 }
 
-/** Welcome background options (owner A/B trial 2026-07-13):
+/** Welcome background options (owner A/B/C trial 2026-07-13):
  *  'pitch'    — option 1: full pitch composition (committed 648fd2e).
  *  'gradient' — option 2: three-green vertical gradient, doodles
- *               full-bleed, everything else identical. */
-const BG_OPTION: 'pitch' | 'gradient' = 'gradient';
+ *               full-bleed, everything else identical.
+ *  'charcoal' — option 3 "The Terminal": deep charcoal gradient,
+ *               wallpaper at a whisper, giant ghosted radar watermark
+ *               behind the brand — monochrome BI instrument. */
+const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' = 'gradient';
 
-// Option 2's three greens, top → bottom: lit crown, base turf, deep
-// shadow — same family as the pitch composition's tones.
-const GRADIENT_GREENS = ['#1E7A3F', '#176D37', '#0F4A25'] as const;
+// Option 2's greens, top → bottom — FLIPPED (owner call 2026-07-13:
+// dark crown falling to a lit base) and widened to five stops, the
+// ends pushed one step deeper/brighter than the original trio.
+const GRADIENT_GREENS = ['#0A3D1E', '#0F4A25', '#176D37', '#1E7A3F', '#27904C'] as const;
+
+// Option 3's charcoals, top → bottom — the dark-terminal ground.
+const CHARCOALS = ['#1B1D21', '#101114', '#0A0B0D'] as const;
+
+/** Option 3's watermark — the six-lobe radar ghosted at billboard
+ *  scale: two rings, spokes, and the familiar irregular shape. */
+function RadarWatermark({ cx, cy, r }: { cx: number; cy: number; r: number }) {
+  const ring = (radius: number) =>
+    [0, 60, 120, 180, 240, 300]
+      .map((deg) => {
+        const a = (deg * Math.PI) / 180;
+        return `${cx + radius * Math.cos(a)},${cy + radius * Math.sin(a)}`;
+      })
+      .join(' ');
+  const spokes = [0, 60, 120].map((deg) => {
+    const a = (deg * Math.PI) / 180;
+    return {
+      x1: cx - r * Math.cos(a),
+      y1: cy - r * Math.sin(a),
+      x2: cx + r * Math.cos(a),
+      y2: cy + r * Math.sin(a),
+    };
+  });
+  const shape = [
+    [0.7, 10], [0.55, 70], [0.85, 130], [0.6, 190], [0.75, 250], [0.5, 310],
+  ]
+    .map(([f, deg]) => {
+      const a = (deg * Math.PI) / 180;
+      return `${cx + r * f * Math.cos(a)},${cy + r * f * Math.sin(a)}`;
+    })
+    .join(' ');
+  return (
+    <Svg width="100%" height="100%" pointerEvents="none">
+      <Polygon points={ring(r)} stroke="rgba(255,255,255,0.06)" strokeWidth={1.5} fill="none" />
+      <Polygon points={ring(r / 2)} stroke="rgba(255,255,255,0.06)" strokeWidth={1.5} fill="none" />
+      {spokes.map((s, i) => (
+        <Line key={i} {...s} stroke="rgba(255,255,255,0.05)" strokeWidth={1.5} />
+      ))}
+      <Polygon points={shape} stroke="rgba(255,255,255,0.09)" strokeWidth={1.5} fill="rgba(255,255,255,0.03)" />
+    </Svg>
+  );
+}
 
 // Pitch asset geometry — used to compute the on-screen field rect so
 // the doodles clip to the pitch's own boundary lines (owner call
@@ -121,14 +167,40 @@ export default function WelcomeScreen() {
             pointerEvents="none"
           />
         </>
+      ) : BG_OPTION === 'gradient' ? (
+        // Option 2: RADIAL five-green gradient (owner call 2026-07-13)
+        // — lit core behind the brand block falling to deep turf at
+        // the edges.
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Svg width="100%" height="100%">
+            <Defs>
+              {/* Three stops (owner call): lit core → base turf →
+                  deep edge. cy matches the fingerprint's centre — the
+                  brand block anchors at 27.7% (the y22 fraction), and
+                  the print's centre lands right on it. */}
+              <RadialGradient id="welcome-radial" cx="50%" cy="27.5%" rx="52%" ry="40%">
+                <Stop offset="0" stopColor={GRADIENT_GREENS[4]} />
+                <Stop offset="0.55" stopColor={GRADIENT_GREENS[2]} />
+                <Stop offset="1" stopColor={GRADIENT_GREENS[0]} />
+              </RadialGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill="url(#welcome-radial)" />
+          </Svg>
+        </View>
       ) : (
-        // Option 2: three-green vertical gradient, no pitch layers.
+        // Option 3: charcoal vertical gradient ground.
         <LinearGradient
-          colors={GRADIENT_GREENS as unknown as [string, string, string]}
+          colors={CHARCOALS as unknown as [string, string, string]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
       )}
+      {/* Option 3's ghosted radar billboard behind the brand block. */}
+      {BG_OPTION === 'charcoal' && layout ? (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <RadarWatermark cx={layout.w / 2} cy={layout.h * 0.31} r={layout.w * 0.52} />
+        </View>
+      ) : null}
       {/* Doodles — clipped to the pitch circumference in option 1,
           full-bleed over the gradient in option 2. The wrapper also
           measures the layout that drives the brand anchor. */}
@@ -138,7 +210,11 @@ export default function WelcomeScreen() {
         onLayout={(e) =>
           setLayout({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })
         }>
-        {BG_OPTION === 'gradient' ? (
+        {BG_OPTION === 'charcoal' ? (
+          // Terminal mode: the wallpaper drops to a whisper — texture
+          // you sense more than read.
+          <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.06} />
+        ) : BG_OPTION === 'gradient' ? (
           <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
         ) : geom ? (
           <View style={[styles.doodleClip, geom.fieldRect]}>
@@ -167,7 +243,7 @@ export default function WelcomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Continue with Apple"
           style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <Ionicons name="logo-apple" size={18} color={Colors.light.text} />
+          <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
           <Text style={styles.buttonText}>Continue with Apple</Text>
         </Pressable>
         <Pressable
@@ -183,7 +259,7 @@ export default function WelcomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Continue with email"
           style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <Ionicons name="mail-outline" size={16} color={Colors.light.text} />
+          <Ionicons name="mail-outline" size={16} color="#FFFFFF" />
           <Text style={styles.buttonText}>Continue with Email</Text>
         </Pressable>
 
@@ -199,7 +275,7 @@ export default function WelcomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Continue as guest"
           style={({ pressed }) => [styles.button, styles.buttonGhost, pressed && styles.pressed]}>
-          <Text style={[styles.buttonText, styles.buttonTextGhost]}>Continue as Guest</Text>
+          <Text style={styles.buttonText}>Continue as Guest</Text>
         </Pressable>
       </View>
 
@@ -261,7 +337,8 @@ const styles = StyleSheet.create({
 
   actions: {
     gap: Spacing.two,
-    paddingBottom: Spacing.three,
+    // Lifted off the bottom edge (owner call 2026-07-13).
+    paddingBottom: Spacing.six,
   },
   button: {
     flexDirection: 'row',
@@ -271,15 +348,18 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 12,
   },
+  // Frosted register (owner call 2026-07-13: solid white was
+  // glaring on the dark ground) — translucent fill, soft keyline,
+  // white content.
   buttonOutline: {
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'rgba(255,255,255,0.10)',
     borderWidth: 1,
-    borderColor: '#C7CBD1',
+    borderColor: 'rgba(255,255,255,0.4)',
   },
   buttonText: {
     fontFamily: 'Barlow_600SemiBold',
     fontSize: 14,
-    color: Colors.light.text,
+    color: '#FFFFFF',
   },
   authNote: {
     textAlign: 'center',
@@ -290,10 +370,10 @@ const styles = StyleSheet.create({
   buttonGhost: {
     backgroundColor: 'transparent',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.7)',
-  },
-  buttonTextGhost: {
-    color: '#FFFFFF',
+    borderColor: 'rgba(255,255,255,0.4)',
+    // Breathing room above — the guest door stands apart from the
+    // three provider sign-ins (owner call 2026-07-13).
+    marginTop: Spacing.three,
   },
   pressed: { opacity: 0.6 },
 
