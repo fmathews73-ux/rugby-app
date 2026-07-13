@@ -5,6 +5,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
+import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Path } from 'react-native-svg';
 
 import { ChartDoodleBackdrop } from '@/components/chart-doodle-backdrop';
@@ -44,6 +45,16 @@ function GoogleG({ size = 16 }: { size?: number }) {
     </Svg>
   );
 }
+
+/** Welcome background options (owner A/B trial 2026-07-13):
+ *  'pitch'    — option 1: full pitch composition (committed 648fd2e).
+ *  'gradient' — option 2: three-green vertical gradient, doodles
+ *               full-bleed, everything else identical. */
+const BG_OPTION: 'pitch' | 'gradient' = 'gradient';
+
+// Option 2's three greens, top → bottom: lit crown, base turf, deep
+// shadow — same family as the pitch composition's tones.
+const GRADIENT_GREENS = ['#1E7A3F', '#176D37', '#0F4A25'] as const;
 
 // Pitch asset geometry — used to compute the on-screen field rect so
 // the doodles clip to the pitch's own boundary lines (owner call
@@ -86,41 +97,50 @@ export default function WelcomeScreen() {
           the base turf green, four sit one shade lighter between
           them. Clipped to the pitch circumference like the doodles;
           behind the pitch artwork. */}
-      {geom ? (
-        <View
-          style={[styles.doodleClip, geom.fieldRect, { backgroundColor: '#176D37' }]}
-          pointerEvents="none">
-          {Array.from({ length: 9 }).map((_, i) => (
+      {BG_OPTION === 'pitch' ? (
+        <>
+          {geom ? (
             <View
-              key={i}
-              style={{ flex: 1, backgroundColor: i % 2 === 0 ? 'transparent' : '#1E7A3F' }}
-            />
-          ))}
-        </View>
-      ) : null}
-      {/* Licensed pitch artwork (owner asset, 2026-07-11) replaces the
-          hand-drawn stripes/lines/numbers — portrait aerial field, try
-          lines top and bottom, flank numbers along the touchlines. */}
-      <Image
-        source={require('@/assets/images/pitch-background.png')}
-        // fill stretches the pitch to the full screen (owner call:
-        // kill the dead green bands; the vertical margin now matches
-        // the flanks). Rendered at the doodles' 16% so lines and
-        // marks share the glyphs' whisper register; solid turf green
-        // lives on the page container behind both layers.
-        style={[StyleSheet.absoluteFill, { opacity: 0.16 }]}
-        contentFit="fill"
-        pointerEvents="none"
-      />
-      {/* Doodles clipped to the pitch circumference — the wrapper is
-          the measured field rect with overflow hidden. */}
+              style={[styles.doodleClip, geom.fieldRect, { backgroundColor: '#176D37' }]}
+              pointerEvents="none">
+              {Array.from({ length: 9 }).map((_, i) => (
+                <View
+                  key={i}
+                  style={{ flex: 1, backgroundColor: i % 2 === 0 ? 'transparent' : '#1E7A3F' }}
+                />
+              ))}
+            </View>
+          ) : null}
+          {/* Licensed pitch artwork (owner asset, 2026-07-11) — portrait
+              aerial field, try lines top and bottom, flank numbers along
+              the touchlines, fill-stretched, 16% whisper. */}
+          <Image
+            source={require('@/assets/images/pitch-background.png')}
+            style={[StyleSheet.absoluteFill, { opacity: 0.16 }]}
+            contentFit="fill"
+            pointerEvents="none"
+          />
+        </>
+      ) : (
+        // Option 2: three-green vertical gradient, no pitch layers.
+        <LinearGradient
+          colors={GRADIENT_GREENS as unknown as [string, string, string]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
+      )}
+      {/* Doodles — clipped to the pitch circumference in option 1,
+          full-bleed over the gradient in option 2. The wrapper also
+          measures the layout that drives the brand anchor. */}
       <View
         style={StyleSheet.absoluteFill}
         pointerEvents="none"
         onLayout={(e) =>
           setLayout({ w: e.nativeEvent.layout.width, h: e.nativeEvent.layout.height })
         }>
-        {geom ? (
+        {BG_OPTION === 'gradient' ? (
+          <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
+        ) : geom ? (
           <View style={[styles.doodleClip, geom.fieldRect]}>
             <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
           </View>
@@ -132,6 +152,9 @@ export default function WelcomeScreen() {
           position, so it lands identically on any device. */}
       {geom ? (
         <View style={[styles.brandBlock, { top: geom.y22 - 26 }]} pointerEvents="none">
+          <View style={styles.logoTilt}>
+            <Ionicons name="finger-print-outline" size={48} color="#FFFFFF" />
+          </View>
           <Text style={styles.wordmark}>RUGBYMETRICS</Text>
           <Text style={styles.strapline}>Match analysis · Stats · Predictions</Text>
         </View>
@@ -168,12 +191,15 @@ export default function WelcomeScreen() {
           <Text style={styles.authNote}>Accounts arrive in a later build — continue below.</Text>
         ) : null}
 
+        {/* Guest path — a proper button (owner call 2026-07-13), in a
+            ghost register so it reads as a different kind of door
+            than the three provider sign-ins. */}
         <Pressable
           onPress={enter}
           accessibilityRole="button"
-          accessibilityLabel="Continue without an account"
-          style={({ pressed }) => [styles.skip, pressed && styles.pressed]}>
-          <Text style={styles.skipText}>Continue without an account</Text>
+          accessibilityLabel="Continue as guest"
+          style={({ pressed }) => [styles.button, styles.buttonGhost, pressed && styles.pressed]}>
+          <Text style={[styles.buttonText, styles.buttonTextGhost]}>Continue as Guest</Text>
         </Pressable>
       </View>
 
@@ -209,6 +235,10 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     gap: 2,
+  },
+  logoTilt: {
+    transform: [{ rotate: '10deg' }],
+    marginBottom: 2,
   },
   fieldSpacer: { flex: 1 },
   doodleClip: {
@@ -257,13 +287,12 @@ const styles = StyleSheet.create({
     fontSize: TextSize.sm,
     color: 'rgba(255,255,255,0.9)',
   },
-  skip: {
-    alignItems: 'center',
-    paddingVertical: Spacing.two,
+  buttonGhost: {
+    backgroundColor: 'transparent',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.7)',
   },
-  skipText: {
-    fontFamily: 'Barlow_600SemiBold',
-    fontSize: 14,
+  buttonTextGhost: {
     color: '#FFFFFF',
   },
   pressed: { opacity: 0.6 },
