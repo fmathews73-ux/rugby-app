@@ -642,3 +642,34 @@ export interface MatchEvent {
    *  Null under the same conditions as `x`. */
   y: number | null;
 }
+
+// ─── Predictor (docs/predictor-phase-spec.md §4 contract) ────────────────────
+//
+// Served synthetically (deterministic, ranking-derived) until the Phase 6
+// BigQuery ML cutover (spec §2d). The shape is the REAL contract — the
+// client must not change at cutover.
+
+export interface MatchPrediction {
+  fixture_id: FixtureId;
+  generated_at: IsoDateTime;
+  model_version: string;
+  home_win_prob: number; // 0..1
+  away_win_prob: number; // 0..1
+  draw_prob: number; // 0..1 (sums with above to 1)
+  /** ± percentage points at 90% CI. */
+  confidence_band_pp: number;
+  predicted_margin: {
+    median: number; // signed; positive = home ahead
+    iqr_lower: number;
+    iqr_upper: number;
+  };
+  top_features: {
+    label: string; // 'Home advantage'
+    impact_pp: number; // signed % contribution (positive = toward home)
+  }[];
+}
+
+// TournamentPrediction was removed 2026-07-13 — champion predictions
+// descoped by the owner (derivative of match predictions; the table
+// works itself out as the competition unfolds). The predictor is
+// next-match-only.

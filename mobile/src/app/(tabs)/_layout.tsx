@@ -86,8 +86,11 @@ export default function TabsLayout() {
         name="predictor"
         options={{
           title: 'Predictor',
+          // Same tab grammar as the other stacks: re-entering lands
+          // on the predictions list; drills pop on blur.
+          popToTopOnBlur: true,
           tabBarIcon: ({ color, size, focused }) => (
-            <Ionicons name={focused ? 'sparkles' : 'sparkles-outline'} size={size} color={color} />
+            <Ionicons name={focused ? 'analytics' : 'analytics-outline'} size={size} color={color} />
           ),
         }}
       />

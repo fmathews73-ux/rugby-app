@@ -11,6 +11,7 @@ import type {
   Competition,
   Fixture,
   LineUp,
+  MatchPrediction,
   Player,
   MatchEvent,
   MatchOfficial,
@@ -303,5 +304,17 @@ export function useTeamsFormSummary(): UseQueryResult<TeamFormSummary[]> {
   return useQuery({
     queryKey: ['teamsFormSummary'],
     queryFn: () => fetchJson<TeamFormSummary[]>('/teams/form-summary'),
+  });
+}
+
+// ─── Predictor (synthetic until Phase 6 BigQuery ML — spec §2d) ─────────────
+
+/** Match win probabilities — the spec §4 contract, served synthetically
+ *  by the stub API; the shape must not change at cutover. */
+export function useMatchPrediction(fixtureId: string): UseQueryResult<MatchPrediction> {
+  return useQuery({
+    queryKey: ['matchPrediction', fixtureId],
+    queryFn: () => fetchJson<MatchPrediction>(`/predictor/match/${fixtureId}`),
+    enabled: Boolean(fixtureId),
   });
 }

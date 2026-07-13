@@ -113,7 +113,7 @@ export default function LegalScreen() {
           accessibilityRole="button"
           accessibilityLabel="Back"
           style={({ pressed }) => [styles.headerSlot, pressed && styles.pressedDim]}>
-          <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
+          <Ionicons name="chevron-back-circle-outline" size={28} color="#C7CBD1" />
         </Pressable>
         <Text style={styles.headerTitle}>{content.title}</Text>
         <View style={styles.headerSlot} />

@@ -89,6 +89,35 @@ infrastructure cost, and a strong baseline the tree-based model has to
 beat. Ship 2b as a v2 upgrade once we have a training pipeline and 6+
 months of real predictions to backtest against.
 
+### 2d. Platform decision — BigQuery ML (owner decision 2026-07-13)
+
+**BigQuery ML is the working-assumption training and batch-scoring
+platform** for whichever model family wins. Rationale and consequences:
+
+- **Already in the stack** (PRD §6: analytics/rankings live in
+  BigQuery), so canonical results land there anyway; the §3 feature
+  pipeline becomes SQL views over those tables — no separate feature
+  store or Python training service.
+- **Covers the §2 menu**: `LOGISTIC_REG` (the disciplined baseline and
+  the ELO-adjacent linear model), `BOOSTED_TREE_CLASSIFIER` (2b), DNNs
+  if ever justified (2c). `ML.EVALUATE` emits the §5 log-loss/Brier
+  metrics natively; `ML.EXPLAIN_PREDICT` feeds the `top_features`
+  contract in §4 with real attributions.
+- **Batch-precompute architecture supersedes live inference in §4**:
+  match probabilities only change when inputs change, so a scheduled
+  job runs `ML.PREDICT` after each ingest, writes rows to Cloud SQL,
+  and the Cloud Run routes serve *precomputed* predictions. The §4
+  guardrails hold by construction (no weights or keys near the
+  client); the live-match 15-min rescore becomes a re-run of the batch
+  job on the live ingest cadence.
+- **Tournament simulation stays app code**: the Monte Carlo loop is a
+  Cloud Run job consuming the match-model probabilities; BQML supplies
+  the per-match numbers only.
+- **Bake-off requirement unchanged**: any BQML model must beat the
+  naive ranking-implied baseline (§5) on held-out matches before it
+  ships. ~130 internationals/year is small data — expect the logistic
+  baseline to be hard to beat.
+
 ## 3. Feature pipeline
 
 Features live in a Cloud Run job that runs after every completed
@@ -251,3 +280,18 @@ is deliberate — it locks the IA. Everything below is deferred:
   + inference spec pinned for Phase 6 cutover. Parallel to the
   analysis-narrative spec: build the entry point + the brief now, land
   the real implementation when the ML tier is authorised.
+- **v1.1 (2026-07-13)** — Platform decision recorded (§2d): BigQuery ML
+  trains and batch-scores the model; predictions PRECOMPUTED to Cloud
+  SQL and served as rows (supersedes §4's live-inference framing).
+  Predictor UI to be built ahead of Phase 6 against a synthetic
+  predictions endpoint matching the §4 contract, dev-gated like all
+  synthetic data.
+- **v1.2 (2026-07-13)** — **Tournament/champion predictions DESCOPED**
+  (owner decision): they are derivatives of match predictions and the
+  table works itself out as rounds complete. Product scope is
+  **next-match-per-team ONLY** — one live prediction per team, the
+  match re-pricing as results land; no probabilities are shown for
+  fixtures beyond a team's next game (they depend on unplayed
+  results). `TournamentPrediction`, its route and the §6 tournament
+  dashboard are removed from scope; ignore tournament references in
+  §1/§4/§6 above.

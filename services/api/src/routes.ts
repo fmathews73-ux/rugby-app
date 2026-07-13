@@ -612,4 +612,125 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
   app.get('/rankings/history', async () => store.rankings);
   app.get('/rankings/mens/history', async () => store.mensRankings);
   app.get('/rankings/womens/history', async () => store.womensRankings);
+
+  // ─── Predictor (synthetic until Phase 6 BigQuery ML cutover) ─────────────
+  //
+  // Deterministic, ranking-derived probabilities matching the contract in
+  // docs/predictor-phase-spec.md §4 — the client built against these routes
+  // must not change at cutover (spec §2d). Same synthetic-data posture as
+  // the rest of this stub API: dev only, behind the app's DEV banner.
+
+  /** Deterministic 0..1 hash — stable predictions per fixture. */
+  const hash01 = (s: string): number => {
+    let h = 2166136261;
+    for (let i = 0; i < s.length; i++) {
+      h ^= s.charCodeAt(i);
+      h = Math.imul(h, 16777619);
+    }
+    return ((h >>> 0) % 10_000) / 10_000;
+  };
+
+  const rankPoints = (): Map<string, number> => {
+    const latest = store.mensRankings[store.mensRankings.length - 1];
+    return new Map((latest?.rows ?? []).map((r) => [r.team_id, r.points]));
+  };
+
+  /** Prev-5 completed-match win rate for a team (0..1). */
+  const recentWinRate = (teamId: string): number => {
+    const resultByFixture = new Map(store.results.map((r) => [r.fixture_id, r]));
+    const played = store.fixtures
+      .filter(
+        (f) =>
+          f.status === 'completed' &&
+          (f.home_team_id === teamId || f.away_team_id === teamId) &&
+          resultByFixture.has(f.id),
+      )
+      .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
+      .slice(0, 5);
+    if (played.length === 0) return 0.5;
+    const wins = played.filter((f) => {
+      const r = resultByFixture.get(f.id)!;
+      const my = f.home_team_id === teamId ? r.home_score : r.away_score;
+      const opp = f.home_team_id === teamId ? r.away_score : r.home_score;
+      return my > opp;
+    }).length;
+    return wins / played.length;
+  };
+
+  /** Net wins for the home side over the last 3 head-to-head meetings. */
+  const headToHead = (homeId: string, awayId: string): number => {
+    const resultByFixture = new Map(store.results.map((r) => [r.fixture_id, r]));
+    const meetings = store.fixtures
+      .filter(
+        (f) =>
+          f.status === 'completed' &&
+          ((f.home_team_id === homeId && f.away_team_id === awayId) ||
+            (f.home_team_id === awayId && f.away_team_id === homeId)) &&
+          resultByFixture.has(f.id),
+      )
+      .sort((a, b) => b.kickoff_utc.localeCompare(a.kickoff_utc))
+      .slice(0, 3);
+    let net = 0;
+    for (const f of meetings) {
+      const r = resultByFixture.get(f.id)!;
+      const homeSideScore = f.home_team_id === homeId ? r.home_score : r.away_score;
+      const awaySideScore = f.home_team_id === homeId ? r.away_score : r.home_score;
+      net += homeSideScore > awaySideScore ? 1 : homeSideScore < awaySideScore ? -1 : 0;
+    }
+    return net;
+  };
+
+  app.get<{ Params: { id: string } }>('/predictor/match/:id', async (req, reply) => {
+    const fx = store.fixtures.find((f) => f.id === req.params.id);
+    if (!fx) return notFound(reply, `fixture ${req.params.id} not found`);
+
+    const pts = rankPoints();
+    const homePts = pts.get(fx.home_team_id) ?? 75;
+    const awayPts = pts.get(fx.away_team_id) ?? 75;
+
+    // Ranking-implied logistic with a home bump — the naive baseline the
+    // real model must beat (spec §5); jitter keeps rows from reading
+    // formulaic while staying deterministic per fixture.
+    const HOME_BUMP = 2.0;
+    const jitter = (hash01(fx.id) - 0.5) * 1.6;
+    const formDiff = recentWinRate(fx.home_team_id) - recentWinRate(fx.away_team_id);
+    const h2h = headToHead(fx.home_team_id, fx.away_team_id);
+    const d = homePts - awayPts + HOME_BUMP + formDiff * 2.5 + h2h * 0.8 + jitter;
+
+    // Scale 6.5: a 12-point WR gap ≈ 86% favourite — heavy but not
+    // certain; 4.5 read implausibly hot (98%).
+    const pHome = 1 / (1 + Math.exp(-d / 6.5));
+    const draw = 0.045 * Math.exp(-Math.abs(d) / 6);
+    const iqrSpread = 7 + Math.round(hash01(fx.id + 'iqr') * 4);
+
+    const features = [
+      { label: 'Ranking gap', impact_pp: (homePts - awayPts) * 1.6 },
+      { label: 'Home advantage', impact_pp: HOME_BUMP * 1.8 },
+      { label: 'Recent form', impact_pp: formDiff * 22 },
+      { label: 'Head-to-head', impact_pp: h2h * 2.4 },
+    ]
+      .map((f) => ({ ...f, impact_pp: Math.round(f.impact_pp * 10) / 10 }))
+      .sort((a, b) => Math.abs(b.impact_pp) - Math.abs(a.impact_pp));
+
+    return {
+      fixture_id: fx.id,
+      generated_at: new Date().toISOString(),
+      model_version: 'synthetic-dev-0.1',
+      home_win_prob: Math.round(pHome * (1 - draw) * 1000) / 1000,
+      away_win_prob: Math.round((1 - pHome) * (1 - draw) * 1000) / 1000,
+      draw_prob: Math.round(draw * 1000) / 1000,
+      confidence_band_pp: 4 + Math.round(hash01(fx.id + 'ci') * 5),
+      predicted_margin: {
+        median: Math.round(d * 1.35),
+        iqr_lower: Math.round(d * 1.35) - iqrSpread,
+        iqr_upper: Math.round(d * 1.35) + iqrSpread,
+      },
+      top_features: features,
+    };
+  });
+
+  // Tournament/champion predictions DESCOPED (owner decision
+  // 2026-07-13): they're derivatives of match predictions and work
+  // themselves out as the competition unfolds. The predictor serves
+  // NEXT-match predictions only.
 }

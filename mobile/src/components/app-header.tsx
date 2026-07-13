@@ -31,8 +31,9 @@ export function AppHeader() {
           accessibilityLabel="Back"
           style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
           {/* Outline circle glyph — matches the profile avatar's
-              person-circle-outline treatment. */}
-          <Ionicons name="chevron-back-circle-outline" size={28} color={Colors.light.textSecondary} />
+              person-circle-outline treatment, in the same chrome
+              grey (owner call 2026-07-13). */}
+          <Ionicons name="chevron-back-circle-outline" size={28} color="#C7CBD1" />
         </Pressable>
       ) : (
         // Hamburger REMOVED (owner call 2026-07-11): footer tabs carry
