@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Image } from 'expo-image';
@@ -52,8 +52,11 @@ function GoogleG({ size = 16 }: { size?: number }) {
  *               full-bleed, everything else identical.
  *  'charcoal' — option 3 "The Terminal": deep charcoal gradient,
  *               wallpaper at a whisper, giant ghosted radar watermark
- *               behind the brand — monochrome BI instrument. */
-const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' = 'gradient';
+ *               behind the brand — monochrome BI instrument.
+ *  'radial-field' — option 4: option 2's radial ground, NO doodles,
+ *               the pitch artwork shrunk to an emblem centred behind
+ *               the brand block. */
+const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' | 'radial-field' = 'gradient';
 
 // Option 2's greens, top → bottom — FLIPPED (owner call 2026-07-13:
 // dark crown falling to a lit base) and widened to five stops, the
@@ -112,6 +115,7 @@ const PITCH_BOUNDS = { left: 0.036, right: 0.964, top: 0.035, bottom: 0.963 };
 export default function WelcomeScreen() {
   const router = useRouter();
   const [authNote, setAuthNote] = useState(false);
+  const [sheetOpen, setSheetOpen] = useState(false);
   const [layout, setLayout] = useState<{ w: number; h: number } | null>(null);
 
   // fill-fit (owner call 2026-07-11: stretch vertically so the dead
@@ -167,26 +171,16 @@ export default function WelcomeScreen() {
             pointerEvents="none"
           />
         </>
-      ) : BG_OPTION === 'gradient' ? (
-        // Option 2: RADIAL five-green gradient (owner call 2026-07-13)
-        // — lit core behind the brand block falling to deep turf at
-        // the edges.
-        <View style={StyleSheet.absoluteFill} pointerEvents="none">
-          <Svg width="100%" height="100%">
-            <Defs>
-              {/* Three stops (owner call): lit core → base turf →
-                  deep edge. cy matches the fingerprint's centre — the
-                  brand block anchors at 27.7% (the y22 fraction), and
-                  the print's centre lands right on it. */}
-              <RadialGradient id="welcome-radial" cx="50%" cy="27.5%" rx="52%" ry="40%">
-                <Stop offset="0" stopColor={GRADIENT_GREENS[4]} />
-                <Stop offset="0.55" stopColor={GRADIENT_GREENS[2]} />
-                <Stop offset="1" stopColor={GRADIENT_GREENS[0]} />
-              </RadialGradient>
-            </Defs>
-            <Rect x={0} y={0} width="100%" height="100%" fill="url(#welcome-radial)" />
-          </Svg>
-        </View>
+      ) : BG_OPTION === 'gradient' || BG_OPTION === 'radial-field' ? (
+        // Options 2/4: vertical dark → light → dark (owner calls
+        // 2026-07-13) — the lit band sits at the brand block's
+        // height, deep turf at both ends.
+        <LinearGradient
+          colors={[GRADIENT_GREENS[0], GRADIENT_GREENS[4], GRADIENT_GREENS[0]]}
+          locations={[0, 0.35, 1]}
+          style={StyleSheet.absoluteFill}
+          pointerEvents="none"
+        />
       ) : (
         // Option 3: charcoal vertical gradient ground.
         <LinearGradient
@@ -201,6 +195,31 @@ export default function WelcomeScreen() {
           <RadarWatermark cx={layout.w / 2} cy={layout.h * 0.31} r={layout.w * 0.52} />
         </View>
       ) : null}
+      {/* Option 4's pitch emblem — the field artwork shrunk and
+          centred behind the brand block (owner call 2026-07-13). */}
+      {BG_OPTION === 'radial-field' && layout
+        ? (() => {
+            const emblemW = layout.w * 0.375;
+            const emblemH = emblemW * (2400 / 1332);
+            return (
+              <Image
+                source={require('@/assets/images/pitch-background.png')}
+                style={{
+                  position: 'absolute',
+                  width: emblemW,
+                  height: emblemH,
+                  left: (layout.w - emblemW) / 2,
+                  // Net +5% of screen height below the brand anchor
+                  // (owner calls 2026-07-13: dropped 10%, raised 5%).
+                  top: layout.h * 0.327 + 8 - emblemH / 2,
+                  opacity: 0.2,
+                }}
+                contentFit="fill"
+                pointerEvents="none"
+              />
+            );
+          })()
+        : null}
       {/* Doodles — clipped to the pitch circumference in option 1,
           full-bleed over the gradient in option 2. The wrapper also
           measures the layout that drives the brand anchor. */}
@@ -216,7 +235,7 @@ export default function WelcomeScreen() {
           <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.06} />
         ) : BG_OPTION === 'gradient' ? (
           <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
-        ) : geom ? (
+        ) : BG_OPTION === 'pitch' && geom ? (
           <View style={[styles.doodleClip, geom.fieldRect]}>
             <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
           </View>
@@ -227,7 +246,7 @@ export default function WelcomeScreen() {
           2026-07-11) — the wordmark's centre rides the measured line
           position, so it lands identically on any device. */}
       {geom ? (
-        <View style={[styles.brandBlock, { top: geom.y22 - 26 }]} pointerEvents="none">
+        <View style={[styles.brandBlock, { top: geom.y22 - 2 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
             <Ionicons name="finger-print-outline" size={48} color="#FFFFFF" />
           </View>
@@ -237,45 +256,15 @@ export default function WelcomeScreen() {
       ) : null}
       <View style={styles.fieldSpacer} />
 
+      {/* ONE door (owner call 2026-07-13): Sign in opens the sheet;
+          the guest path lives inside it. */}
       <View style={styles.actions}>
         <Pressable
-          onPress={() => setAuthNote(true)}
+          onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
-          accessibilityLabel="Continue with Apple"
+          accessibilityLabel="Sign in"
           style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
-          <Text style={styles.buttonText}>Continue with Apple</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setAuthNote(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Continue with Google"
-          style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <GoogleG size={16} />
-          <Text style={styles.buttonText}>Continue with Google</Text>
-        </Pressable>
-        <Pressable
-          onPress={() => setAuthNote(true)}
-          accessibilityRole="button"
-          accessibilityLabel="Continue with email"
-          style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <Ionicons name="mail-outline" size={16} color="#FFFFFF" />
-          <Text style={styles.buttonText}>Continue with Email</Text>
-        </Pressable>
-
-        {authNote ? (
-          <Text style={styles.authNote}>Accounts arrive in a later build — continue below.</Text>
-        ) : null}
-
-        {/* Guest path — a proper button (owner call 2026-07-13), in a
-            ghost register so it reads as a different kind of door
-            than the three provider sign-ins. */}
-        <Pressable
-          onPress={enter}
-          accessibilityRole="button"
-          accessibilityLabel="Continue as guest"
-          style={({ pressed }) => [styles.button, styles.buttonGhost, pressed && styles.pressed]}>
-          <Text style={styles.buttonText}>Continue as Guest</Text>
+          <Text style={styles.buttonText}>Sign in</Text>
         </Pressable>
       </View>
 
@@ -292,6 +281,70 @@ export default function WelcomeScreen() {
           .
         </Text>
       </View>
+
+      {/* Provider bottom sheet — the three sign-in doors, one tap
+          away. White sheet in the app's light grammar; providers wear
+          their classic light-surface styles (Apple black, Google
+          white-keyline, Email quiet grey). */}
+      <Modal
+        visible={sheetOpen}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setSheetOpen(false)}>
+        <Pressable
+          style={styles.sheetBackdrop}
+          accessibilityRole="button"
+          accessibilityLabel="Close sign-in options"
+          onPress={() => setSheetOpen(false)}
+        />
+        <View style={styles.sheet}>
+          <View style={styles.sheetGrabber} />
+          <Text style={styles.sheetTitle}>Sign in</Text>
+          <Pressable
+            onPress={() => setAuthNote(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Apple"
+            style={({ pressed }) => [styles.button, styles.sheetApple, pressed && styles.pressed]}>
+            <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
+            <Text style={[styles.sheetButtonText, styles.sheetButtonTextInverse]}>
+              Continue with Apple
+            </Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setAuthNote(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with Google"
+            style={({ pressed }) => [styles.button, styles.sheetGoogle, pressed && styles.pressed]}>
+            <GoogleG size={16} />
+            <Text style={styles.sheetButtonText}>Continue with Google</Text>
+          </Pressable>
+          <Pressable
+            onPress={() => setAuthNote(true)}
+            accessibilityRole="button"
+            accessibilityLabel="Continue with email"
+            style={({ pressed }) => [styles.button, styles.sheetEmail, pressed && styles.pressed]}>
+            <Ionicons name="mail-outline" size={16} color={Colors.light.text} />
+            <Text style={styles.sheetButtonText}>Continue with Email</Text>
+          </Pressable>
+          {authNote ? (
+            <Text style={styles.sheetNote}>
+              Accounts arrive in a later build — continue as guest for now.
+            </Text>
+          ) : null}
+          {/* Guest path lives in the sheet (owner call 2026-07-13) —
+              quiet text door under the providers. */}
+          <Pressable
+            onPress={() => {
+              setSheetOpen(false);
+              enter();
+            }}
+            accessibilityRole="button"
+            accessibilityLabel="Continue as guest"
+            style={({ pressed }) => [styles.sheetGuest, pressed && styles.pressed]}>
+            <Text style={styles.sheetGuestText}>Continue as Guest</Text>
+          </Pressable>
+        </View>
+      </Modal>
     </SafeAreaView>
   );
 }
@@ -337,8 +390,9 @@ const styles = StyleSheet.create({
 
   actions: {
     gap: Spacing.two,
-    // Lifted off the bottom edge (owner call 2026-07-13).
-    paddingBottom: Spacing.six,
+    // Sits just above the legal line with a 16pt separation
+    // (owner call 2026-07-13).
+    paddingBottom: Spacing.three,
   },
   button: {
     flexDirection: 'row',
@@ -361,19 +415,70 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#FFFFFF',
   },
-  authNote: {
+  sheetBackdrop: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+  },
+  sheet: {
+    backgroundColor: '#FFFFFF',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    paddingHorizontal: Spacing.four,
+    paddingTop: Spacing.two,
+    paddingBottom: Spacing.six,
+    gap: Spacing.two,
+  },
+  sheetGrabber: {
+    alignSelf: 'center',
+    width: 36,
+    height: 4,
+    borderRadius: 999,
+    backgroundColor: '#C7CBD1',
+    marginBottom: Spacing.one,
+  },
+  sheetTitle: {
+    textAlign: 'center',
+    fontFamily: 'BarlowCondensed_700Bold_Italic',
+    fontSize: TextSize.md,
+    letterSpacing: TextTracking.wide,
+    textTransform: 'uppercase',
+    color: Colors.light.textSecondary,
+    marginBottom: Spacing.one,
+  },
+  sheetApple: {
+    backgroundColor: Colors.light.text,
+  },
+  sheetGoogle: {
+    backgroundColor: '#FFFFFF',
+    borderWidth: 1,
+    borderColor: '#C7CBD1',
+  },
+  sheetEmail: {
+    backgroundColor: '#F3F4F6',
+  },
+  sheetButtonText: {
+    fontFamily: 'Barlow_600SemiBold',
+    fontSize: 14,
+    color: Colors.light.text,
+  },
+  sheetButtonTextInverse: {
+    color: Colors.light.textInverse,
+  },
+  sheetNote: {
     textAlign: 'center',
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    color: 'rgba(255,255,255,0.9)',
+    color: Colors.light.textSecondary,
   },
-  buttonGhost: {
-    backgroundColor: 'transparent',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
-    // Breathing room above — the guest door stands apart from the
-    // three provider sign-ins (owner call 2026-07-13).
-    marginTop: Spacing.three,
+  sheetGuest: {
+    alignItems: 'center',
+    paddingVertical: Spacing.two,
+    marginTop: Spacing.one,
+  },
+  sheetGuestText: {
+    fontFamily: 'Barlow_600SemiBold',
+    fontSize: 14,
+    color: Colors.light.textSecondary,
   },
   pressed: { opacity: 0.6 },
 
