@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Defs, Line, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
@@ -21,25 +22,26 @@ import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
  * the "later build" note instead of pretending to work.
  */
 
-/** The official four-colour Google "G" (Google's sign-in branding
- *  requires the multicolour mark on provider buttons). */
-function GoogleG({ size = 16 }: { size?: number }) {
+/** The official Google "G" — four-colour by default; pass `color`
+ *  for a monochrome variant (owner call 2026-07-13: white G on the
+ *  green sheet button). */
+function GoogleG({ size = 16, color }: { size?: number; color?: string }) {
   return (
     <Svg width={size} height={size} viewBox="0 0 18 18">
       <Path
-        fill="#4285F4"
+        fill={color ?? '#4285F4'}
         d="M17.64 9.2045c0-.6381-.0573-1.2518-.1636-1.8409H9v3.4814h4.8436c-.2086 1.125-.8427 2.0782-1.7959 2.7164v2.2581h2.9087c1.7018-1.5668 2.6836-3.874 2.6836-6.615z"
       />
       <Path
-        fill="#34A853"
+        fill={color ?? '#34A853'}
         d="M9 18c2.43 0 4.4673-.8059 5.9564-2.1805l-2.9087-2.2581c-.8059.54-1.8368.859-3.0477.859-2.344 0-4.3282-1.5831-5.036-3.7104H.9574v2.3318C2.4382 15.9832 5.4818 18 9 18z"
       />
       <Path
-        fill="#FBBC05"
+        fill={color ?? '#FBBC05'}
         d="M3.964 10.71c-.18-.54-.2822-1.1168-.2822-1.71s.1022-1.17.2822-1.71V4.9582H.9573A8.9965 8.9965 0 000 9c0 1.4523.3477 2.8268.9573 4.0418L3.964 10.71z"
       />
       <Path
-        fill="#EA4335"
+        fill={color ?? '#EA4335'}
         d="M9 3.5795c1.3214 0 2.5077.4541 3.4405 1.346l2.5813-2.5814C13.4632.8918 11.426 0 9 0 5.4818 0 2.4382 2.0168.9573 4.9582L3.964 7.29C4.6718 5.1627 6.656 3.5795 9 3.5795z"
       />
     </Svg>
@@ -172,12 +174,21 @@ export default function WelcomeScreen() {
           />
         </>
       ) : BG_OPTION === 'gradient' || BG_OPTION === 'radial-field' ? (
-        // Options 2/4: vertical dark → light → dark (owner calls
-        // 2026-07-13) — the lit band sits at the brand block's
-        // height, deep turf at both ends.
+        // Options 2/4: vertical dark → light → dark over SEVEN stops
+        // biased to the darker shades (owner call 2026-07-13) — the
+        // peak caps at the second-lightest green and the shoulders
+        // linger in the deep end of the ramp.
         <LinearGradient
-          colors={[GRADIENT_GREENS[0], GRADIENT_GREENS[4], GRADIENT_GREENS[0]]}
-          locations={[0, 0.35, 1]}
+          colors={[
+            GRADIENT_GREENS[0],
+            GRADIENT_GREENS[1],
+            GRADIENT_GREENS[2],
+            GRADIENT_GREENS[3],
+            GRADIENT_GREENS[2],
+            GRADIENT_GREENS[1],
+            GRADIENT_GREENS[0],
+          ]}
+          locations={[0, 0.12, 0.23, 0.35, 0.55, 0.75, 1]}
           style={StyleSheet.absoluteFill}
           pointerEvents="none"
         />
@@ -246,9 +257,14 @@ export default function WelcomeScreen() {
           2026-07-11) — the wordmark's centre rides the measured line
           position, so it lands identically on any device. */}
       {geom ? (
-        <View style={[styles.brandBlock, { top: geom.y22 - 2 }]} pointerEvents="none">
+        <View style={[styles.brandBlock, { top: layout ? layout.h * 0.335 : geom.y22 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
-            <Ionicons name="finger-print-outline" size={48} color="#FFFFFF" />
+            <Ionicons
+              name="finger-print-outline"
+              size={58}
+              color="#FFFFFF"
+              style={styles.markShadow}
+            />
           </View>
           <Text style={styles.wordmark}>RUGBYMETRICS</Text>
           <Text style={styles.strapline}>Match analysis · Stats · Predictions</Text>
@@ -259,12 +275,17 @@ export default function WelcomeScreen() {
       {/* ONE door (owner call 2026-07-13): Sign in opens the sheet;
           the guest path lives inside it. */}
       <View style={styles.actions}>
+        {/* Apple-glass door (owner call 2026-07-13): real backdrop
+            blur — the wallpaper diffuses into soft light under the
+            button instead of being masked. */}
         <Pressable
           onPress={() => setSheetOpen(true)}
           accessibilityRole="button"
           accessibilityLabel="Sign in"
-          style={({ pressed }) => [styles.button, styles.buttonOutline, pressed && styles.pressed]}>
-          <Text style={styles.buttonText}>Sign in</Text>
+          style={({ pressed }) => [styles.glassWrap, pressed && styles.pressed]}>
+          <BlurView intensity={35} tint="light" style={styles.glassFill}>
+            <Text style={styles.buttonText}>Sign in</Text>
+          </BlurView>
         </Pressable>
       </View>
 
@@ -282,10 +303,10 @@ export default function WelcomeScreen() {
         </Text>
       </View>
 
-      {/* Provider bottom sheet — the three sign-in doors, one tap
-          away. White sheet in the app's light grammar; providers wear
-          their classic light-surface styles (Apple black, Google
-          white-keyline, Email quiet grey). */}
+      {/* Provider bottom sheet — the four doors wear ONE continuous
+          dark→light gradient (owner call 2026-07-13): each button
+          renders its quarter of the five-green ramp, so the stack
+          reads as a single column of light. */}
       <Modal
         visible={sheetOpen}
         transparent
@@ -300,49 +321,62 @@ export default function WelcomeScreen() {
         <View style={styles.sheet}>
           <View style={styles.sheetGrabber} />
           <Text style={styles.sheetTitle}>Sign in</Text>
-          <Pressable
-            onPress={() => setAuthNote(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Continue with Apple"
-            style={({ pressed }) => [styles.button, styles.sheetApple, pressed && styles.pressed]}>
-            <Ionicons name="logo-apple" size={18} color="#FFFFFF" />
-            <Text style={[styles.sheetButtonText, styles.sheetButtonTextInverse]}>
-              Continue with Apple
-            </Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setAuthNote(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Continue with Google"
-            style={({ pressed }) => [styles.button, styles.sheetGoogle, pressed && styles.pressed]}>
-            <GoogleG size={16} />
-            <Text style={styles.sheetButtonText}>Continue with Google</Text>
-          </Pressable>
-          <Pressable
-            onPress={() => setAuthNote(true)}
-            accessibilityRole="button"
-            accessibilityLabel="Continue with email"
-            style={({ pressed }) => [styles.button, styles.sheetEmail, pressed && styles.pressed]}>
-            <Ionicons name="mail-outline" size={16} color={Colors.light.text} />
-            <Text style={styles.sheetButtonText}>Continue with Email</Text>
-          </Pressable>
+          {(
+            [
+              {
+                key: 'apple',
+                label: 'Continue with Apple',
+                icon: <Ionicons name="logo-apple" size={18} color="#FFFFFF" />,
+                onPress: () => setAuthNote(true),
+              },
+              {
+                key: 'google',
+                label: 'Continue with Google',
+                icon: <GoogleG size={16} color="#FFFFFF" />,
+                onPress: () => setAuthNote(true),
+              },
+              {
+                key: 'email',
+                label: 'Continue with Email',
+                icon: <Ionicons name="mail" size={16} color="#FFFFFF" />,
+                onPress: () => setAuthNote(true),
+              },
+              {
+                key: 'guest',
+                label: 'Continue as Guest',
+                icon: <Ionicons name="american-football" size={16} color="#FFFFFF" />,
+                onPress: () => {
+                  setSheetOpen(false);
+                  enter();
+                },
+              },
+            ] as const
+          ).map((door, i) => (
+            <Pressable
+              key={door.key}
+              onPress={door.onPress}
+              accessibilityRole="button"
+              accessibilityLabel={door.label}
+              style={({ pressed }) => [styles.button, styles.sheetDoor, pressed && styles.pressed]}>
+              {/* Quarter i of the ramp: adjacent buttons share their
+                  seam colour, so the stack is one continuous sweep. */}
+              <LinearGradient
+                colors={[GRADIENT_GREENS[i], GRADIENT_GREENS[i + 1]]}
+                style={styles.sheetDoorFill}>
+                <View style={styles.sheetBtnInner}>
+                  <View style={styles.sheetBtnIcon}>{door.icon}</View>
+                  <Text style={[styles.sheetButtonText, styles.sheetButtonTextInverse]}>
+                    {door.label}
+                  </Text>
+                </View>
+              </LinearGradient>
+            </Pressable>
+          ))}
           {authNote ? (
             <Text style={styles.sheetNote}>
               Accounts arrive in a later build — continue as guest for now.
             </Text>
           ) : null}
-          {/* Guest path lives in the sheet (owner call 2026-07-13) —
-              quiet text door under the providers. */}
-          <Pressable
-            onPress={() => {
-              setSheetOpen(false);
-              enter();
-            }}
-            accessibilityRole="button"
-            accessibilityLabel="Continue as guest"
-            style={({ pressed }) => [styles.sheetGuest, pressed && styles.pressed]}>
-            <Text style={styles.sheetGuestText}>Continue as Guest</Text>
-          </Pressable>
         </View>
       </Modal>
     </SafeAreaView>
@@ -378,6 +412,11 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: 46,
     color: '#FFFFFF',
+    // Embossed read (owner call 2026-07-13): soft dark shadow below
+    // the glyphs — light from above, letters raised off the turf.
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 3,
   },
   strapline: {
     fontFamily: 'Barlow_500Medium',
@@ -386,6 +425,14 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     // Legibility over the green ground (grey drowned in the stripes).
     color: 'rgba(255,255,255,0.9)',
+    textShadowColor: 'rgba(0,0,0,0.35)',
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  markShadow: {
+    textShadowColor: 'rgba(0,0,0,0.5)',
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
 
   actions: {
@@ -405,10 +452,18 @@ const styles = StyleSheet.create({
   // Frosted register (owner call 2026-07-13: solid white was
   // glaring on the dark ground) — translucent fill, soft keyline,
   // white content.
-  buttonOutline: {
-    backgroundColor: 'rgba(255,255,255,0.10)',
+  glassWrap: {
+    borderRadius: 12,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.4)',
+    borderColor: 'rgba(255,255,255,0.55)',
+  },
+  glassFill: {
+    height: 48,
+    alignItems: 'center',
+    justifyContent: 'center',
+    // Thin white tint over the blur — the Apple-glass milkiness.
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   buttonText: {
     fontFamily: 'Barlow_600SemiBold',
@@ -445,16 +500,30 @@ const styles = StyleSheet.create({
     color: Colors.light.textSecondary,
     marginBottom: Spacing.one,
   },
-  sheetApple: {
-    backgroundColor: Colors.light.text,
+  // One continuous gradient across the four doors — each button
+  // clips its quarter of the ramp (owner call 2026-07-13).
+  sheetDoor: {
+    overflow: 'hidden',
   },
-  sheetGoogle: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#C7CBD1',
+  sheetDoorFill: {
+    width: '100%',
+    height: '100%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  sheetEmail: {
-    backgroundColor: '#F3F4F6',
+  // Fixed inner cluster: a common icon slot so every "Continue …"
+  // label starts at the same x across the three buttons, while the
+  // cluster itself stays visually centred.
+  sheetBtnInner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: 200,
+    gap: Spacing.two,
+  },
+  sheetBtnIcon: {
+    width: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   sheetButtonText: {
     fontFamily: 'Barlow_600SemiBold',
@@ -468,16 +537,6 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     fontFamily: 'Barlow_500Medium',
     fontSize: TextSize.sm,
-    color: Colors.light.textSecondary,
-  },
-  sheetGuest: {
-    alignItems: 'center',
-    paddingVertical: Spacing.two,
-    marginTop: Spacing.one,
-  },
-  sheetGuestText: {
-    fontFamily: 'Barlow_600SemiBold',
-    fontSize: 14,
     color: Colors.light.textSecondary,
   },
   pressed: { opacity: 0.6 },
