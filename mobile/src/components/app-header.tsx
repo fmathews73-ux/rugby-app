@@ -67,7 +67,10 @@ export function AppHeader() {
         accessibilityRole="button"
         accessibilityLabel="Account and settings"
         style={({ pressed }) => [styles.slot, styles.rightSlot, pressed && styles.slotPressed]}>
-        <Ionicons name="person-circle-outline" size={28} color={Colors.light.textSecondary} />
+        {/* Chrome register — quiet-but-tappable, matching the
+            inactive tabs so the wordmark owns the header
+            (owner call 2026-07-13). */}
+        <Ionicons name="person-circle-outline" size={28} color="#C7CBD1" />
       </Pressable>
     </View>
   );

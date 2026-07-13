@@ -22,11 +22,10 @@ export default function TabsLayout() {
         // divider (`borderTopColor`) provides the visual separation from
         // the page bg instead of a colour contrast — same technical /
         // restrained pattern used in Stripe, Linear, Grafana.
-        // Active tab sits in the black identity register ("where you
-        // are" is content, not chrome); inactive stays in the grey
-        // functional register with the header avatar.
+        // Active tab in the black identity register ("where you are
+        // is content"), inactive in chrome grey.
         tabBarActiveTintColor: Colors.light.text,
-        tabBarInactiveTintColor: Colors.light.textSecondary,
+        tabBarInactiveTintColor: '#C7CBD1',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
           borderTopColor: '#E5E7EB',
