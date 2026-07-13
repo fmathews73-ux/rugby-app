@@ -51,7 +51,7 @@ function StatRow({
   homeFlex,
   awayFlex,
   homeLeads,
-  quietBoxes,
+  tie,
 }: {
   label: string;
   home: string;
@@ -59,8 +59,8 @@ function StatRow({
   homeFlex: number;
   awayFlex: number;
   homeLeads: boolean;
-  /** Drivers: no dark-box treatment — the bar carries the verdict. */
-  quietBoxes?: boolean;
+  /** Dead heat — both boxes quiet (the app-wide draw law). */
+  tie?: boolean;
 }) {
   const total = Math.max(homeFlex + awayFlex, 1);
   const MAX_FILL = 0.85;
@@ -68,14 +68,25 @@ function StatRow({
   const awaySeg = (awayFlex / total) * MAX_FILL;
   const homeColor = homeFlex === 0 ? 'transparent' : homeLeads ? FAV_COLOR : DOG_COLOR;
   const awayColor = awayFlex === 0 ? 'transparent' : homeLeads ? DOG_COLOR : FAV_COLOR;
-  const homeWins = !quietBoxes && homeLeads;
-  const awayWins = !quietBoxes && !homeLeads && awayFlex > 0;
+  // EXPERIMENT (owner call 2026-07-13): winner-side boxes = light
+  // green bg + dark green value; loser-side = light red bg + dark
+  // red value. Empty/dash boxes stay neutral.
+  // Winner boxes dark, everything else quiet — the app-wide score-box
+  // pairing (settled after green/red box trials 2026-07-13: colour
+  // lives in the BARS, values stay neutral).
+  const homeWins = !tie && homeLeads && home !== '' && home !== '—';
+  const awayWins = !tie && !homeLeads && away !== '' && away !== '—';
 
   return (
     <View style={styles.statBlock}>
       <Text style={styles.statLabel}>{label}</Text>
       <View style={styles.statBarRow}>
-        <View style={[styles.statValueBox, homeWins && styles.statValueBoxWin, home === '' && styles.statValueBoxEmpty]}>
+        <View
+          style={[
+            styles.statValueBox,
+            homeWins && styles.statValueBoxWin,
+            home === '' && styles.statValueBoxEmpty,
+          ]}>
           {home !== '' ? (
             <Text style={[styles.statValue, homeWins && styles.statValueTextWin]}>{home}</Text>
           ) : null}
@@ -91,7 +102,12 @@ function StatRow({
             <View style={{ flex: Math.max(1 - awaySeg, 0.001) }} />
           </View>
         </View>
-        <View style={[styles.statValueBox, awayWins && styles.statValueBoxWin, away === '' && styles.statValueBoxEmpty]}>
+        <View
+          style={[
+            styles.statValueBox,
+            awayWins && styles.statValueBoxWin,
+            away === '' && styles.statValueBoxEmpty,
+          ]}>
           {away !== '' ? (
             <Text style={[styles.statValue, awayWins && styles.statValueTextWin]}>{away}</Text>
           ) : null}
@@ -178,6 +194,9 @@ export default function MatchPredictionScreen() {
                   homeFlex={homePct}
                   awayFlex={awayPct}
                   homeLeads={homeFav}
+                  // Dead heat = both quiet, the app-wide draw law
+                  // (and index-row parity).
+                  tie={homePct === awayPct}
                 />
                 <Text style={styles.bandNote}>
                   Draw {Math.max(drawPct, 1) === drawPct ? drawPct : '<1'}% · ±{' '}
@@ -221,7 +240,6 @@ export default function MatchPredictionScreen() {
                       // Colour is the FAVOURITE's perspective: a bar
                       // toward the favourite is green, against red.
                       homeLeads={homeFav}
-                      quietBoxes
                     />
                   );
                 })}
