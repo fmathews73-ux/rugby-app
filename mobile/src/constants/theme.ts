@@ -31,6 +31,22 @@ export const Colors = {
  * anything that carries meaning — live matches, warnings, premium hints.
  * Documented in `docs/design-system.md` §5.
  */
+/**
+ * Broadcast score-bug treatment (owner-locked 2026-07-14): every
+ * score/value box leans −8° with the display face's italic axis
+ * (content counter-skews +8° so digits keep only the font's own
+ * lean), and row-outer boxes take sharp "wing" cuts — LEFT box cuts
+ * top-left/bottom-right, RIGHT box mirrors top-right/bottom-left.
+ * In a three-box row (W/D/L, home/draw/away) the CENTRE box keeps
+ * all rounded corners.
+ */
+export const ScoreBug = {
+  skew: { transform: [{ skewX: '-8deg' }] },
+  counterSkew: { transform: [{ skewX: '8deg' }] },
+  cutLeft: { borderTopLeftRadius: 0, borderBottomRightRadius: 0 },
+  cutRight: { borderTopRightRadius: 0, borderBottomLeftRadius: 0 },
+} as const;
+
 export const StatusColor = {
   /** Live matches, destructive actions (Clear reset, remove). */
   live: '#DC2626',

@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Fragment, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useQueries } from '@tanstack/react-query';
 
@@ -11,11 +11,13 @@ import { fetchJson } from '@/api/client';
 import { useSeasons, useTeams } from '@/api/hooks';
 import { CardHeaderActions } from '@/components/card-header-actions';
 import { CardTitle } from '@/components/card-title';
+import { CompetitionPicker } from '@/components/competition-picker';
 import { FadeCard, NarrativeBack, BackStrong } from '@/components/narrative-flip-card';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
  * Predictor — ONE prediction per team: their NEXT match, nothing
@@ -31,6 +33,20 @@ import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, T
  * BigQuery ML cutover (spec §2d) — dev-only behind the DEV banner.
  */
 
+// Same filter strip as the Fixtures landing page — one pill grammar
+// across every tab except Home (owner call 2026-07-14).
+const ALL_COMPETITIONS = 'all';
+const FILTER_OPTIONS = [
+  { id: ALL_COMPETITIONS, label: 'All' },
+  { id: 'six-nations', label: 'Six Nations' },
+  { id: 'rugby-championship', label: 'Rugby C’ship' },
+  { id: 'summer-tests', label: 'Summer' },
+  { id: 'autumn-tests', label: 'Autumn' },
+  { id: 'rugby-europe-championship', label: 'Rugby Europe' },
+  { id: 'pacific-nations-cup', label: 'Pacific Cup' },
+  { id: 'world-cup', label: 'World Cup' },
+] as const;
+
 const NEXT_MATCHES_ABOUT = (
   <>
     One prediction per team — their <BackStrong>next match only</BackStrong>.
@@ -45,6 +61,7 @@ const NEXT_MATCHES_ABOUT = (
 type TeamLite = Pick<Team, 'id' | 'short_name' | 'flag_code' | 'name'>;
 
 export default function PredictorScreen() {
+  const [competitionFilter, setCompetitionFilter] = useState<string>(ALL_COMPETITIONS);
   const seasons = useSeasons();
   const teams = useTeams();
 
@@ -86,8 +103,12 @@ export default function PredictorScreen() {
         deduped.push(f);
       }
     }
-    return deduped.sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc));
-  }, [fixtureQueries]);
+    return deduped
+      .filter(
+        (f) => competitionFilter === ALL_COMPETITIONS || f.competition_id === competitionFilter,
+      )
+      .sort((a, b) => a.kickoff_utc.localeCompare(b.kickoff_utc));
+  }, [fixtureQueries, competitionFilter]);
 
   const predictionQueries = useQueries({
     queries: nextMatches.map((f) => ({
@@ -110,7 +131,12 @@ export default function PredictorScreen() {
   return (
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <CompetitionPicker
+        options={FILTER_OPTIONS}
+        selected={competitionFilter}
+        onSelect={setCompetitionFilter}
+      />
+      <FadingScrollView contentContainerStyle={styles.scroll}>
         {isLoading ? (
           <LoadingState />
         ) : error ? (
@@ -124,7 +150,7 @@ export default function PredictorScreen() {
             predictionByFixture={predictionByFixture}
           />
         )}
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -208,13 +234,13 @@ function PredictionRow({
         </View>
         <Text style={styles.teamCode}>{home?.short_name ?? fx.home_team_id.toUpperCase()}</Text>
         <View style={styles.middle}>
-          <View style={[styles.probBox, homeFav && styles.probBoxFav]}>
+          <View style={[styles.probBox, ScoreBug.cutLeft, homeFav && styles.probBoxFav]}>
             <Text style={[styles.probText, homeFav && styles.probTextFav]}>
               {homePct ?? '–'}
               <Text style={[styles.probUnit, homeFav && styles.probTextFav]}>%</Text>
             </Text>
           </View>
-          <View style={[styles.probBox, awayFav && styles.probBoxFav]}>
+          <View style={[styles.probBox, ScoreBug.cutRight, awayFav && styles.probBoxFav]}>
             <Text style={[styles.probText, awayFav && styles.probTextFav]}>
               {awayPct ?? '–'}
               <Text style={[styles.probUnit, awayFav && styles.probTextFav]}>%</Text>
@@ -324,16 +350,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
+    ...ScoreBug.skew,
   },
   probBoxFav: { backgroundColor: Colors.light.textSecondary },
   probText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   probTextFav: { color: Colors.light.textInverse },
   probUnit: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

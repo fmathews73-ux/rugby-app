@@ -20,7 +20,7 @@ import { CountUpTSpan, CountUpValue } from '@/components/insights/count-up-value
 import { RadarChart } from '@/components/insights/radar-chart';
 import { teamDotColor } from '@/lib/team-colors';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
+import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { usePlayerAnalysis } from '@/hooks/use-player-analysis';
 import { FadingScrollView } from '@/components/fading-scroll-view';
@@ -136,14 +136,14 @@ export default function PlayerCardScreen() {
                 with the anchors; the position line rides above the
                 row like the date line (owner call 2026-07-10). */}
             <View style={styles.heroScoreRow}>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutLeft]}>
                 <Text style={styles.heroScoreText}>{p.height_cm}</Text>
                 <View style={styles.heroUnitStack}>
                   <Text style={styles.heroScoreUnit}>C</Text>
                   <Text style={styles.heroScoreUnit}>M</Text>
                 </View>
               </View>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutRight]}>
                 <Text style={styles.heroScoreText}>{p.weight_kg}</Text>
                 <View style={styles.heroUnitStack}>
                   <Text style={styles.heroScoreUnit}>K</Text>
@@ -530,7 +530,7 @@ function PeerRow({
         <Text style={styles.scoutLabel}>{label}</Text>
       </View>
       <View style={styles.peerBarRow}>
-        <View style={[styles.valueBox, !isTie && favourable ? styles.valueBoxWin : null]}>
+        <View style={[styles.valueBox, ScoreBug.cutLeft, !isTie && favourable ? styles.valueBoxWin : null]}>
           <Text style={[styles.valueBoxText, !isTie && favourable ? styles.valueBoxTextWin : null]}>
             <CountUpValue value={formatPeer(mine)} ink={ink} />
           </Text>
@@ -566,7 +566,7 @@ function PeerRow({
             <View style={{ flex: avgSpacer }} />
           </View>
         </View>
-        <View style={styles.valueBox}>
+        <View style={[styles.valueBox, ScoreBug.cutRight]}>
           <Text style={styles.valueBoxText}>
             <CountUpValue value={formatPeer(avg)} ink={ink} />
           </Text>
@@ -578,7 +578,7 @@ function PeerRow({
 
 function formatPeer(v: number): string {
   const r = Math.round(v * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return String(Math.round(r));
 }
 
 // ─── Player radar (shape lead card) ─────────────────────────────────────────
@@ -836,12 +836,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   valueBoxWin: { backgroundColor: Colors.light.textSecondary },
   valueBoxText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   valueBoxTextWin: { color: Colors.light.textInverse },
   // Front face fills the flip container (grow-only).
@@ -1020,20 +1022,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 2,
     paddingHorizontal: 5,
+    ...ScoreBug.skew,
   },
   heroScoreText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   // Unit letters stacked VERTICALLY beside the digits (owner call
   // 2026-07-10: the inline " CM" suffix overlapped on device and
-  // widened the tile).
+  // widened the tile). Counter-skewed like the digits.
   heroUnitStack: {
     justifyContent: 'center',
+    ...ScoreBug.counterSkew,
   },
   heroScoreUnit: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 7,
     lineHeight: 8,
     color: Colors.light.textSecondary,

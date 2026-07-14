@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { Fragment, useMemo } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { Fixture, Result } from '@rugby-app/shared';
@@ -10,11 +10,12 @@ import { useSeasonFixtures, useTeams } from '@/api/hooks';
 import { fetchJson } from '@/api/client';
 import { CardTitle } from '@/components/card-title';
 import { LivePulseDot } from '@/components/live-pulse-dot';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { formatKickoffTime } from '@/lib/format-fixture-date';
-import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
+import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, ScoreBug, Spacing, StatusColor, TextSize, TextTracking } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 /**
@@ -75,7 +76,7 @@ export default function StandingsTeamScreen() {
   return (
     <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       <PageGradient />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <FadingScrollView contentContainerStyle={styles.scroll}>
         {isLoading ? (
           <LoadingState />
         ) : error ? (
@@ -102,7 +103,7 @@ export default function StandingsTeamScreen() {
             ) : null}
           </>
         )}
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -171,6 +172,7 @@ function MatchRow({
             <View
               style={[
                 styles.scoreBoxSmall,
+                ScoreBug.cutLeft,
                 result.home_score > result.away_score && styles.scoreBoxSmallWinner,
               ]}>
               <Text
@@ -185,6 +187,7 @@ function MatchRow({
             <View
               style={[
                 styles.scoreBoxSmall,
+                ScoreBug.cutRight,
                 result.away_score > result.home_score && styles.scoreBoxSmallWinner,
               ]}>
               <Text
@@ -298,12 +301,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   ftLabel: {

@@ -77,13 +77,13 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       key: 'attack',
       label: 'Attack',
       value: clip01(g.pointsScored / AXIS_CEILINGS.attack),
-      raw: `${g.pointsScored.toFixed(1)} pts/g`,
+      raw: `${Math.round(g.pointsScored)} pts/g`,
     },
     {
       key: 'defence',
       label: 'Defence',
       value: clip01(1 - g.pointsConceded / AXIS_CEILINGS.defence),
-      raw: `${g.pointsConceded.toFixed(1)} pts conceded/g`,
+      raw: `${Math.round(g.pointsConceded)} pts conceded/g`,
     },
     {
       key: 'setPiece',
@@ -95,13 +95,13 @@ export function buildRadarAxes(data: TeamAggregate | undefined): RadarAxis[] {
       key: 'turnovers',
       label: 'Turnovers',
       value: clip01(g.turnoversWon / AXIS_CEILINGS.turnovers),
-      raw: `${g.turnoversWon.toFixed(1)} won/g`,
+      raw: `${Math.round(g.turnoversWon)} won/g`,
     },
     {
       key: 'discipline',
       label: 'Discipline',
       value: clip01(1 - g.penaltiesConceded / AXIS_CEILINGS.discipline),
-      raw: `${g.penaltiesConceded.toFixed(1)} pens/g`,
+      raw: `${Math.round(g.penaltiesConceded)} pens/g`,
     },
     {
       key: 'kicking',

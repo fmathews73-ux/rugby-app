@@ -5,7 +5,7 @@ import type { Competition, Fixture, Result, Team } from '@rugby-app/shared';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { formatKickoffTime } from '@/lib/format-fixture-date';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 /**
  * One card in the Home timeline carousel. Layout mirrors the fixture-drill
@@ -111,14 +111,14 @@ function ScoreBlock({
       fixture.status === 'half-time' ? 'HT' : `${computeLiveMinute(fixture)}'`;
     return (
       <>
-        <View style={styles.scoreBox}>
+        <View style={[styles.scoreBox, styles.scoreBoxLeft]}>
           <Text style={styles.scoreText}>{result.home_score}</Text>
         </View>
         <View style={styles.liveMiddle}>
           <LivePulseDot size={5} />
           <Text style={styles.statusLive}>{statusText}</Text>
         </View>
-        <View style={styles.scoreBox}>
+        <View style={[styles.scoreBox, styles.scoreBoxRight]}>
           <Text style={styles.scoreText}>{result.away_score}</Text>
         </View>
       </>
@@ -132,13 +132,13 @@ function ScoreBlock({
     const awayWins = result.away_score > result.home_score;
     return (
       <>
-        <View style={[styles.scoreBox, homeWins && styles.scoreBoxWinner]}>
+        <View style={[styles.scoreBox, styles.scoreBoxLeft, homeWins && styles.scoreBoxWinner]}>
           <Text style={[styles.scoreText, homeWins && styles.scoreTextWinner]}>
             {result.home_score}
           </Text>
         </View>
         <Text style={styles.ftLabel}>FT</Text>
-        <View style={[styles.scoreBox, awayWins && styles.scoreBoxWinner]}>
+        <View style={[styles.scoreBox, styles.scoreBoxRight, awayWins && styles.scoreBoxWinner]}>
           <Text style={[styles.scoreText, awayWins && styles.scoreTextWinner]}>
             {result.away_score}
           </Text>
@@ -241,7 +241,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
+  scoreBoxLeft: { ...ScoreBug.cutLeft },
+  scoreBoxRight: { ...ScoreBug.cutRight },
   scoreBoxWinner: {
     backgroundColor: Colors.light.textSecondary,
   },
@@ -249,6 +252,7 @@ const styles = StyleSheet.create({
     fontSize: TextSize.xl,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   scoreTextWinner: { color: Colors.light.textInverse },
   // Card-scale FT annotation between the two completed scores. Same 12pt

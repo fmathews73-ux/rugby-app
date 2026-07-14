@@ -5,7 +5,7 @@ import type { Team } from '@rugby-app/shared';
 
 import { CapsJerseyBadge } from '@/components/squad-jersey';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, TextSize, TextTracking } from '@/constants/theme';
 import { useTeamPlayers } from '@/api/hooks';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 
@@ -49,7 +49,7 @@ export function TeamHeroRow({
           {/* Dark treatment lives on the W box ALWAYS (owner call
               2026-07-09 sim date): wins are the identity number, the
               L box stays quiet whatever the record. */}
-          <View style={[styles.scoreBoxSmall, styles.scoreBoxSmallWinner]}>
+          <View style={[styles.scoreBoxSmall, ScoreBug.cutLeft, styles.scoreBoxSmallWinner]}>
             <Text style={[styles.scoreBoxSmallText, styles.scoreBoxSmallTextWinner]}>
               {wins}
               <Text style={[styles.unitText, styles.scoreBoxSmallTextWinner]}> W</Text>
@@ -61,7 +61,7 @@ export function TeamHeroRow({
               <Text style={styles.unitText}> D</Text>
             </Text>
           </View>
-          <View style={styles.scoreBoxSmall}>
+          <View style={[styles.scoreBoxSmall, ScoreBug.cutRight]}>
             <Text style={styles.scoreBoxSmallText}>
               {losses}
               <Text style={styles.unitText}> L</Text>
@@ -76,7 +76,7 @@ export function TeamHeroRow({
       </View>
       <Text style={styles.metaText}>
         {rankRow
-          ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts`
+          ? `World Rank #${rankRow.rank} · ${Math.round(rankRow.points)} pts`
           : 'Unranked'}
       </Text>
     </View>
@@ -126,6 +126,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
+    ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
   // Draw tile: white with the chrome hairline-grey keyline — reads as
@@ -139,10 +140,11 @@ const styles = StyleSheet.create({
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   unitText: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

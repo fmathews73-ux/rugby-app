@@ -709,7 +709,9 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
       { label: 'Recent form', impact_pp: formDiff * 22 },
       { label: 'Head-to-head', impact_pp: h2h * 2.4 },
     ]
-      .map((f) => ({ ...f, impact_pp: Math.round(f.impact_pp * 10) / 10 }))
+      // Whole points only — the app shows no decimals anywhere
+      // (owner rule 2026-07-14).
+      .map((f) => ({ ...f, impact_pp: Math.round(f.impact_pp) }))
       .sort((a, b) => Math.abs(b.impact_pp) - Math.abs(a.impact_pp));
 
     return {

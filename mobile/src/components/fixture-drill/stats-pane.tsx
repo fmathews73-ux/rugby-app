@@ -11,7 +11,7 @@ import { LoadingState } from '@/components/state-views';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 export function StatsPane({
   fixture,
@@ -284,7 +284,7 @@ export function buildCategoryRead(
     Math.abs(r.home - r.away) / Math.max(Math.abs(r.home), Math.abs(r.away), 1);
   const contested = rows.filter((r) => leaderOf(r) !== null).sort((a, b) => gapOf(b) - gapOf(a));
 
-  const fmtV = (v: number) => (Number.isInteger(v) ? String(v) : v.toFixed(1));
+  const fmtV = (v: number) => String(Math.round(v));
   const holds = completed ? 'finished with' : 'holds';
   const sentences: string[] = [];
 
@@ -407,7 +407,7 @@ function StatBar({
       <Text style={styles.statLabel}>{label}</Text>
       <View style={styles.statBarRowWrap}>
         <View style={styles.statBarRow}>
-          <View style={[styles.statValueBox, homeBetter ? styles.statValueBoxWin : null]}>
+          <View style={[styles.statValueBox, ScoreBug.cutLeft, homeBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, homeBetter ? styles.statValueTextWin : null]}>
               <CountUpValue value={String(home)} ink={ink} />
             </Text>
@@ -444,7 +444,7 @@ function StatBar({
               <View style={{ flex: awaySpacerFlex }} />
             </View>
           </View>
-          <View style={[styles.statValueBox, awayBetter ? styles.statValueBoxWin : null]}>
+          <View style={[styles.statValueBox, ScoreBug.cutRight, awayBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, awayBetter ? styles.statValueTextWin : null]}>
               <CountUpValue value={String(away)} ink={ink} />
             </Text>
@@ -533,6 +533,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   statValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   statValueTextWin: { color: Colors.light.textInverse },
@@ -541,6 +542,7 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
 
   // Track matches the Efficiency KPI row: 4pt-tall grey slab, small
@@ -580,10 +582,11 @@ const styles = StyleSheet.create({
   barSegHome: { borderRadius: 2, height: 4 },
   barSegAway: { borderRadius: 2, height: 4 },
 
+  // NO overflow/radius on the wrap — clipping here rounded the value
+  // boxes' sharp wing cuts back off (owner catch 2026-07-14); the
+  // premium blur carries its own rounding instead.
   statBarRowWrap: {
     position: 'relative',
-    overflow: 'hidden',
-    borderRadius: 8,
   },
   /** Blur overlay that sits on top of the value + bar row (but underneath the
    * label above it) when a metric is behind the premium gate. Values and
@@ -595,5 +598,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
+    borderRadius: 8,
+    overflow: 'hidden',
   },
 });

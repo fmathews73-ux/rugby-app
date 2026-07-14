@@ -20,7 +20,7 @@ import { SegmentedTabs } from '@/components/segmented-tabs';
 import { CapsJerseyBadge } from '@/components/squad-jersey';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { ErrorState, LoadingState } from '@/components/state-views';
-import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, Spacing, StatusColor, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
+import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_MIN_HEIGHT, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { useFixturePlayerStats, usePlayerMatchStats } from '@/hooks/use-player-match-stats';
 import {
@@ -227,14 +227,14 @@ export default function PlayerMatchScreen() {
                 with the anchors; the position line rides above the
                 row like the date line (owner call 2026-07-10). */}
             <View style={styles.heroScoreRow}>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutLeft]}>
                 <Text style={styles.heroScoreText}>{p.height_cm}</Text>
                 <View style={styles.heroUnitStack}>
                   <Text style={styles.heroScoreUnit}>C</Text>
                   <Text style={styles.heroScoreUnit}>M</Text>
                 </View>
               </View>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutRight]}>
                 <Text style={styles.heroScoreText}>{p.weight_kg}</Text>
                 <View style={styles.heroUnitStack}>
                   <Text style={styles.heroScoreUnit}>K</Text>
@@ -685,7 +685,7 @@ function NormRow({
         <Text style={styles.normLabel}>{label}</Text>
       </View>
       <View style={styles.normBarRow}>
-        <View style={[styles.valueBox, !isTie && favourable ? styles.valueBoxWin : null]}>
+        <View style={[styles.valueBox, ScoreBug.cutLeft, !isTie && favourable ? styles.valueBoxWin : null]}>
           <Text style={[styles.valueBoxText, !isTie && favourable ? styles.valueBoxTextWin : null]}>
             <CountUpValue value={formatValue(mine)} ink={ink} />
           </Text>
@@ -721,7 +721,7 @@ function NormRow({
             <View style={{ flex: avgSpacer }} />
           </View>
         </View>
-        <View style={styles.valueBox}>
+        <View style={[styles.valueBox, ScoreBug.cutRight]}>
           <Text style={styles.valueBoxText}>
             {avg === null ? '—' : <CountUpValue value={formatValue(norm)} ink={ink} />}
           </Text>
@@ -826,7 +826,7 @@ function MatchLedgerCard({
 
 function formatValue(v: number): string {
   const r = Math.round(v * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return String(Math.round(r));
 }
 
 function ageFrom(dobIso: string): number {
@@ -939,20 +939,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 2,
     paddingHorizontal: 5,
+    ...ScoreBug.skew,
   },
   heroScoreText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   // Unit letters stacked VERTICALLY beside the digits (owner call
   // 2026-07-10: the inline " CM" suffix overlapped on device and
-  // widened the tile).
+  // widened the tile). Counter-skewed like the digits.
   heroUnitStack: {
     justifyContent: 'center',
+    ...ScoreBug.counterSkew,
   },
   heroScoreUnit: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 7,
     lineHeight: 8,
     color: Colors.light.textSecondary,
@@ -1095,6 +1098,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   valueBoxWin: { backgroundColor: Colors.light.textSecondary },
   valueBoxTextWin: { color: Colors.light.textInverse },
@@ -1102,6 +1106,7 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   // Match ledger — Season-grid grammar.
   ledgerGrid: {

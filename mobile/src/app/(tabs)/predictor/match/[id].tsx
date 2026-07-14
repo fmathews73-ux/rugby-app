@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useFixture, useMatchPrediction, useTeams, useCompetitions } from '@/api/hooks';
@@ -9,8 +9,9 @@ import { CardTitle } from '@/components/card-title';
 import { MatchupHeader } from '@/components/fixture-drill/matchup-header';
 import { FadeCard, NarrativeBack, BackStrong } from '@/components/narrative-flip-card';
 import { ErrorState, LoadingState } from '@/components/state-views';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
-import { PAGE_BOTTOM_INSET, Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, ScoreBug, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
  * Match prediction drill — split probability bar, predicted margin
@@ -84,6 +85,7 @@ function StatRow({
         <View
           style={[
             styles.statValueBox,
+            ScoreBug.cutLeft,
             homeWins && styles.statValueBoxWin,
             home === '' && styles.statValueBoxEmpty,
           ]}>
@@ -105,6 +107,7 @@ function StatRow({
         <View
           style={[
             styles.statValueBox,
+            ScoreBug.cutRight,
             awayWins && styles.statValueBoxWin,
             away === '' && styles.statValueBoxEmpty,
           ]}>
@@ -166,7 +169,7 @@ export default function MatchPredictionScreen() {
         awayTeam={awayTeam}
         competitionName={competitionName}
       />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <FadingScrollView contentContainerStyle={styles.scroll}>
         <FadeCard
           flipped={flipped}
           front={
@@ -264,7 +267,7 @@ export default function MatchPredictionScreen() {
             />
           }
         />
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -335,6 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   statValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   statValueBoxEmpty: { backgroundColor: 'transparent' },
@@ -342,6 +346,7 @@ const styles = StyleSheet.create({
     fontSize: TextSize.md,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   statValueTextWin: { color: Colors.light.textInverse },
   barTrack: {

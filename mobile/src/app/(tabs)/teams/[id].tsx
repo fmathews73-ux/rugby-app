@@ -21,7 +21,7 @@ import { SegmentedTabs } from '@/components/segmented-tabs';
 import { CapsJerseyBadge, SquadJersey } from '@/components/squad-jersey';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, Spacing, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBug, Spacing, TextSize, TextTracking, TextWeight, ScoreBoxSize } from '@/constants/theme';
 import { useTeamRecentForm } from '@/hooks/use-team-recent-form';
 import { TIER_1_IDS } from '@/lib/tiers';
 
@@ -188,7 +188,7 @@ export default function TeamHubScreen() {
         <View style={styles.heroVenueRow}>
           <Text style={styles.heroPositionLine}>
             {rankRow
-              ? `World Rank #${rankRow.rank} · ${rankRow.points.toFixed(1)} pts`
+              ? `World Rank #${rankRow.rank} · ${Math.round(rankRow.points)} pts`
               : 'Unranked'}
           </Text>
         </View>
@@ -203,7 +203,7 @@ export default function TeamHubScreen() {
                 identity number; the L box stays quiet regardless of
                 which count is higher. */}
             <View style={styles.heroScoreRow}>
-              <View style={[styles.heroScoreBox, styles.heroScoreBoxWinner]}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutLeft, styles.heroScoreBoxWinner]}>
                 <Text style={[styles.heroScoreText, styles.heroScoreTextWinner]}>
                   {wins}
                   <Text style={[styles.heroScoreUnit, styles.heroScoreTextWinner]}> W</Text>
@@ -215,7 +215,7 @@ export default function TeamHubScreen() {
                   <Text style={styles.heroScoreUnit}> D</Text>
                 </Text>
               </View>
-              <View style={styles.heroScoreBox}>
+              <View style={[styles.heroScoreBox, ScoreBug.cutRight]}>
                 <Text style={styles.heroScoreText}>
                   {losses}
                   <Text style={styles.heroScoreUnit}> L</Text>
@@ -621,7 +621,7 @@ function TierStatBar({
       <View style={styles.tierStatBarRow}>
         {/* Team value in the match-score tile convention: beating the
             tier average (inverted-aware) takes the winner pairing. */}
-        <View style={[styles.tierValueBox, !isTie && favourable ? styles.tierValueBoxWin : null]}>
+        <View style={[styles.tierValueBox, ScoreBug.cutLeft, !isTie && favourable ? styles.tierValueBoxWin : null]}>
           <Text
             style={[styles.tierValueText, !isTie && favourable ? styles.tierValueTextWin : null]}>
             <CountUpValue value={formatStat(team, percent).replace('%', '')} ink={ink} />
@@ -659,7 +659,7 @@ function TierStatBar({
             <View style={{ flex: tierSpacerFlex }} />
           </View>
         </View>
-        <View style={styles.tierValueBox}>
+        <View style={[styles.tierValueBox, ScoreBug.cutRight]}>
           <Text style={styles.tierValueText}>
             <CountUpValue value={formatStat(tier, percent).replace('%', '')} ink={ink} />
           </Text>
@@ -671,7 +671,7 @@ function TierStatBar({
 
 function formatStat(v: number, percent?: boolean): string {
   const r = Math.round(v * 10) / 10;
-  const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+  const s = String(Math.round(r));
   return percent ? `${s}%` : s;
 }
 
@@ -727,14 +727,14 @@ function PlayerRow({
         <View style={styles.playerMiddle}>
           {/* Two boxes, not three — age lives on the meta line
               (player-hero parity; the YRS box duplicated it). */}
-          <View style={styles.playerScoreBox}>
+          <View style={[styles.playerScoreBox, ScoreBug.cutLeft]}>
             <Text style={styles.playerScoreText}>{player.height_cm}</Text>
             <View style={styles.playerUnitStack}>
               <Text style={styles.playerUnitText}>C</Text>
               <Text style={styles.playerUnitText}>M</Text>
             </View>
           </View>
-          <View style={styles.playerScoreBox}>
+          <View style={[styles.playerScoreBox, ScoreBug.cutRight]}>
             <Text style={styles.playerScoreText}>{player.weight_kg}</Text>
             <View style={styles.playerUnitStack}>
               <Text style={styles.playerUnitText}>K</Text>
@@ -911,11 +911,13 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
+    ...ScoreBug.skew,
   },
   heroScoreText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.xl,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   heroScoreBoxWinner: { backgroundColor: Colors.light.textSecondary },
   // Draw tile: white with the chrome hairline-grey keyline — its own
@@ -927,7 +929,7 @@ const styles = StyleSheet.create({
   },
   heroScoreTextWinner: { color: Colors.light.textInverse },
   heroScoreUnit: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 8,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,
@@ -1065,20 +1067,24 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 1,
     paddingHorizontal: 3,
+    ...ScoreBug.skew,
   },
   playerScoreText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   // Unit letters stacked VERTICALLY beside the digits (owner call
   // 2026-07-10: the inline suffix overlapped on device and widened
-  // the tile).
+  // the tile). Counter-skewed like the digits — the stack is a
+  // sibling, not a child, of the digit Text.
   playerUnitStack: {
     justifyContent: 'center',
+    ...ScoreBug.counterSkew,
   },
   playerUnitText: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 6,
     lineHeight: 7,
     color: Colors.light.textSecondary,
@@ -1198,12 +1204,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   tierValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   tierValueText: {
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   tierValueTextWin: { color: Colors.light.textInverse },
   tierBarTrack: {

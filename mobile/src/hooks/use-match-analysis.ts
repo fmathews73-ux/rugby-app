@@ -249,7 +249,7 @@ function buildHeatmapRead(result: Result, home: Team, away: Team, isLive: boolea
   const share = Math.round(Math.max(ht, 100 - ht));
   const lEntries = leader === home ? result.home_twenty_two_entries : result.away_twenty_two_entries;
   const lPts = leader === home ? result.home_points_from_twenty_two_entries : result.away_points_from_twenty_two_entries;
-  const ppe = lEntries > 0 ? (lPts / lEntries).toFixed(1) : null;
+  const ppe = lEntries > 0 ? String(Math.round(lPts / lEntries)) : null;
   const tense = isLive ? 'has been played' : 'was played';
   if (share <= 53) {
     return `The map splits close to even: neither side ${isLive ? 'has owned' : 'owned'} the ground, and the heat sits through the middle third — a field-position stalemate that ${isLive ? 'is pushing' : 'pushed'} the contest onto execution instead.`;
@@ -507,7 +507,7 @@ function summaryDetail(result: Result, home: Team, away: Team, isLive: boolean, 
     const rz = homeEntries >= awayEntries ? home : away;
     const entries = Math.max(homeEntries, awayEntries);
     const pts = rz.id === home.id ? result.home_points_from_twenty_two_entries : result.away_points_from_twenty_two_entries;
-    const ppe = (pts / entries).toFixed(1);
+    const ppe = String(Math.round(pts / entries));
     s.push(
       `${rz.short_name}'s ${entries} visits to the 22 ${past ? 'yielded' : 'have yielded'} ${pts} points, ${ppe} a visit, ${Number(ppe) >= 2.5 ? 'ruthless red-zone work' : `a return that ${past ? 'left' : 'leaves'} points out on the field`}.`,
     );
@@ -662,7 +662,7 @@ function attackParagraph(result: Result, home: Team, away: Team, ctx: PreMatchCo
     const betterCount = Math.max(homeLB, awayLB);
     if (betterBase && betterCount > betterBase * (1 + BASELINE_VARIANCE_THRESHOLD)) {
       parts.push(
-        `${better.short_name} keep finding the softer edges, ${betterCount} line breaks to ${Math.min(homeLB, awayLB)}. That is comfortably above the ${betterBase.toFixed(1)} they average in a match: the cutting edge is sharper than usual today.`,
+        `${better.short_name} keep finding the softer edges, ${betterCount} line breaks to ${Math.min(homeLB, awayLB)}. That is comfortably above the ${Math.round(betterBase)} they average in a match: the cutting edge is sharper than usual today.`,
       );
     } else {
       parts.push(
@@ -1204,8 +1204,8 @@ function verdictDetail(
   const homeEntries = result.home_twenty_two_entries;
   const awayEntries = result.away_twenty_two_entries;
   if (homeEntries + awayEntries > 0) {
-    const homePPE = homeEntries > 0 ? (result.home_points_from_twenty_two_entries / homeEntries).toFixed(1) : '0.0';
-    const awayPPE = awayEntries > 0 ? (result.away_points_from_twenty_two_entries / awayEntries).toFixed(1) : '0.0';
+    const homePPE = homeEntries > 0 ? String(Math.round(result.home_points_from_twenty_two_entries / homeEntries)) : '0';
+    const awayPPE = awayEntries > 0 ? String(Math.round(result.away_points_from_twenty_two_entries / awayEntries)) : '0';
     s.push(
       `Conversion ${past ? 'was' : 'is'} the other half of the ledger: ${home.short_name} ${past ? 'took' : 'have taken'} ${homePPE} points a visit from ${homeEntries} trips to the 22, ${away.short_name} ${awayPPE} from ${awayEntries}.`,
     );

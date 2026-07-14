@@ -9,7 +9,7 @@ import type { Fixture, Result } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useCompetitions, useTeam, useTeams } from '@/api/hooks';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useMyTeamId } from '@/hooks/use-my-team-id';
 import { formatFixtureDate, formatKickoffTime } from '@/lib/format-fixture-date';
 
@@ -218,13 +218,13 @@ function FixtureLine({
     const oppWins = oppScore > teamScore;
     middle = (
       <View style={styles.scoreCluster}>
-        <View style={[styles.scoreBoxSmall, teamWins && styles.scoreBoxSmallWinner]}>
+        <View style={[styles.scoreBoxSmall, ScoreBug.cutLeft, teamWins && styles.scoreBoxSmallWinner]}>
           <Text style={[styles.scoreBoxSmallText, teamWins && styles.scoreBoxSmallTextWinner]}>
             {teamScore}
           </Text>
         </View>
         <Text style={styles.ftLabel}>FT</Text>
-        <View style={[styles.scoreBoxSmall, oppWins && styles.scoreBoxSmallWinner]}>
+        <View style={[styles.scoreBoxSmall, ScoreBug.cutRight, oppWins && styles.scoreBoxSmallWinner]}>
           <Text style={[styles.scoreBoxSmallText, oppWins && styles.scoreBoxSmallTextWinner]}>
             {oppScore}
           </Text>
@@ -367,12 +367,14 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   ftLabel: {

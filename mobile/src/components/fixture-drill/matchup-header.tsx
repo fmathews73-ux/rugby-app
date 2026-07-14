@@ -5,7 +5,7 @@ import type { Fixture, Result, Team } from '@rugby-app/shared';
 import { LivePulseDot } from '@/components/live-pulse-dot';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { formatKickoffTime } from '@/lib/format-fixture-date';
-import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, DRILL_HERO_MIN_HEIGHT, FlagSize, ScoreBoxSize, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 
 // ─── Matchup header ──────────────────────────────────────────────────────────
 
@@ -68,6 +68,7 @@ export function MatchupHeader({
               <View
                 style={[
                   styles.detailScoreBox,
+                  ScoreBug.cutLeft,
                   isCompleted && result.home_score > result.away_score && styles.detailScoreBoxWinner,
                 ]}>
                 <Text
@@ -91,6 +92,7 @@ export function MatchupHeader({
               <View
                 style={[
                   styles.detailScoreBox,
+                  ScoreBug.cutRight,
                   isCompleted && result.away_score > result.home_score && styles.detailScoreBoxWinner,
                 ]}>
                 <Text
@@ -283,9 +285,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   detailScoreBoxWinner: { backgroundColor: Colors.light.textSecondary },
-  detailScoreText: { fontSize: TextSize.xl, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary },
+  detailScoreText: { fontSize: TextSize.xl, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary, ...ScoreBug.counterSkew },
   detailScoreTextWinner: { color: Colors.light.textInverse },
   pill: {
     paddingHorizontal: 10,

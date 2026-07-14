@@ -12,7 +12,7 @@ import { CardTitle } from '@/components/card-title';
 import { CardHeaderActions } from '@/components/card-header-actions';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
-import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, ScoreBug, Spacing, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
 
 // Perspective colours — the app's outcome pair: ahead green, behind red.
@@ -328,6 +328,11 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    // Positional pane rule (owner call 2026-07-14): right-edge boxes
+    // always take the RIGHT cut (TR/BL), bracketing the pane —
+    // never winner-relative.
+    ...ScoreBug.skew,
+    ...ScoreBug.cutRight,
   },
   rowValueBoxWin: { backgroundColor: Colors.light.textSecondary },
   rowValueTextWin: { color: Colors.light.textInverse },
@@ -336,9 +341,10 @@ const styles = StyleSheet.create({
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     fontSize: TextSize.lg,
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   rowValueSuffix: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: TextSize.xs,
     color: Colors.light.textSecondary,
   },
@@ -369,6 +375,6 @@ const styles = StyleSheet.create({
 
 function fmt(v: number, percent?: boolean): string {
   const r = Math.round(v * 10) / 10;
-  const s = Number.isInteger(r) ? String(r) : r.toFixed(1);
+  const s = String(Math.round(r));
   return percent ? `${s}%` : s;
 }

@@ -325,10 +325,10 @@ function buildShape(home: Team, away: Team, h: TeamAggregate, a: TeamAggregate):
   // Coming-in backdrop opens the section (moved here from the match
   // analysis card 2026-07-06 — the kickoff baselines belong on the
   // pre-match surface; match analysis is strictly the match itself).
-  const f1 = h.perGame.pointsScored.toFixed(1);
-  const c1 = h.perGame.pointsConceded.toFixed(1);
-  const f2 = a.perGame.pointsScored.toFixed(1);
-  const c2 = a.perGame.pointsConceded.toFixed(1);
+  const f1 = String(Math.round(h.perGame.pointsScored));
+  const c1 = String(Math.round(h.perGame.pointsConceded));
+  const f2 = String(Math.round(a.perGame.pointsScored));
+  const c2 = String(Math.round(a.perGame.pointsConceded));
   const backdrop =
     `${home.short_name} come in scoring ${f1} a game and conceding ${c1}. ` +
     `${away.short_name} arrive at ${f2} for, ${c2} against.`;
@@ -934,7 +934,7 @@ function neutraliseText(axis: PreviewAxisKey, opp: Team, s: PerGame, o: PerGame)
 
 function fmt(v: number): string {
   const r = Math.round(v * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return String(Math.round(r));
 }
 
 function ordinal(n: number): string {

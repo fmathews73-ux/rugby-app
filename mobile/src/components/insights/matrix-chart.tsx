@@ -239,7 +239,7 @@ export function MatrixChart({
                   const ay2 = yOf(subject2.y);
                   const fmtD = (v: number) => {
                     const r = Math.round(v * 10) / 10;
-                    return Number.isInteger(r) ? String(r) : r.toFixed(1);
+                    return String(Math.round(r));
                   };
                   const xLabel = `\u0394 ${fmtD(Math.abs(subject.x - subject2.x))}${xUnit}`;
                   const yLabel = `\u0394 ${fmtD(Math.abs(subject.y - subject2.y))}${yUnit}`;

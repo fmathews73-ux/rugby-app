@@ -408,5 +408,5 @@ function ordinal(n: number): string {
 }
 
 function formatRate(v: number): string {
-  return Number.isInteger(v) ? String(v) : v.toFixed(1);
+  return String(Math.round(v));
 }

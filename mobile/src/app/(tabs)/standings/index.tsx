@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Fragment, useMemo, useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { useSeasonStandings, useTeams } from '@/api/hooks';
@@ -9,10 +9,11 @@ import { CardHeaderActions } from '@/components/card-header-actions';
 import { CardTitle } from '@/components/card-title';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { FadeCard, NarrativeBack, BackStrong } from '@/components/narrative-flip-card';
+import { FadingScrollView } from '@/components/fading-scroll-view';
 import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
 /**
  * Standings on the app-wide row-geometry law (design-system §9): each
@@ -88,7 +89,7 @@ export default function StandingsScreen() {
         selected={seasonId}
         onSelect={setSeasonId}
       />
-      <ScrollView contentContainerStyle={styles.scroll}>
+      <FadingScrollView contentContainerStyle={styles.scroll}>
         {query.isLoading ? (
           <LoadingState />
         ) : query.isError ? (
@@ -106,7 +107,7 @@ export default function StandingsScreen() {
         ) : (
           <EmptyState label="No standings for this competition." />
         )}
-      </ScrollView>
+      </FadingScrollView>
     </SafeAreaView>
   );
 }
@@ -196,7 +197,7 @@ function TableRow({
         {/* W/D/L trio absolute-centred over the row (§9: variable-width
             wings must never drag a flexed middle off-centre). */}
         <View style={styles.middle}>
-          <View style={[styles.scoreBoxSmall, styles.scoreBoxSmallWinner]}>
+          <View style={[styles.scoreBoxSmall, ScoreBug.cutLeft, styles.scoreBoxSmallWinner]}>
             <Text style={[styles.scoreBoxSmallText, styles.scoreBoxSmallTextWinner]}>
               {row.won}
               <Text style={[styles.unitText, styles.scoreBoxSmallTextWinner]}> W</Text>
@@ -208,7 +209,7 @@ function TableRow({
               <Text style={styles.unitText}> D</Text>
             </Text>
           </View>
-          <View style={styles.scoreBoxSmall}>
+          <View style={[styles.scoreBoxSmall, ScoreBug.cutRight]}>
             <Text style={styles.scoreBoxSmallText}>
               {row.lost}
               <Text style={styles.unitText}> L</Text>
@@ -342,6 +343,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
+    ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
   // Draw tile: white with the chrome hairline-grey keyline — its own
@@ -355,10 +357,11 @@ const styles = StyleSheet.create({
     fontSize: TextSize.lg,
     fontFamily: 'BarlowCondensed_700Bold_Italic',
     color: Colors.light.textSecondary,
+    ...ScoreBug.counterSkew,
   },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   unitText: {
-    fontFamily: 'WorkSans_500Medium',
+    fontFamily: 'WorkSans_500Medium_Italic',
     fontSize: 7,
     letterSpacing: TextTracking.wide,
     color: Colors.light.textSecondary,

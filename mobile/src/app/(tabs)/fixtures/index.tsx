@@ -15,7 +15,7 @@ import { LivePulseDot } from '@/components/live-pulse-dot';
 import { PageGradient } from '@/components/page-gradient';
 import { ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
-import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { Colors, FlagSize, PAGE_BOTTOM_INSET, ScoreBoxSize, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
 import { useQueries } from '@tanstack/react-query';
 
 import { usePullToRefresh } from '@/hooks/use-pull-to-refresh';
@@ -308,6 +308,7 @@ export default function FixturesScreen() {
                         <View
                           style={[
                             styles.scoreBoxSmall,
+                            ScoreBug.cutLeft,
                             result.home_score > result.away_score && styles.scoreBoxSmallWinner,
                           ]}>
                           <Text
@@ -322,6 +323,7 @@ export default function FixturesScreen() {
                         <View
                           style={[
                             styles.scoreBoxSmall,
+                            ScoreBug.cutRight,
                             result.away_score > result.home_score && styles.scoreBoxSmallWinner,
                           ]}>
                           <Text
@@ -511,9 +513,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
+    ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
-  scoreBoxSmallText: { fontSize: TextSize.lg, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary },
+  scoreBoxSmallText: { fontSize: TextSize.lg, fontFamily: 'BarlowCondensed_700Bold_Italic', color: Colors.light.textSecondary, ...ScoreBug.counterSkew },
   scoreBoxSmallTextWinner: { color: Colors.light.textInverse },
   ftLabel: {
     fontSize: TextSize.sm,

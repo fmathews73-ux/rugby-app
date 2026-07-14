@@ -304,7 +304,7 @@ function WindowsChart({
 
 function fmt(v: number): string {
   const r = Math.round(v * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return String(Math.round(r));
 }
 
 const styles = StyleSheet.create({

@@ -1,4 +1,4 @@
-import { WorkSans_400Regular, WorkSans_500Medium, WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
+import { WorkSans_400Regular, WorkSans_500Medium, WorkSans_500Medium_Italic, WorkSans_600SemiBold } from '@expo-google-fonts/work-sans';
 import { BarlowCondensed_700Bold_Italic, useFonts } from '@expo-google-fonts/barlow-condensed';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
@@ -41,6 +41,9 @@ export default function RootLayout() {
     BarlowCondensed_700Bold_Italic,
     WorkSans_400Regular,
     WorkSans_500Medium,
+    // Italic cut for unit suffixes inside score boxes — units lean
+    // with the condensed digits (owner call 2026-07-14).
+    WorkSans_500Medium_Italic,
     WorkSans_600SemiBold,
   });
 

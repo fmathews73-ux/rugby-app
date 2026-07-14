@@ -55,7 +55,7 @@ export function AerialContest({
     ? [
         {
           label: 'Contestables kicked',
-          value: g.contestablesDelivered.toFixed(1),
+          value: String(Math.round(g.contestablesDelivered)),
           suffix: '/g',
           bar: clip(g.contestablesDelivered / 12),
           avg: clip(T1.contestablesDelivered / 12),
@@ -70,7 +70,7 @@ export function AerialContest({
         },
         {
           label: 'Contestables received',
-          value: g.contestablesReceived.toFixed(1),
+          value: String(Math.round(g.contestablesReceived)),
           suffix: '/g',
           bar: clip(g.contestablesReceived / 12),
           avg: clip(T1.contestablesReceived / 12),

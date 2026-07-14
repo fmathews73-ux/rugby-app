@@ -847,8 +847,7 @@ function buildDisciplineTrend(
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 function fmt(v: number): string {
-  const r = Math.round(v * 10) / 10;
-  return Number.isInteger(r) ? String(r) : r.toFixed(1);
+  return String(Math.round(v));
 }
 
 function ordinal(n: number): string {
