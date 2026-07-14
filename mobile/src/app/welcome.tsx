@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
 import Svg, {
@@ -19,7 +18,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 
-import { ChartDoodleBackdrop } from '@/components/chart-doodle-backdrop';
+import { ChartDoodleBackdrop, FINGERPRINT_PATH } from '@/components/chart-doodle-backdrop';
 import { markWelcomeSeen } from '@/hooks/use-welcome-seen';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
@@ -83,6 +82,12 @@ const GRADIENT_GREENS = ['#0A3D1E', '#0F4A25', '#176D37', '#1E7A3F', '#27904C'] 
 
 // Option 3's charcoals, top → bottom — the dark-terminal ground.
 const CHARCOALS = ['#1B1D21', '#101114', '#0A0B0D'] as const;
+
+// The broadcast pitch ramp (owner arc 2026-07-14): the wordmark's
+// dark zone (#124E1B→#1D6423) and light zone (#4DA344→#5CB04E) with
+// an interpolated mid stop — one green system for the brand block,
+// the artwork's sweep and the sign-in doors.
+const PITCH_GREENS = ['#124E1B', '#1D6423', '#358333', '#4DA344', '#5CB04E'] as const;
 
 /** Option 3's watermark — the six-lobe radar ghosted at billboard
  *  scale: two rings, spokes, and the familiar irregular shape. */
@@ -328,7 +333,18 @@ export default function WelcomeScreen() {
       {geom ? (
         <View style={[styles.brandBlock, { top: layout ? layout.h * 0.335 : geom.y22 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
-            <Ionicons name="finger-print-outline" size={58} color="#0A3D1E" />
+            {/* The exact Ionicons print geometry with the wordmark's
+                LIGHT-zone ramp (owner call 2026-07-14) — icon and the
+                name's lit half share one ink. */}
+            <Svg width={58} height={58} viewBox="0 0 512 512">
+              <Defs>
+                <SvgLinearGradient id="mark-ramp" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0" stopColor="#5CB04E" />
+                  <Stop offset="1" stopColor="#4DA344" />
+                </SvgLinearGradient>
+              </Defs>
+              <Path d={FINGERPRINT_PATH} fill="url(#mark-ramp)" />
+            </Svg>
           </View>
           {/* Wordmark in the GRADIENT_GREENS ramp (owner call
               2026-07-14) — light leading into deep ink, the EXPERT
@@ -336,13 +352,32 @@ export default function WelcomeScreen() {
               cannot take a gradient fill. */}
           <Svg width={340} height={54}>
             <Defs>
-              {/* Deep ink leading into light (reversed, owner call
-                  2026-07-14). */}
-              <SvgLinearGradient id="wordmark-ramp" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor={GRADIENT_GREENS[0]} />
-                <Stop offset="0.35" stopColor={GRADIENT_GREENS[2]} />
-                <Stop offset="0.65" stopColor={GRADIENT_GREENS[3]} />
-                <Stop offset="1" stopColor={GRADIENT_GREENS[4]} />
+              {/* The EXPERT-label two-tone (owner call 2026-07-14):
+                  a LIGHT gradient zone and a DARK gradient zone split
+                  by one hard diagonal running corner to corner —
+                  bottom-left of the R to the top-right of the S. The
+                  gradient runs top-left → bottom-right so the shared
+                  0.5 stop lands exactly on that anti-diagonal. Greens
+                  from the broadcast pitch ramp so the name and the
+                  artwork's sweep speak one green. */}
+              {/* User-space gradient perpendicular to the divide
+                  line — 25% up the R's side rising to 25% down the
+                  S (flattened from full corner-to-corner, owner call
+                  2026-07-14) — so the hard 0.5 stop IS that line:
+                  every letter splits light-over-dark around it. */}
+              <SvgLinearGradient
+                id="wordmark-ramp"
+                gradientUnits="userSpaceOnUse"
+                x1="171"
+                y1="2"
+                x2="174"
+                y2="56">
+                {/* Light above the line, dark below — the flip was
+                    trialled and reverted (owner call 2026-07-14). */}
+                <Stop offset="0" stopColor="#5CB04E" />
+                <Stop offset="0.499" stopColor="#4DA344" />
+                <Stop offset="0.501" stopColor="#1D6423" />
+                <Stop offset="1" stopColor="#124E1B" />
               </SvgLinearGradient>
             </Defs>
             <SvgText
@@ -355,7 +390,27 @@ export default function WelcomeScreen() {
               RUGBYMETRICS
             </SvgText>
           </Svg>
-          <Text style={styles.strapline}>Match analysis · Stats · Predictions</Text>
+          {/* Tagline in the wordmark's DARK-zone ramp (owner call
+              2026-07-14) — SVG text because RN Text can't take a
+              gradient fill. */}
+          <Svg width={360} height={18}>
+            <Defs>
+              <SvgLinearGradient id="tagline-ramp" x1="0" y1="0" x2="1" y2="0">
+                <Stop offset="0" stopColor="#1D6423" />
+                <Stop offset="1" stopColor="#124E1B" />
+              </SvgLinearGradient>
+            </Defs>
+            <SvgText
+              x={180}
+              y={13}
+              textAnchor="middle"
+              fontFamily="WorkSans_500Medium"
+              fontSize={TextSize.sm}
+              letterSpacing={TextTracking.wide}
+              fill="url(#tagline-ramp)">
+              MATCH ANALYSIS · STATS · PREDICTIONS
+            </SvgText>
+          </Svg>
         </View>
       ) : null}
       <View style={styles.fieldSpacer} />
@@ -371,9 +426,18 @@ export default function WelcomeScreen() {
           accessibilityRole="button"
           accessibilityLabel="Sign in"
           style={({ pressed }) => [styles.glassWrap, pressed && styles.pressed]}>
-          <BlurView intensity={35} tint="light" style={styles.glassFill}>
-            <Text style={styles.buttonText}>Sign in</Text>
-          </BlurView>
+          {/* Silver-ribbon door (owner call 2026-07-14): the sweep's
+              silver edge reborn as the button fill — white catching
+              silver at the centre — with the wordmark's deep green
+              as the label ink. Green fills trialled and retired. */}
+          <LinearGradient
+            colors={['#FFFFFF', '#DDE0E4', '#C9CCD1', '#DDE0E4', '#FFFFFF']}
+            locations={[0, 0.3, 0.5, 0.7, 1]}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.glassFill}>
+            <Text style={styles.buttonTextGreen}>Sign in</Text>
+          </LinearGradient>
         </Pressable>
       </View>
 
@@ -449,7 +513,7 @@ export default function WelcomeScreen() {
               {/* Quarter i of the ramp: adjacent buttons share their
                   seam colour, so the stack is one continuous sweep. */}
               <LinearGradient
-                colors={[GRADIENT_GREENS[i], GRADIENT_GREENS[i + 1]]}
+                colors={[PITCH_GREENS[i], PITCH_GREENS[i + 1]]}
                 style={styles.sheetDoorFill}>
                 <View style={styles.sheetBtnInner}>
                   <View style={styles.sheetBtnIcon}>{door.icon}</View>
@@ -496,15 +560,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     overflow: 'hidden',
   },
-  strapline: {
-    fontFamily: 'WorkSans_500Medium',
-    fontSize: TextSize.sm,
-    letterSpacing: TextTracking.wide,
-    textTransform: 'uppercase',
-    // The Guest door's green (GRADIENT_GREENS ramp's lit end, owner
-    // call 2026-07-14) — a step brighter than the wordmark's deep ink.
-    color: '#27904C',
-  },
 
   actions: {
     gap: Spacing.two,
@@ -523,23 +578,31 @@ const styles = StyleSheet.create({
   // Frosted register (owner call 2026-07-13: solid white was
   // glaring on the dark ground) — translucent fill, soft keyline,
   // white content.
+  // Pill door (owner call 2026-07-14): compact centred pill instead
+  // of the full-width bar.
   glassWrap: {
-    borderRadius: 12,
+    borderRadius: 999,
     overflow: 'hidden',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.55)',
+    alignSelf: 'center',
+    width: 150,
   },
   glassFill: {
-    height: 48,
+    height: 36,
     alignItems: 'center',
     justifyContent: 'center',
-    // Thin white tint over the blur — the Apple-glass milkiness.
-    backgroundColor: 'rgba(255,255,255,0.08)',
   },
   buttonText: {
     fontFamily: 'WorkSans_600SemiBold',
     fontSize: 14,
     color: '#FFFFFF',
+  },
+  buttonTextGreen: {
+    fontFamily: 'WorkSans_600SemiBold',
+    fontSize: 14,
+    // The wordmark's deep-ink green on the silver ribbon.
+    color: '#124E1B',
   },
   sheetBackdrop: {
     flex: 1,
