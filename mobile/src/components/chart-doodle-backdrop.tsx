@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
-import Svg, { Circle, Defs, Ellipse, G, Line, Path, Pattern, Polygon, Rect } from 'react-native-svg';
+import Svg, { Circle, Defs, Ellipse, G, Line, Mask, Path, Pattern, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
 
 /**
  * The chart-doodle backdrop — a WhatsApp-style wallpaper whose glyphs
@@ -258,13 +258,31 @@ const GLYPHS: Glyph[] = [
       </>
     ),
   },
-  // Predictor — sparkles
+  // Predictor — the analytics tab icon: rising zigzag trend line
+  // broken by two hollow nodes (replaced sparkles, owner call
+  // 2026-07-14 — matches the tab bar's Ionicons analytics).
   {
-    r: 13,
+    r: 18,
     el: (
       <>
-        <Path d="M 0 -9 L 2.2 -2.2 L 9 0 L 2.2 2.2 L 0 9 L -2.2 2.2 L -9 0 L -2.2 -2.2 Z" />
-        <Path d="M 8 -9 L 9 -6 L 12 -5 L 9 -4 L 8 -1 L 7 -4 L 4 -5 L 7 -6 Z" />
+        <Line x1={-15} y1={9} x2={-8.6} y2={-0.6} />
+        <Circle cx={-7} cy={-3} r={2.4} />
+        <Line x1={-4.8} y1={-1.1} x2={-0.2} y2={3.1} />
+        <Circle cx={2} cy={5} r={2.4} />
+        <Line x1={4} y1={2.9} x2={14} y2={-8} />
+      </>
+    ),
+  },
+  // Aerial pitch — field line markings: touchline rectangle, halfway
+  // line, both 22m lines (owner ask 2026-07-14).
+  {
+    r: 20,
+    el: (
+      <>
+        <Rect x={-12} y={-16} width={24} height={32} rx={1.5} />
+        <Line x1={-12} y1={-8} x2={12} y2={-8} />
+        <Line x1={-12} y1={0} x2={12} y2={0} />
+        <Line x1={-12} y1={8} x2={12} y2={8} />
       </>
     ),
   },
@@ -272,8 +290,8 @@ const GLYPHS: Glyph[] = [
   // deck (owner call 2026-07-11: "I'm not seeing the fingerprint").
   FINGERPRINT_GLYPH,
   // Ball again — double frequency (owner call 2026-07-13). Deck
-  // length 20 keeps the stride-7 assignment coprime (no same-glyph
-  // neighbours).
+  // length 21 needs stride 8 (gcd(8,21)=1) so neighbours never draw
+  // the same glyph — stride 7 would repeat every third cell.
   BALL_GLYPH,
 ];
 
@@ -284,9 +302,9 @@ function cellPlacements(): ReactNode[] {
   for (let i = 0; i < COLS * ROWS; i++) {
     const col = i % COLS;
     const row = Math.floor(i / COLS);
-    // Stride 7 is coprime with the 18-glyph library, so horizontal
-    // and vertical neighbours always draw different glyphs.
-    const glyph = GLYPHS[(i * 7 + row * 3) % GLYPHS.length];
+    // Stride 8 is coprime with the 21-glyph deck, so horizontal and
+    // vertical neighbours always draw different glyphs.
+    const glyph = GLYPHS[(i * 8 + row * 3) % GLYPHS.length];
     const targetR = 10 + rnd(i) * 3.5; // 10..13.5
     const scale = targetR / glyph.r;
     const margin = CELL / 2 - targetR - 1;
@@ -354,11 +372,19 @@ function cornerFillers(): ReactNode[] {
 export function ChartDoodleBackdrop({
   opacity = 0.5,
   ink = INK,
+  spotlight,
 }: {
   opacity?: number;
   /** Doodle stroke/fill colour. Default chrome grey; pass a light
    *  colour for tone-on-tone use over dark/coloured grounds. */
   ink?: string;
+  /** Stadium-light falloff: glyphs near (cx,cy) keep full ink
+   *  opacity and dim with distance (~25% at radius r) via a
+   *  luminance-mask radial gradient — the wallpaper reads as lit by
+   *  the spotlight rather than sitting at one flat level. The pool
+   *  is a slightly squashed ellipse (ry = 0.85 r), light falling on
+   *  a surface, not a circle stamp. */
+  spotlight?: { cx: number; cy: number; r: number };
 }) {
   return (
     <View style={StyleSheet.absoluteFill} pointerEvents="none">
@@ -370,8 +396,33 @@ export function ChartDoodleBackdrop({
               {cornerFillers()}
             </G>
           </Pattern>
+          {spotlight ? (
+            <>
+              <RadialGradient
+                id="spotlight-falloff"
+                gradientUnits="userSpaceOnUse"
+                cx={spotlight.cx}
+                cy={spotlight.cy}
+                rx={spotlight.r}
+                ry={spotlight.r * 0.85}>
+                <Stop offset="0" stopColor="#FFFFFF" />
+                <Stop offset="0.5" stopColor="#B4B4B4" />
+                <Stop offset="1" stopColor="#464646" />
+              </RadialGradient>
+              <Mask id="spotlight-mask">
+                <Rect x={0} y={0} width="100%" height="100%" fill="url(#spotlight-falloff)" />
+              </Mask>
+            </>
+          ) : null}
         </Defs>
-        <Rect x={0} y={0} width="100%" height="100%" fill="url(#chart-doodles)" />
+        <Rect
+          x={0}
+          y={0}
+          width="100%"
+          height="100%"
+          fill="url(#chart-doodles)"
+          mask={spotlight ? 'url(#spotlight-mask)' : undefined}
+        />
       </Svg>
     </View>
   );

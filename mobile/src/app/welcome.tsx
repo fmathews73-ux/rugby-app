@@ -245,13 +245,49 @@ export default function WelcomeScreen() {
           // you sense more than read.
           <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.06} />
         ) : BG_OPTION === 'gradient' ? (
-          <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
+          // Spotlit wallpaper (owner ask 2026-07-14): doodles catch
+          // the stadium light — brighter than the old flat 0.16
+          // inside the pool, falling toward darkness at the edges.
+          <ChartDoodleBackdrop
+            ink="#FFFFFF"
+            opacity={0.22}
+            spotlight={
+              layout
+                ? { cx: layout.w / 2, cy: layout.h * 0.335 + 55, r: layout.w * 0.62 }
+                : undefined
+            }
+          />
         ) : BG_OPTION === 'pitch' && geom ? (
           <View style={[styles.doodleClip, geom.fieldRect]}>
             <ChartDoodleBackdrop ink="#FFFFFF" opacity={0.16} />
           </View>
         ) : null}
       </View>
+
+      {/* Stadium-spotlight pool (owner ask 2026-07-14) — a soft
+          white radial glow centred on the brand block, sitting OVER
+          the doodles (atmospheric haze) and UNDER the brand. The
+          ellipse is wider than tall — light pooling on a surface. */}
+      {BG_OPTION === 'gradient' && layout ? (
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          <Svg width="100%" height="100%">
+            <Defs>
+              <RadialGradient
+                id="spotlight-pool"
+                gradientUnits="userSpaceOnUse"
+                cx={layout.w / 2}
+                cy={layout.h * 0.335 + 55}
+                rx={layout.w * 0.55}
+                ry={layout.w * 0.46}>
+                <Stop offset="0" stopColor="#FFFFFF" stopOpacity={0.16} />
+                <Stop offset="0.4" stopColor="#FFFFFF" stopOpacity={0.08} />
+                <Stop offset="1" stopColor="#FFFFFF" stopOpacity={0} />
+              </RadialGradient>
+            </Defs>
+            <Rect x={0} y={0} width="100%" height="100%" fill="url(#spotlight-pool)" />
+          </Svg>
+        </View>
+      ) : null}
 
       {/* Brand block OVERLAYS the upper 22m line (owner call
           2026-07-11) — the wordmark's centre rides the measured line

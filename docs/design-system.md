@@ -227,7 +227,7 @@ Dimensions are tuned to the Barlow Condensed digits — tiles hug the numerals b
 **Fill / text pairing:**
 - Winner box: `Colors.light.textSecondary` fill + `Colors.light.textInverse` (white) text.
 - Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.textSecondary` text.
-- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with D and L always quiet, regardless of which count is higher. Applies to the teams-directory rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `WorkSans_500Medium` suffix.
+- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with D and L always quiet, regardless of which count is higher. Applies to the teams-directory rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `WorkSans_500Medium_Italic` suffix (italic since 2026-07-14 — units lean with the digits, see §6.1).
 - Face: `BarlowCondensed_700Bold_Italic` (no `fontWeight`, no `tabular-nums` — see §3).
 - Text size: `TextSize.lg` for `row`, `TextSize.xl` for `card` — same size as the neighbouring nation codes.
 
@@ -253,6 +253,25 @@ scoreBoxSmall: {
 ```
 
 **Do not add a third size.** If a call site "needs" 40×24 for a row (or 60×56 for a hero), the design brief is wrong, not the scale. Grow the text or space, not the tile.
+
+### 6.1 The score-bug treatment (skew + positional wing cuts) — owner-locked 2026-07-14
+
+Every score/value box in the app carries the broadcast score-bug treatment, exported from `theme.ts` as the `ScoreBug` token:
+
+- **Skew.** The box leans `skewX: '-8deg'` — the same axis as the Barlow Condensed italic digits, so tile and numerals lean together. The box *content* (the inner text/stack) counter-skews `+8deg` (`ScoreBug.counterSkew`) so glyphs render on their own natural italic axis, not double-slanted.
+- **Wing cuts are PANE-POSITIONAL, never winner-relative.** A box's cut is decided by where it sits on the pane, regardless of which side is winning or losing:
+  - Left-edge boxes → `ScoreBug.cutLeft` (`borderTopLeftRadius: 0`, `borderBottomRightRadius: 0`)
+  - Right-edge boxes → `ScoreBug.cutRight` (`borderTopRightRadius: 0`, `borderBottomLeftRadius: 0`)
+  - **Three-box rows (W/D/L trios):** outer boxes take their positional cuts; the **centre box stays fully rounded** — no cuts.
+
+  Owner's phrasing: *"this styles as a pane not as box to box / score to score relative."* A losing left-edge box still cuts left; a winning right-edge box still cuts right.
+- **Apply via style arrays** so cut and skew stay token-driven: `[styles.box, ScoreBug.cutLeft, winner && styles.win]`. Never hand-code the radii or the transform.
+- **Clipping gotcha:** a wrapper with `overflow: 'hidden'` + `borderRadius` will round the sharp cuts back off (this bit the stats-pane premium blur). Rounding belongs on overlay layers, never on a wrap that contains score boxes.
+- **Unit suffixes lean too.** Units/symbols rendered inside a score box (`CM`/`KG` stacks, `PTS`, `%`, per-game suffixes) use `WorkSans_500Medium_Italic` — the true italic cut of the supporting face, never a fake skew — so they lean with the condensed digits.
+
+### 6.2 No decimals — ever (owner law 2026-07-14)
+
+**"No decimal place values anywhere in any cards ever."** Every value a card displays is a whole number: `String(Math.round(v))` in display formatters, integer fields from the API where the contract allows. This covers score boxes, readout tiles, chart badges, narrative prose, and driver values alike. The only exemption is **SVG path geometry** (`toFixed` inside path/coordinate math — smooth paths, radar vertices, progression curves), which is drawing precision, not displayed data.
 
 ### Match-state annotations (FT / KO / LIVE / HT)
 
