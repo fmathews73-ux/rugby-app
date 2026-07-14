@@ -28,7 +28,7 @@ import { PAGE_BOTTOM_INSET, Colors, ScoreBug, Spacing, TextSize, TextTracking } 
 // underdog = red (owner call 2026-07-13, replacing the home-blue /
 // away-purple identity pairing — a prediction is a verdict, not a
 // venue).
-const FAV_COLOR = '#059669';
+const FAV_COLOR = '#5CB04E';
 const DOG_COLOR = '#DC2626';
 
 const PREDICTION_ABOUT = (

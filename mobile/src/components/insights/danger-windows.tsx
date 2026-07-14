@@ -13,7 +13,7 @@ import { Colors, Spacing, TextSize, TextTracking, TextWeight } from '@/constants
 import { useTeamPointsPattern } from '@/hooks/use-team-points-pattern';
 
 // Same outcome pair as Scoring Rhythm / Form.
-const SCORED_COLOR = '#059669';
+const SCORED_COLOR = '#5CB04E';
 const CONCEDED_COLOR = '#DC2626';
 
 const QUARTER_LABELS = ['Q1', 'Q2', 'Q3', 'Q4'] as const;

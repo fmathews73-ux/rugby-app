@@ -20,7 +20,7 @@ const LOOKBACK = 10;
 const PENS_LOW = 9;
 const PENS_HIGH = 12;
 
-const GOOD_COLOR = '#059669';
+const GOOD_COLOR = '#5CB04E';
 const BAD_COLOR = '#DC2626';
 const MID_COLOR = '#9CA3AF';
 

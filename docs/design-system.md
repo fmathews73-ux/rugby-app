@@ -187,7 +187,7 @@ Anything that doesn't fit these three isn't a status colour — it's a neutral o
 ### 5.3 What NOT to add
 
 - No `accent` or `brand` colour yet — brand identity is register #23 (open). When it lands, the accent becomes a first-class token and any legacy `#4F46E5` / `#007AFF` usage collapses to it.
-- No `success` green until there's a real use — the movement-up `▲` in the rankings is currently `#059669` inline; not yet worth promoting to a token with only one usage.
+- The semantic leader/winner green is **`#5CB04E`** app-wide since 2026-07-14 — the wordmark's light-zone green, replacing the old `#059669`, so every leading bar, W dot, up-arrow and subject dot matches the brand lockup. The lagger red stays `#DC2626`.
 - No hard-coded whites for backgrounds — those are structural (`#FFFFFF` card fills, `#F5F5F7` page bg) and not text colours. Keep them raw for now; consolidate when we tackle §4 Elevation / cards.
 
 ### 5.4 Comparative visualisations (home vs. away)

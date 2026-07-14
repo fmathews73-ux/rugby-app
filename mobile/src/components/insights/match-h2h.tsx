@@ -16,7 +16,7 @@ import { Colors, ScoreBug, Spacing, TextSize, TextTracking, TextWeight } from '@
 import type { AxisKey } from '@/hooks/use-match-analysis';
 
 // Standard bar-row tokens (same as Profile H2H / Axis H2H / KPIs).
-const AHEAD_COLOR = '#059669';
+const AHEAD_COLOR = '#5CB04E';
 const BEHIND_COLOR = '#DC2626';
 const EVEN_COLOR = Colors.light.textSecondary;
 const MAX_FILL = 0.85;

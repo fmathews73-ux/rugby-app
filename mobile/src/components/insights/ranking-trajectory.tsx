@@ -16,7 +16,7 @@ import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 // Rank-move dot colours — green when the month's rank improved, red
 // when it slipped, neutral grey when it held. Same trio as the Form
 // card's margin bars.
-const BETTER_COLOR = '#059669';
+const BETTER_COLOR = '#5CB04E';
 const WORSE_COLOR = '#DC2626';
 const HELD_COLOR = '#9CA3AF';
 

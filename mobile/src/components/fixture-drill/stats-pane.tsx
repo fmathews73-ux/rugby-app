@@ -332,7 +332,7 @@ export function buildCategoryRead(
 // the two adjacent surfaces read as one visual system. Leader green =
 // GOOD_COLOR from that card; lagger red = BAD_COLOR (StatusColor.live);
 // tie renders in secondary text grey.
-const LEADING_COLOR = '#059669';
+const LEADING_COLOR = '#5CB04E';
 const LAGGING_COLOR = StatusColor.live;
 const TIE_COLOR = Colors.light.textSecondary;
 

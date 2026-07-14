@@ -14,7 +14,7 @@ import { Colors, ScoreBug, Spacing, TextSize, TextTracking, TextWeight } from '@
 import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
 
-const LEADING_COLOR = '#059669';
+const LEADING_COLOR = '#5CB04E';
 const LAGGING_COLOR = '#DC2626';
 const TIE_COLOR = Colors.light.textSecondary;
 

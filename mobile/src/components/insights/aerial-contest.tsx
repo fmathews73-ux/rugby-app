@@ -15,7 +15,7 @@ import { CHART_LINE_COLOR } from '@/lib/smooth-path';
 
 const LOOKBACK = 10;
 
-const GOOD_COLOR = '#059669';
+const GOOD_COLOR = '#5CB04E';
 const BAD_COLOR = StatusColor.live;
 // Volume rows are a style read, not a quality read — neutral fill.
 const NEUTRAL_COLOR = '#9CA3AF';

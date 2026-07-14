@@ -38,7 +38,7 @@ import { teamDotColor } from '@/lib/team-colors';
 import { INSUFFICIENT_INSIGHT, fitNarrative, insufficientData } from '@/lib/fit-narrative';
 
 const BASELINE_LOOKBACK = 10;
-const GOOD_COLOR = '#059669';
+const GOOD_COLOR = '#5CB04E';
 const BAD_COLOR = StatusColor.live;
 const TIE_COLOR = Colors.light.textSecondary;
 

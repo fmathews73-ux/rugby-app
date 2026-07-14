@@ -390,10 +390,24 @@ export default function WelcomeScreen() {
               RUGBYMETRICS
             </SvgText>
           </Svg>
+          {/* Miniature stats-bar row (owner call 2026-07-14) — the
+              app's signature grammar as a visual cue of what's
+              inside: skewed cut score boxes, centre-out diverging
+              bars, the real leader-green / lagger-red pairing. */}
+          <View style={styles.statsCue}>
+            {/* Leader bar in the wordmark's light-zone green. */}
+            <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#5CB04E' }]} />
+            <View style={styles.cueGap} />
+            {/* The pre-match bars' near-black centre marker. */}
+            <View style={styles.cueMarker} />
+            <View style={styles.cueGap} />
+            <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#DC2626' }]} />
+          </View>
+
           {/* Tagline in the wordmark's DARK-zone ramp (owner call
               2026-07-14) — SVG text because RN Text can't take a
               gradient fill. */}
-          <Svg width={360} height={18}>
+          <Svg width={386} height={18}>
             <Defs>
               <SvgLinearGradient id="tagline-ramp" x1="0" y1="0" x2="1" y2="0">
                 <Stop offset="0" stopColor="#1D6423" />
@@ -401,14 +415,14 @@ export default function WelcomeScreen() {
               </SvgLinearGradient>
             </Defs>
             <SvgText
-              x={180}
-              y={13}
+              x={193}
+              y={12}
               textAnchor="middle"
               fontFamily="WorkSans_500Medium"
-              fontSize={TextSize.sm}
+              fontSize={10}
               letterSpacing={TextTracking.wide}
               fill="url(#tagline-ramp)">
-              MATCH ANALYSIS · STATS · PREDICTIONS
+              FIXTURES · MATCH ANALYSIS · STATS · PREDICTIONS
             </SvgText>
           </Svg>
         </View>
@@ -556,6 +570,23 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   fieldSpacer: { flex: 1 },
+  // The stats-bar cue as a title underline — boxes removed (owner
+  // call 2026-07-14), equal green/red halves at the wordmark's width.
+  statsCue: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    // Hugs the wordmark's rendered glyphs (R → S), not its canvas.
+    width: 234,
+    height: 2,
+    // VISUALLY equal air above and below (owner call 2026-07-14):
+    // the wordmark canvas carries ~6px of empty space under its
+    // descenders, so the top margin goes negative to compensate.
+    marginTop: -1,
+    marginBottom: 5,
+  },
+  cueSeg: { height: 2, borderRadius: 1 },
+  cueGap: { width: 3 },
+  cueMarker: { width: 2, height: 8, borderRadius: 1, backgroundColor: '#111827' },
   doodleClip: {
     position: 'absolute',
     overflow: 'hidden',

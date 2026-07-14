@@ -442,7 +442,7 @@ const TIER_STAT_GROUPS: readonly {
   },
 ];
 
-const LEADING_COLOR = '#059669';
+const LEADING_COLOR = '#5CB04E';
 const LAGGING_COLOR = '#DC2626';
 const TIE_COLOR = Colors.light.textSecondary;
 

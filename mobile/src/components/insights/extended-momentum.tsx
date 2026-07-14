@@ -21,7 +21,7 @@ import { TeamToggle, type ToggleSide } from '@/components/insights/team-toggle';
 
 // Outcome bar colours — same trio as FormCircles so W/L/D reads
 // identically across the dot strip and the margin bars.
-const WIN_COLOR = '#059669';
+const WIN_COLOR = '#5CB04E';
 const LOSS_COLOR = '#DC2626';
 const DRAW_COLOR = '#9CA3AF';
 

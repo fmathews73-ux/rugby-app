@@ -5,7 +5,7 @@ import type { FormOutcome } from '@/hooks/use-team-recent-form';
 
 // Colour tokens re-used from the Stats leader/lagger bars — green for
 // wins, red for losses. Draw uses secondary text grey.
-const WIN_COLOR = '#059669';
+const WIN_COLOR = '#5CB04E';
 const LOSS_COLOR = '#DC2626';
 const DRAW_COLOR = '#9CA3AF';
 

@@ -16,7 +16,7 @@ import { Colors, ScoreBug, Spacing, TextSize, TextTracking, TextWeight } from '@
 import { useTeamAggregate, type TeamAggregate } from '@/hooks/use-team-aggregate';
 
 // Perspective colours — the app's outcome pair: ahead green, behind red.
-const AHEAD_COLOR = '#059669';
+const AHEAD_COLOR = '#5CB04E';
 const BEHIND_COLOR = '#DC2626';
 const EVEN_COLOR = Colors.light.textSecondary;
 

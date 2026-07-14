@@ -7,7 +7,7 @@ import { useChartInk } from '@/components/insights/use-chart-ink';
 import { teamDotColor } from '@/lib/team-colors';
 import { Colors } from '@/constants/theme';
 
-const SUBJECT_COLOR = '#059669';
+const SUBJECT_COLOR = '#5CB04E';
 const POOL_COLOR = '#9CA3AF';
 
 export interface MatrixPoint {

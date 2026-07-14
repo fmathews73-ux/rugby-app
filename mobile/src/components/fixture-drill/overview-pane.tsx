@@ -295,7 +295,7 @@ function EventIcon({ event }: { event: MatchEvent }) {
       // down for player going OFF (red).
       return (
         <View style={styles.subGlyph}>
-          <Ionicons name="arrow-up" size={12} color="#059669" />
+          <Ionicons name="arrow-up" size={12} color="#5CB04E" />
           <Ionicons name="arrow-down" size={12} color={StatusColor.live} />
         </View>
       );
