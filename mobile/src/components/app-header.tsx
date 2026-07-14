@@ -1,7 +1,15 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter, useSegments } from 'expo-router';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
+import Svg, {
+  Defs,
+  LinearGradient as SvgLinearGradient,
+  Path,
+  Stop,
+  Text as SvgText,
+} from 'react-native-svg';
 
+import { FINGERPRINT_PATH } from '@/components/chart-doodle-backdrop';
 import { Colors } from '@/constants/theme';
 
 /**
@@ -54,9 +62,51 @@ export function AppHeader() {
                 composite (fingerprint clipped in the ball silhouette)
                 was trialled 2026-07-09 and dropped: at header size it
                 never stopped reading as a plain print. */}
-            <Ionicons name="finger-print-outline" size={22} color={Colors.light.text} />
+            {/* Welcome's light-zone ramp on the exact print geometry
+                (owner call 2026-07-14). */}
+            <Svg width={22} height={22} viewBox="0 0 512 512">
+              <Defs>
+                <SvgLinearGradient id="header-mark-ramp" x1="0" y1="0" x2="1" y2="1">
+                  <Stop offset="0" stopColor="#5CB04E" />
+                  <Stop offset="1" stopColor="#4DA344" />
+                </SvgLinearGradient>
+              </Defs>
+              <Path d={FINGERPRINT_PATH} fill="url(#header-mark-ramp)" />
+            </Svg>
           </View>
-          <Text style={styles.wordmarkMain}>RUGBYMETRICS</Text>
+          {/* The welcome wordmark's two-tone slice at header scale
+              (owner call 2026-07-14): PITCH_GREENS light zone over
+              dark, hard diagonal from the R's lower quarter to the
+              S's upper quarter. Fingerprint stays identity black for
+              now. */}
+          {/* Canvas hugs the rendered glyphs (~134pt at 26pt
+              condensed) so the centred cluster is icon + gap + TEXT,
+              not icon + gap + canvas-with-margin. */}
+          <Svg width={136} height={30}>
+            <Defs>
+              <SvgLinearGradient
+                id="header-wordmark-ramp"
+                gradientUnits="userSpaceOnUse"
+                x1="67"
+                y1="1"
+                x2="69"
+                y2="32">
+                <Stop offset="0" stopColor="#5CB04E" />
+                <Stop offset="0.499" stopColor="#4DA344" />
+                <Stop offset="0.501" stopColor="#1D6423" />
+                <Stop offset="1" stopColor="#124E1B" />
+              </SvgLinearGradient>
+            </Defs>
+            <SvgText
+              x={0}
+              y={25}
+              textAnchor="start"
+              fontFamily="BarlowCondensed_700Bold_Italic"
+              fontSize={26}
+              fill="url(#header-wordmark-ramp)">
+              RUGBYMETRICS
+            </SvgText>
+          </Svg>
         </View>
       </View>
       {/* Profile avatar on the right (owner call 2026-07-08); Fantasy
@@ -106,11 +156,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 9,
-  },
-  wordmarkMain: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: 26,
-    color: Colors.light.text,
   },
   rightSlot: {
     minWidth: 44,

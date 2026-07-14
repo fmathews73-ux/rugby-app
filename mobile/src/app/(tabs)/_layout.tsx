@@ -23,7 +23,9 @@ export default function TabsLayout() {
         // the page bg instead of a colour contrast — same technical /
         // restrained pattern used in Stripe, Linear, Grafana.
         // Active tab in the black identity register ("where you are
-        // is content"), inactive in chrome grey.
+        // is content"), inactive in chrome grey. Deep-ink green trial
+        // reverted same day (2026-07-14) — the brand green lives in
+        // the header lockup only.
         tabBarActiveTintColor: Colors.light.text,
         tabBarInactiveTintColor: '#C7CBD1',
         tabBarStyle: {
