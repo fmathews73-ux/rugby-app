@@ -2,12 +2,22 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { BlurView } from 'expo-blur';
 import { Image } from 'expo-image';
 import { LinearGradient } from 'expo-linear-gradient';
-import Svg, { Defs, Line, Path, Polygon, RadialGradient, Rect, Stop } from 'react-native-svg';
+import Svg, {
+  Defs,
+  Line,
+  LinearGradient as SvgLinearGradient,
+  Path,
+  Polygon,
+  RadialGradient,
+  Rect,
+  Stop,
+  Text as SvgText,
+} from 'react-native-svg';
 
 import { ChartDoodleBackdrop } from '@/components/chart-doodle-backdrop';
 import { markWelcomeSeen } from '@/hooks/use-welcome-seen';
@@ -57,8 +67,14 @@ function GoogleG({ size = 16, color }: { size?: number; color?: string }) {
  *               behind the brand — monochrome BI instrument.
  *  'radial-field' — option 4: option 2's radial ground, NO doodles,
  *               the pitch artwork shrunk to an emblem centred behind
- *               the brand block. */
-const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' | 'radial-field' = 'gradient';
+ *               the brand block.
+ *  'burst'    — option 5 (owner artwork 2026-07-14): the light-burst
+ *               composition rasterised from the supplied Illustrator
+ *               SVG (its screen-blend gradients can't render in
+ *               react-native-svg) — silver beams + sparkles over the
+ *               green sweep. No doodles, no spotlight: the artwork
+ *               carries the drama. */
+const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' | 'radial-field' | 'burst' = 'burst';
 
 // Option 2's greens, top → bottom — FLIPPED (owner call 2026-07-13:
 // dark crown falling to a lit base) and widened to five stops, the
@@ -119,6 +135,7 @@ export default function WelcomeScreen() {
   const [authNote, setAuthNote] = useState(false);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [layout, setLayout] = useState<{ w: number; h: number } | null>(null);
+  const insets = useSafeAreaInsets();
 
   // fill-fit (owner call 2026-07-11: stretch vertically so the dead
   // green above/below matches the flanks) — the image spans the whole
@@ -144,12 +161,28 @@ export default function WelcomeScreen() {
   const enter = () => markWelcomeSeen();
 
   return (
-    <SafeAreaView edges={['left', 'right', 'bottom']} style={styles.safe}>
+    // No top/bottom safe edges — the label frame runs the full screen
+    // height (owner call 2026-07-14); the legal row carries the home-
+    // indicator inset itself.
+    <SafeAreaView edges={['left', 'right']} style={styles.safe}>
       {/* Mowing bands (owner call 2026-07-11): nine bands — five keep
           the base turf green, four sit one shade lighter between
           them. Clipped to the pitch circumference like the doodles;
           behind the pitch artwork. */}
-      {BG_OPTION === 'pitch' ? (
+      {BG_OPTION === 'burst' ? (
+        // Option 5: the artwork full-bleed edge to edge. The white
+        // circumference frame was trialled and CANCELLED (owner call
+        // 2026-07-14): display corner radii differ per device and
+        // aren't queryable, so square full-bleed is the only render
+        // that's identical everywhere. fill-stretch — the asset is
+        // cut to phone aspect, so distortion is negligible.
+        <Image
+          source={require('@/assets/images/welcome-burst.jpg')}
+          style={StyleSheet.absoluteFill}
+          contentFit="fill"
+          pointerEvents="none"
+        />
+      ) : BG_OPTION === 'pitch' ? (
         <>
           {geom ? (
             <View
@@ -295,14 +328,33 @@ export default function WelcomeScreen() {
       {geom ? (
         <View style={[styles.brandBlock, { top: layout ? layout.h * 0.335 : geom.y22 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
-            <Ionicons
-              name="finger-print-outline"
-              size={58}
-              color="#FFFFFF"
-              style={styles.markShadow}
-            />
+            <Ionicons name="finger-print-outline" size={58} color="#0A3D1E" />
           </View>
-          <Text style={styles.wordmark}>RUGBYMETRICS</Text>
+          {/* Wordmark in the GRADIENT_GREENS ramp (owner call
+              2026-07-14) — light leading into deep ink, the EXPERT
+              label's left-to-right sweep. SVG text because RN Text
+              cannot take a gradient fill. */}
+          <Svg width={340} height={54}>
+            <Defs>
+              {/* Deep ink leading into light (reversed, owner call
+                  2026-07-14). */}
+              <SvgLinearGradient id="wordmark-ramp" x1="0" y1="0" x2="1" y2="0">
+                <Stop offset="0" stopColor={GRADIENT_GREENS[0]} />
+                <Stop offset="0.35" stopColor={GRADIENT_GREENS[2]} />
+                <Stop offset="0.65" stopColor={GRADIENT_GREENS[3]} />
+                <Stop offset="1" stopColor={GRADIENT_GREENS[4]} />
+              </SvgLinearGradient>
+            </Defs>
+            <SvgText
+              x={170}
+              y={44}
+              textAnchor="middle"
+              fontFamily="BarlowCondensed_700Bold_Italic"
+              fontSize={46}
+              fill="url(#wordmark-ramp)">
+              RUGBYMETRICS
+            </SvgText>
+          </Svg>
           <Text style={styles.strapline}>Match analysis · Stats · Predictions</Text>
         </View>
       ) : null}
@@ -325,7 +377,7 @@ export default function WelcomeScreen() {
         </Pressable>
       </View>
 
-      <View style={styles.legalRow}>
+      <View style={[styles.legalRow, { paddingBottom: Spacing.three + insets.bottom }]}>
         <Text style={styles.legalText}>
           By continuing you agree to the{' '}
           <Text style={styles.legalLink} onPress={() => router.push('/legal/terms')}>
@@ -444,31 +496,14 @@ const styles = StyleSheet.create({
     position: 'absolute',
     overflow: 'hidden',
   },
-  wordmark: {
-    fontFamily: 'BarlowCondensed_700Bold_Italic',
-    fontSize: 46,
-    color: '#FFFFFF',
-    // Embossed read (owner call 2026-07-13): soft dark shadow below
-    // the glyphs — light from above, letters raised off the turf.
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 3,
-  },
   strapline: {
     fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.sm,
     letterSpacing: TextTracking.wide,
     textTransform: 'uppercase',
-    // Legibility over the green ground (grey drowned in the stripes).
-    color: 'rgba(255,255,255,0.9)',
-    textShadowColor: 'rgba(0,0,0,0.35)',
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-  },
-  markShadow: {
-    textShadowColor: 'rgba(0,0,0,0.5)',
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    // The Guest door's green (GRADIENT_GREENS ramp's lit end, owner
+    // call 2026-07-14) — a step brighter than the wordmark's deep ink.
+    color: '#27904C',
   },
 
   actions: {

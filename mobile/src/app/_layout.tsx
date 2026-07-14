@@ -82,9 +82,14 @@ export default function RootLayout() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : AppLightTheme}>
           <SafeAreaProvider>
-            <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
-              <DevModeBanner />
-            </SafeAreaView>
+            {/* Welcome runs full-bleed (no synthetic data on it, so
+                the PRD banner rule doesn't apply); every other screen
+                keeps the top strip that the banner + headers rely on. */}
+            {welcomeSeen !== false ? (
+              <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
+                <DevModeBanner />
+              </SafeAreaView>
+            ) : null}
             <View style={styles.appBody}>
               <Stack>
                 <Stack.Protected guard={welcomeSeen === false}>
