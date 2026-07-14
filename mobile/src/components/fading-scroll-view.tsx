@@ -13,10 +13,10 @@ import {
   View,
 } from 'react-native';
 
-// Page surface (PageGradient's flat #FAFAFA) — the edges dissolve
-// scrolling content into it.
-const PAGE_BG_SOLID = 'rgba(250, 250, 250, 1)';
-const PAGE_BG_CLEAR = 'rgba(250, 250, 250, 0)';
+// Page surface (PageGradient's flat #F4F6F9) — the edges dissolve
+// scrolling content into it. Keep in lockstep with page-gradient.tsx.
+const PAGE_BG_SOLID = 'rgba(244, 246, 249, 1)';
+const PAGE_BG_CLEAR = 'rgba(244, 246, 249, 0)';
 const FADE_HEIGHT = 72;
 const FADE_MS = 180;
 // A fade only shows when at least this much content is hidden past its

@@ -225,7 +225,7 @@ export function ScoringProgression({
               x2={PAD_LEFT + PLOT_W}
               y1={scaleY(t)}
               y2={scaleY(t)}
-              stroke="#F3F4F6"
+              stroke="#EFF2F6"
               strokeWidth={1}
             />
           ))}
@@ -321,7 +321,7 @@ export function ScoringProgression({
                     markers: home totals above their line, away below. */}
                 {fixedBadges.map((b, i) => (
                   <G key={`fb${i}`}>
-                    <Circle cx={b.x} cy={b.y} r={8} fill="#F3F4F6" />
+                    <Circle cx={b.x} cy={b.y} r={8} fill="#EFF2F6" />
                     <SvgText
                       x={b.x}
                       y={b.y + 3}
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.three,
     shadowColor: '#000',

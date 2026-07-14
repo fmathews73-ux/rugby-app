@@ -8,6 +8,7 @@ import { CardTitle } from '@/components/card-title';
 import { FlipTrigger } from '@/components/flip-trigger';
 import { MatrixChart } from '@/components/insights/matrix-chart';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
+import { INSUFFICIENT_INSIGHT, fitNarrative, insufficientData } from '@/lib/fit-narrative';
 import { Colors, Spacing, TextSize } from '@/constants/theme';
 
 /** One side's chart values from the match Result. */
@@ -25,7 +26,8 @@ export interface MatchPairAxes {
  * this combination against the opponent". The tier plays no part
  * here; the same-named tier matrices live on the team surfaces and
  * Pre-Match. Unweighted dots (dot-size-as-margin is a tier-chart
- * device). Backs are About-only until match-pair narratives exist.
+ * device). Backs carry a card-local pair read (each side's quadrant
+ * in the chart's own words) since 2026-07-14.
  */
 export function MatchPairMatrix({
   fixture,
@@ -80,6 +82,63 @@ export function MatchPairMatrix({
     });
   })();
 
+  // Pair read (owner call 2026-07-14: every flip back carries a true
+  // insight) — with two dots and pair-midpoint crosshairs the frame
+  // is strictly who is beating whom, so the read names each side's
+  // quadrant in the chart's own words.
+  const read = (() => {
+    if (notStarted) {
+      return 'No insight before kickoff — this lens populates once the match is under way.';
+    }
+    if (points.length < 2) return null;
+    const h = points[0]!;
+    const a = points[1]!;
+    const clean = (caption: string) => caption.replace('→', '').trim().toLowerCase();
+    if (
+      insufficientData([h.x, a.x]) &&
+      insufficientData([Math.abs(h.y), Math.abs(a.y)])
+    ) {
+      return INSUFFICIENT_INSIGHT;
+    }
+    const midX = (h.x + a.x) / 2;
+    const midY = (h.y + a.y) / 2;
+    const quadOf = (pt: { x: number; y: number }) => {
+      const right = pt.x >= midX;
+      const upper = pt.y <= midY;
+      return upper
+        ? right
+          ? quadrants.tr
+          : quadrants.tl
+        : right
+          ? quadrants.br
+          : quadrants.bl;
+    };
+    const xTie = Math.round(h.x) === Math.round(a.x);
+    const yTie = Math.round(Math.abs(h.y)) === Math.round(Math.abs(a.y));
+    if (xTie && yTie) {
+      return `Nothing between them on this lens — level on ${clean(xCaption)} and ${clean(yCaption)} alike.`;
+    }
+    const parts: string[] = [
+      `${h.code} sit in ${quadOf(h)}, ${a.code} in ${quadOf(a)}.`,
+    ];
+    if (!xTie) {
+      const xLeader = h.x > a.x ? h : a;
+      parts.push(
+        `${xLeader.code} own the ${clean(xCaption)} half of the frame${yTie ? `; the pair are level on ${clean(yCaption)}` : ''}.`,
+      );
+    }
+    if (!yTie) {
+      // Smaller stored y plots higher — the upper side wins the y axis.
+      const yLeader = h.y < a.y ? h : a;
+      parts.push(
+        xTie
+          ? `The pair are level on ${clean(xCaption)}; ${yLeader.code} take ${clean(yCaption)}.`
+          : `${yLeader.code} take ${clean(yCaption)}.`,
+      );
+    }
+    return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+  })();
+
   return (
     <FadeCard
       style={style}
@@ -88,6 +147,7 @@ export function MatchPairMatrix({
         <NarrativeBack
           title={title}
           onClose={() => setInfoOpen(false)}
+          read={read}
           purpose={<>{purpose}</>}
         />
       }
@@ -141,7 +201,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

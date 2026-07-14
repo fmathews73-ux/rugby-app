@@ -24,13 +24,18 @@ import { FlagSize, PAGE_BOTTOM_INSET, PAGE_CARD_MIN_HEIGHT, Colors, DRILL_HERO_M
 import { usePlayerAggregate, type PlayerStatField } from '@/hooks/use-player-aggregate';
 import { useFixturePlayerStats, usePlayerMatchStats } from '@/hooks/use-player-match-stats';
 import {
+  BACK_CATEGORY_ORDER,
+  FORWARD_CATEGORY_ORDER,
   FORWARD_POSITIONS,
   POSITION_GROUP_MEMBERS,
   POSITION_LABELS,
   RADAR_DIMENSIONS,
+  SCOUT_CATEGORIES,
   positionGroupOf,
+  type ScoutMetric,
 } from '@/lib/player-roles';
 import { teamDotColor } from '@/lib/team-colors';
+import { INSUFFICIENT_INSIGHT, fitNarrative, insufficientData } from '@/lib/fit-narrative';
 
 const BASELINE_LOOKBACK = 10;
 const GOOD_COLOR = '#059669';
@@ -48,75 +53,21 @@ const MATCH_TABS: readonly { id: MatchTab; label: string }[] = [
   { id: 'match', label: 'Match KPIs' },
 ];
 
-interface SheetMetric {
-  field: PlayerStatField;
-  label: string;
-  /** Lower is better — flips the bar colouring. */
-  inverted?: boolean;
-  /** Hide the row when this match's value AND the norm are both zero —
-   *  keeps non-kickers' sheets free of empty goal-kicking rows without
-   *  ever hiding a real datapoint. */
-  hideWhenZero?: boolean;
-}
-
 const NORM_DECODE =
   'The right tile is the per-game norm he carried into this match — his previous ten appearances, frozen at kickoff. Tonight beats the norm in green, falls short in red, grey when level; on giveaway rows the lower number wins the green.';
 
-/** Full feed sheet, grouped in the app's category order. */
-const SHEET_SECTIONS: readonly {
-  label: string;
-  purpose: string;
-  metrics: readonly SheetMetric[];
-}[] = [
-  {
-    label: 'Attack',
-    purpose: `His with-ball shift tonight — points, carries and what they broke. ${NORM_DECODE}`,
-    metrics: [
-      { field: 'points', label: 'Points' },
-      { field: 'tries', label: 'Tries' },
-      { field: 'try_assists', label: 'Try assists' },
-      { field: 'carries', label: 'Carries' },
-      { field: 'metres_carried', label: 'Metres carried' },
-      { field: 'clean_breaks', label: 'Clean breaks' },
-      { field: 'defenders_beaten', label: 'Defenders beaten' },
-      { field: 'offloads', label: 'Offloads' },
-      { field: 'passes', label: 'Passes' },
-    ],
-  },
-  {
-    label: 'Kicking',
-    purpose: `His boot tonight — kicks from hand, the metres they bought and any goal kicks (goal-kicking rows hide when they carry nothing). ${NORM_DECODE}`,
-    metrics: [
-      { field: 'kicks_from_hand', label: 'Kicks from hand' },
-      { field: 'kick_metres', label: 'Kick metres' },
-      { field: 'conversions', label: 'Conversions', hideWhenZero: true },
-      { field: 'penalty_goals', label: 'Penalty goals', hideWhenZero: true },
-      { field: 'drop_goals', label: 'Drop goals', hideWhenZero: true },
-    ],
-  },
-  {
-    label: 'Defence & Breakdown',
-    purpose: `His contact-area shift tonight — tackles, the ones that slipped, and the ball won at ruck and lineout. ${NORM_DECODE}`,
-    metrics: [
-      { field: 'tackles_made', label: 'Tackles' },
-      { field: 'missed_tackles', label: 'Missed tackles', inverted: true },
-      { field: 'turnovers_won', label: 'Turnovers won' },
-      { field: 'rucks_hit', label: 'Rucks hit' },
-      { field: 'lineout_takes', label: 'Lineout takes', hideWhenZero: true },
-      { field: 'lineout_steals', label: 'Lineout steals', hideWhenZero: true },
-    ],
-  },
-  {
-    label: 'Discipline',
-    purpose: `His giveaway ledger tonight — errors, penalties and cards (card rows hide when clean). ${NORM_DECODE}`,
-    metrics: [
-      { field: 'handling_errors', label: 'Handling errors', inverted: true },
-      { field: 'penalties_conceded', label: 'Penalties conceded', inverted: true },
-      { field: 'yellow_cards', label: 'Yellow cards', inverted: true, hideWhenZero: true },
-      { field: 'red_cards', label: 'Red cards', inverted: true, hideWhenZero: true },
-    ],
-  },
-];
+// The stats deck is the SAME four cards as the team-squad player page
+// (owner call 2026-07-14): SCOUT_CATEGORIES metrics verbatim — same
+// cards, same rows, same order, no rows hidden — only the comparison
+// frame changes (tonight vs his norm instead of per-game vs the
+// positional average). The old fixture-only grouping (Attack/Kicking/
+// Discipline) and its hideWhenZero rows are retired.
+const SHEET_PURPOSES: Record<string, string> = {
+  scoring: `His scoring tonight — tries, the passes that made them, and the goal kicks landed. ${NORM_DECODE}`,
+  attack: `His with-ball engine tonight — volume, metres and what the carries broke. ${NORM_DECODE}`,
+  contest: `His contact contest tonight — tackle volume and the ones that slipped, plus the ball won at ruck and lineout. ${NORM_DECODE}`,
+  management: `The boot and the whistle tonight — kicks from hand and the metres they bought, against the penalties and cards given away. ${NORM_DECODE}`,
+};
 
 /** One tonight-peer with his sheet — the pool behind the match radar
  *  and matrices. */
@@ -289,18 +240,30 @@ export default function PlayerMatchScreen() {
             )}
 
             {tab === 'stats' &&
-              SHEET_SECTIONS.map((section) => (
-                <NormCard
-                  key={section.label}
-                  section={section}
-                  sheet={sheet.data!}
-                  norm={
-                    baseline.data && baseline.data.appearances > 0
-                      ? baseline.data.perGame
-                      : null
-                  }
-                />
-              ))}
+              // Role-led deck order, same as the squad player page:
+              // forwards read contact-first, backs strike-first.
+              (FORWARD_POSITIONS.includes(p.primary_position)
+                ? FORWARD_CATEGORY_ORDER
+                : BACK_CATEGORY_ORDER
+              ).map((key) => {
+                const cat = SCOUT_CATEGORIES[key]!;
+                return (
+                  <NormCard
+                    key={key}
+                    section={{
+                      label: cat.title,
+                      purpose: SHEET_PURPOSES[key]!,
+                      metrics: cat.metrics,
+                    }}
+                    sheet={sheet.data!}
+                    norm={
+                      baseline.data && baseline.data.appearances > 0
+                        ? baseline.data.perGame
+                        : null
+                    }
+                  />
+                );
+              })}
 
             {tab === 'match' && (
               <MatchLedgerCard
@@ -356,6 +319,23 @@ function MatchRadarCard({
     });
   }, [subjectSheet, peers]);
 
+  const read = useMemo(() => {
+    if (axes.length === 0) return INSUFFICIENT_INSIGHT;
+    const standings = axes.map((a) => Math.round(a.value * 100));
+    if (insufficientData(standings)) return INSUFFICIENT_INSIGHT;
+    const best = axes.reduce((a, b) => (b.value > a.value ? b : a));
+    const worst = axes.reduce((a, b) => (b.value < a.value ? b : a));
+    const parts = [
+      `His strongest department tonight was ${best.label.toLowerCase()} — a ${Math.round(best.value * 100)} standing among the positional peers on this pitch.`,
+      `${worst.label} trailed the group at ${Math.round(worst.value * 100)}.`,
+    ];
+    const led = axes.filter((a) => Math.round(a.value * 100) >= 75).length;
+    if (led > 1) {
+      parts.push(`He sat in the group's top quarter in ${led} of the six departments.`);
+    }
+    return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+  }, [axes]);
+
   return (
     <FadeCard
       style={style}
@@ -364,6 +344,7 @@ function MatchRadarCard({
         <NarrativeBack
           title="Profile"
           onClose={() => setInfoOpen(false)}
+          read={read}
           purpose={
             <>
               His shape TONIGHT — six departments, each lobe his standing
@@ -548,6 +529,33 @@ function MatchMatrixCard({
     }));
   }, [peers, subjectId, cfg]);
 
+  const read = useMemo(() => {
+    if (points.length < 4) return INSUFFICIENT_INSIGHT;
+    const subjectPt = points.find((pt) => pt.code !== '');
+    if (!subjectPt) return INSUFFICIENT_INSIGHT;
+    const xs = points.map((pt) => pt.x);
+    const ys = points.map((pt) => pt.y);
+    if (insufficientData(xs) && insufficientData(ys)) return INSUFFICIENT_INSIGHT;
+    const midX = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const midY = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const right = subjectPt.x >= midX;
+    // y feeds negated for higher-is-better axes — smaller plots higher.
+    const upper = subjectPt.y <= midY;
+    const quad = upper
+      ? right
+        ? cfg.quadrants.tr
+        : cfg.quadrants.tl
+      : right
+        ? cfg.quadrants.br
+        : cfg.quadrants.bl;
+    return (
+      fitNarrative([
+        `Tonight he plots in ${quad} — the ${right ? 'high' : 'low'} end of the group on ${cfg.xCaption.toLowerCase()}, ${upper ? 'strong' : 'soft'} on ${cfg.yCaption.toLowerCase()}.`,
+        `That is against ${points.length - 1} positional peers who took the field in this match.`,
+      ]) ?? INSUFFICIENT_INSIGHT
+    );
+  }, [points, cfg]);
+
   return (
     <FadeCard
       style={style}
@@ -556,6 +564,7 @@ function MatchMatrixCard({
         <NarrativeBack
           title={cfg.title}
           onClose={() => setInfoOpen(false)}
+          read={read}
           purpose={<>{cfg.purpose}</>}
         />
       }
@@ -594,21 +603,68 @@ function MatchMatrixCard({
 
 // ─── Stats pane: tonight vs the norm he carried in ──────────────────────────
 
+/** Tonight-vs-norm read: biggest beat, biggest shortfall, and the
+ *  card's overall score — verdicts on the displayed whole numbers. */
+function buildNormRead(
+  metrics: readonly ScoutMetric[],
+  sheet: PlayerMatchStats,
+  norm: Record<PlayerStatField, number> | null,
+): string {
+  const rows = metrics.map((m) => ({
+    label: m.label,
+    mine: Math.round(sheet[m.field]),
+    avg: norm ? Math.round(Math.round(norm[m.field] * 10) / 10) : null,
+    inverted: m.inverted,
+  }));
+  if (
+    insufficientData(rows.map((r) => r.mine)) &&
+    (norm === null || insufficientData(rows.map((r) => r.avg)))
+  ) {
+    return INSUFFICIENT_INSIGHT;
+  }
+  if (norm === null) {
+    return 'No previous appearances tracked — tonight sets the norm these rows will read against.';
+  }
+  const beats = rows.filter(
+    (r) => r.avg !== null && (r.inverted ? r.mine < r.avg : r.mine > r.avg),
+  );
+  const shorts = rows.filter(
+    (r) => r.avg !== null && (r.inverted ? r.mine > r.avg : r.mine < r.avg),
+  );
+  const biggest = (list: typeof rows) =>
+    list.reduce((a, b) =>
+      Math.abs(b.mine - (b.avg ?? 0)) > Math.abs(a.mine - (a.avg ?? 0)) ? b : a,
+    );
+  const parts: string[] = [];
+  if (beats.length > 0) {
+    const b = biggest(beats);
+    parts.push(
+      `His biggest beat of the norm came on ${b.label.toLowerCase()} — ${b.mine} against the ${b.avg} he carried in.`,
+    );
+  }
+  if (shorts.length > 0) {
+    const s = biggest(shorts);
+    parts.push(`${s.label} fell short: ${s.mine} against a norm of ${s.avg}.`);
+  }
+  parts.push(
+    beats.length === 0 && shorts.length === 0
+      ? 'Level with his norm across the card — a carbon-copy shift.'
+      : `Across the card he beat his norm on ${beats.length} of the ${rows.length} rows.`,
+  );
+  return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+}
+
 function NormCard({
   section,
   sheet,
   norm,
 }: {
-  section: (typeof SHEET_SECTIONS)[number];
+  section: { label: string; purpose: string; metrics: readonly ScoutMetric[] };
   sheet: PlayerMatchStats;
   norm: Record<PlayerStatField, number> | null;
 }) {
   const [infoOpen, setInfoOpen] = useState(false);
-  const rows = section.metrics.filter((m) => {
-    const value = sheet[m.field];
-    const n = norm ? norm[m.field] : null;
-    return !(m.hideWhenZero && value === 0 && (n === null || n < 0.05));
-  });
+  const rows = section.metrics;
   return (
     <FadeCard
       style={styles.stackCard}
@@ -617,6 +673,7 @@ function NormCard({
         <NarrativeBack
           title={section.label}
           onClose={() => setInfoOpen(false)}
+          read={buildNormRead(section.metrics, sheet, norm)}
           purpose={<>{section.purpose}</>}
         />
       }
@@ -673,9 +730,13 @@ function NormRow({
   const mineSpacer = Math.max(0.001, 1 - MAX_FILL * (mine / maxValue));
   const avgSeg = Math.max(0.001, MAX_FILL * (norm / maxValue));
   const avgSpacer = Math.max(0.001, 1 - MAX_FILL * (norm / maxValue));
-  const variance = mine - norm;
-  const favourable = inverted ? variance < 0 : variance > 0;
-  const isTie = Math.abs(variance) < 0.05;
+  // Verdict on the DISPLAYED whole numbers (owner rule 2026-07-14,
+  // mirrors formatValue's rounding): even-to-the-nearest-whole = tie,
+  // both boxes quiet.
+  const mineR = Math.round(Math.round(mine * 10) / 10);
+  const normR = Math.round(Math.round(norm * 10) / 10);
+  const isTie = mineR === normR;
+  const favourable = inverted ? mineR < normR : mineR > normR;
   const mineColor = isTie ? TIE_COLOR : favourable ? GOOD_COLOR : BAD_COLOR;
   const avgColor = isTie ? TIE_COLOR : favourable ? BAD_COLOR : GOOD_COLOR;
 
@@ -721,8 +782,17 @@ function NormRow({
             <View style={{ flex: avgSpacer }} />
           </View>
         </View>
-        <View style={[styles.valueBox, ScoreBug.cutRight]}>
-          <Text style={styles.valueBoxText}>
+        <View
+          style={[
+            styles.valueBox,
+            ScoreBug.cutRight,
+            avg !== null && !isTie && !favourable ? styles.valueBoxWin : null,
+          ]}>
+          <Text
+            style={[
+              styles.valueBoxText,
+              avg !== null && !isTie && !favourable ? styles.valueBoxTextWin : null,
+            ]}>
             {avg === null ? '—' : <CountUpValue value={formatValue(norm)} ink={ink} />}
           </Text>
         </View>
@@ -785,6 +855,7 @@ function MatchLedgerCard({
         <NarrativeBack
           title="Match"
           onClose={() => setInfoOpen(false)}
+          read={buildLedgerRead(tiles)}
           purpose={
             <>
               His match in counting numbers — minutes and the milestones as
@@ -824,6 +895,42 @@ function MatchLedgerCard({
   );
 }
 
+/** Ledger read: the shift length and the two loudest counting
+ *  numbers — pure milestones, no comparison (that lives on Stats). */
+function buildLedgerRead(tiles: readonly { label: string; value: number }[]): string {
+  const rounded = tiles.map((t) => ({ label: t.label, value: Math.round(t.value) }));
+  if (insufficientData(rounded.map((t) => t.value))) return INSUFFICIENT_INSIGHT;
+  const minutes = rounded.find((t) => t.label === 'MINUTES');
+  const rest = rounded
+    .filter((t) => t.label !== 'MINUTES' && t.label !== 'PENALTIES' && t.value > 0)
+    .sort((a, b) => b.value - a.value);
+  const parts: string[] = [];
+  if (minutes) {
+    parts.push(
+      minutes.value >= 80
+        ? 'A full eighty-minute shift.'
+        : `${minutes.value} minutes on the pitch.`,
+    );
+  }
+  if (rest.length > 0) {
+    const [first, second] = rest;
+    parts.push(
+      second
+        ? `The ledger's loudest lines: ${first!.value} ${first!.label.toLowerCase()} and ${second.value} ${second.label.toLowerCase()}.`
+        : `The ledger's loudest line: ${first!.value} ${first!.label.toLowerCase()}.`,
+    );
+  }
+  const pens = rounded.find((t) => t.label === 'PENALTIES');
+  if (pens) {
+    parts.push(
+      pens.value === 0
+        ? 'He kept the whistle silent — no penalties conceded.'
+        : `${pens.value} penalt${pens.value === 1 ? 'y' : 'ies'} conceded against his name.`,
+    );
+  }
+  return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+}
+
 function formatValue(v: number): string {
   const r = Math.round(v * 10) / 10;
   return String(Math.round(r));
@@ -861,7 +968,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   // Match-hero symmetry (owner call 2026-07-10): three EQUAL slots —
   // identity · meta · nation — each centred in its third, same row
@@ -933,7 +1040,7 @@ const styles = StyleSheet.create({
     minWidth: ScoreBoxSize.card.width,
     height: ScoreBoxSize.card.height,
     borderRadius: ScoreBoxSize.card.borderRadius,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -991,7 +1098,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
@@ -1069,7 +1176,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
@@ -1095,7 +1202,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,

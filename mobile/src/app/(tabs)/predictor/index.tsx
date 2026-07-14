@@ -10,6 +10,7 @@ import type { Fixture, MatchPrediction, Team } from '@rugby-app/shared';
 import { fetchJson } from '@/api/client';
 import { useSeasons, useTeams } from '@/api/hooks';
 import { CardHeaderActions } from '@/components/card-header-actions';
+import { INSUFFICIENT_INSIGHT, fitNarrative } from '@/lib/fit-narrative';
 import { CardTitle } from '@/components/card-title';
 import { CompetitionPicker } from '@/components/competition-picker';
 import { FadeCard, NarrativeBack, BackStrong } from '@/components/narrative-flip-card';
@@ -155,6 +156,58 @@ export default function PredictorScreen() {
   );
 }
 
+/** Slate read: the strongest edge, the tightest call, and how the
+ *  board splits — whole-number probabilities only. */
+function buildSlateRead(
+  fixtures: Fixture[],
+  teamById: Map<string, TeamLite>,
+  predictionByFixture: Map<string, MatchPrediction>,
+): string {
+  const rows = fixtures
+    .map((fx) => {
+      const p = predictionByFixture.get(fx.id);
+      if (!p) return null;
+      const homePct = Math.round(p.home_win_prob * 100);
+      const awayPct = Math.round(p.away_win_prob * 100);
+      const homeFav = homePct >= awayPct;
+      return {
+        favCode:
+          (homeFav ? teamById.get(fx.home_team_id) : teamById.get(fx.away_team_id))
+            ?.short_name ?? '—',
+        dogCode:
+          (homeFav ? teamById.get(fx.away_team_id) : teamById.get(fx.home_team_id))
+            ?.short_name ?? '—',
+        favPct: Math.max(homePct, awayPct),
+        margin: Math.abs(Math.round(p.predicted_margin.median)),
+      };
+    })
+    .filter((r): r is NonNullable<typeof r> => r !== null);
+  if (rows.length === 0) return INSUFFICIENT_INSIGHT;
+
+  const strongest = rows.reduce((a, b) => (b.favPct > a.favPct ? b : a));
+  const tightest = rows.reduce((a, b) => (b.favPct < a.favPct ? b : a));
+  const parts: string[] = [];
+  parts.push(
+    `The strongest call on the board is ${strongest.favCode} — ${strongest.favPct} of 100 replays against ${strongest.dogCode}${strongest.margin > 0 ? `, by ${strongest.margin} on the median` : ''}.`,
+  );
+  if (rows.length > 1 && tightest !== strongest) {
+    parts.push(
+      tightest.favPct <= 55
+        ? `${tightest.favCode} against ${tightest.dogCode} is the coin toss — ${tightest.favPct} to ${100 - tightest.favPct}, close enough to swing on the day.`
+        : `The tightest of the rest is ${tightest.favCode} against ${tightest.dogCode} at ${tightest.favPct}.`,
+    );
+  }
+  const heavy = rows.filter((r) => r.favPct >= 75).length;
+  if (rows.length >= 3) {
+    parts.push(
+      heavy === 0
+        ? `No runaway favourites across the ${rows.length} fixtures — the model reads this slate as competitive.`
+        : `${heavy} of the ${rows.length} fixtures read as heavy favourites; the rest stay live.`,
+    );
+  }
+  return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+}
+
 function NextMatchesCard({
   fixtures,
   teamById,
@@ -198,6 +251,7 @@ function NextMatchesCard({
         <NarrativeBack
           title="Upcoming Matches"
           purpose={NEXT_MATCHES_ABOUT}
+          read={buildSlateRead(fixtures, teamById, predictionByFixture)}
           onClose={() => setFlipped(false)}
         />
       }
@@ -284,7 +338,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -315,7 +369,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.two,
   },
-  rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   matchupRow: {
     position: 'relative',
     flexDirection: 'row',
@@ -346,7 +400,7 @@ const styles = StyleSheet.create({
   probBox: {
     ...ScoreBoxSize.row,
     minWidth: ScoreBoxSize.row.width + 12,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,

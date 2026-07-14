@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     // padded bound gave a hard cut the gradient couldn't hide.
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -203,7 +203,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.textSecondary,
   },
   pillInactive: {
-    backgroundColor: '#F3F4F6',
+    // Matches the page ground (page-gradient.tsx) — unselected pills
+    // sit flush in the ground, only the selected pill lifts.
+    backgroundColor: '#E9EDF2',
   },
   pillLabel: {
     fontFamily: 'WorkSans_500Medium',

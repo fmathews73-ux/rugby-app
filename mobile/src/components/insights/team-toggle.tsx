@@ -79,7 +79,8 @@ const styles = StyleSheet.create({
   side: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    backgroundColor: '#F3F4F6',
+    // Cool ground grey — same register as unselected filter pills.
+    backgroundColor: '#E9EDF2',
     minWidth: 44,
     alignItems: 'center',
   },

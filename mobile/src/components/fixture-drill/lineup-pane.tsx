@@ -453,7 +453,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -537,7 +537,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 6,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#F3F4F6',
+    // Standard hairline register — was a stray #F3F4F6.
+    borderBottomColor: '#E3E8EF',
   },
   // Names hug the shared centre badge — home reads toward it from the
   // left (right-aligned), away from the right (left-aligned).
@@ -555,7 +556,7 @@ const styles = StyleSheet.create({
     gap: Spacing.two,
   },
   // Shirt-number badge — small grey circle wrapping the tabular-nums
-  // number. Same grey (#F3F4F6) used by the Stats bar tracks + KPI bar
+  // number. Same grey (#EFF2F6) used by the Stats bar tracks + KPI bar
   // tracks so all "muted-fill" surfaces in the fixture drill share one
   // token. Fixed 22 × 22 keeps a clean 11pt radius regardless of digit
   // count (single-digit numbers still centre inside a full circle).
@@ -580,7 +581,7 @@ const styles = StyleSheet.create({
     // lives in the solid shirt glyphs instead.
     backgroundColor: '#FFFFFF',
     borderWidth: 1.5,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     alignItems: 'center',
     justifyContent: 'center',
     marginHorizontal: Spacing.three,

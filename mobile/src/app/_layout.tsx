@@ -80,7 +80,7 @@ export default function RootLayout() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : AppLightTheme}>
           <SafeAreaProvider>
             <SafeAreaView edges={['top']} style={styles.bannerSafeArea}>
               <DevModeBanner />
@@ -101,9 +101,20 @@ export default function RootLayout() {
   );
 }
 
+// Page ground = the cool grey #E9EDF2 at 50% over white (owner call
+// 2026-07-14) — composites to #F4F6F9. Quiet score boxes, pills and
+// pressed states keep the full-strength #E9EDF2; the ground carries
+// a half-strength wash of the same cast. Keep in lockstep with
+// page-gradient.tsx and fading-scroll-view.tsx.
+const PAGE_GROUND = '#F4F6F9';
+const AppLightTheme = {
+  ...DefaultTheme,
+  colors: { ...DefaultTheme.colors, background: PAGE_GROUND },
+};
+
 const styles = StyleSheet.create({
   bannerSafeArea: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: PAGE_GROUND,
   },
   appBody: {
     flex: 1,

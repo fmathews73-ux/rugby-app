@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
   scoreBoxSmall: {
     ...ScoreBoxSize.row,
     minWidth: ScoreBoxSize.row.width + 6,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
@@ -134,7 +134,8 @@ const styles = StyleSheet.create({
   scoreBoxSmallDraw: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#C7CBD1',
+    // Cool ground grey keyline (owner call 2026-07-14, was chrome).
+    borderColor: '#E9EDF2',
   },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,

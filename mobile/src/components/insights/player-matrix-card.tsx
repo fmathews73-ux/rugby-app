@@ -7,6 +7,7 @@ import { FlipTrigger } from '@/components/flip-trigger';
 import { MatrixChart, type MatrixPoint } from '@/components/insights/matrix-chart';
 import { FadeCard, NarrativeBack } from '@/components/narrative-flip-card';
 import { PLAYER_LOOKBACK } from '@/lib/player-roles';
+import { INSUFFICIENT_INSIGHT, fitNarrative, insufficientData } from '@/lib/fit-narrative';
 import { teamDotColor } from '@/lib/team-colors';
 import { Colors, Spacing, TextSize } from '@/constants/theme';
 
@@ -97,6 +98,33 @@ export function PlayerMatrixCard({
 
   const ready = points.length >= 4 && (percentiles.data?.appearances ?? 0) > 0;
 
+  const read = useMemo(() => {
+    if (!ready) return INSUFFICIENT_INSIGHT;
+    const subjectPt = points.find((pt) => pt.id === playerId);
+    if (!subjectPt) return INSUFFICIENT_INSIGHT;
+    const xs = points.map((pt) => pt.x);
+    const ys = points.map((pt) => pt.y);
+    if (insufficientData(xs) && insufficientData(ys)) return INSUFFICIENT_INSIGHT;
+    const midX = (Math.min(...xs) + Math.max(...xs)) / 2;
+    const midY = (Math.min(...ys) + Math.max(...ys)) / 2;
+    const right = subjectPt.x >= midX;
+    // y feeds negated for higher-is-better axes — smaller plots higher.
+    const upper = subjectPt.y <= midY;
+    const quad = upper
+      ? right
+        ? quadrants.tr
+        : quadrants.tl
+      : right
+        ? quadrants.br
+        : quadrants.bl;
+    return (
+      fitNarrative([
+        `He plots in ${quad} — the ${right ? 'high' : 'low'} end of the group on ${xCaption.toLowerCase()}, ${upper ? 'strong' : 'soft'} on ${yCaption.toLowerCase()}.`,
+        `That is against the position group's ten most-used players over the window.`,
+      ]) ?? INSUFFICIENT_INSIGHT
+    );
+  }, [ready, points, playerId, quadrants, xCaption, yCaption]);
+
   return (
     <FadeCard
       style={style}
@@ -105,6 +133,7 @@ export function PlayerMatrixCard({
         <NarrativeBack
           title={title}
           onClose={() => setInfoOpen(false)}
+          read={read}
           purpose={<>{purpose}</>}
         />
       }
@@ -158,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

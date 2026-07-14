@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   wrap: {
     backgroundColor: STRIP_BG,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   // Horizontal padding lives on the CONTENT (not the wrap) so pills
   // stay visible to the screen edge and dissolve under the edge fades —
@@ -134,7 +134,9 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.light.textSecondary,
   },
   pillInactive: {
-    backgroundColor: '#F3F4F6',
+    // Matches the page ground (page-gradient.tsx) — unselected pills
+    // sit flush in the ground, only the selected pill lifts.
+    backgroundColor: '#E9EDF2',
   },
   pillLabel: {
     fontFamily: 'WorkSans_500Medium',

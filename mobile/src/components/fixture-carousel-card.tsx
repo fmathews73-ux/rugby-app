@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     // Horizontal Spacing.three (16pt), vertical Spacing.four (24pt) —
     // adds a line-height of breathing room compared to Spacing.three
     // (8pt more top + 8pt more bottom) while keeping the tighter
@@ -238,7 +238,7 @@ const styles = StyleSheet.create({
   },
   scoreBox: {
     ...ScoreBoxSize.card,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,

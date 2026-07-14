@@ -433,7 +433,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     // No inner padding on the card itself — the header + rows own their own
     // padding so the row divider hairlines can span the full card width.
     shadowColor: '#000',
@@ -473,7 +473,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C7CBD1',
     marginHorizontal: Spacing.three,
   },
-  rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   rowChevron: {
     // Inside matchupRow: -8 reaches into the row's 16pt side padding,
     // landing 8pt off the card edge, centred on the flag line.
@@ -510,7 +510,7 @@ const styles = StyleSheet.create({
   },
   scoreBoxSmall: {
     ...ScoreBoxSize.row,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,

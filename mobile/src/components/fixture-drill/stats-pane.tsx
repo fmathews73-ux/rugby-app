@@ -12,6 +12,7 @@ import { FlipTrigger } from '@/components/flip-trigger';
 import { CountUpValue } from '@/components/insights/count-up-value';
 import { useChartInk } from '@/components/insights/use-chart-ink';
 import { Colors, ScoreBug, Spacing, StatusColor, TextSize, TextTracking, TextWeight } from '@/constants/theme';
+import { INSUFFICIENT_INSIGHT, insufficientData } from '@/lib/fit-narrative';
 
 export function StatsPane({
   fixture,
@@ -267,7 +268,12 @@ export function buildCategoryRead(
   completed: boolean,
 ): string | null {
   const rows = section.stats;
-  if (rows.length === 0) return null;
+  // Sparse-data honesty (owner rule 2026-07-14): no rows, or a
+  // mostly-zero sheet, says so instead of building hollow prose.
+  if (rows.length === 0) return INSUFFICIENT_INSIGHT;
+  if (insufficientData(rows.flatMap((r) => [r.home, r.away]))) {
+    return INSUFFICIENT_INSIGHT;
+  }
 
   const leaderOf = (r: (typeof rows)[number]) => {
     if (r.home === r.away) return null;
@@ -396,8 +402,13 @@ function StatBar({
   // lower gets the red. Ties render both bars in the neutral secondary text
   // colour so "no leader" reads distinctly. Uses the app's existing win /
   // loss tokens for consistency with the form sparkline + momentum arrows.
-  const homeBetter = inverted ? home < away : home > away;
-  const awayBetter = inverted ? away < home : away > home;
+  // Verdicts compare the ROUNDED display values (owner rule
+  // 2026-07-14): if both sides show the same whole number, both boxes
+  // stay quiet — no dark box on a difference the user can't see.
+  const homeR = Math.round(home);
+  const awayR = Math.round(away);
+  const homeBetter = inverted ? homeR < awayR : homeR > awayR;
+  const awayBetter = inverted ? awayR < homeR : awayR > homeR;
   const homeColor = homeBetter ? LEADING_COLOR : awayBetter ? LAGGING_COLOR : TIE_COLOR;
   const awayColor = awayBetter ? LEADING_COLOR : homeBetter ? LAGGING_COLOR : TIE_COLOR;
 
@@ -409,7 +420,7 @@ function StatBar({
         <View style={styles.statBarRow}>
           <View style={[styles.statValueBox, ScoreBug.cutLeft, homeBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, homeBetter ? styles.statValueTextWin : null]}>
-              <CountUpValue value={String(home)} ink={ink} />
+              <CountUpValue value={String(homeR)} ink={ink} />
             </Text>
           </View>
           <View style={styles.barTrack}>
@@ -446,7 +457,7 @@ function StatBar({
           </View>
           <View style={[styles.statValueBox, ScoreBug.cutRight, awayBetter ? styles.statValueBoxWin : null]}>
             <Text style={[styles.statValue, awayBetter ? styles.statValueTextWin : null]}>
-              <CountUpValue value={String(away)} ink={ink} />
+              <CountUpValue value={String(awayR)} ink={ink} />
             </Text>
           </View>
         </View>
@@ -497,7 +508,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.three,
     shadowColor: '#000',
@@ -530,7 +541,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,
@@ -553,7 +564,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,

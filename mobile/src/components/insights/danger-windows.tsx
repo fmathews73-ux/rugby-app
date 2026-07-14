@@ -185,7 +185,7 @@ function WindowsChart({
                 y1={2}
                 x2={x}
                 y2={plotH}
-                stroke="#E5E7EB"
+                stroke="#E3E8EF"
                 strokeWidth={1}
               />
             );
@@ -202,7 +202,7 @@ function WindowsChart({
                   y1={gy}
                   x2={width - padX}
                   y2={gy}
-                  stroke="#E5E7EB"
+                  stroke="#E3E8EF"
                   strokeWidth={1}
                   strokeDasharray="3 3"
                 />
@@ -219,17 +219,17 @@ function WindowsChart({
             );
           })}
           {bars.map((b) => (
-            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill="#E5E7EB" />
+            <Rect key={`u${b.label}`} x={b.up.x} y={b.up.y} width={b.up.w} height={b.up.h} rx={2} fill="#E3E8EF" />
           ))}
           {bars.map((b) => (
-            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill="#E5E7EB" />
+            <Rect key={`d${b.label}`} x={b.down.x} y={b.down.y} width={b.down.w} height={b.down.h} rx={2} fill="#E3E8EF" />
           ))}
           {/* Value badges — scored above its bar, conceded below its
               bar; same quiet circular badge as the Form / Scoring
               Rhythm values. */}
           {bars.map((b) => (
             <G key={`ul${b.label}`}>
-              <Circle cx={b.up.x + b.up.w / 2} cy={b.up.y - 11} r={9} fill="#F3F4F6" />
+              <Circle cx={b.up.x + b.up.w / 2} cy={b.up.y - 11} r={9} fill="#EFF2F6" />
               <SvgText
                 x={b.up.x + b.up.w / 2}
                 y={b.up.y - 8}
@@ -243,7 +243,7 @@ function WindowsChart({
           ))}
           {bars.map((b) => (
             <G key={`dl${b.label}`}>
-              <Circle cx={b.down.x + b.down.w / 2} cy={b.down.y + b.down.h + 11} r={9} fill="#F3F4F6" />
+              <Circle cx={b.down.x + b.down.w / 2} cy={b.down.y + b.down.h + 11} r={9} fill="#EFF2F6" />
               <SvgText
                 x={b.down.x + b.down.w / 2}
                 y={b.down.y + b.down.h + 14}
@@ -314,7 +314,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

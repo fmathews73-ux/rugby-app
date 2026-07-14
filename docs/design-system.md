@@ -159,6 +159,19 @@ Every interactive/identity element sits in exactly one of three registers:
 
 The disclosure chevron spec: `Ionicons chevron-forward, size 16, #C7CBD1`, pinned to the right edge of every navigational row (team rows, player rows, fixture rows, Next/Last Match cards) and vertically centred **on the shield/matchup line**, not on the whole row — absolute-positioned in the row's right gutter so centred clusters keep their symmetry.
 
+### 5.1b The cool grey family (owner-settled 2026-07-14)
+
+Every non-chrome grey surface derives from ONE hue — `#E9EDF2`, a cool blue-cast grey — at fixed strengths. Warm/neutral greys (`#FAFAFA`, `#F3F4F6`, `#F0F0F3`, `#E5E7EB`) are RETIRED from fills and keylines; only chrome `#C7CBD1` sits outside the family (it's structure, not surface).
+
+| Strength | Hex | What lives here |
+|---|---|---|
+| 50% over white | `#F4F6F9` | Page ground (`page-gradient.tsx`), scroll-edge fades, DEV banner strip, picker-modal ground — all four sites must move in lockstep |
+| ~70% | `#EFF2F6` | Chart bar tracks, SVG grid strokes, quiet chart badges — one register lighter than value boxes so box and track never merge |
+| Full | `#E9EDF2` | Quiet/loser score boxes, unselected pills, team-toggle idle sides, pressed-state feedback, the D-tile keyline |
+| Keyline | `#E3E8EF` | Card borders + hairlines that used to be `#E5E7EB` |
+
+White cards + this family + chrome + the two text tokens is the complete neutral system. If a new grey is needed, derive it from `#E9EDF2` — don't introduce a new hue.
+
 ### 5.2 Status tokens (semantic)
 
 For anything that carries meaning — live / destructive / warning / premium — pick one of these. Never a raw hex:
@@ -226,8 +239,9 @@ Dimensions are tuned to the Barlow Condensed digits — tiles hug the numerals b
 
 **Fill / text pairing:**
 - Winner box: `Colors.light.textSecondary` fill + `Colors.light.textInverse` (white) text.
-- Loser / neutral box: `#F3F4F6` fill (light-grey) + `Colors.light.textSecondary` text.
-- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with D and L always quiet, regardless of which count is higher. Applies to the teams-directory rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `WorkSans_500Medium_Italic` suffix (italic since 2026-07-14 — units lean with the digits, see §6.1).
+- Loser / neutral box: `#E9EDF2` fill (the full-strength cool grey — also the fill for unselected pills, team toggles and pressed states) + `Colors.light.textSecondary` text. Chart bar *tracks* sit one register lighter at `#EFF2F6` — cool-cast, but never matching the boxes, so box and track stay distinct shapes.
+- **Winner verdicts compare the ROUNDED display values** (owner rule 2026-07-14): if both sides show the same whole number, that's a tie — both boxes quiet. No dark box on a difference the user can't see. This applies to every paired bar row — fixture Stats, predictor drill, team-vs-tier-average, player-vs-peer-average — and **the average side takes the dark box when it's the better side**; the dark fill is not reserved for the subject.
+- **W/D/L record tiles are NOT the match pairing** (owner correction 2026-07-10): the dark fill sits **permanently on the W box** — wins are the identity number — with L always quiet, regardless of which count is higher. The **D box is white with a 1pt `#E9EDF2` cool-grey keyline** (moved off chrome 2026-07-14) — its own state between the dark W and quiet L. Applies to the teams-directory rows, standings rows and the team hero. Unit letters (`W`/`D`/`L`, `CM`/`KG`) render *inside* the tile as a 7–8pt `WorkSans_500Medium_Italic` suffix (italic since 2026-07-14 — units lean with the digits, see §6.1).
 - Face: `BarlowCondensed_700Bold_Italic` (no `fontWeight`, no `tabular-nums` — see §3).
 - Text size: `TextSize.lg` for `row`, `TextSize.xl` for `card` — same size as the neighbouring nation codes.
 
@@ -240,7 +254,7 @@ Dimensions are tuned to the Barlow Condensed digits — tiles hug the numerals b
 // if the token ever gets tuned. Nothing else in the style can drift.
 scoreBoxSmall: {
   ...ScoreBoxSize.row,
-  backgroundColor: '#F3F4F6',
+  backgroundColor: '#E9EDF2',
   alignItems: 'center',
   justifyContent: 'center',
 },

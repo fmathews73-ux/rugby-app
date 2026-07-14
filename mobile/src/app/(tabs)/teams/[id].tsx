@@ -605,9 +605,13 @@ function TierStatBar({
   const tierSpacerFlex = Math.max(0.001, 1 - MAX_FILL * (tier / maxValue));
 
   // Better-side colouring: higher wins unless the metric is inverted.
-  const variance = team - tier;
-  const favourable = inverted ? variance < 0 : variance > 0;
-  const isTie = Math.abs(variance) < 0.05;
+  // Verdict on the DISPLAYED whole numbers (owner rule 2026-07-14,
+  // mirrors formatStat's rounding): even-to-the-nearest-whole = tie,
+  // both boxes quiet.
+  const teamR = Math.round(Math.round(team * 10) / 10);
+  const tierR = Math.round(Math.round(tier * 10) / 10);
+  const isTie = teamR === tierR;
+  const favourable = inverted ? teamR < tierR : teamR > tierR;
   // Fixture-Stats convention: leader green, trailer red, BOTH grey
   // only when even.
   const teamColor = isTie ? TIE_COLOR : favourable ? LEADING_COLOR : LAGGING_COLOR;
@@ -659,8 +663,14 @@ function TierStatBar({
             <View style={{ flex: tierSpacerFlex }} />
           </View>
         </View>
-        <View style={[styles.tierValueBox, ScoreBug.cutRight]}>
-          <Text style={styles.tierValueText}>
+        <View
+          style={[
+            styles.tierValueBox,
+            ScoreBug.cutRight,
+            !isTie && !favourable ? styles.tierValueBoxWin : null,
+          ]}>
+          <Text
+            style={[styles.tierValueText, !isTie && !favourable ? styles.tierValueTextWin : null]}>
             <CountUpValue value={formatStat(tier, percent).replace('%', '')} ink={ink} />
           </Text>
         </View>
@@ -794,7 +804,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
@@ -819,7 +829,7 @@ const styles = StyleSheet.create({
     minHeight: DRILL_HERO_MIN_HEIGHT,
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   // Single hero row: identity group left, meta stack filling the right.
   // Match-hero symmetry (owner call 2026-07-10): identity slots at
@@ -907,7 +917,7 @@ const styles = StyleSheet.create({
     minWidth: ScoreBoxSize.card.width,
     height: ScoreBoxSize.card.height,
     borderRadius: ScoreBoxSize.card.borderRadius,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
@@ -925,7 +935,8 @@ const styles = StyleSheet.create({
   heroScoreBoxDraw: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#C7CBD1',
+    // Cool ground grey keyline (owner call 2026-07-14, was chrome).
+    borderColor: '#E9EDF2',
   },
   heroScoreTextWinner: { color: Colors.light.textInverse },
   heroScoreUnit: {
@@ -1061,7 +1072,7 @@ const styles = StyleSheet.create({
   playerScoreBox: {
     ...ScoreBoxSize.row,
     minWidth: ScoreBoxSize.row.width + 6,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1201,7 +1212,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,
@@ -1218,7 +1229,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,

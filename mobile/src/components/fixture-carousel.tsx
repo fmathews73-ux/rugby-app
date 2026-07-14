@@ -18,8 +18,6 @@ import { EmptyState, LoadingState } from '@/components/state-views';
 import { Colors, Spacing } from '@/constants/theme';
 import { formatFixtureDate } from '@/lib/format-fixture-date';
 
-const CARD_GAP = 12;
-
 /**
  * Timeline carousel of 7 fixtures across all competitions.
  *
@@ -33,19 +31,19 @@ const CARD_GAP = 12;
  * cancelled fixtures never occupy a slot. Fewer than 7 render near the
  * ends of the season.
  *
- * Horizontal `<ScrollView>` with snap-to-interval + a paged-look dot
- * indicator underneath. No extra deps.
+ * Paged full-screen-width pages with the 24pt card column inside each
+ * (owner call 2026-07-14: no prev/next slivers) — the same geometry as
+ * CardCarousel, so every carousel in the app pages identically.
  */
 const CARDS_EITHER_SIDE = 3;
+// Room for the card shadow blur inside the clipping horizontal
+// scroller.
+const SHADOW_BLEED = 16;
 export function FixtureCarousel() {
   const { width: screenWidth } = useWindowDimensions();
   // Card width leaves the app-wide 24pt card column on each side,
-  // matching the Fixtures / Teams landing pages. Wider than the old
-  // 30pt margins, so the completed-fixture `[score][FT][score]` cluster
-  // fits with room to spare.
+  // matching the Fixtures / Teams landing pages.
   const CARD_WIDTH = Math.round(screenWidth - Spacing.four * 2);
-  const SNAP = CARD_WIDTH + CARD_GAP;
-  const SIDE_PAD = Math.round((screenWidth - CARD_WIDTH) / 2);
 
   const seasons = useSeasons();
   const teams = useTeams();
@@ -142,7 +140,7 @@ export function FixtureCarousel() {
   // belt-and-braces version.
   useEffect(() => {
     if (windowFixtures.length > 0 && !didInitialScroll.current) {
-      const targetX = centreIndexInWindow * SNAP;
+      const targetX = centreIndexInWindow * screenWidth;
       // Delay lets layout settle before scrolling.
       const t = setTimeout(() => {
         scrollRef.current?.scrollTo({ x: targetX, animated: false });
@@ -152,22 +150,25 @@ export function FixtureCarousel() {
       return () => clearTimeout(t);
     }
     return undefined;
-  }, [windowFixtures.length, centreIndexInWindow, SNAP]);
+  }, [windowFixtures.length, centreIndexInWindow, screenWidth]);
 
   // Re-centre on the next-up match every time the tab regains focus —
   // the centre card is the carousel's home position.
   useFocusEffect(
     useCallback(() => {
       if (didInitialScroll.current && windowFixtures.length > 0) {
-        scrollRef.current?.scrollTo({ x: centreIndexInWindow * SNAP, animated: false });
+        scrollRef.current?.scrollTo({
+          x: centreIndexInWindow * screenWidth,
+          animated: false,
+        });
         setActiveIdx(centreIndexInWindow);
       }
-    }, [windowFixtures.length, centreIndexInWindow, SNAP]),
+    }, [windowFixtures.length, centreIndexInWindow, screenWidth]),
   );
 
   const handleScroll = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const x = e.nativeEvent.contentOffset.x;
-    const idx = Math.round(x / SNAP);
+    const idx = Math.round(x / screenWidth);
     if (idx !== activeIdx && idx >= 0 && idx < windowFixtures.length) {
       setActiveIdx(idx);
     }
@@ -187,42 +188,39 @@ export function FixtureCarousel() {
       <ScrollView
         ref={scrollRef}
         horizontal
+        pagingEnabled
         showsHorizontalScrollIndicator={false}
-        snapToInterval={SNAP}
-        snapToAlignment="start"
-        decelerationRate="fast"
-        contentContainerStyle={{ paddingHorizontal: SIDE_PAD }}
+        // The scroller clips to its bounds, which sits flush on the
+        // card — vertical padding gives the card shadow room to blur,
+        // the negative margin hands the space back to the layout.
+        style={{ marginVertical: -SHADOW_BLEED }}
+        contentContainerStyle={{ paddingVertical: SHADOW_BLEED }}
         onScroll={handleScroll}
         scrollEventThrottle={16}
-        contentOffset={{ x: centreIndexInWindow * SNAP, y: 0 }}>
-        {windowFixtures.map((fx, i) => {
+        contentOffset={{ x: centreIndexInWindow * screenWidth, y: 0 }}>
+        {windowFixtures.map((fx) => {
           const home = teamById.get(fx.home_team_id);
           const away = teamById.get(fx.away_team_id);
           const comp = compById.get(fx.competition_id);
           const result = resultByFixture.get(fx.id) ?? null;
           return (
-            <Pressable
-              key={fx.id}
-              onPress={() => router.push(`/fixtures/${fx.id}`, { withAnchor: true })}
-              accessibilityRole="button"
-              accessibilityLabel="Open fixture"
-              style={({ pressed }) => [
-                {
-                  width: CARD_WIDTH,
-                  marginRight: i === windowFixtures.length - 1 ? 0 : CARD_GAP,
-                },
-                pressed && { opacity: 0.85 },
-              ]}>
-              <FixtureCarouselCard
-                fixture={fx}
-                result={result}
-                homeTeam={home}
-                awayTeam={away}
-                competition={comp}
-                dayLabel={formatFixtureDate(fx)}
-                width={CARD_WIDTH}
-              />
-            </Pressable>
+            <View key={fx.id} style={{ width: screenWidth, paddingHorizontal: Spacing.four }}>
+              <Pressable
+                onPress={() => router.push(`/fixtures/${fx.id}`, { withAnchor: true })}
+                accessibilityRole="button"
+                accessibilityLabel="Open fixture"
+                style={({ pressed }) => pressed && { opacity: 0.85 }}>
+                <FixtureCarouselCard
+                  fixture={fx}
+                  result={result}
+                  homeTeam={home}
+                  awayTeam={away}
+                  competition={comp}
+                  dayLabel={formatFixtureDate(fx)}
+                  width={CARD_WIDTH}
+                />
+              </Pressable>
+            </View>
           );
         })}
       </ScrollView>

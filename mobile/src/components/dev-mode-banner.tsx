@@ -30,13 +30,13 @@ export function DevModeBanner() {
 
 const styles = StyleSheet.create({
   banner: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F4F6F9',
     paddingVertical: 3,
     paddingHorizontal: 12,
     alignItems: 'center',
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   text: {
     color: Colors.light.textSecondary,

@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   headerSlot: { minWidth: 44 },
   headerTitle: {
@@ -187,7 +187,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     paddingHorizontal: Spacing.four,
     paddingVertical: Spacing.four,
     gap: Spacing.three,

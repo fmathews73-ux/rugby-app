@@ -235,7 +235,7 @@ function TrajectoryChart({
           y1={padTop}
           x2={d.x}
           y2={plotBottom - 4}
-          stroke="#F3F4F6"
+          stroke="#EFF2F6"
           strokeWidth={1}
         />
       ))}
@@ -247,7 +247,7 @@ function TrajectoryChart({
           y1={rankToY(r)}
           x2={width - padRight}
           y2={rankToY(r)}
-          stroke="#F3F4F6"
+          stroke="#EFF2F6"
           strokeWidth={1}
         />
       ))}
@@ -344,7 +344,7 @@ function TrajectoryChart({
               cx={d.x}
               cy={d.y + (d.fill === BETTER_COLOR ? -14 : 14)}
               r={8}
-              fill="#F3F4F6"
+              fill="#EFF2F6"
             />
             <SvgText
               x={d.x}
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

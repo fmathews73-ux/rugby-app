@@ -241,7 +241,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.two,
   },
-  rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   matchupRow: {
     position: 'relative',
     flexDirection: 'row',
@@ -298,7 +298,7 @@ const styles = StyleSheet.create({
   },
   scoreBoxSmall: {
     ...ScoreBoxSize.row,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,

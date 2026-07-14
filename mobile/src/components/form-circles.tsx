@@ -65,7 +65,7 @@ const styles = StyleSheet.create({
   },
   circleEmpty: {
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     backgroundColor: 'transparent',
   },
   letter: {

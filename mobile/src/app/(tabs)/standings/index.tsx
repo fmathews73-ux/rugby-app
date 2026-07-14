@@ -14,6 +14,7 @@ import { PageGradient } from '@/components/page-gradient';
 import { EmptyState, ErrorState, LoadingState } from '@/components/state-views';
 import { TeamFlagShield } from '@/components/team-flag-shield';
 import { PAGE_BOTTOM_INSET, Colors, FlagSize, ScoreBoxSize, ScoreBug, Spacing, TextSize, TextTracking } from '@/constants/theme';
+import { INSUFFICIENT_INSIGHT, fitNarrative } from '@/lib/fit-narrative';
 
 /**
  * Standings on the app-wide row-geometry law (design-system §9): each
@@ -112,6 +113,53 @@ export default function StandingsScreen() {
   );
 }
 
+/** Table read in the client-template register (narrative-spec
+ *  grammar): lead story, unbeaten note, tightest mid-table gap, and
+ *  the points-difference swing — whole numbers only. */
+function buildTableRead(
+  rows: readonly StandingsRow[],
+  teamById: Map<string, TeamLite>,
+): string {
+  const totalPlayed = rows.reduce((s, r) => s + r.played, 0);
+  if (rows.length < 2 || totalPlayed === 0) return INSUFFICIENT_INSIGHT;
+  const code = (r: StandingsRow) => teamById.get(r.team_id)?.short_name ?? '—';
+  const sorted = [...rows].slice().sort((a, b) => a.rank - b.rank);
+  const top = sorted[0]!;
+  const second = sorted[1]!;
+  const gap = top.table_points - second.table_points;
+  const parts: string[] = [];
+  parts.push(
+    gap === 0
+      ? `${code(top)} and ${code(second)} are level on ${top.table_points} points at the top — points difference is doing the separating.`
+      : `${code(top)} lead on ${top.table_points} points, ${gap} clear of ${code(second)}.`,
+  );
+  if (top.lost === 0 && top.drawn === 0 && top.played > 1) {
+    parts.push(`They are unbeaten through ${top.played}.`);
+  }
+  let tightIdx = -1;
+  let tight = Number.POSITIVE_INFINITY;
+  for (let i = 1; i < sorted.length - 1; i++) {
+    const d = sorted[i]!.table_points - sorted[i + 1]!.table_points;
+    if (d < tight) {
+      tight = d;
+      tightIdx = i;
+    }
+  }
+  if (tightIdx > 0 && tight <= 2) {
+    parts.push(
+      tight === 0
+        ? `${code(sorted[tightIdx]!)} and ${code(sorted[tightIdx + 1]!)} sit locked level below them.`
+        : `Only ${tight} point${tight === 1 ? '' : 's'} split ${code(sorted[tightIdx]!)} and ${code(sorted[tightIdx + 1]!)}.`,
+    );
+  }
+  const bottom = sorted[sorted.length - 1]!;
+  const sign = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+  parts.push(
+    `Points difference tells the season's story — ${code(top)} at ${sign(top.points_difference)} against ${code(bottom)}'s ${sign(bottom.points_difference)}.`,
+  );
+  return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+}
+
 function StandingsCard({
   title,
   seasonId,
@@ -152,6 +200,7 @@ function StandingsCard({
         <NarrativeBack
           title={title}
           purpose={TABLE_ABOUT}
+          read={buildTableRead(rows, teamById)}
           onClose={() => setFlipped(false)}
         />
       }
@@ -246,7 +295,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -283,7 +332,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.two,
   },
-  rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   matchupRow: {
     position: 'relative',
     flexDirection: 'row',
@@ -339,19 +388,20 @@ const styles = StyleSheet.create({
   scoreBoxSmall: {
     ...ScoreBoxSize.row,
     minWidth: ScoreBoxSize.row.width + 6,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 3,
     ...ScoreBug.skew,
   },
   scoreBoxSmallWinner: { backgroundColor: Colors.light.textSecondary },
-  // Draw tile: white with the chrome hairline-grey keyline — its own
-  // state between the dark W and quiet L (teams-row parity).
+  // Draw tile: white with a cool-ground-grey keyline — its own
+  // state between the dark W and quiet L (teams-row parity; keyline
+  // moved off chrome 2026-07-14).
   scoreBoxSmallDraw: {
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
-    borderColor: '#C7CBD1',
+    borderColor: '#E9EDF2',
   },
   scoreBoxSmallText: {
     fontSize: TextSize.lg,

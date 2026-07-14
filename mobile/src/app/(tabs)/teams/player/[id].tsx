@@ -11,7 +11,7 @@ import { CapsJerseyBadge } from '@/components/squad-jersey';
 import { CardCarousel } from '@/components/card-carousel';
 import { PlayerMatrixCard } from '@/components/insights/player-matrix-card';
 import { LegendChip } from '@/components/insights/legend-chip';
-import { fitNarrative } from '@/lib/fit-narrative';
+import { INSUFFICIENT_INSIGHT, fitNarrative, insufficientData } from '@/lib/fit-narrative';
 import { PageGradient } from '@/components/page-gradient';
 import { SegmentedTabs } from '@/components/segmented-tabs';
 import { ErrorState, LoadingState } from '@/components/state-views';
@@ -436,6 +436,60 @@ function ScoutingCard({
     return m;
   }, [percentiles.data]);
 
+  // Card-local template read (owner call 2026-07-14: every flip back
+  // carries a true insight) — biggest edge over the average peer,
+  // biggest deficit, and the card's overall score, on the displayed
+  // whole numbers. An explicit `read` prop (the analysis narrative)
+  // takes precedence when supplied.
+  const scoutRead = useMemo(() => {
+    if (percentiles.isLoading) return null;
+    if (!percentiles.data || percentiles.data.appearances === 0) {
+      return INSUFFICIENT_INSIGHT;
+    }
+    const rows = metrics
+      .map((m) => {
+        const r = byField.get(m.field);
+        if (!r) return null;
+        return {
+          label: m.label,
+          mine: Math.round(Math.round(r.per_game * 10) / 10),
+          avg: Math.round(Math.round(r.peer_avg * 10) / 10),
+          inverted: m.inverted,
+        };
+      })
+      .filter((r): r is NonNullable<typeof r> => r !== null);
+    if (
+      rows.length === 0 ||
+      (insufficientData(rows.map((r) => r.mine)) &&
+        insufficientData(rows.map((r) => r.avg)))
+    ) {
+      return INSUFFICIENT_INSIGHT;
+    }
+    const beats = rows.filter((r) => (r.inverted ? r.mine < r.avg : r.mine > r.avg));
+    const shorts = rows.filter((r) => (r.inverted ? r.mine > r.avg : r.mine < r.avg));
+    const biggest = (list: typeof rows) =>
+      list.reduce((a, b) =>
+        Math.abs(b.mine - b.avg) > Math.abs(a.mine - a.avg) ? b : a,
+      );
+    const parts: string[] = [];
+    if (beats.length > 0) {
+      const b = biggest(beats);
+      parts.push(
+        `His clearest edge on the average peer is ${b.label.toLowerCase()} — ${b.mine} a game against their ${b.avg}.`,
+      );
+    }
+    if (shorts.length > 0) {
+      const s = biggest(shorts);
+      parts.push(`${s.label} runs behind the group: ${s.mine} against ${s.avg}.`);
+    }
+    parts.push(
+      beats.length === 0 && shorts.length === 0
+        ? 'He tracks the average peer line for line across this card.'
+        : `Across the card he beats the positional average on ${beats.length} of the ${rows.length} rows.`,
+    );
+    return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
+  }, [percentiles.isLoading, percentiles.data, metrics, byField]);
+
   return (
     <FadeCard
       style={style}
@@ -444,7 +498,7 @@ function ScoutingCard({
         <NarrativeBack
           title={title}
           onClose={() => setInfoOpen(false)}
-          read={read}
+          read={read ?? scoutRead}
           purpose={<>{purpose}</>}
         />
       }
@@ -518,9 +572,13 @@ function PeerRow({
   const mineSpacer = Math.max(0.001, 1 - MAX_FILL * (mine / maxValue));
   const avgSeg = Math.max(0.001, MAX_FILL * (avg / maxValue));
   const avgSpacer = Math.max(0.001, 1 - MAX_FILL * (avg / maxValue));
-  const variance = mine - avg;
-  const favourable = inverted ? variance < 0 : variance > 0;
-  const isTie = Math.abs(variance) < 0.05;
+  // Verdict on the DISPLAYED whole numbers (owner rule 2026-07-14,
+  // mirrors formatPeer's rounding): even-to-the-nearest-whole = tie,
+  // both boxes quiet.
+  const mineR = Math.round(Math.round(mine * 10) / 10);
+  const avgR = Math.round(Math.round(avg * 10) / 10);
+  const isTie = mineR === avgR;
+  const favourable = inverted ? mineR < avgR : mineR > avgR;
   const mineColor = isTie ? Colors.light.textSecondary : favourable ? GOOD_COLOR : BAD_COLOR;
   const avgColor = isTie ? Colors.light.textSecondary : favourable ? BAD_COLOR : GOOD_COLOR;
 
@@ -566,8 +624,13 @@ function PeerRow({
             <View style={{ flex: avgSpacer }} />
           </View>
         </View>
-        <View style={[styles.valueBox, ScoreBug.cutRight]}>
-          <Text style={styles.valueBoxText}>
+        <View
+          style={[
+            styles.valueBox,
+            ScoreBug.cutRight,
+            !isTie && !favourable ? styles.valueBoxWin : null,
+          ]}>
+          <Text style={[styles.valueBoxText, !isTie && !favourable ? styles.valueBoxTextWin : null]}>
             <CountUpValue value={formatPeer(avg)} ink={ink} />
           </Text>
         </View>
@@ -833,7 +896,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,
@@ -862,7 +925,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',
@@ -915,7 +978,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: Spacing.two,
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   // Single hero row: identity group left, meta stack filling the right
   // — the same treatment as the team drill hero.
@@ -1016,7 +1079,7 @@ const styles = StyleSheet.create({
     minWidth: ScoreBoxSize.card.width,
     height: ScoreBoxSize.card.height,
     borderRadius: ScoreBoxSize.card.borderRadius,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1101,7 +1164,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,
@@ -1185,7 +1248,7 @@ const styles = StyleSheet.create({
   scoutTrack: {
     flex: 1,
     height: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     borderRadius: 2,
     position: 'relative',
     overflow: 'visible',
@@ -1224,7 +1287,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.four,
     gap: Spacing.two,
     shadowColor: '#000',

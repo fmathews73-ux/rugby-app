@@ -139,7 +139,7 @@ export function MatchupHeader({
 
 function StatusPill({ status }: { status: Fixture['status'] }) {
   const config: Record<Fixture['status'], { bg: string; fg: string; label: string }> = {
-    scheduled: { bg: '#E5E7EB', fg: '#374151', label: 'Upcoming' },
+    scheduled: { bg: '#E3E8EF', fg: '#374151', label: 'Upcoming' },
     live: { bg: '#DC2626', fg: '#FFFFFF', label: 'LIVE' },
     'half-time': { bg: '#F59E0B', fg: '#FFFFFF', label: 'HALF-TIME' },
     completed: { bg: '#111827', fg: '#F9FAFB', label: 'Final' },
@@ -202,7 +202,7 @@ const styles = StyleSheet.create({
     minHeight: DRILL_HERO_MIN_HEIGHT,
     justifyContent: 'center',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   matchupTopRow: {
     flexDirection: 'row',
@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   },
   detailScoreBox: {
     ...ScoreBoxSize.card,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,

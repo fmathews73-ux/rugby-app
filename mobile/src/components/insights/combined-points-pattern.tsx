@@ -265,7 +265,7 @@ function MomentumMirror({
           y1={padTop}
           x2={xForMinute(m)}
           y2={height - padBottom}
-          stroke="#F3F4F6"
+          stroke="#EFF2F6"
           strokeWidth={1}
         />
       ))}
@@ -280,7 +280,7 @@ function MomentumMirror({
           y1={padTop}
           x2={xForMinute(m.minute)}
           y2={height - padBottom}
-          stroke="#E5E7EB"
+          stroke="#E3E8EF"
           strokeWidth={1}
           strokeDasharray="3 3"
         />
@@ -412,7 +412,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

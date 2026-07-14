@@ -267,7 +267,7 @@ function MarginBars({
                   y1={gy}
                   x2={width - padX}
                   y2={gy}
-                  stroke="#E5E7EB"
+                  stroke="#E3E8EF"
                   strokeWidth={1}
                   strokeDasharray="3 3"
                 />
@@ -284,14 +284,14 @@ function MarginBars({
             );
           })}
           {bars.map((b, i) => (
-            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
+            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E3E8EF" />
           ))}
           {bars.map((b, i) =>
             b.label ? (
               // Value badge — the quiet score-tile pairing (light fill,
               // grey digits) in circular form.
               <G key={`l${i}`}>
-                <Circle cx={b.cx} cy={b.labelY} r={8} fill="#F3F4F6" />
+                <Circle cx={b.cx} cy={b.labelY} r={8} fill="#EFF2F6" />
                 <SvgText
                   x={b.cx}
                   y={b.labelY + 3}
@@ -379,7 +379,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

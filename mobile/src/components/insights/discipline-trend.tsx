@@ -162,7 +162,7 @@ function TrendChart({
         <>
         <Svg width={width} height={height} viewBox={`0 0 ${width} ${height}`}>
           {bars.map((b, i) => (
-            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E5E7EB" />
+            <Rect key={i} x={b.x} y={b.y} width={b.w} height={b.h} rx={2} fill="#E3E8EF" />
           ))}
           {/* Band reference lines + flush-left labels. */}
           <Line x1={padLeft} y1={yOf(PENS_LOW)} x2={width - padRight} y2={yOf(PENS_LOW)} stroke="#D1D5DB" strokeWidth={1} strokeDasharray="3 3" />
@@ -197,7 +197,7 @@ function TrendChart({
               as the Form / Scoring Rhythm values. */}
           {bars.map((b, i) => (
             <G key={`l${i}`}>
-              <Circle cx={b.cx} cy={b.y - 11} r={8} fill="#F3F4F6" />
+              <Circle cx={b.cx} cy={b.y - 11} r={8} fill="#EFF2F6" />
               <SvgText
                 x={b.cx}
                 y={b.y - 8}
@@ -259,7 +259,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     gap: Spacing.two,
     shadowColor: '#000',

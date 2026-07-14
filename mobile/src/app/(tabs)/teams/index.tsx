@@ -196,7 +196,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -233,5 +233,5 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.three,
   },
-  teamRowPressed: { backgroundColor: Colors.light.backgroundElement },
+  teamRowPressed: { backgroundColor: '#E9EDF2' },
 });

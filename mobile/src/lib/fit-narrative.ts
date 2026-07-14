@@ -58,6 +58,30 @@ export function fitToLines(
   return out || text;
 }
 
+/**
+ * Shown on any card back whose numbers cannot support prose —
+ * missing data, or a mostly-zero metric set (owner rule 2026-07-14).
+ * Distinct from the `null` loading state, which renders "Analysing…".
+ */
+export const INSUFFICIENT_INSIGHT =
+  'Not enough data yet to generate an insight here — this read fills in as matches are played.';
+
+/**
+ * True when a metric set cannot support prose: no finite values, or
+ * more than half of them round to zero (the displayed whole numbers
+ * are what the reader sees — see the no-decimals law).
+ */
+export function insufficientData(
+  values: readonly (number | null | undefined)[],
+): boolean {
+  const nums = values.filter(
+    (v): v is number => typeof v === 'number' && Number.isFinite(v),
+  );
+  if (nums.length === 0) return true;
+  const zeros = nums.filter((v) => Math.round(v) === 0).length;
+  return zeros > nums.length / 2;
+}
+
 export function fitNarrative(
   parts: readonly (string | null | undefined)[],
   cap: number = NARRATIVE_CAP,

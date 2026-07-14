@@ -44,6 +44,8 @@ export function TeamSelectorCard() {
       style={({ pressed }) => [styles.filterButton, pressed && styles.filterButtonPressed]}
       accessibilityRole="button"
       accessibilityLabel="Change favourite team">
+      {/* Chrome register — matches the row-selection disclosure
+          chevrons (owner call 2026-07-14). */}
       <Ionicons name="list-outline" size={20} color="#C7CBD1" />
     </Pressable>
   );
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     padding: Spacing.three,
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -115,5 +117,5 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
   },
-  filterButtonPressed: { backgroundColor: '#F3F4F6' },
+  filterButtonPressed: { backgroundColor: '#E9EDF2' },
 });

@@ -92,7 +92,7 @@ export function TeamPickerModal({
             <Ionicons
               name="chevron-back-circle-outline"
               size={28}
-              color={Colors.light.textSecondary}
+              color="#C7CBD1"
             />
           </Pressable>
           <Text style={styles.headerTitle}>{title}</Text>
@@ -198,7 +198,7 @@ function TeamRow({
 }
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: '#F5F5F7' },
+  root: { flex: 1, backgroundColor: '#F4F6F9' },
 
   header: {
     flexDirection: 'row',
@@ -208,7 +208,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   headerAction: { fontSize: TextSize.md, color: Colors.light.text, fontWeight: TextWeight.semibold },
   // Reset / clear — same weight as Cancel, tinted red to signal it undoes
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     shadowColor: '#000',
     shadowOpacity: 0.06,
     shadowRadius: 8,
@@ -271,7 +271,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#C7CBD1',
     marginHorizontal: Spacing.three,
   },
-  rowPressed: { backgroundColor: '#F3F4F6' },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   radio: {
     width: 12,
     height: 12,
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     backgroundColor: '#FFFFFF',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#E5E7EB',
+    borderTopColor: '#E3E8EF',
     alignItems: 'center',
   },
   // Compact pill centred in the footer — the picker is primarily a

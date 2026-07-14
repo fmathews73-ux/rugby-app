@@ -22,7 +22,12 @@ import { StyleSheet } from 'react-native';
 // component (and expo-linear-gradient) around so a gradient can be
 // reintroduced with a one-line swap if we change direction; today it just
 // renders both stops at the same value → visually flat.
-const COLORS = ['#FAFAFA', '#FAFAFA'] as const;
+// The cool grey #E9EDF2 at 50% over white (owner call 2026-07-14),
+// pre-composited to #F4F6F9 — a half-strength wash of the cool cast
+// that the full-strength score boxes / pills sit on. MUST stay in
+// lockstep with fading-scroll-view's PAGE_BG and _layout's
+// PAGE_GROUND.
+const COLORS = ['#F4F6F9', '#F4F6F9'] as const;
 
 export function PageGradient() {
   return (

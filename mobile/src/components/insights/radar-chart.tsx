@@ -275,7 +275,7 @@ export function RadarChart({
             key={frac}
             points={pts}
             fill="none"
-            stroke="#F3F4F6"
+            stroke="#EFF2F6"
             strokeWidth={1}
           />
         );
@@ -289,7 +289,7 @@ export function RadarChart({
             y1={cy}
             x2={end.x}
             y2={end.y}
-            stroke="#F3F4F6"
+            stroke="#EFF2F6"
             strokeWidth={1}
           />
         );

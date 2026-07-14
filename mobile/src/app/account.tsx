@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   headerSlot: { minWidth: 44 },
   headerTitle: {
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     overflow: 'hidden',
     shadowColor: '#000',
     shadowOpacity: 0.06,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.three,
     gap: Spacing.two,
   },
-  rowPressed: { backgroundColor: Colors.light.backgroundElement },
+  rowPressed: { backgroundColor: '#E9EDF2' },
   rowLabel: {
     fontFamily: 'WorkSans_500Medium',
     fontSize: TextSize.md,

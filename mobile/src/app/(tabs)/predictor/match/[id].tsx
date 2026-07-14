@@ -3,7 +3,10 @@ import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import type { MatchPrediction } from '@rugby-app/shared';
+
 import { useFixture, useMatchPrediction, useTeams, useCompetitions } from '@/api/hooks';
+import { INSUFFICIENT_INSIGHT, fitNarrative } from '@/lib/fit-narrative';
 import { CardHeaderActions } from '@/components/card-header-actions';
 import { CardTitle } from '@/components/card-title';
 import { MatchupHeader } from '@/components/fixture-drill/matchup-header';
@@ -263,6 +266,12 @@ export default function MatchPredictionScreen() {
             <NarrativeBack
               title="Prediction"
               purpose={PREDICTION_ABOUT}
+              read={buildPredictionRead(
+                p,
+                homeFav,
+                homeTeam?.short_name ?? 'Home',
+                awayTeam?.short_name ?? 'Away',
+              )}
               onClose={() => setFlipped(false)}
             />
           }
@@ -270,6 +279,58 @@ export default function MatchPredictionScreen() {
       </FadingScrollView>
     </SafeAreaView>
   );
+}
+
+/** Verdict read: the call, how confident, what's driving it, and the
+ *  swing band — whole numbers only. */
+function buildPredictionRead(
+  p: MatchPrediction,
+  homeFav: boolean,
+  homeCode: string,
+  awayCode: string,
+): string {
+  const homePct = Math.round(p.home_win_prob * 100);
+  const drawPct = Math.round(p.draw_prob * 100);
+  const awayPct = Math.max(100 - homePct - drawPct, 0);
+  const favPct = homeFav ? homePct : awayPct;
+  const fav = homeFav ? homeCode : awayCode;
+  const dog = homeFav ? awayCode : homeCode;
+  const margin = Math.abs(Math.round(p.predicted_margin.median));
+  if (favPct === 0 && margin === 0) return INSUFFICIENT_INSIGHT;
+
+  const parts: string[] = [];
+  if (Math.abs(homePct - awayPct) <= 4) {
+    parts.push(
+      `This one is too close to call — ${homeCode} ${homePct}, ${awayCode} ${awayPct}, a genuine coin toss.`,
+    );
+  } else {
+    parts.push(
+      `The model makes ${fav} the favourite — winning ${favPct} of 100 replays${margin > 0 ? `, by ${margin} on the median` : ''}.`,
+    );
+    parts.push(
+      favPct >= 80
+        ? `That is a heavy lean; ${dog} need the extremes of the distribution.`
+        : favPct >= 65
+          ? `Clear but not closed — ${dog} land roughly one replay in three.`
+          : `A lean, not a lock: ${dog} stay firmly live at ${100 - favPct - drawPct}.`,
+    );
+  }
+  const top = p.top_features
+    .slice()
+    .sort(
+      (a: { impact_pp: number }, b: { impact_pp: number }) =>
+        Math.abs(b.impact_pp) - Math.abs(a.impact_pp),
+    )[0];
+  if (top && Math.round(Math.abs(top.impact_pp)) > 0) {
+    const towards = top.impact_pp >= 0 ? homeCode : awayCode;
+    parts.push(
+      `The biggest driver is ${top.label.toLowerCase()} — worth ${Math.round(Math.abs(top.impact_pp))} points of probability toward ${towards}.`,
+    );
+  }
+  parts.push(
+    `The middle half of replays lands between ${p.predicted_margin.iqr_lower > 0 ? '+' : ''}${Math.round(p.predicted_margin.iqr_lower)} and +${Math.round(p.predicted_margin.iqr_upper)}.`,
+  );
+  return fitNarrative(parts) ?? INSUFFICIENT_INSIGHT;
 }
 
 const styles = StyleSheet.create({
@@ -284,7 +345,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3E8EF',
     paddingBottom: Spacing.three,
     overflow: 'hidden',
     shadowColor: '#000',
@@ -335,7 +396,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 22,
     borderRadius: 4,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E9EDF2',
     alignItems: 'center',
     justifyContent: 'center',
     ...ScoreBug.skew,
@@ -353,7 +414,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 4,
     borderRadius: 2,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#EFF2F6',
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 6,

@@ -32,7 +32,7 @@ export function AppHeader() {
           style={({ pressed }) => [styles.slot, styles.leftSlot, pressed && styles.slotPressed]}>
           {/* Outline circle glyph — matches the profile avatar's
               person-circle-outline treatment, in the same chrome
-              grey (owner call 2026-07-13). */}
+              grey (cool-ground trial 2026-07-14 reverted same day). */}
           <Ionicons name="chevron-back-circle-outline" size={28} color="#C7CBD1" />
         </Pressable>
       ) : (
@@ -69,8 +69,7 @@ export function AppHeader() {
         accessibilityLabel="Account and settings"
         style={({ pressed }) => [styles.slot, styles.rightSlot, pressed && styles.slotPressed]}>
         {/* Chrome register — quiet-but-tappable, matching the
-            inactive tabs so the wordmark owns the header
-            (owner call 2026-07-13). */}
+            inactive tabs so the wordmark owns the header. */}
         <Ionicons name="person-circle-outline" size={28} color="#C7CBD1" />
       </Pressable>
     </View>
@@ -88,7 +87,7 @@ const styles = StyleSheet.create({
     // separation instead of a colour contrast.
     backgroundColor: '#FFFFFF',
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#E5E7EB',
+    borderBottomColor: '#E3E8EF',
   },
   slot: {
     minWidth: 44,

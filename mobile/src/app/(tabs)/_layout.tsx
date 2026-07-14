@@ -28,7 +28,7 @@ export default function TabsLayout() {
         tabBarInactiveTintColor: '#C7CBD1',
         tabBarStyle: {
           backgroundColor: '#FFFFFF',
-          borderTopColor: '#E5E7EB',
+          borderTopColor: '#E3E8EF',
           // A touch of air between the bar's top border and the icons.
           paddingTop: 4,
         },
