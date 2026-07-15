@@ -327,11 +327,11 @@ export default function WelcomeScreen() {
         </View>
       ) : null}
 
-      {/* Brand block OVERLAYS the upper 22m line (owner call
-          2026-07-11) — the wordmark's centre rides the measured line
-          position, so it lands identically on any device. */}
+      {/* Brand block raised into the top third (owner call
+          2026-07-15) — the block (print + name + bars + tagline,
+          ~150pt) spans roughly 0.15h → 0.33h. */}
       {geom ? (
-        <View style={[styles.brandBlock, { top: layout ? layout.h * 0.335 : geom.y22 }]} pointerEvents="none">
+        <View style={[styles.brandBlock, { top: layout ? layout.h * 0.25 : geom.y22 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
             {/* The exact Ionicons print geometry with the wordmark's
                 LIGHT-zone ramp (owner call 2026-07-14) — icon and the
