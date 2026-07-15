@@ -62,7 +62,9 @@ const squadRng = root.fork();
 const resultRng = root.fork();
 const lineupRng = root.fork();
 const rankingRng = root.fork();
-const womensRankingRng = root.fork();
+// Women's slot retired (men's-only, register #3, 2026-07-15) — the fork
+// stays so every downstream rng keeps its deterministic sequence.
+root.fork();
 const eventsRng = root.fork();
 const coachRng = root.fork();
 const officialRng = root.fork();
@@ -224,12 +226,6 @@ rankings.push(
   ...generateAnchoredRankingSeries(rankingRng, snapshotDates, MENS_RANKING_SEED, 'world-rugby-mens'),
 );
 
-let prevWomensRankByTeam: Map<TeamId, number> | null = null;
-for (const date of snapshotDates) {
-  const snap = generateRanking(womensRankingRng, date, ALL_TEAMS, prevWomensRankByTeam, 'world-rugby-womens');
-  rankings.push(snap);
-  prevWomensRankByTeam = new Map(snap.rows.map((r) => [r.team_id, r.rank]));
-}
 
 // ─── Brackets ────────────────────────────────────────────────────────────────
 // Emit whichever bundles carry a bracket. Knockout fixture_ids are empty for

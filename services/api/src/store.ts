@@ -69,7 +69,6 @@ export interface Store {
 
   rankings: readonly RankingSnapshot[];
   mensRankings: readonly RankingSnapshot[];
-  womensRankings: readonly RankingSnapshot[];
 
   events: readonly MatchEvent[];
   eventsByFixture: ReadonlyMap<FixtureId, MatchEvent[]>;
@@ -170,9 +169,6 @@ export function loadStore(dataDir: string): Store {
     rankings: rankings.slice().sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
     mensRankings: rankings
       .filter((r) => r.source === 'world-rugby-mens')
-      .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
-    womensRankings: rankings
-      .filter((r) => r.source === 'world-rugby-womens')
       .sort((a, b) => a.snapshot_date.localeCompare(b.snapshot_date)),
 
     events,

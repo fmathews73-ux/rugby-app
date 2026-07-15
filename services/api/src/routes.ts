@@ -604,14 +604,8 @@ export function registerRoutes(app: FastifyInstance, store: Store): void {
     return latest ?? {};
   });
 
-  app.get('/rankings/womens', async () => {
-    const latest = store.womensRankings[store.womensRankings.length - 1];
-    return latest ?? {};
-  });
-
   app.get('/rankings/history', async () => store.rankings);
   app.get('/rankings/mens/history', async () => store.mensRankings);
-  app.get('/rankings/womens/history', async () => store.womensRankings);
 
   // ─── Predictor (synthetic until Phase 6 BigQuery ML cutover) ─────────────
   //

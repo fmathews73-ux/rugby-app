@@ -543,11 +543,11 @@ export interface BracketRound {
 export interface RankingSnapshot {
   id: RankingSnapshotId;
   /**
-   * Ranking source. Men's and women's are the two active World Rugby-published
-   * ranking systems (register #3 flipped 2026-07-02 — women's brought into v1
-   * scope alongside men's). Both are stored, not computed (PRD §7).
+   * Ranking source. Men's only — register #3 settled as Men's-only
+   * (owner call 2026-07-15; the 2026-07-02 women's flip was reverted).
+   * Stored, not computed (PRD §7).
    */
-  source: 'world-rugby-mens' | 'world-rugby-womens';
+  source: 'world-rugby-mens';
   snapshot_date: IsoDate;
   rows: RankingRow[];
 }
