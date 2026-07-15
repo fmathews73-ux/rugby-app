@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "Rugbymetrics",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -8,7 +8,6 @@
     "scheme": "rugbyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon",
       "bundleIdentifier": "com.fmathews73.rugbyapp",
       "appleTeamId": "8GE33VJ4NE"
     },
@@ -24,19 +23,11 @@
     "plugins": [
       "expo-router",
       [
-        "expo-font",
-        {
-          "fonts": [
-            "node_modules/@expo-google-fonts/anton/400Regular/Anton_400Regular.ttf"
-          ]
-        }
-      ],
-      [
         "expo-splash-screen",
         {
-          "backgroundColor": "#208AEF",
+          "backgroundColor": "#FFFFFF",
           "image": "./assets/images/splash-icon.png",
-          "imageWidth": 76
+          "imageWidth": 340
         }
       ]
     ],

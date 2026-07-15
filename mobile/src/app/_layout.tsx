@@ -30,9 +30,8 @@ export default function RootLayout() {
   const welcomeSeen = useWelcomeSeen();
 
   // Display font (Barlow Condensed Bold Italic — nation codes and
-  // other sport-display moments) loads at runtime; the brand wordmark
-  // font (Anton) is embedded natively via the expo-font config plugin
-  // (app.json).
+  // other sport-display moments) loads at runtime. (The Anton native
+  // embed was a scaffold relic — removed 2026-07-15.)
   // Faces: Barlow Condensed = the display voice; Work Sans = the
   // supporting family (replaced Barlow app-wide, owner call
   // 2026-07-13 — rounder and wider, more air around the condensed
