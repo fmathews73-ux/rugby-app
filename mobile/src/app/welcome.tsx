@@ -188,29 +188,46 @@ export default function WelcomeScreen() {
             (() => {
               const { w, h } = layout;
               // The ICON's slope (26.6° — drop of half the width),
-              // centred on mid-height: gentler than the literal
-              // 25%/75% rule on a tall screen (owner call 2026-07-16).
+              // centred on mid-height. The dark zone is a real
+              // POLYGON, not a gradient hard-stop — a vector edge is
+              // razor sharp where duplicate stops still feathered
+              // ~2pt across the gradient run (owner call 2026-07-16:
+              // "make the dividing line sharper").
               const pl = Math.hypot(0.5 * w, w);
               const ux = (0.5 * w) / pl;
               const uy = w / pl;
               const s = 0.55 * h;
+              const yLeft = h / 2 + 0.25 * w;
+              const yRight = h / 2 - 0.25 * w;
               return (
                 <Svg width="100%" height="100%">
                   <Defs>
                     <SvgLinearGradient
-                      id="ground-split"
+                      id="ground-light"
                       gradientUnits="userSpaceOnUse"
                       x1={w / 2 - ux * s}
                       y1={h / 2 - uy * s}
+                      x2={w / 2}
+                      y2={h / 2}>
+                      <Stop offset="0" stopColor="#5CB04E" />
+                      <Stop offset="1" stopColor="#4DA344" />
+                    </SvgLinearGradient>
+                    <SvgLinearGradient
+                      id="ground-dark"
+                      gradientUnits="userSpaceOnUse"
+                      x1={w / 2}
+                      y1={h / 2}
                       x2={w / 2 + ux * s}
                       y2={h / 2 + uy * s}>
-                      <Stop offset="0" stopColor="#5CB04E" />
-                      <Stop offset="0.499" stopColor="#4DA344" />
-                      <Stop offset="0.501" stopColor="#1D6423" />
+                      <Stop offset="0" stopColor="#1D6423" />
                       <Stop offset="1" stopColor="#124E1B" />
                     </SvgLinearGradient>
                   </Defs>
-                  <Rect x={0} y={0} width="100%" height="100%" fill="url(#ground-split)" />
+                  <Rect x={0} y={0} width="100%" height="100%" fill="url(#ground-light)" />
+                  <Polygon
+                    points={`0,${yLeft} ${w},${yRight} ${w},${h} 0,${h}`}
+                    fill="url(#ground-dark)"
+                  />
                 </Svg>
               );
             })()
