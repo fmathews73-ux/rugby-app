@@ -71,14 +71,14 @@ Server-side ingestion only — our jobs pull the feed into our own store; mobile
 | 49 | Handling errors | Team match stats |
 | 50 | Yellow cards | Team match stats |
 | 51 | Red cards | Team match stats |
-| 52 | Post-contact metres | Team match stats (advanced) |
-| 53 | Gainline success % | Team match stats (advanced) |
-| 54 | Dominant tackles | Team match stats (advanced) |
-| 55 | Ruck speed — share of attacking rucks recycled 0–3 s | Team match stats (advanced) |
-| 56 | Scrum penalties conceded | Team match stats (advanced) |
-| 57 | Breakdown penalties conceded | Team match stats (advanced) |
-| 58 | Offside penalties conceded | Team match stats (advanced) |
-| 59 | Lineout penalties conceded | Team match stats (advanced) |
+| 52 | Post-contact metres | Team match stats |
+| 53 | Gainline success % | Team match stats |
+| 54 | Dominant tackles | Team match stats |
+| 55 | Ruck speed — share of attacking rucks recycled 0–3 s | Team match stats |
+| 56 | Scrum penalties conceded | Team match stats |
+| 57 | Breakdown penalties conceded | Team match stats |
+| 58 | Offside penalties conceded | Team match stats |
+| 59 | Lineout penalties conceded | Team match stats |
 | 60 | Started match (Y/N) | Player match stats |
 | 61 | Minutes played | Player match stats |
 | 62 | Tries | Player match stats |
@@ -136,7 +136,7 @@ Server-side ingestion only — our jobs pull the feed into our own store; mobile
 1. Which items above are covered per competition (please flag Tier-2 gaps)?
 2. Player stats coverage: both matchday 23s or starters only?
 3. Redistribution licence terms for a consumer mobile app (iOS/Android) — display rights, attribution, caching/retention constraints.
-4. Pricing structure: per competition bundle vs. all-internationals; standard vs. advanced items; historical back-fill.
+4. Pricing structure: per competition bundle vs. all-internationals; any per-item tiering on your side; historical back-fill.
 5. Sandbox/trial access with schema documentation before contract.
 6. Delivery: REST endpoints and/or push; rate limits; SLA during live matches.
 
