@@ -4,12 +4,10 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import Svg, {
   Defs,
   LinearGradient as SvgLinearGradient,
-  Path,
   Stop,
   Text as SvgText,
 } from 'react-native-svg';
 
-import { FINGERPRINT_PATH } from '@/components/chart-doodle-backdrop';
 import { Colors } from '@/constants/theme';
 
 /**
@@ -54,26 +52,12 @@ export function AppHeader() {
         {/* Brand wordmark — text build in the app's sport-display face
             (Barlow Condensed 700 Italic). Name trial: RUGBYMETRICS
             (register #23 still open). */}
+        {/* Wordmark-only header (owner call 2026-07-16): the print
+            was REMOVED after colour trials (light ramp, slice, grey,
+            deep ink) — it lives on the icon/splash/welcome and the
+            card flip-triggers; the header is chrome, and the sliced
+            name alone carries the brand here. */}
         <View style={styles.wordmarkRow} accessible accessibilityLabel="Rugby Metrics">
-          {/* Tilted to echo the wordmark's italic axis. */}
-          <View style={styles.logoTilt}>
-            {/* Fingerprint brand mark — identity black beside the
-                wordmark, still (no motion) in the header. A ball-print
-                composite (fingerprint clipped in the ball silhouette)
-                was trialled 2026-07-09 and dropped: at header size it
-                never stopped reading as a plain print. */}
-            {/* Welcome's light-zone ramp on the exact print geometry
-                (owner call 2026-07-14). */}
-            <Svg width={22} height={22} viewBox="0 0 512 512">
-              <Defs>
-                <SvgLinearGradient id="header-mark-ramp" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0" stopColor="#5CB04E" />
-                  <Stop offset="1" stopColor="#4DA344" />
-                </SvgLinearGradient>
-              </Defs>
-              <Path d={FINGERPRINT_PATH} fill="url(#header-mark-ramp)" />
-            </Svg>
-          </View>
           {/* The welcome wordmark's two-tone slice at header scale
               (owner call 2026-07-14): PITCH_GREENS light zone over
               dark, hard diagonal from the R's lower quarter to the
@@ -148,9 +132,6 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  logoTilt: {
-    transform: [{ rotate: '10deg' }],
   },
   wordmarkRow: {
     flexDirection: 'row',

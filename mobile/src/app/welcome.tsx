@@ -18,7 +18,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 
-import { ChartDoodleBackdrop, FINGERPRINT_PATH } from '@/components/chart-doodle-backdrop';
+import { ChartDoodleBackdrop } from '@/components/chart-doodle-backdrop';
 import { markWelcomeSeen } from '@/hooks/use-welcome-seen';
 import { Colors, Spacing, TextSize, TextTracking } from '@/constants/theme';
 
@@ -393,14 +393,9 @@ export default function WelcomeScreen() {
           ~150pt) spans roughly 0.15h → 0.33h. */}
       {geom ? (
         <View style={[styles.brandBlock, { top: layout ? layout.h * 0.22 : geom.y22 }]} pointerEvents="none">
-          <View style={styles.logoTilt}>
-            {/* The exact Ionicons print geometry in WHITE (owner call
-                2026-07-16) — the icon's white print, mirrored on the
-                split ground. */}
-            <Svg width={58} height={58} viewBox="0 0 512 512">
-              <Path d={FINGERPRINT_PATH} fill="#FFFFFF" />
-            </Svg>
-          </View>
+          {/* Print REMOVED from the lockup (owner call 2026-07-16:
+              "the brand is the two-tone, not the print") — it lives
+              on only as the app icon itself. */}
           {/* Wordmark in the GRADIENT_GREENS ramp (owner call
               2026-07-14) — light leading into deep ink, the EXPERT
               label's left-to-right sweep. SVG text because RN Text
@@ -624,10 +619,6 @@ const styles = StyleSheet.create({
     // Tilt-along-the-divide trialled at 26.6° and 13° and REVERTED
     // (owner call 2026-07-16) — the block stays horizontal; the
     // ground alone carries the diagonal.
-  },
-  logoTilt: {
-    transform: [{ rotate: '10deg' }],
-    marginBottom: 2,
   },
   fieldSpacer: { flex: 1 },
   // The stats-bar cue as a title underline — boxes removed (owner

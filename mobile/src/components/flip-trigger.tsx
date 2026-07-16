@@ -8,15 +8,15 @@ import { Colors } from '@/constants/theme';
 
 /**
  * The card-flip affordance — one shared component so the glyph and its
- * arrival motion swap app-wide in one place. Mark: the fingerprint
- * ("the team's print"), settled 2026-07-08; it also serves as the
- * header brand mark beside the wordmark.
+ * arrival motion swap app-wide in one place. Glyph: the INFO CIRCLE
+ * (owner call 2026-07-16, replacing the fingerprint — "the brand is
+ * the two-tone, not the print"; the print retires to the icon/splash/
+ * welcome). Matches the app's info-icon → explainer language.
  *
- * Arrival grammar: 10° tilt to the wordmark's italic axis; once the
- * chart's arrival sweep has finished (bars at size, count-ups landed —
- * CHART_INK_TOTAL_MS after page-activation) the mark gives ONE
- * breathing pulse, then repeats a single pulse every 5s while the
- * page stays visible.
+ * Arrival grammar unchanged: once the chart's arrival sweep has
+ * finished (bars at size, count-ups landed — CHART_INK_TOTAL_MS after
+ * page-activation) the glyph gives ONE breathing pulse, then repeats
+ * a single pulse every 5s while the page stays visible.
  */
 export function FlipTrigger({
   size = 16,
@@ -51,11 +51,10 @@ export function FlipTrigger({
     <Animated.View
       style={{
         transform: [
-          { rotate: '10deg' },
           { scale: turn.interpolate({ inputRange: [0, 1], outputRange: [1, 1.3] }) },
         ],
       }}>
-      <Ionicons name="finger-print-outline" size={size} color={color} />
+      <Ionicons name="information-circle-outline" size={size} color={color} />
     </Animated.View>
   );
 }
