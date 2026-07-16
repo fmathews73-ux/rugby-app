@@ -1,102 +1,125 @@
 # RUGBYMETRICS — Data Feed Requirements
 
-**Purpose of this document.** RUGBYMETRICS is a consumer mobile app (iOS + Android) for international rugby union: fixtures, match analysis, team & player statistics, and match predictions. This document specifies the data points the product consumes, so a provider can confirm coverage, tier fit, and pricing for a licensed feed package. It is organised by entity, with each field group marked **REQUIRED** (the product renders it today), **OPTIONAL** (rendered if supplied; the UI section hides itself if absent), or **FUTURE** (roadmap — quote separately if available).
-
----
+**Purpose.** RUGBYMETRICS is a consumer mobile app (iOS + Android) for international rugby union: fixtures, match analysis, team & player statistics, and match predictions. This document itemises every data point the product consumes so a provider can confirm coverage and pricing line-by-line.
 
 ## 1. Scope of coverage
 
 | Dimension | Requirement |
 |---|---|
 | Sport | Rugby union, 15-a-side, **men's internationals only** (no club, no league, no sevens) |
-| Competitions (v1) | Six Nations · The Rugby Championship · July/Summer international windows · Autumn Nations Series · Rugby World Cup 2027 |
-| Teams | All men's national teams appearing in those competitions (10 Tier-1 + Tier-2 qualifiers, ~28 teams) |
-| Seasons | Current season ongoing; **plus historical depth in §6** |
-| Rankings | World Rugby world rankings — **men's** published snapshots |
+| Competitions | Six Nations · The Rugby Championship · July/Summer international windows · Autumn Nations Series · Rugby World Cup 2027 |
+| Teams | All men's national teams appearing in those competitions (~28 teams) |
+| Rankings | World Rugby world rankings — men's published snapshots |
+| Historical depth | Minimum current season + previous two completed seasons of all items below; five seasons preferred |
 
 ## 2. Consumption model
 
-- The feed is consumed **server-side only** — our ingestion jobs pull into our own store; our mobile clients only ever call our own cached APIs. No feed key or provider endpoint is ever embedded in a client.
-- Pull/REST + JSON preferred. Push/webhook acceptable. No streaming/websocket requirement in v1.
-- Volumes are modest: ~180–220 fixtures per year across the five competitions.
+Server-side ingestion only — our jobs pull the feed into our own store; mobile clients call only our cached APIs and never hold a feed key. Pull/REST + JSON preferred; volumes modest (~180–220 fixtures/year).
 
-## 3. Entities and required data points
+## 3. Itemised data points
 
-### 3.1 Competitions, seasons & fixtures — REQUIRED
-- Competition: name, format (round-robin / pool-and-knockout / test window), governing body
-- Season: year label, start/end dates, status
-- Fixture: competition, season, round label (or null for test windows), home/away teams, **kickoff time (UTC)**, venue name, status (scheduled / live / half-time / completed / postponed / cancelled)
-- Knockout bracket structure for RWC (round names + fixture mapping)
+| # | Data point | Context |
+|---|---|---|
+| 1 | Competition name, short name, format, governing body | Competition |
+| 2 | Season year label, start date, end date, status | Season |
+| 3 | Fixture: competition, season, round label, home team, away team | Fixture |
+| 4 | Kickoff date/time (UTC) | Fixture |
+| 5 | Venue (stadium name) | Fixture |
+| 6 | Fixture status (scheduled / live / half-time / completed / postponed / cancelled) | Fixture |
+| 7 | Knockout bracket structure (round names + fixture mapping, RWC) | Competition |
+| 8 | Team name + World Rugby 3-letter code | Team |
+| 9 | Player full name | Player |
+| 10 | Player date of birth | Player |
+| 11 | Player height (cm) | Player |
+| 12 | Player weight (kg) | Player |
+| 13 | Player primary position (15-position granularity) | Player |
+| 14 | Player international cap count | Player |
+| 15 | Squad list per team per season/tournament window | Squad |
+| 16 | Match officials per fixture (referee, AR1, AR2, TMO) | Fixture |
+| 17 | Coaching staff per team (head coach + assistants, roles) | Team |
+| 18 | Final score (both sides) | Team match stats |
+| 19 | Half-time score (both sides) | Team match stats |
+| 20 | Tries | Team match stats |
+| 21 | Conversions + conversion attempts | Team match stats |
+| 22 | Penalty goals + penalty goal attempts | Team match stats |
+| 23 | Drop goals | Team match stats |
+| 24 | Possession % | Team match stats |
+| 25 | Territory % | Team match stats |
+| 26 | Metres carried | Team match stats |
+| 27 | Carries | Team match stats |
+| 28 | Line breaks | Team match stats |
+| 29 | Defenders beaten | Team match stats |
+| 30 | Passes | Team match stats |
+| 31 | Offloads | Team match stats |
+| 32 | Kicks in play | Team match stats |
+| 33 | Kicks to touch | Team match stats |
+| 34 | Kick metres | Team match stats |
+| 35 | Contestable kicks put up | Team match stats |
+| 36 | Contestable kicks regathered (own) | Team match stats |
+| 37 | 50/22 kicks landed | Team match stats |
+| 38 | Scrums won / lost | Team match stats |
+| 39 | Lineouts won / lost | Team match stats |
+| 40 | Rucks won / lost | Team match stats |
+| 41 | Mauls won / lost | Team match stats |
+| 42 | 22-entries (visits to the opposition 22) | Team match stats |
+| 43 | Points scored from 22-entries | Team match stats |
+| 44 | Tackles made | Team match stats |
+| 45 | Tackle success % | Team match stats |
+| 46 | Turnovers won | Team match stats |
+| 47 | Turnovers conceded | Team match stats |
+| 48 | Penalties conceded | Team match stats |
+| 49 | Handling errors | Team match stats |
+| 50 | Yellow cards | Team match stats |
+| 51 | Red cards | Team match stats |
+| 52 | Post-contact metres | Team match stats (advanced) |
+| 53 | Gainline success % | Team match stats (advanced) |
+| 54 | Dominant tackles | Team match stats (advanced) |
+| 55 | Ruck speed — share of attacking rucks recycled 0–3 s | Team match stats (advanced) |
+| 56 | Scrum penalties conceded | Team match stats (advanced) |
+| 57 | Breakdown penalties conceded | Team match stats (advanced) |
+| 58 | Offside penalties conceded | Team match stats (advanced) |
+| 59 | Lineout penalties conceded | Team match stats (advanced) |
+| 60 | Started match (Y/N) | Player match stats |
+| 61 | Minutes played | Player match stats |
+| 62 | Tries | Player match stats |
+| 63 | Try assists | Player match stats |
+| 64 | Points | Player match stats |
+| 65 | Carries | Player match stats |
+| 66 | Metres carried | Player match stats |
+| 67 | Clean breaks | Player match stats |
+| 68 | Defenders beaten | Player match stats |
+| 69 | Offloads | Player match stats |
+| 70 | Passes | Player match stats |
+| 71 | Handling errors | Player match stats |
+| 72 | Conversions | Player match stats |
+| 73 | Penalty goals | Player match stats |
+| 74 | Drop goals | Player match stats |
+| 75 | Kicks from hand | Player match stats |
+| 76 | Kick metres | Player match stats |
+| 77 | Tackles made | Player match stats |
+| 78 | Missed tackles | Player match stats |
+| 79 | Turnovers won | Player match stats |
+| 80 | Rucks hit (attended) | Player match stats |
+| 81 | Lineout takes | Player match stats |
+| 82 | Lineout steals | Player match stats |
+| 83 | Penalties conceded | Player match stats |
+| 84 | Yellow cards | Player match stats |
+| 85 | Red cards | Player match stats |
+| 86 | Team lineups: starting XV + bench, shirt numbers, match positions (pre-kickoff) | Lineups |
+| 87 | Scoring events with minute + stoppage, team, player, points value | Match events |
+| 88 | Card events (yellow/red) with minute, team, player | Match events |
+| 89 | Substitution events (player off + player on, minute) | Match events |
+| 90 | Match milestones (kick-off, half-time, second-half start, full-time) | Match events |
+| 91 | Per-event pitch coordinates (x/y) for phases/carries | Match events (future) |
+| 92 | Live score + match clock/status (≤ 60 s freshness) | Live |
+| 93 | Live event ticker (scoring / cards / subs) | Live |
+| 94 | League table rows: played, W/D/L, points for/against/difference, try bonus points, losing bonus points, table points, rank | Standings |
+| 95 | World Rugby ranking snapshots (men's): rank, points, previous rank, movement — weekly/as published, with history | Rankings |
+| 96 | Player headshots + coaching-staff photos (licensed for in-app display) | Imagery (separate tier) |
 
-### 3.2 Teams & people — REQUIRED (bio), OPTIONAL (staff)
-- Team: name, World Rugby 3-letter code
-- Player bio: full name, date of birth, height (cm), weight (kg), primary position (front row → fullback, 15-position granularity), **international cap count**
-- Squad lists: per team **per season/tournament window** (squads differ between windows)
-- Match-day officials per fixture (referee, AR1, AR2, TMO) — OPTIONAL
-- Coaching staff per team (head coach + assistants with roles) — OPTIONAL
+*Consistency expectation: player sheets sum to team totals; event-derived counts reconcile with both.*
 
-### 3.3 Match result & team match statistics
-One record per completed fixture, both sides. Live partials for the in-play fields are welcome but not required beyond §3.6.
-
-**Core — REQUIRED**
-- Final score; half-time score
-- Scoring breakdown: tries, conversions, penalty goals, drop goals (each side)
-- Possession % · territory %
-- Attack: metres carried, carries, line breaks, defenders beaten, passes, offloads
-- Kicking: kicks in play, kicks to touch, kick metres
-- Set piece: scrums won/lost, lineouts won/lost
-- Breakdown: rucks won/lost, mauls won/lost
-- Defence: tackles made, tackle success %, turnovers won, turnovers conceded
-- Discipline: penalties conceded, handling errors, yellow cards, red cards
-- Goal kicking: conversion attempts, penalty goal attempts (so success % derives)
-- Red zone: 22-entries ("visits to the 22") and points scored from those entries
-- Contestable kicks: put up, and own kicks regathered
-- 50/22 kicks landed
-
-**Advanced tier — REQUIRED for our premium surface (quote as a tier if separate)**
-- Post-contact metres
-- Gainline success % (share of carries crossing the gainline)
-- Dominant tackles
-- Ruck speed: share of attacking rucks recycled 0–3 s ("quick ball" %)
-- Penalty-cause split: scrum / breakdown / offside penalties conceded
-- *(Requested addition, FUTURE if unavailable):* lineout penalties conceded
-
-### 3.4 Player per-match stat sheets — REQUIRED
-One sheet per player in each matchday 23, per completed fixture:
-
-- Participation: started (Y/N), **minutes played**
-- Attacking: tries, try assists, points, carries, metres carried, clean breaks, defenders beaten, offloads, passes, handling errors
-- Kicking: conversions, penalty goals, drop goals, kicks from hand, kick metres
-- Defence: tackles made, missed tackles, turnovers won
-- Breakdown/set piece: rucks hit (attended), lineout takes, lineout steals
-- Discipline: penalties conceded, yellow cards, red cards
-
-**Consistency expectation:** side-level sums of player sheets reconcile with the team totals in §3.3, and event-derived counts (§3.5) reconcile with both.
-
-### 3.5 Match event timeline — REQUIRED
-Chronological events per fixture with **match minute + stoppage minute**:
-
-- Scoring events (try, conversion, penalty goal, drop goal) with team + player attribution and points value
-- Cards (yellow/red) with team + player
-- Substitutions (player off + player on)
-- Milestones: kick-off, half-time, second-half start, full-time
-- Team lineups per fixture: starting XV + bench with **shirt numbers and positions as selected for that match**, available pre-kickoff (T-48h → T-1h typical announcement window)
-- *(FUTURE)*: per-event pitch coordinates (x/y) for carries/phases — powers a pitch heatmap; quote if available
-
-### 3.6 Live data — REQUIRED (modest)
-- Live score + match clock/status (poll-based; ≤ 60 s freshness is acceptable in v1)
-- Live event ticker for §3.5 scoring/card/sub events
-- No requirement for live team/player stat updates in v1 (nice-to-have)
-
-### 3.7 Standings & rankings — REQUIRED
-- League tables per round-robin competition and RWC pools: played, W/D/L, points for/against/difference, **try bonus points, losing bonus points**, table points, rank
-- World Rugby rankings: **weekly snapshots** (or as published), men's — rank, points, previous rank/movement per team. Historical snapshots across the season for trajectory charts.
-
-## 4. Derived metrics (no feed fields needed)
-
-We compute internally: points-per-entry, kicking success %, ruck/maul success rates, per-80 and per-game player rates, positional percentiles, form windows, head-to-head aggregates, and model-based match predictions. Listed only so the package isn't over-scoped.
-
-## 5. Latency & cadence expectations
+## 4. Latency & cadence
 
 | Data | Freshness |
 |---|---|
@@ -108,26 +131,15 @@ We compute internally: points-per-entry, kicking success %, ruck/maul success ra
 | Standings | With result confirmation |
 | World rankings | On publication |
 
-## 6. Historical depth
+## 5. Questions for the provider
 
-- **Minimum:** current season plus the previous **two completed seasons** of all §3 data for the covered competitions — required at launch to power form windows (last 5–10 matches), player per-game norms, positional percentile pools, and head-to-head (last 3 meetings, which can span seasons).
-- **Preferred:** five seasons, for deeper head-to-head and model training.
-
-## 7. Imagery (separate tier — please quote)
-
-- Player headshots and coaching-staff photos, licensed for in-app display — OPTIONAL tier, not required for launch.
-- We do **not** require team crests/union logos (deliberately not displayed; national flags are sourced independently).
-
-## 8. Questions for the provider
-
-1. Which of the §3.3 core and advanced team metrics are covered per competition (coverage can differ for Tier-2 fixtures — please flag gaps, e.g. RWC qualifiers)?
-2. Which §3.4 player fields are covered, and for both matchday 23s or starters only?
-3. Redistribution licence terms for a **consumer mobile app** (iOS/Android, global audience unless territory pricing applies) — display rights, attribution requirements, and any caching/retention constraints.
-4. Pricing structure: per competition bundle vs. all-internationals package; core vs. advanced-stat tiers; historical back-fill.
-5. Sandbox/trial access with schema documentation for integration mapping before contract.
+1. Which items above are covered per competition (please flag Tier-2 gaps)?
+2. Player stats coverage: both matchday 23s or starters only?
+3. Redistribution licence terms for a consumer mobile app (iOS/Android) — display rights, attribution, caching/retention constraints.
+4. Pricing structure: per competition bundle vs. all-internationals; standard vs. advanced items; historical back-fill.
+5. Sandbox/trial access with schema documentation before contract.
 6. Delivery: REST endpoints and/or push; rate limits; SLA during live matches.
-7. Availability and pricing of the imagery tier (§7) and event coordinates (§3.5 FUTURE).
 
 ---
 
-*Document version 1.0 — generated from the product's canonical data contract. All field groups above are live product surfaces on the current build (running on synthetic data pending licensing), so coverage confirmations map one-to-one onto shipped screens.*
+*Document version 2.0 — itemised single-table format. Generated from the product's canonical data contract; every item maps to a shipped screen (currently running on synthetic data pending licensing).*
