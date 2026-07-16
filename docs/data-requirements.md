@@ -115,7 +115,10 @@ Server-side ingestion only — our jobs pull the feed into our own store; mobile
 | 93 | Live event ticker | Live |
 | 94 | League table rows: played, W/D/L, points for/against/difference, try bonus points, losing bonus points, table points, rank | Standings |
 | 95 | World Rugby ranking snapshots: rank, points, previous rank, movement, with history | Rankings |
-| 96 | Player headshots + coaching-staff photos | Imagery |
+| 96 | Player headshots | Imagery |
+| 97 | Coaching-staff photos | Imagery |
+| 98 | Match-official photos | Imagery |
+| 99 | Team crests / union logos | Imagery |
 
 ## 4. Data freshness
 
