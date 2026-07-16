@@ -8,10 +8,11 @@
     "scheme": "rugbyapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "bundleIdentifier": "com.fmathews73.rugbyapp",
+      "bundleIdentifier": "app.rugbymetrics.mobile",
       "appleTeamId": "8GE33VJ4NE"
     },
     "android": {
+      "package": "app.rugbymetrics.mobile",
       "adaptiveIcon": {
         "backgroundColor": "#E6F4FE",
         "foregroundImage": "./assets/images/android-icon-foreground.png",
