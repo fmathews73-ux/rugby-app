@@ -73,7 +73,12 @@ function GoogleG({ size = 16, color }: { size?: number; color?: string }) {
  *               react-native-svg) — silver beams + sparkles over the
  *               green sweep. No doodles, no spotlight: the artwork
  *               carries the drama. */
-const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' | 'radial-field' | 'burst' = 'burst';
+/** 'split' — option 6 (owner call 2026-07-16): the APP ICON's ground
+ *  at full screen — light pitch green over deep ink, one hard
+ *  diagonal from 25% up the left edge to 25% down the right, echoing
+ *  pitch line markings. Brand block goes white/silver over it. */
+const BG_OPTION: 'pitch' | 'gradient' | 'charcoal' | 'radial-field' | 'burst' | 'split' =
+  'split';
 
 // Option 2's greens, top → bottom — FLIPPED (owner call 2026-07-13:
 // dark crown falling to a lit base) and widened to five stops, the
@@ -174,7 +179,46 @@ export default function WelcomeScreen() {
           the base turf green, four sit one shade lighter between
           them. Clipped to the pitch circumference like the doodles;
           behind the pitch artwork. */}
-      {BG_OPTION === 'burst' ? (
+      {BG_OPTION === 'split' ? (
+        // Option 6: the icon's split ground, computed in real pixels
+        // so the divide runs exactly 0.75h-left → 0.25h-right on any
+        // device (no viewBox stretching, per the chart rules).
+        <View style={StyleSheet.absoluteFill} pointerEvents="none">
+          {layout ? (
+            (() => {
+              const { w, h } = layout;
+              // The ICON's slope (26.6° — drop of half the width),
+              // centred on mid-height: gentler than the literal
+              // 25%/75% rule on a tall screen (owner call 2026-07-16).
+              const pl = Math.hypot(0.5 * w, w);
+              const ux = (0.5 * w) / pl;
+              const uy = w / pl;
+              const s = 0.55 * h;
+              return (
+                <Svg width="100%" height="100%">
+                  <Defs>
+                    <SvgLinearGradient
+                      id="ground-split"
+                      gradientUnits="userSpaceOnUse"
+                      x1={w / 2 - ux * s}
+                      y1={h / 2 - uy * s}
+                      x2={w / 2 + ux * s}
+                      y2={h / 2 + uy * s}>
+                      <Stop offset="0" stopColor="#5CB04E" />
+                      <Stop offset="0.499" stopColor="#4DA344" />
+                      <Stop offset="0.501" stopColor="#1D6423" />
+                      <Stop offset="1" stopColor="#124E1B" />
+                    </SvgLinearGradient>
+                  </Defs>
+                  <Rect x={0} y={0} width="100%" height="100%" fill="url(#ground-split)" />
+                </Svg>
+              );
+            })()
+          ) : (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: '#4DA344' }]} />
+          )}
+        </View>
+      ) : BG_OPTION === 'burst' ? (
         // Option 5: the artwork full-bleed edge to edge. The white
         // circumference frame was trialled and CANCELLED (owner call
         // 2026-07-14): display corner radii differ per device and
@@ -331,19 +375,13 @@ export default function WelcomeScreen() {
           2026-07-15) — the block (print + name + bars + tagline,
           ~150pt) spans roughly 0.15h → 0.33h. */}
       {geom ? (
-        <View style={[styles.brandBlock, { top: layout ? layout.h * 0.25 : geom.y22 }]} pointerEvents="none">
+        <View style={[styles.brandBlock, { top: layout ? layout.h * 0.22 : geom.y22 }]} pointerEvents="none">
           <View style={styles.logoTilt}>
-            {/* The exact Ionicons print geometry with the wordmark's
-                LIGHT-zone ramp (owner call 2026-07-14) — icon and the
-                name's lit half share one ink. */}
+            {/* The exact Ionicons print geometry in WHITE (owner call
+                2026-07-16) — the icon's white print, mirrored on the
+                split ground. */}
             <Svg width={58} height={58} viewBox="0 0 512 512">
-              <Defs>
-                <SvgLinearGradient id="mark-ramp" x1="0" y1="0" x2="1" y2="1">
-                  <Stop offset="0" stopColor="#5CB04E" />
-                  <Stop offset="1" stopColor="#4DA344" />
-                </SvgLinearGradient>
-              </Defs>
-              <Path d={FINGERPRINT_PATH} fill="url(#mark-ramp)" />
+              <Path d={FINGERPRINT_PATH} fill="#FFFFFF" />
             </Svg>
           </View>
           {/* Wordmark in the GRADIENT_GREENS ramp (owner call
@@ -372,12 +410,14 @@ export default function WelcomeScreen() {
                 y1="2"
                 x2="174"
                 y2="56">
-                {/* Light above the line, dark below — the flip was
-                    trialled and reverted (owner call 2026-07-14). */}
-                <Stop offset="0" stopColor="#5CB04E" />
-                <Stop offset="0.499" stopColor="#4DA344" />
-                <Stop offset="0.501" stopColor="#1D6423" />
-                <Stop offset="1" stopColor="#124E1B" />
+                {/* White above the line, silver/light-grey below
+                    (owner call 2026-07-16) — the green two-tone moved
+                    to the ground, so the name flips to the page's
+                    other material. */}
+                <Stop offset="0" stopColor="#FFFFFF" />
+                <Stop offset="0.499" stopColor="#F2F4F6" />
+                <Stop offset="0.501" stopColor="#C9CCD1" />
+                <Stop offset="1" stopColor="#AEB3BA" />
               </SvgLinearGradient>
             </Defs>
             <SvgText
@@ -395,8 +435,9 @@ export default function WelcomeScreen() {
               inside: skewed cut score boxes, centre-out diverging
               bars, the real leader-green / lagger-red pairing. */}
           <View style={styles.statsCue}>
-            {/* Leader bar in the wordmark's light-zone green. */}
-            <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#5CB04E' }]} />
+            {/* Leader bar in white on the split ground; dark-ink bar
+                trialled and reverted (owner call 2026-07-16). */}
+            <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#FFFFFF' }]} />
             <View style={styles.cueGap} />
             {/* The pre-match bars' near-black centre marker. */}
             <View style={styles.cueMarker} />
@@ -409,9 +450,10 @@ export default function WelcomeScreen() {
               gradient fill. */}
           <Svg width={386} height={18}>
             <Defs>
+              {/* White on the split ground (owner call 2026-07-16). */}
               <SvgLinearGradient id="tagline-ramp" x1="0" y1="0" x2="1" y2="0">
-                <Stop offset="0" stopColor="#1D6423" />
-                <Stop offset="1" stopColor="#124E1B" />
+                <Stop offset="0" stopColor="#FFFFFF" />
+                <Stop offset="1" stopColor="#EDEFF2" />
               </SvgLinearGradient>
             </Defs>
             <SvgText
@@ -564,6 +606,9 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: 'center',
     gap: 2,
+    // Tilt-along-the-divide trialled at 26.6° and 13° and REVERTED
+    // (owner call 2026-07-16) — the block stays horizontal; the
+    // ground alone carries the diagonal.
   },
   logoTilt: {
     transform: [{ rotate: '10deg' }],
@@ -586,7 +631,9 @@ const styles = StyleSheet.create({
   },
   cueSeg: { height: 2, borderRadius: 1 },
   cueGap: { width: 3 },
-  cueMarker: { width: 2, height: 8, borderRadius: 1, backgroundColor: '#111827' },
+  // Deep-ink marker (the black↔green tick round-trip settled here,
+  // owner call 2026-07-16).
+  cueMarker: { width: 2, height: 8, borderRadius: 1, backgroundColor: '#124E1B' },
   doodleClip: {
     position: 'absolute',
     overflow: 'hidden',
