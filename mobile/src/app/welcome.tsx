@@ -427,14 +427,12 @@ export default function WelcomeScreen() {
                 y1="2"
                 x2="174"
                 y2="56">
-                {/* White above the line, silver/light-grey below
-                    (owner call 2026-07-16) — the green two-tone moved
-                    to the ground, so the name flips to the page's
-                    other material. */}
+                {/* Solid white (owner call 2026-07-16) — the silver
+                    two-tone didn't earn its place on the green
+                    ground; the slice lives on in the in-app header's
+                    green pair. */}
                 <Stop offset="0" stopColor="#FFFFFF" />
-                <Stop offset="0.499" stopColor="#F2F4F6" />
-                <Stop offset="0.501" stopColor="#C9CCD1" />
-                <Stop offset="1" stopColor="#AEB3BA" />
+                <Stop offset="1" stopColor="#FFFFFF" />
               </SvgLinearGradient>
             </Defs>
             <SvgText
