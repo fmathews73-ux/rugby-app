@@ -53,7 +53,10 @@ export function NarrativeBack({
           hitSlop={12}
           accessibilityRole="button"
           accessibilityLabel="Back to chart">
-          <Ionicons name="arrow-back-circle-outline" size={18} color={Colors.light.textSecondary} />
+          {/* Chevron glyph matching the header back button (owner
+              call 2026-07-16, was arrow-back) — one return-glyph
+              vocabulary app-wide, in the chrome register. */}
+          <Ionicons name="chevron-back-circle-outline" size={18} color="#C7CBD1" />
         </Pressable>
       </View>
       {/* NO scrolling — the narrative must fit the card's footprint.

@@ -4,7 +4,6 @@ import { Animated, Easing } from 'react-native';
 
 import { CarouselPageActiveContext } from '@/components/card-carousel';
 import { CHART_INK_TOTAL_MS } from '@/components/insights/use-chart-ink';
-import { Colors } from '@/constants/theme';
 
 /**
  * The card-flip affordance — one shared component so the glyph and its
@@ -20,7 +19,9 @@ import { Colors } from '@/constants/theme';
  */
 export function FlipTrigger({
   size = 16,
-  color = Colors.light.textSecondary,
+  // Chrome — the same ink as the narrative-back chevron (owner call
+  // 2026-07-16), so both card glyphs speak one colour.
+  color = '#C7CBD1',
 }: {
   size?: number;
   color?: string;
