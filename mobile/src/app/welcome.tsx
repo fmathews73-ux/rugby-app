@@ -396,60 +396,25 @@ export default function WelcomeScreen() {
           {/* Print REMOVED from the lockup (owner call 2026-07-16:
               "the brand is the two-tone, not the print") — it lives
               on only as the app icon itself. */}
-          {/* Wordmark in the GRADIENT_GREENS ramp (owner call
-              2026-07-14) — light leading into deep ink, the EXPERT
-              label's left-to-right sweep. SVG text because RN Text
-              cannot take a gradient fill. */}
+          {/* Wordmark, solid white on the split ground. (The slash
+              lockup — RUGBY / METRICS with a drawn separator — was
+              trialled 2026-07-16 and rejected outright.) */}
           <Svg width={340} height={54}>
-            <Defs>
-              {/* The EXPERT-label two-tone (owner call 2026-07-14):
-                  a LIGHT gradient zone and a DARK gradient zone split
-                  by one hard diagonal running corner to corner —
-                  bottom-left of the R to the top-right of the S. The
-                  gradient runs top-left → bottom-right so the shared
-                  0.5 stop lands exactly on that anti-diagonal. Greens
-                  from the broadcast pitch ramp so the name and the
-                  artwork's sweep speak one green. */}
-              {/* User-space gradient perpendicular to the divide
-                  line — 25% up the R's side rising to 25% down the
-                  S (flattened from full corner-to-corner, owner call
-                  2026-07-14) — so the hard 0.5 stop IS that line:
-                  every letter splits light-over-dark around it. */}
-              <SvgLinearGradient
-                id="wordmark-ramp"
-                gradientUnits="userSpaceOnUse"
-                x1="171"
-                y1="2"
-                x2="174"
-                y2="56">
-                {/* Solid white (owner call 2026-07-16) — the silver
-                    two-tone didn't earn its place on the green
-                    ground; the slice lives on in the in-app header's
-                    green pair. */}
-                <Stop offset="0" stopColor="#FFFFFF" />
-                <Stop offset="1" stopColor="#FFFFFF" />
-              </SvgLinearGradient>
-            </Defs>
             <SvgText
               x={170}
               y={44}
               textAnchor="middle"
               fontFamily="BarlowCondensed_700Bold_Italic"
               fontSize={46}
-              fill="url(#wordmark-ramp)">
+              fill="#FFFFFF">
               RUGBYMETRICS
             </SvgText>
           </Svg>
-          {/* Miniature stats-bar row (owner call 2026-07-14) — the
-              app's signature grammar as a visual cue of what's
-              inside: skewed cut score boxes, centre-out diverging
-              bars, the real leader-green / lagger-red pairing. */}
+          {/* Miniature stats-bar underline — white leader, red
+              lagger, deep-ink marker. */}
           <View style={styles.statsCue}>
-            {/* Leader bar in white on the split ground; dark-ink bar
-                trialled and reverted (owner call 2026-07-16). */}
             <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#FFFFFF' }]} />
             <View style={styles.cueGap} />
-            {/* The pre-match bars' near-black centre marker. */}
             <View style={styles.cueMarker} />
             <View style={styles.cueGap} />
             <View style={[styles.cueSeg, { flex: 1, backgroundColor: '#DC2626' }]} />
@@ -621,24 +586,18 @@ const styles = StyleSheet.create({
     // ground alone carries the diagonal.
   },
   fieldSpacer: { flex: 1 },
-  // The stats-bar cue as a title underline — boxes removed (owner
-  // call 2026-07-14), equal green/red halves at the wordmark's width.
+  // The stats-bar cue as a title underline — equal white/red halves
+  // at the wordmark's width, deep-ink marker.
   statsCue: {
     flexDirection: 'row',
     alignItems: 'center',
-    // Hugs the wordmark's rendered glyphs (R → S), not its canvas.
     width: 234,
     height: 2,
-    // VISUALLY equal air above and below (owner call 2026-07-14):
-    // the wordmark canvas carries ~6px of empty space under its
-    // descenders, so the top margin goes negative to compensate.
     marginTop: -1,
     marginBottom: 5,
   },
   cueSeg: { height: 2, borderRadius: 1 },
   cueGap: { width: 3 },
-  // Deep-ink marker (the black↔green tick round-trip settled here,
-  // owner call 2026-07-16).
   cueMarker: { width: 2, height: 8, borderRadius: 1, backgroundColor: '#124E1B' },
   doodleClip: {
     position: 'absolute',
